@@ -1,0 +1,51 @@
+<script lang="ts">
+
+import {getUsername, isLoggedIn} from '../user.ts'
+import UserButton from "./header/UserButton.vue";
+import MenuEntry from "./header/MenuEntry.vue";
+
+export default {
+  data() {
+    return {
+      username: getUsername(),
+      loggedIn: isLoggedIn(),
+      loggedOut: !isLoggedIn()
+    }
+  },
+  components: {
+    Entry: MenuEntry,
+    UserButton
+  },
+  methods: {},
+  computed: {}
+}
+
+</script>
+
+<template>
+  <header class="absolute inset-x-0 top-0 flex w-screen justify-around py-6 bg-slate-900 text-light">
+    <div class="max-w-screen-lg w-5/6 grid grid-cols-7 justify-items-stretch">
+      <div class="grid content-center justify-items-start">
+        <div>
+          <p class="mx-3">Simple</p>
+          <p class="mx-3">POS</p>
+        </div>
+      </div>
+
+      <div class="col-span-5 content-center">
+        <div class="grid grid-cols-3 content-center justify-items-stretch gap-x-10">
+        <Entry link="#pos" label="POS" icon="fa-money-bill"/>
+        <Entry link="#accounts" label="Accounts" icon="fa-users"/>
+        <Entry link="#manage" label="Manage" icon="fa-list-check"/>
+        </div>
+      </div>
+
+      <div class="grid content-center justify-items-end">
+        <UserButton/>
+      </div>
+    </div>
+  </header>
+</template>
+
+<style scoped>
+</style>
