@@ -6,7 +6,9 @@ export default {
     ], theme: {
         extend: {
             colors: {
+                "dark": "#121417",
                 "primary": "#23282D",
+                "primary-accent": "#434d57",
                 "secondary": "#D1DAE3",
                 "bright": "#f1f1f1",
                 "highlight": "#6899CA",
@@ -14,6 +16,8 @@ export default {
             }
         },
     },
-    plugins: [],
+    plugins: [
+        require('@tailwindcss/forms')
+    ],
 }
 

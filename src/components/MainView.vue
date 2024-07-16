@@ -2,11 +2,17 @@
 import Manage from "./views/Manage.vue";
 import POS from "./views/POS.vue";
 import Accounts from "./views/Accounts.vue";
+import NotFound from "./views/NotFound.vue";
+import Login from "./views/Login.vue";
+import Logout from "./views/Logout.vue";
 
 const routes = {
+  "": POS,
   "pos": POS,
   "accounts": Accounts,
-  "manage": Manage
+  "manage": Manage,
+  "login": Login,
+  "logout": Logout
 }
 
 export default {
@@ -19,7 +25,7 @@ export default {
     currentView() {
       // TODO: remove some day
       console.debug(`Switching to path: ${this.currentPath}`)
-      return routes[this.currentPath.replace(RegExp("^#"), "")] || POS
+      return routes[this.currentPath.replace(RegExp("^#"), "")] || NotFound
     }
   },
   mounted() {
@@ -31,7 +37,9 @@ export default {
 </script>
 
 <template>
-  <component :is="currentView"/>
+  <div class="max-w-screen-lg my-20">
+    <component :is="currentView"/>
+  </div>
 </template>
 
 <style scoped>

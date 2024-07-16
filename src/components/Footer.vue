@@ -7,7 +7,7 @@ export default {
 </script>
 
 <template>
-  <footer class="absolute inset-x-0 bottom-0 flex w-screen justify-around py-6 bg-slate-900 text-light">
+  <footer class="fixed inset-x-0 bottom-0 flex w-screen justify-around py-6 bg-primary-accent text-light">
     <div class="max-w-screen-lg w-5/6 grid grid-cols-4">
         <div class="col-start-4">
           <div>

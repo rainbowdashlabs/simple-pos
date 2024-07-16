@@ -1,8 +1,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import UserContextEntry from "./usercontext/UserContextEntry.vue";
 
 export default defineComponent({
-  name: "UserContext"
+  name: "UserContext",
+  components: {UserContextEntry}
 })
 </script>
 
@@ -14,27 +16,9 @@ export default defineComponent({
         role="menu" aria-orientation="vertical"
         aria-labelledby="menu-button">
       <div class="py-1" role="none">
-        <a
-            href="#1"
-            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-            role="menuitem"
-        >
-          Option 1
-        </a>
-        <a
-            href="#2"
-            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-            role="menuitem"
-        >
-          Option 2
-        </a>
-        <a
-            href="#3"
-            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-            role="menuitem"
-        >
-          Option 3
-        </a>
+        <UserContextEntry text="Option 1" href="#"/>
+        <UserContextEntry text="Option 2" href="#"/>
+        <UserContextEntry text="Logout" href="#logout"/>
       </div>
     </div>
   </div>
