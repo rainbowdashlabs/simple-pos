@@ -20,3 +20,12 @@ export function login(username: string, password: string) {
 export function getUsername() {
     return Cookies.get("username")
 }
+
+export function getLocale(): string | null {
+    return Cookies.get("locale")
+}
+
+export function setLocale(locale: string) {
+    console.log("Saved locale " + locale)
+    Cookies.set("locale", locale)
+}

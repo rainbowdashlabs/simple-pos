@@ -1,11 +1,11 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
 import {account} from "../../accounts.ts";
 import Entry from "./profile/Entry.vue";
 import History from "./profile/History.vue";
 import Balance from "./profile/Balance.vue";
+import {store} from "../../store.js.ts";
 
-export default defineComponent({
+export default {
   name: "Profile",
   components: {Balance, History, Entry},
   data() {
@@ -14,29 +14,23 @@ export default defineComponent({
     }
   },
   mounted() {
-    let param = new URLSearchParams(window.location.search)
-    this.id = Number(param.get("id"))
+    if(store.focusAccount == null){
+      window.location.href = "#accounts"
+    }
   },
   computed: {
-    account() {
-      return account(this.id)
+    store() {
+      return store
     }
   }
-})
+}
 </script>
 
 <template>
-  <div class="grid grid-cols-4 gap-5">
-    <Entry class="col-start-1 col-span-2" :text="account.name"/>
-    <History class="col-start-3 col-span-2 row-span-2"/>
-    <Balance class="col-span-2" :value="account.balance"/>
-
-
-  </div>
-  <div class="grid grid-cols-4 gap-5 mt-10">
-    <Entry class="" text="add balance"/>
-
-
+  <div class="grid grid-cols-5 grid-rows-3 gap-5">
+      <Entry class="col-start-1 row-start-1 col-span-2" :text="store.focusAccount?.name"/>
+      <Balance class="col-start-1 row-start-2 col-span-2" :account="store.focusAccount"/>
+      <History class="col-start-3 col-span-3 row-span-2"/>
   </div>
 </template>
 

@@ -21,10 +21,10 @@ export default defineComponent({
     <table class="table-auto table-padding">
       <thead>
       <tr>
-        <th>ID</th>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Delete</th>
+        <th>{{$t('date')}}</th>
+        <th>{{$t('product')}}</th>
+        <th>{{$t('price')}}</th>
+        <th>{{$t('delete')}}</th>
       </tr>
       </thead>
       <tbody class="max-h-64 overflow-y-scroll">
@@ -39,6 +39,7 @@ export default defineComponent({
 table {
 }
 th, td {
-  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 </style>

@@ -1,6 +1,8 @@
 <script lang="ts">
+import {defineComponent} from 'vue'
 
-export default {
+export default defineComponent({
+  name: "BalanceDisplay",
   props: ['value'],
   computed: {
     valueStyle() {
@@ -11,11 +13,11 @@ export default {
     }
   }
 
-}
+})
 </script>
 
 <template>
-  <p :class="`font-bold ${valueStyle}`">{{$n(value, 'currency')}}</p>
+  <p :class="`font-bold text-xl ${valueStyle}`">{{ $n(value, 'currency') }}</p>
 </template>
 
 <style scoped>

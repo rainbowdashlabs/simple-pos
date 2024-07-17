@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {logout} from "../../user.ts";
+import {logout} from "../../session.ts";
 
 export default defineComponent({
   name: "Logout",

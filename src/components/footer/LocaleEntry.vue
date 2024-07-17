@@ -1,17 +1,18 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import {getLocale} from "../../session.ts";
 
 export default defineComponent({
   name: "LocaleEntry",
   data() {
     return {
-      locale: this.locale
+      elementLocale: this.locale
     }
   },
   props: ["locale"],
   computed: {
     isCurrent() {
-      return this.$i18n.locale == this.locale
+      return (getLocale() || this.$i18n.locale) == this.locale
     }
   }
 })

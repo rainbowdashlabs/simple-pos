@@ -1,6 +1,6 @@
 <script lang="ts">
 
-import {getUsername, isLoggedIn} from '../user.ts'
+import {getUsername, isLoggedIn} from '../session.ts'
 import UserButton from "./header/UserButton.vue";
 import MenuEntry from "./header/MenuEntry.vue";
 

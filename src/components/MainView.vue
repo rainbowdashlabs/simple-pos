@@ -6,7 +6,8 @@ import NotFound from "./views/NotFound.vue";
 import Login from "./views/Login.vue";
 import Logout from "./views/Logout.vue";
 import Profile from "./views/Profile.vue";
-import {isLoggedIn} from "../user.ts";
+import {isLoggedIn} from "../session.ts";
+import Balance from "./views/Balance.vue";
 
 const routes = {
   "": POS,
@@ -15,11 +16,13 @@ const routes = {
   "manage": Manage,
   "login": Login,
   "logout": Logout,
-  "profile": Profile}
+  "profile": Profile,
+  "balance": Balance
+}
 
 export default {
   components: {Login},
-  methods: {isLoggedIn},
+  methods: {},
   data() {
     return {
       currentPath: window.location.hash,
@@ -27,7 +30,7 @@ export default {
     }
   },
   computed: {
-    currentView() {
+    currentView() :any {
       // TODO: remove some day
       console.debug(`Switching to path: ${this.currentPath}`)
       return routes[this.currentPath.replace(RegExp("^#"), "").split("?")[0]] || NotFound

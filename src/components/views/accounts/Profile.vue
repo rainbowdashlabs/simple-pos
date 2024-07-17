@@ -1,13 +1,16 @@
 <script lang="ts">
+import {store} from "../../../store.js.ts";
 import Balance from "./profile/Balance.vue";
 import Name from "./profile/Name.vue";
+import {account} from "../../../accounts.ts";
 
 export default {
   components: {Balance, Name},
   props: ["id", "name", "balance"],
   methods: {
     openProfile() {
-      window.location.href = `#profile?id=${this.id}`
+      store.focusAccount = account(this.id)
+      window.location.href = `#profile`
     }
   }
 }

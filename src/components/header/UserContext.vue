@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import UserContextEntry from "./usercontext/UserContextEntry.vue";
-import {logout} from "../../user.ts";
+import {logout} from "../../session.ts";
 
 export default defineComponent({
   name: "UserContext",

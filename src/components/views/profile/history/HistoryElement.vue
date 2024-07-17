@@ -33,9 +33,9 @@ export default defineComponent({
 
 <template>
   <tr>
-    <th :class="color">{{ new Intl.DateTimeFormat(navigator.languages, {timeStyle:"short", dateStyle: "long"}).format(new Date(transaction.time * 1000)) }}</th>
+    <th :class="color">{{ $d(new Date(transaction.time * 1000)) }}</th>
     <th :class="color">{{ product.name }}</th>
-    <th :class="color">{{ transaction.price }}</th>
+    <th :class="color">{{ $n(transaction.price, 'currency') }}</th>
     <th v-show="!deleted">
       <DeleteHistoryButton @click="deleteTransaction" :id="transaction.id"/>
     </th>
