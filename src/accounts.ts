@@ -39,3 +39,20 @@ export function account(id: number): FullAccount {
 export function addDeposit(id: number, deposit: number) {
     console.log(`Deposit ${deposit} for ${id}`)
 }
+
+export interface Deposit {
+    id: number;
+    user_id: number,
+    amount: number;
+    date: number;
+}
+
+export function deposits(id: number, limit: number) :Deposit[]{
+    console.log(`Retrieve ${limit} deposits for ${id}`)
+    let result: Deposit[] = []
+    for (let i = 0; i < limit; i++) {
+        result.push({id: i, user_id: id, amount: Math.round(Math.random() * 50), date: Math.floor(Date.now() / 1000)})
+    }
+    console.log(result)
+    return result
+}

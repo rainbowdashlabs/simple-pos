@@ -76,7 +76,7 @@ const i18n: I18n = createI18n({
             product: "Produkt",
             delete: "Löschen",
             history: "Verlauf",
-            deposit: "Einzahlen"
+            deposit: "Einzahlung"
         }
     }, datetime: datetimeFormats,
     numberFormats: numberformats

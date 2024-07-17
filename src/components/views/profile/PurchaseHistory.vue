@@ -1,16 +1,17 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Profile from "../accounts/Profile.vue";
-import HistoryElement from "./history/HistoryElement.vue";
-import {history} from "../../../transactions.ts";
+import HistoryElement from "./purchasehistory/HistoryElement.vue";
+import {History, history} from "../../../transactions.ts";
+import {store} from "../../../store.js.ts";
 
 export default defineComponent({
-  name: "History",
-  props: ["user_id"],
-  components: {HistoryElement, Profile},
+  name: "PurchaseHistory",
+  props: [],
+  components: {HistoryElement},
   computed: {
-    purchases() {
-      return history(this.user_id, 30)
+    purchases(): History {
+      if (!store.focusAccount) return {transactions: [], products: new Map()}
+      return history(store.focusAccount?.id!, 30)
     }
   }
 })
@@ -21,10 +22,10 @@ export default defineComponent({
     <table class="table-auto table-padding">
       <thead>
       <tr>
-        <th>{{$t('date')}}</th>
-        <th>{{$t('product')}}</th>
-        <th>{{$t('price')}}</th>
-        <th>{{$t('delete')}}</th>
+        <th>{{ $t('date') }}</th>
+        <th>{{ $t('product') }}</th>
+        <th>{{ $t('price') }}</th>
+        <th>{{ $t('delete') }}</th>
       </tr>
       </thead>
       <tbody class="max-h-64 overflow-y-scroll">
@@ -38,6 +39,7 @@ export default defineComponent({
 <style scoped>
 table {
 }
+
 th, td {
   padding-left: 20px;
   padding-right: 20px;

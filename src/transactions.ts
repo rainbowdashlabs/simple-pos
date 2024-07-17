@@ -2,9 +2,10 @@ import {product, Product} from './product.ts'
 
 export interface Transaction {
     id: number
+    user_id: number
     product_id: number
     price: number
-    time: number
+    date: number
 }
 
 export interface History {
@@ -13,13 +14,15 @@ export interface History {
 }
 
 export function history(user_id: number, limit: number = 30): History {
+    console.log(`Retrieve ${limit} transactions for user ${user_id}`)
     let result: Transaction[] = []
     for (let i = 0; i < limit; i++) {
         result.push({
             id: i,
+            user_id: user_id,
             product_id: 1,
             price: 1.2,
-            time: Math.floor(Date.now() / 1000)
+            date: Math.floor(Date.now() / 1000)
         })
     }
     let products: Map<number, Product> = new Map()

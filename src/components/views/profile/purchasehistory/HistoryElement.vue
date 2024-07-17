@@ -33,7 +33,7 @@ export default defineComponent({
 
 <template>
   <tr>
-    <th :class="color">{{ $d(new Date(transaction.time * 1000)) }}</th>
+    <th :class="color">{{ $d(new Date(transaction.date * 1000)) }}</th>
     <th :class="color">{{ product.name }}</th>
     <th :class="color">{{ $n(transaction.price, 'currency') }}</th>
     <th v-show="!deleted">
