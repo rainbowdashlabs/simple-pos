@@ -33,7 +33,7 @@ export default {
     currentView() :any {
       // TODO: remove some day
       console.debug(`Switching to path: ${this.currentPath}`)
-      return routes[this.currentPath.replace(RegExp("^#"), "").split("?")[0]] || NotFound
+      return routes[this.currentPath.replace(RegExp("^#"), "").split("?")[0].split("/")[0]] || NotFound
     }
   },
   beforeUpdate() {

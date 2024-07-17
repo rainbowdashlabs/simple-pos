@@ -47,7 +47,7 @@ export interface Deposit {
     date: number;
 }
 
-export function deposits(id: number, limit: number) :Deposit[]{
+export function deposits(id: number, limit: number): Deposit[] {
     console.log(`Retrieve ${limit} deposits for ${id}`)
     let result: Deposit[] = []
     for (let i = 0; i < limit; i++) {
@@ -55,4 +55,17 @@ export function deposits(id: number, limit: number) :Deposit[]{
     }
     console.log(result)
     return result
+}
+
+export function deleteAccount(id: number) {
+    console.log(`deleted account ${id}`)
+}
+
+export function createAccount(name: string): LazyAccount {
+    console.log(`Created account ${name}`)
+    return {
+        id: 100,
+        name: name,
+        balance: 0
+    }
 }

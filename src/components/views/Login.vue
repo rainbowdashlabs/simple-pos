@@ -19,7 +19,7 @@ export default defineComponent({
       return this.password === "" || this.username === ""
     },
     buttonColor() {
-      return this.disabled ? "bg-gray text-gray-500" : "bg-accent"
+      return this.disabled ? "bg-gray-600 text-gray-400" : "bg-accent"
     }
   }
 })
@@ -28,25 +28,26 @@ export default defineComponent({
 <template>
   <div>
     <form @submit.prevent="submit">
-      <div>
-        <p>Username</p>
-        <input class="text-dark bg-secondary rounded-md"
-               type="text"
-               placeholder="username"
-               v-model="username"
-               required>
-      </div>
-      <div>
-        <p>Password</p>
-        <input class="text-dark bg-secondary rounded-md"
-               type="password"
-               placeholder="password"
-               v-model="password"
-               required>
-      </div>
-      <div>
-        <button :class="`rounded-md m-5 ${buttonColor}`" type="submit" :disabled="disabled" @click="submit">Login
-        </button>
+      <div class="grid grid-cols-1">
+
+        <div>
+          <p>Username</p>
+          <input class="text-dark bg-secondary rounded-md"
+                 type="text"
+                 placeholder="username"
+                 v-model="username"
+                 required>
+        </div>
+        <div>
+          <p>Password</p>
+          <input class="text-dark bg-secondary rounded-md"
+                 type="password"
+                 placeholder="password"
+                 v-model="password"
+                 required>
+        </div>
+          <button :class="`rounded-md m-5 ${buttonColor}`" type="submit" :disabled="disabled" @click="submit">Login
+          </button>
       </div>
     </form>
   </div>

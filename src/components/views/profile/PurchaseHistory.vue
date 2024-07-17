@@ -18,7 +18,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="bg-secondary rounded-md text-dark p-5 max-h-96 overflow-y-scroll">
+  <div class="bg-secondary rounded-md text-dark max-h-96 overflow-y-scroll p-5">
     <table class="table-auto table-padding">
       <thead>
       <tr>

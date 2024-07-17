@@ -23,9 +23,6 @@ export default defineComponent({
       transactionDelete(this.transaction.id)
     }
   },
-  mounted() {
-    console.log()
-  },
   props: ['transaction', 'product'],
   components: {DeleteHistoryButton, Profile, navigator}
 })

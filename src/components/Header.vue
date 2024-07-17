@@ -23,7 +23,7 @@ export default {
 </script>
 
 <template>
-  <header class="flex justify-around mb-5 py-4 bg-primary-accent text-bright">
+  <header class="flex justify-around py-4 bg-primary-accent text-bright">
     <div class="max-w-screen-lg w-5/6 grid grid-cols-7 justify-items-stretch">
       <div class="grid content-center justify-items-start">
         <div>

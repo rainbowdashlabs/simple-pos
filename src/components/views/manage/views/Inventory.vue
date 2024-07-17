@@ -2,15 +2,11 @@
 import {defineComponent} from 'vue'
 
 export default defineComponent({
-  name: "Entry",
-  props:["text"]
+  name: "Inventory"
 })
 </script>
 
 <template>
-  <div class="bg-secondary rounded-md text-dark">
-    {{text}}
-  </div>
 
 </template>
 

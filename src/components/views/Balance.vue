@@ -48,7 +48,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-5 gap-5">
+  <div class="grid grid-cols-5 gap-5 pt-5">
     <div class="col-span-full">
       <h1>{{ store.focusAccount?.name }}</h1>
     </div>

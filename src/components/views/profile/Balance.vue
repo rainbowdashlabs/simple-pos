@@ -32,7 +32,7 @@ export default {
 
 <template>
   <div class="grid grid-cols-1 gap-5">
-    <div class="flex bg-secondary items-center justify-center rounded-md text-dark p-5">
+    <div class="flex bg-secondary items-center justify-center rounded-md text-dark">
       <p :class="`text-5xl font-bold ${valueStyle}`">{{ $n(value, 'currency') }}</p>
     </div>
     <button class="flex bg-accent text-primary items-center justify-center" @click="addBalance">

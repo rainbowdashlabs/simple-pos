@@ -66,7 +66,10 @@ const i18n: I18n = createI18n({
             product: "Product",
             delete: "Delete",
             history: "History",
-            deposit: "Deposit"
+            deposit: "Deposit",
+            overview: "Overview",
+            products: "Products",
+            inventory: "Inventory"
         },
         de: {
             accounts: "Konten",
@@ -76,9 +79,13 @@ const i18n: I18n = createI18n({
             product: "Produkt",
             delete: "Löschen",
             history: "Verlauf",
-            deposit: "Einzahlung"
-        }
-    }, datetime: datetimeFormats,
+            deposit: "Einzahlung",
+                   overview: "Übersicht",
+            products: "Produkte",
+            inventory: "Inventar"
+ }
+    },
+    datetime: datetimeFormats,
     numberFormats: numberformats
 })
 
