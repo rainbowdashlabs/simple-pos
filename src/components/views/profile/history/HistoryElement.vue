@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Profile from "../accounts/Profile.vue";
-import {product} from "../../../product.ts";
+import Profile from "../../accounts/Profile.vue";
+import {product} from "../../../../product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {transactionDelete} from "../../../transactions.ts";
+import {transactionDelete} from "../../../../transactions.ts";
 
 export default defineComponent({
   name: "HistoryElement",
@@ -23,14 +23,17 @@ export default defineComponent({
       transactionDelete(this.transaction.id)
     }
   },
+  mounted() {
+    console.log()
+  },
   props: ['transaction', 'product'],
-  components: {DeleteHistoryButton, Profile}
+  components: {DeleteHistoryButton, Profile, navigator}
 })
 </script>
 
 <template>
   <tr>
-    <th :class="color">{{ transaction.id }}</th>
+    <th :class="color">{{ new Intl.DateTimeFormat(navigator.languages, {timeStyle:"short", dateStyle: "long"}).format(new Date(transaction.time * 1000)) }}</th>
     <th :class="color">{{ product.name }}</th>
     <th :class="color">{{ transaction.price }}</th>
     <th v-show="!deleted">

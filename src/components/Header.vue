@@ -35,8 +35,8 @@ export default {
       <div class="col-span-5 content-center">
         <div class="grid grid-cols-3 content-center justify-items-stretch gap-x-10">
         <Entry link="#pos" label="POS" icon="fa-money-bill"/>
-        <Entry link="#accounts" label="Accounts" icon="fa-users"/>
-        <Entry link="#manage" label="Manage" icon="fa-list-check"/>
+        <Entry link="#accounts" :label="$t('accounts')" icon="fa-users"/>
+        <Entry link="#manage" :label="$t('manage')" icon="fa-list-check"/>
         </div>
       </div>
 

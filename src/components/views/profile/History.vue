@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import Profile from "../accounts/Profile.vue";
-import HistoryElement from "./HistoryElement.vue";
+import HistoryElement from "./history/HistoryElement.vue";
 import {history} from "../../../transactions.ts";
 
 export default defineComponent({
