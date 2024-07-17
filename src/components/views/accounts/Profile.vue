@@ -7,7 +7,7 @@ export default {
   props: ["id", "name", "balance"],
   methods: {
     openProfile() {
-      alert(`open profile ${this.id}`)
+      window.location.href = `#profile?id=${this.id}`
     }
   }
 }

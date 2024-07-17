@@ -5,6 +5,8 @@ import Accounts from "./views/Accounts.vue";
 import NotFound from "./views/NotFound.vue";
 import Login from "./views/Login.vue";
 import Logout from "./views/Logout.vue";
+import Profile from "./views/Profile.vue";
+import {isLoggedIn} from "../user.ts";
 
 const routes = {
   "": POS,
@@ -12,33 +14,41 @@ const routes = {
   "accounts": Accounts,
   "manage": Manage,
   "login": Login,
-  "logout": Logout
-}
+  "logout": Logout,
+  "profile": Profile}
 
 export default {
+  components: {Login},
+  methods: {isLoggedIn},
   data() {
     return {
-      currentPath: window.location.hash
+      currentPath: window.location.hash,
+      loggedIn: isLoggedIn()
     }
   },
   computed: {
     currentView() {
       // TODO: remove some day
       console.debug(`Switching to path: ${this.currentPath}`)
-      return routes[this.currentPath.replace(RegExp("^#"), "")] || NotFound
+      return routes[this.currentPath.replace(RegExp("^#"), "").split("?")[0]] || NotFound
     }
+  },
+  beforeUpdate() {
+    this.loggedIn = isLoggedIn()
   },
   mounted() {
     window.addEventListener('hashchange', () => {
       this.currentPath = window.location.hash
+      this.loggedIn = isLoggedIn()
     })
   }
 }
 </script>
 
 <template>
-  <div class="max-w-screen-lg my-20">
-    <component :is="currentView"/>
+  <div class="mx-auto max-w-screen-lg">
+    <Login v-if="!loggedIn"/>
+    <component v-if="loggedIn" :is="currentView"/>
   </div>
 </template>
 

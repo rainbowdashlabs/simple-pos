@@ -12,6 +12,7 @@ export default defineComponent({
   }, methods: {
     submit() {
       login(this.username, this.password)
+      window.location.href = "#"
     }
   }, computed: {
     disabled() {

@@ -5,9 +5,11 @@ import MainView from "./components/MainView.vue";
 </script>
 
 <template>
-  <app_header/>
-  <MainView/>
-  <app_footer/>
+  <div class="flex flex-col min-h-screen justify-between">
+    <app_header/>
+    <MainView/>
+    <app_footer/>
+  </div>
 </template>
 
 <style scoped>

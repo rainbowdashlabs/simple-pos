@@ -6,8 +6,8 @@ export default {
   components: {UserContext},
   data() {
     return {
-      loggedIn: isLoggedIn(),
-      userContext: false
+      userContext: false,
+      loggedIn: isLoggedIn()
     }
   },
   computed: {
@@ -18,13 +18,22 @@ export default {
       return this.loggedIn ? this.toggleContext : this.login
     }
   },
+  beforeUpdate() {
+  },
   methods: {
+    userContextActive(){
+      return this.userContext && this.loggedIn
+    },
     toggleContext() {
       this.userContext = !this.userContext
     },
     login() {
       window.location.href = "#login"
     }
+  },   mounted() {
+    window.addEventListener('hashchange', () => {
+      this.loggedIn = isLoggedIn()
+    })
   }
 }
 </script>
@@ -33,7 +42,7 @@ export default {
   <button class="bg-accent" @click="buttonAction">
     <font-awesome-icon :icon="buttonIcon"/>
   </button>
-  <div v-show="userContext">
+  <div v-show="userContextActive()">
     <UserContext/>
   </div>
 </template>

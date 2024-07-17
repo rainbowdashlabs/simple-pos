@@ -19,7 +19,10 @@ export default {
 </script>
 
 <template>
-  <p :class="`font-bold ${valueStyle}`">{{prettyValue}}€</p>
+  <div class="bg-secondary rounded-md text-dark p-5">
+    <p :class="`font-bold ${valueStyle}`">{{ prettyValue }}€</p>
+  </div>
+
 </template>
 
 <style scoped>

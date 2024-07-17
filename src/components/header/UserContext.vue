@@ -1,9 +1,11 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import UserContextEntry from "./usercontext/UserContextEntry.vue";
+import {logout} from "../../user.ts";
 
 export default defineComponent({
   name: "UserContext",
+  methods: {logout},
   components: {UserContextEntry}
 })
 </script>
@@ -18,7 +20,7 @@ export default defineComponent({
       <div class="py-1" role="none">
         <UserContextEntry text="Option 1" href="#"/>
         <UserContextEntry text="Option 2" href="#"/>
-        <UserContextEntry text="Logout" href="#logout"/>
+        <UserContextEntry text="Logout" href="#logout" @click="logout"/>
       </div>
     </div>
   </div>

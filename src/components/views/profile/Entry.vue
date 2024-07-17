@@ -1,16 +1,17 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {logout} from "../../user.ts";
 
 export default defineComponent({
-  name: "Logout",
-  mounted() {
-  }
+  name: "Entry",
+  props:["text"]
 })
 </script>
 
 <template>
-<h1>Logged out</h1>
+  <div class="bg-secondary rounded-md text-dark p-5">
+    {{text}}
+  </div>
+
 </template>
 
 <style scoped>

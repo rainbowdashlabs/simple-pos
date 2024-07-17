@@ -5,14 +5,15 @@ export function logout() {
 }
 
 export function isLoggedIn() {
-    return Cookies.get("token") != null;
+    let b = Cookies.get("token") != null;
+    console.debug(`User is logged in: ${b}`)
+    return b;
 }
 
 export function login(username: string, password: string) {
     // TODO save actual session token
     Cookies.set("token", "abcdef", {expires: 30})
     Cookies.set("username", username)
-    alert("logged in")
 }
 
 
