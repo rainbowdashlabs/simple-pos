@@ -8,11 +8,13 @@ import Products from "./manage/views/Products.vue";
 import Inventory from "./manage/views/Inventory.vue";
 import Header from "./manage/Header.vue";
 import AccountCreate from "./manage/views/AccountCreate.vue";
+import ProductCreate from "./manage/views/ProductCreate.vue";
 
 const routes = {
   "accounts": Accounts,
   "accounts/create": AccountCreate,
   "products": Products,
+  "products/create": ProductCreate,
   "inventory": Inventory,
   "overview": Overview
 }

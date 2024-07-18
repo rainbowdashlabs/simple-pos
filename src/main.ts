@@ -69,7 +69,16 @@ const i18n: I18n = createI18n({
             deposit: "Deposit",
             overview: "Overview",
             products: "Products",
-            inventory: "Inventory"
+            inventory: "Inventory",
+            name: "Name",
+            purchase_price: "Purchase Price",
+            container_size: "Container Size",
+            pledge: "Pledge",
+            pledge_container: "Container Pledge",
+            min_stock: "Min. Stock",
+            active: "Active",
+            category:"Category"
+
         },
         de: {
             accounts: "Konten",
@@ -80,10 +89,19 @@ const i18n: I18n = createI18n({
             delete: "Löschen",
             history: "Verlauf",
             deposit: "Einzahlung",
-                   overview: "Übersicht",
+            overview: "Übersicht",
             products: "Produkte",
-            inventory: "Inventar"
- }
+            inventory: "Inventar",
+            name: "Name",
+            purchase_price: "Einkaufspreis",
+            container_size: "Packung",
+            pledge: "Pfand",
+            pledge_container: "Packungspfand",
+            min_stock: "Min. Vorrat",
+            active: "Aktiv",
+            category: "Kategorie"
+
+        }
     },
     datetime: datetimeFormats,
     numberFormats: numberformats
