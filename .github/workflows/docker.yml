@@ -35,7 +35,7 @@ jobs:
       - name: Push image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: .
           file: ./frontend/Dockerfile
           push: true
           tags: |
@@ -43,7 +43,7 @@ jobs:
       - name: Tag & Push branch image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: .
           file: ./frontend/Dockerfile
           push: true
           tags: |
@@ -53,7 +53,7 @@ jobs:
         if: github.ref_name == 'main'
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: .
           file: ./frontend/Dockerfile
           push: true
           tags: |

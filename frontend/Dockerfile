@@ -5,11 +5,11 @@ FROM nixos/nix:latest AS build
 
 WORKDIR build/
 RUN nix-channel --update
-COPY ../shell.nix .
+COPY shell.nix .
 
-COPY package*.json /build
+COPY frontend/package*.json /build
 RUN nix-shell --run "npm ci"
-COPY . .
+COPY ./frontend/ .
 RUN nix-shell --run "npm run build"
 
 FROM nginx:alpine
