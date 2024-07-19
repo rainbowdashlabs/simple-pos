@@ -5,7 +5,7 @@ FROM nixos/nix:latest AS build
 
 WORKDIR build/
 RUN nix-channel --update
-COPY shell.nix .
+COPY ../shell.nix .
 
 COPY package*.json /build
 RUN nix-shell --run "npm ci"
