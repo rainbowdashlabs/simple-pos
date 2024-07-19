@@ -1,0 +1,14 @@
+FROM nixos/nix:latest AS build
+
+WORKDIR build/
+RUN nix-channel --update
+COPY shell.nix .
+
+COPY package*.json /build
+RUN nix-shell --run "npm ci"
+COPY . .
+RUN nix-shell --run "npm run build"
+
+FROM nginx:alpine
+
+COPY --from=build /build/dist /usr/share/nginx/html
