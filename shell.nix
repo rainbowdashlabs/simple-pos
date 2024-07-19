@@ -1,6 +1,11 @@
 { pkgs ? import <nixpkgs> {}, ... }:
 
-pkgs.mkShell {
-  packages = with pkgs; [nodejs_22];
+let
+jdk = pkgs.jdk22;
+gradle= pkgs.gradle.override { java = jdk; };
+in
+pkgs.mkShell
+{
+  packages = with pkgs; [jdk gradle nodejs_22];
 }
 

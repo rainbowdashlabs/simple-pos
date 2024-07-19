@@ -12,6 +12,7 @@ import ProductCreate from "./manage/views/ProductCreate.vue";
 import Cash from "./Cash.vue";
 import ProductInfo from "./manage/views/ProductInfo.vue";
 import ProductEdit from "./manage/views/ProductEdit.vue";
+import Categories from "./manage/views/Categories.vue";
 
 const routes = {
   "accounts": Accounts,
@@ -22,6 +23,7 @@ const routes = {
   "products/edit": ProductEdit,
   "inventory": Inventory,
   "overview": Overview,
+  "categories": Categories,
   "cash": Cash
 }
 
@@ -62,7 +64,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.full{
+.full {
   min-height: 90vh;
 }
 </style>

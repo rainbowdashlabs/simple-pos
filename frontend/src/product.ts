@@ -80,6 +80,10 @@ export function createProduct(product: Product) {
     console.log("Created product " + product)
 }
 
+export function updateProduct(product: Product) {
+    console.log("Updated product " + product)
+}
+
 export function products(): ProductListing {
     let res: ProductGroup[] = []
     for (let category of categories()) {
