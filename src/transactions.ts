@@ -31,6 +31,7 @@ export function history(user_id: number, limit: number = 30): History {
     return {transactions: result, products: products}
 }
 
+// @ts-expect-error
 export function transactionDelete(id: number) {
 
 }

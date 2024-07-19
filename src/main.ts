@@ -9,6 +9,7 @@ import {createI18n, DefaultDateTimeFormatSchema, DefaultNumberFormatSchema, I18n
 
 const numberformats: DefaultNumberFormatSchema = {
     en: {
+// @ts-expect-error
         currency: {
             style: 'currency', currency: 'USD', notation: 'standard'
         },
@@ -20,6 +21,7 @@ const numberformats: DefaultNumberFormatSchema = {
         }
     },
     de: {
+// @ts-expect-error
         currency: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
@@ -36,6 +38,7 @@ const numberformats: DefaultNumberFormatSchema = {
 
 const datetimeFormats: DefaultDateTimeFormatSchema = {
     en: {
+// @ts-expect-error
         short: {
             year: 'numeric', month: 'short', day: 'numeric'
         },
@@ -45,6 +48,7 @@ const datetimeFormats: DefaultDateTimeFormatSchema = {
         }
     },
     de: {
+// @ts-expect-error
         short: {
             year: 'numeric', month: 'short', day: 'numeric'
         },
@@ -63,6 +67,7 @@ const i18n: I18n = createI18n({
             manage: "Manage",
             date: "Date",
             price: "Price",
+            price_total: "Total",
             product: "Product",
             delete: "Delete",
             history: "History",
@@ -77,14 +82,26 @@ const i18n: I18n = createI18n({
             pledge_container: "Container Pledge",
             min_stock: "Min. Stock",
             active: "Active",
-            category:"Category"
-
+            category: "Category",
+            cash: "Cash",
+            stock: "Stock",
+            sales: "Sales",
+            sales_month: "Sales Month",
+            sales_year: "Sales Year",
+            prices: "Prices",
+            statistic: "Statistik",
+            amount: "Amount",
+            purchases: "Purchases",
+            revenue: "Revenue",
+            month: "Month",
+            year: "Year"
         },
         de: {
             accounts: "Konten",
             manage: "Verwalten",
             date: "Datum",
             price: "Preis",
+            price_total: "Total",
             product: "Produkt",
             delete: "Löschen",
             history: "Verlauf",
@@ -99,11 +116,24 @@ const i18n: I18n = createI18n({
             pledge_container: "Packungspfand",
             min_stock: "Min. Vorrat",
             active: "Aktiv",
-            category: "Kategorie"
-
+            category: "Kategorie",
+            cash: "Bargeld",
+            stock: "Vorrat",
+            sales: "Verkäufe",
+            sales_month: "Verkäufe Monat",
+            sales_year: "Verkäufe Jahr",
+            prices: "Preise",
+            statistic: "Statistik",
+            amount: "Anzahl",
+            purchases: "Einkäufe",
+            revenue: "Umsatz",
+            profit: "Gewinn",
+            month: "Monat",
+            year: "Jahr"
         }
     },
     datetime: datetimeFormats,
+    // @ts-expect-error
     numberFormats: numberformats
 })
 

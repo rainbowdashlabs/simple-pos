@@ -8,8 +8,10 @@ export default defineComponent({
   components: {LocaleEntry},
   methods: {
     saveLocale(event: Event) {
-      this.$i18n.locale = event.target.value
-      setLocale(event.target.value)
+      // @ts-expect-error
+      this.$i18n.locale = event.target!.value
+      // @ts-expect-error
+      setLocale(event.target!.value)
     }
   }
 })

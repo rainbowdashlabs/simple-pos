@@ -14,6 +14,7 @@ export function login(username: string, password: string) {
     // TODO save actual session token
     Cookies.set("token", "abcdef", {expires: 30})
     Cookies.set("username", username)
+    console.log(`Logged in as user ${username} with password ${password}`)
 }
 
 
@@ -21,7 +22,7 @@ export function getUsername() {
     return Cookies.get("username")
 }
 
-export function getLocale(): string | null {
+export function getLocale(): string | undefined {
     return Cookies.get("locale")
 }
 

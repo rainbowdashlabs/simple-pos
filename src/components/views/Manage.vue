@@ -9,14 +9,20 @@ import Inventory from "./manage/views/Inventory.vue";
 import Header from "./manage/Header.vue";
 import AccountCreate from "./manage/views/AccountCreate.vue";
 import ProductCreate from "./manage/views/ProductCreate.vue";
+import Cash from "./Cash.vue";
+import ProductInfo from "./manage/views/ProductInfo.vue";
+import ProductEdit from "./manage/views/ProductEdit.vue";
 
 const routes = {
   "accounts": Accounts,
   "accounts/create": AccountCreate,
   "products": Products,
   "products/create": ProductCreate,
+  "products/info": ProductInfo,
+  "products/edit": ProductEdit,
   "inventory": Inventory,
-  "overview": Overview
+  "overview": Overview,
+  "cash": Cash
 }
 
 export default defineComponent({
@@ -35,6 +41,7 @@ export default defineComponent({
       // TODO: remove some day
       let subpage = this.currentPath.replace("#manage/", "")
       console.log(`Going to ${subpage}`)
+      // @ts-expect-error
       return routes[subpage] || Overview
     }
   },
@@ -49,7 +56,7 @@ export default defineComponent({
 
 <template>
   <Header/>
-  <div class="flex justify-center full">
+  <div class="flex justify-center full my-5">
     <component :is="currentView"/>
   </div>
 </template>

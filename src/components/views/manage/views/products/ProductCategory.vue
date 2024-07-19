@@ -1,11 +1,17 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, PropType} from 'vue'
 import ProductEntry from "./ProductEntry.vue";
+import {ProductGroup} from "../../../../../product.ts";
 
 export default defineComponent({
   name: "ProductCategory",
   components: {ProductEntry},
-  props: ['group']
+  props: {
+    group:{
+      type: Object as PropType<ProductGroup>,
+      required: true
+    }
+  }
 })
 </script>
 

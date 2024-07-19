@@ -27,6 +27,7 @@ export default defineComponent({
       this.deposit = 0
     },
     valueUpdated(event: Event) {
+      // @ts-expect-error
       this.deposit = Number(event.target.value) - store.focusAccount?.balance!
       console.log("Deposit is: " + this.deposit)
     },

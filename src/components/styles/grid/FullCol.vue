@@ -2,13 +2,14 @@
 import {defineComponent} from 'vue'
 
 export default defineComponent({
-  name: "FieldName",
-  props:["name"]
+  name: "FullCol"
 })
 </script>
 
 <template>
-  <p class="text-xl md:text-2xl lg:text-4xl mb-2">{{name}}</p>
+  <div class="col-span-full">
+    <slot/>
+  </div>
 </template>
 
 <style scoped>

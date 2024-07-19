@@ -33,6 +33,7 @@ export default {
     currentView() :any {
       // TODO: remove some day
       console.debug(`Switching to path: ${this.currentPath}`)
+      // @ts-expect-error
       return routes[this.currentPath.replace(RegExp("^#"), "").split("?")[0].split("/")[0]] || NotFound
     }
   },

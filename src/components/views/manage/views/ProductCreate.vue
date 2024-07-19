@@ -1,14 +1,15 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {createAccount} from "../../../../accounts.ts";
 import FieldName from "./productcreate/FieldName.vue";
-import {categories} from "../../../../product.ts";
+import {categories, createProduct} from "../../../../product.ts";
 import CategorySelector from "./productcreate/CategorySelector.vue";
+import ConfigureSection from "./products/ConfigureSection.vue";
+import FullCol from "../../../styles/grid/FullCol.vue";
 
 export default defineComponent({
   name: "ProductCreate.vue",
-  components: {CategorySelector, FieldName, FontAwesomeIcon},
+  components: {FullCol, ConfigureSection, CategorySelector, FieldName, FontAwesomeIcon},
   data() {
     return {
       name: "",
@@ -18,7 +19,9 @@ export default defineComponent({
       category: "",
       pledge: 0,
       pledge_container: 0,
-      min_stock: 0
+      min_stock: 0,
+      input_field_style: "text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl",
+      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl"
     }
   },
   computed: {
@@ -37,8 +40,19 @@ export default defineComponent({
     }
   },
   methods: {
-    createProduct() {
-      createAccount(this.name)
+    createProd() {
+      createProduct({
+        id: null,
+        name: this.name,
+        category_id: this.categoryList[this.categoryList.findIndex(e => e.name = this.category)].id,
+        price: this.price,
+        purchase_price: this.purchase_price,
+        container_size: this.container_size,
+        pledge: this.pledge,
+        pledge_container: this.pledge_container,
+        min_stock: this.min_stock,
+        active: true
+      })
       window.location.href = "#manage/products"
     }
   }
@@ -47,81 +61,142 @@ export default defineComponent({
 
 <template>
   <div>
-    <form @submit.prevent="createProduct">
-      <div class="grid grid-cols-2 gap-5">
+    <form @submit.prevent="createProd">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <ConfigureSection>
+          <div>
+            <FieldName :name="$t('name')"/>
+            <input :class="input_field_style"
+                   type="text"
+                   :placeholder="$t('name')"
+                   v-model="name"
+                   required>
+          </div>
+        </ConfigureSection>
 
-        <div>
-          <FieldName :name="$t('name')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="text"
-                 :placeholder="$t('name')"
-                 v-model="name"
-                 required>
-        </div>
+        <ConfigureSection>
+          <div>
+            <FieldName :name="$t('category')"/>
+            <select :class="input_field_style"
+                    v-model="category"
+                    required>
+              <CategorySelector v-for="item in categoryList" :category_id="item.id" :name="item.name"/>
+            </select>
+          </div>
+        </ConfigureSection>
 
-        <div>
-          <FieldName :name="$t('category')"/>
-          <select class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                  v-model="category"
-                  required>
-            <CategorySelector v-for="item in categoryList" :category_id="item.id" :name="item.name"/>
-          </select>
-        </div>
+        <ConfigureSection>
+          <div>
+            <FieldName :name="$t('price')"/>
+            <input :class="input_field_style"
+                   type="number"
+                   placeholder="price"
+                   v-model="price"
+                   required>
+          </div>
+        </ConfigureSection>
 
-        <div>
-          <FieldName :name="$t('price')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="number"
-                 placeholder="price"
-                 v-model="price"
-                 required>
-        </div>
+        <ConfigureSection>
+          <div>
+            <FieldName :name="$t('purchase_price')"/>
+            <input :class="input_field_style"
+                   type="number"
+                   placeholder="price"
+                   v-model="purchase_price"
+                   required>
+          </div>
+        </ConfigureSection>
 
-        <div>
-          <FieldName :name="$t('purchase_price')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="number"
-                 placeholder="price"
-                 v-model="purchase_price"
-                 required>
-        </div>
+        <ConfigureSection cols="5">
+          <FullCol>
+            <FieldName :name="$t('container_size')"/>
+            <input :class="input_field_style"
+                   type="number"
+                   placeholder="price"
+                   v-model="container_size">
+          </FullCol>
+          <button :class="button_style" @click="container_size = 0">
+            0
+          </button>
+          <button :class="button_style" @click="container_size = 6">
+            6
+          </button>
+          <button :class="button_style" @click="container_size = 12">
+            12
+          </button>
+          <button :class="button_style" @click="container_size = 20">
+            20
+          </button>
+          <button :class="button_style" @click="container_size = 24">
+            24
+          </button>
+        </ConfigureSection>
+        <ConfigureSection cols="4">
+          <FullCol>
+            <FieldName :name="$t('pledge')"/>
+            <input :class="input_field_style"
+                   type="number"
+                   placeholder="price"
+                   v-model="pledge">
+          </FullCol>
+          <button :class="button_style" @click="pledge = 0">
+            {{ $n(0, 'currency') }}
+          </button>
+          <button :class="button_style" @click="pledge = 0.08">
+            {{ $n(0.08, 'currency') }}
+          </button>
+          <button :class="button_style" @click="pledge = 0.12">
+            {{ $n(0.12, 'currency') }}
+          </button>
+          <button :class="button_style" @click="pledge = 0.25">
+            {{ $n(0.25, 'currency') }}
+          </button>
+        </ConfigureSection>
 
-        <div>
-          <FieldName :name="$t('container_size')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="number"
-                 placeholder="price"
-                 v-model="container_size">
-        </div>
+        <ConfigureSection cols="3">
+          <FullCol>
+            <FieldName :name="$t('pledge_container')"/>
+            <input :class="input_field_style"
+                   type="number"
+                   placeholder="price"
+                   v-model="pledge_container">
+          </FullCol>
+          <button :class="button_style" @click="pledge_container = 0">
+            {{ $n(0, 'currency') }}
+          </button>
+          <button :class="button_style" @click="pledge_container = 0.75">
+            {{ $n(0.75, 'currency') }}
+          </button>
+          <button :class="button_style" @click="pledge_container = 1.5">
+            {{ $n(1.5, 'currency') }}
+          </button>
+        </ConfigureSection>
 
-        <div>
-          <FieldName :name="$t('pledge')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="number"
-                 placeholder="price"
-                 v-model="pledge">
-        </div>
-        <div>
-          <FieldName :name="$t('pledge_container')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="number"
-                 placeholder="price"
-                 v-model="pledge_container">
-        </div>
+        <ConfigureSection cols="3">
+          <FullCol>
+            <FieldName :name="$t('min_stock')"/>
+            <input :class="input_field_style"
+                   type="number"
+                   placeholder="price"
+                   v-model="min_stock">
+          </FullCol>
+          <button :class="button_style" @click="min_stock = container_size || 1">
+            {{ container_size || 1 }}
+          </button>
+          <button :class="button_style" @click="min_stock = container_size * 2 || 5">
+            {{ container_size * 2 || 5 }}
+          </button>
+          <button :class="button_style" @click="min_stock = container_size * 3 || 10">
+            {{ container_size * 3 || 10 }}
+          </button>
 
-        <div>
-          <FieldName :name="$t('min_stock')"/>
-          <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-                 type="number"
-                 placeholder="price"
-                 v-model="min_stock">
-        </div>
+        </ConfigureSection>
 
         <div class="col-span-full">
           <button :class="`rounded-md mt-5 ${buttonColor} min-h-14 size-full`"
                   type="submit"
                   :disabled="disabled"
-                  @click="createProduct">
+                  @click="createProd">
             <font-awesome-icon class="text-4xl" icon="fa-square-plus"/>
           </button>
         </div>
@@ -132,5 +207,10 @@ export default defineComponent({
 </template>
 
 <style scoped>
-
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  width: auto;
+  height: auto;
+  -webkit-transform: scaleY(1.5);
+}
 </style>

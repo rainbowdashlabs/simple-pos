@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import AccountEntry from "./accounts/AccountEntry.vue";
-import {Product, ProductListing, products} from "../../../../product.ts";
+import {ProductListing, products} from "../../../../product.ts";
 import ProductEntry from "./products/ProductEntry.vue";
 import ProductCategory from "./products/ProductCategory.vue";
 
@@ -36,7 +36,7 @@ export default defineComponent({
       <div class="font-bold text-center">{{$t('pledge_container')}}</div>
       <div class="font-bold text-center">{{$t('min_stock')}}</div>
     </div>
-    <ProductCategory v-for="item in productList" :group="item"/>
+    <ProductCategory v-for="item in productList.categories" :group="item"/>
   </div>
 
 </template>

@@ -11,10 +11,9 @@ export default defineComponent({
 
 <template>
   <tr>
-    <th>{{ $d(new Date(deposit.date * 1000), 'short') }}</th>
+    <th>{{ $d(new Date(deposit.date * 1000)) }}</th>
     <th>{{ $n(deposit.amount, 'currency') }}</th>
   </tr>
-
 </template>
 
 <style scoped>
