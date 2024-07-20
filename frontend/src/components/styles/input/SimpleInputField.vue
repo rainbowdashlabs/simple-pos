@@ -6,7 +6,7 @@ export default defineComponent({
   components: {},
   props: {
     modelValue: {
-      required: true
+      required: false
     },
     type: {
       required: true,
@@ -31,12 +31,12 @@ export default defineComponent({
            class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-3xl"
            :type="type"
            value=""
-           :placeholder="String(modelValue)"
+           :placeholder="$attrs.placeholder"
            @input=" $emit('update', extract($event))"
            required>
     <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-3xl"
            :type="type"
-           :placeholder="String(modelValue)"
+           :placeholder="$attrs.placeholder"
            @input="$emit('update', extract($event))"
            required>
   </div>

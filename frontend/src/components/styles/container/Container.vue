@@ -2,12 +2,14 @@
 import {defineComponent} from 'vue'
 
 export default defineComponent({
-  name: "Cash"
+  name: "Container"
 })
 </script>
 
 <template>
-
+<div class="rounded-md p-5">
+  <slot/>
+</div>
 </template>
 
 <style scoped>

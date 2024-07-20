@@ -7,7 +7,7 @@ import Accounts from "./manage/views/Accounts.vue";
 import Products from "./manage/views/Products.vue";
 import Storage from "./manage/views/Storage.vue";
 import Header from "./manage/Header.vue";
-import Cash from "./Cash.vue";
+import Cash from "./manage/views/Cash.vue";
 import Categories from "./manage/views/Categories.vue";
 import AccountCreate from "./manage/views/accounts/views/AccountCreate.vue";
 import ProductCreate from "./manage/views/products/views/ProductCreate.vue";
