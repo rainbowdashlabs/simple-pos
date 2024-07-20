@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../../../styles/text/CenterText.vue";
-import {salesCountProduct, Timeframe} from "../../../../../../../product.ts";
+import {salesCountProduct, Timeframe} from "../../../../../../../scripts/product.ts";
 
 
 export default defineComponent({

@@ -2,7 +2,7 @@
 import {defineComponent, PropType} from 'vue'
 
 export default defineComponent({
-  name: "InputField",
+  name: "SimpleInputField",
   components: {},
   props: {
     modelValue: {
@@ -26,15 +26,15 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="bg-secondary rounded-md p-5">
+  <div>
     <input v-if="required"
-           class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
+           class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-3xl"
            :type="type"
            value=""
            :placeholder="String(modelValue)"
            @input=" $emit('update', extract($event))"
            required>
-    <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-4xl"
+    <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-3xl"
            :type="type"
            :placeholder="String(modelValue)"
            @input="$emit('update', extract($event))"

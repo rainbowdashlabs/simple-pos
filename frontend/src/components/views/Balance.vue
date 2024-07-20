@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {store} from "../../store.ts";
+import {store} from "../../scripts/store.ts";
 import BalanceAdd from "./balance/BalanceAdd.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import BalanceDisplay from "./balance/BalanceDisplay.vue";
-import {addDeposit} from "../../accounts.ts";
+import {addDeposit} from "../../scripts/accounts.ts";
 
 export default defineComponent({
   name: "Balance",

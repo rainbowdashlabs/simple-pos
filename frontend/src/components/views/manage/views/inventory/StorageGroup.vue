@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {StorageGroup} from "../../../../../product.ts";
 import StorageEntry from "./StorageEntry.vue";
+import {StorageGroup} from "../../../../../scripts/storage.ts";
 
 export default defineComponent({
   name: "StorageGroup",

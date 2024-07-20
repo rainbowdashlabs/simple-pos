@@ -1,7 +1,8 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import CategoryEntry from "./categories/CategoryEntry.vue";
-import {categories} from "../../../../product.ts";
+
+import {categories} from "../../../../scripts/categories.ts";
 
 export default defineComponent({
   name: "Categories",

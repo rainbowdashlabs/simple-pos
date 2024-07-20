@@ -2,7 +2,7 @@
 import Entry from "./profile/Entry.vue";
 import PurchaseHistory from "./profile/PurchaseHistory.vue";
 import Balance from "./profile/Balance.vue";
-import {store} from "../../store.ts";
+import {store} from "../../scripts/store.ts";
 import DepositHistory from "./profile/DepositHistory.vue";
 
 export default {

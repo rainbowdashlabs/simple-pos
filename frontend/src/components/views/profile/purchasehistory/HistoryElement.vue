@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import Profile from "../../accounts/Profile.vue";
-import {product} from "../../../../product.ts";
+import {product} from "../../../../scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {transactionDelete} from "../../../../transactions.ts";
+import {transactionDelete} from "../../../../scripts/transactions.ts";
 
 export default defineComponent({
   name: "HistoryElement",

@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import LocaleEntry from "./LocaleEntry.vue";
-import {setLocale} from "../../session.ts";
+import {setLocale} from "../../scripts/session.ts";
 
 export default defineComponent({
   name: "ColorChanger",

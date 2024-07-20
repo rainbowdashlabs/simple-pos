@@ -6,7 +6,7 @@ import MainView from "./components/MainView.vue";
 </script>
 
 <script lang="ts">
-import {getLocale} from "./session.ts";
+import {getLocale} from "./scripts/session.ts";
 
 export default {
   mounted() {

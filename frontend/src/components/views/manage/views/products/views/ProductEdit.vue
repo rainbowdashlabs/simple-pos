@@ -5,8 +5,9 @@ import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
-import {categories, category, Category, updateProduct} from "../../../../../../product.ts";
-import {store} from "../../../../../../store.ts";
+import {updateProduct} from "../../../../../../scripts/product.ts";
+import {store} from "../../../../../../scripts/store.ts";
+import {categories, category, Category} from "../../../../../../scripts/categories.ts";
 
 export default defineComponent({
   name: "ProductCreate.vue",

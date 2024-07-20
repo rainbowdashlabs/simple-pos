@@ -1,8 +1,8 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {StorageSummary} from "../../../../../product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
-import {store} from "../../../../../store.ts";
+import {store} from "../../../../../scripts/store.ts";
+import {StorageSummary} from "../../../../../scripts/storage.ts";
 
 export default defineComponent({
   name: "StorageEntry",
@@ -27,6 +27,7 @@ export default defineComponent({
   methods: {
     openInfo() {
       store.focusStorage = this.listing
+      console.log(`Opening info of ${store.focusStorage}`)
       window.location.href = "#manage/storage/add"
     }
   }

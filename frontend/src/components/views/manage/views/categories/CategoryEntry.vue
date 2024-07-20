@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {category, Category, updateCategory} from "../../../../../product.ts";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {category, Category, updateCategory} from "../../../../../scripts/categories.ts";
 
 export default defineComponent({
   name: "CategoryEntry",

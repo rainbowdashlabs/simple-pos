@@ -1,6 +1,6 @@
 <script lang="ts">
 import Login from "./Login.vue";
-import {isLoggedIn} from "../../session.ts";
+import {isLoggedIn} from "../../scripts/session.ts";
 import {Component, defineComponent} from "vue";
 import Overview from "./manage/views/Overview.vue";
 import Accounts from "./manage/views/Accounts.vue";
@@ -14,6 +14,7 @@ import ProductCreate from "./manage/views/products/views/ProductCreate.vue";
 import ProductInfo from "./manage/views/products/views/ProductInfo.vue";
 import ProductEdit from "./manage/views/products/views/ProductEdit.vue";
 import StorageAdd from "./manage/views/inventory/views/StorageAdd.vue";
+import StorageInventory from "./manage/views/inventory/views/StorageInventory.vue";
 
 const routes = {
   "accounts": Accounts,
@@ -24,6 +25,7 @@ const routes = {
   "products/edit": ProductEdit,
   "storage": Storage,
   "storage/add": StorageAdd,
+  "storage/inventory": StorageInventory,
   "overview": Overview,
   "categories": Categories,
   "cash": Cash

@@ -1,5 +1,5 @@
 <script lang="ts">
-import {isLoggedIn} from '../../session.ts'
+import {isLoggedIn} from '../../scripts/session.ts'
 import UserContext from "./UserContext.vue";
 
 export default {

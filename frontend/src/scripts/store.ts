@@ -1,6 +1,7 @@
 import {Reactive, reactive} from "vue";
 import {LazyAccount} from "./accounts.ts";
-import {Product, StorageSummary} from "./product.ts";
+import {Product} from "./product.ts";
+import {StorageSummary} from "./storage.ts";
 
 export interface Store {
     focusAccount: LazyAccount | null | undefined,

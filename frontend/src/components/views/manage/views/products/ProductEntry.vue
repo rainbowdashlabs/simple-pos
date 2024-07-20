@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {deleteAccount} from "../../../../../accounts.ts";
-import {Product} from "../../../../../product.ts";
+import {deleteAccount} from "../../../../../scripts/accounts.ts";
+import {Product} from "../../../../../scripts/product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
-import {store} from "../../../../../store.ts";
+import {store} from "../../../../../scripts/store.ts";
 
 export default defineComponent({
   name: "ProductEntry",

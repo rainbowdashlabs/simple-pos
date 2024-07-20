@@ -6,8 +6,11 @@ import SalesHistory from "./productinfo/SalesHistory.vue";
 import SalesStatistic from "./productinfo/SalesStatistic.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import CenterText from "../../../../../styles/text/CenterText.vue";
-import {category, Category, inboundInventory, Product, salesProduct, Timeframes} from "../../../../../../product.ts";
-import {store} from "../../../../../../store.ts";
+import {Product, salesProduct} from "../../../../../../scripts/product.ts";
+import {store} from "../../../../../../scripts/store.ts";
+import {category, Category} from "../../../../../../scripts/categories.ts";
+import {storageHistory} from "../../../../../../scripts/storage.ts";
+import {Timeframes} from "../../../../../../scripts/util.ts";
 
 export default defineComponent({
   name: "ProductInfo",
@@ -23,7 +26,7 @@ export default defineComponent({
       return category(Number(this.focusProduct.category_id))
     },
     inventoryIn() {
-      return inboundInventory(this.focusProduct.id!)
+      return storageHistory(this.focusProduct.id!)
     },
     inventoryOut() {
       let date = new Date()

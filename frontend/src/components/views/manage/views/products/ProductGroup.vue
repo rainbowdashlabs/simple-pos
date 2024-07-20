@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import ProductEntry from "./ProductEntry.vue";
-import {ProductGroup} from "../../../../../product.ts";
+import {ProductGroup} from "../../../../../scripts/product.ts";
 
 export default defineComponent({
   name: "ProductGroup",

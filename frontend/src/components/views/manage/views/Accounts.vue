@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {accounts, LazyAccount} from "../../../../accounts.ts";
+import {accounts, LazyAccount} from "../../../../scripts/accounts.ts";
 import AccountEntry from "./accounts/AccountEntry.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 

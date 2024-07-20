@@ -1,8 +1,8 @@
 <script lang="ts">
-import {store} from "../../../store.ts";
+import {store} from "../../../scripts/store.ts";
 import Balance from "./profile/Balance.vue";
 import Name from "./profile/Name.vue";
-import {account} from "../../../accounts.ts";
+import {account} from "../../../scripts/accounts.ts";
 
 export default {
   components: {Balance, Name},

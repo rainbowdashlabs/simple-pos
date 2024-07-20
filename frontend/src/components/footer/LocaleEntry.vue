@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {getLocale} from "../../session.ts";
+import {getLocale} from "../../scripts/session.ts";
 
 export default defineComponent({
   name: "LocaleEntry",

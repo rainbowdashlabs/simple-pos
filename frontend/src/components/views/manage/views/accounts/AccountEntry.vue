@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {deleteAccount} from "../../../../../accounts.ts";
+import {deleteAccount} from "../../../../../scripts/accounts.ts";
 
 export default defineComponent({
   name: "AccountEntry",

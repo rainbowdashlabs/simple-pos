@@ -6,7 +6,7 @@ import NotFound from "./views/NotFound.vue";
 import Login from "./views/Login.vue";
 import Logout from "./views/Logout.vue";
 import Profile from "./views/Profile.vue";
-import {isLoggedIn} from "../session.ts";
+import {isLoggedIn} from "../scripts/session.ts";
 import Balance from "./views/Balance.vue";
 
 const routes = {

@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import GridRowWrapper from "../../../../../../styles/grid/GridRowWrapper.vue";
-import {ProductSalesStat} from "../../../../../../../product.ts";
+import {ProductSalesStat} from "../../../../../../../scripts/product.ts";
 
 export default defineComponent({
   name: "SalesHistory",

@@ -1,5 +1,5 @@
 <script lang="ts">
-import {accounts} from "../../accounts.ts";
+import {accounts} from "../../scripts/accounts.ts";
 import Profile from "./accounts/Profile.vue";
 
 export default {

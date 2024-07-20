@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import AccountEntry from "./accounts/AccountEntry.vue";
-import {ProductListings, products} from "../../../../product.ts";
+import {ProductListings, products} from "../../../../scripts/product.ts";
 import ProductEntry from "./products/ProductEntry.vue";
 import ProductGroup from "./products/ProductGroup.vue";
 

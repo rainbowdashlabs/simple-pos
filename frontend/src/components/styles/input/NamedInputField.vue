@@ -1,10 +1,15 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
+import FieldName from "../../views/manage/views/products/views/productcreate/FieldName.vue";
 
 export default defineComponent({
-  name: "InputField",
-  components: {},
+  name: "NamedInputField",
+  components: {FieldName},
   props: {
+    name: {
+      type: String,
+      required: true
+    },
     modelValue: {
       required: true
     },
@@ -25,8 +30,10 @@ export default defineComponent({
 })
 </script>
 
+<!-- @ts-expect-error -->
 <template>
   <div class="bg-secondary rounded-md p-5">
+    <FieldName :name="name"/>
     <input v-if="required"
            class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
            :type="type"
@@ -40,7 +47,6 @@ export default defineComponent({
            @input="$emit('update', extract($event))"
            required>
   </div>
-
 </template>
 
 <style scoped>

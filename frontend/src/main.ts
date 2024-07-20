@@ -88,14 +88,18 @@ const i18n: I18n = createI18n({
             sales_month: "Sales Month",
             sales_year: "Sales Year",
             prices: "Prices",
-            statistic: "Statistik",
+            statistic: "Statistic",
             amount: "Amount",
             purchases: "Purchases",
             revenue: "Revenue",
             month: "Month",
             year: "Year",
             storage: "Storage",
-            piece: "Piece"
+            piece: "Piece",
+            pieces: "Pieces",
+            total: "Total",
+            difference: "Difference",
+            counted: "Counted"
         },
         de: {
             accounts: "Konten",
@@ -134,7 +138,12 @@ const i18n: I18n = createI18n({
             month: "Monat",
             year: "Jahr",
             storage: "Lager",
-            piece: "Einheiten"
+            piece: "Einheiten",
+            pieces: "Einheiten",
+            total: "Total",
+            difference: "Differenz",
+            counted: "Gezählt"
+
         }
     },
     datetime: datetimeFormats,
