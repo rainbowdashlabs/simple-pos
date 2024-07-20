@@ -3,8 +3,6 @@ import {defineComponent} from 'vue'
 import {store} from "../../../../../../store.ts";
 import FieldName from "../../products/views/productcreate/FieldName.vue";
 import InputField from "../../../../../styles/input/InputField.vue";
-import {library} from "@fortawesome/fontawesome-svg-core";
-import {list} from "postcss";
 
 export default defineComponent({
   name: "StorageAdd",
@@ -43,7 +41,7 @@ export default defineComponent({
       },
       set(value: number) {
         this.containerCount = value
-        this.piece. = value * this.listing.product.container_size
+        this.piece = value * this.listing.product.container_size
         if (this.listing.product.pledge_container) {
           this.containerPledge = this.listing.product.pledge_container * value
         }

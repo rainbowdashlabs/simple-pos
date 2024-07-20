@@ -5,8 +5,7 @@ import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
-import categories from "../../Categories.vue";
-import {createProduct} from "../../../../../../product.ts";
+import {categories, createProduct} from "../../../../../../product.ts";
 
 export default defineComponent({
   name: "ProductCreate.vue",

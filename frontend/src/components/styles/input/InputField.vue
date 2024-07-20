@@ -21,10 +21,17 @@ export default defineComponent({
     required: {
       type: Object as PropType<boolean>
     },
-  }, emits: ["update:modelValue"]
+  }, emits: ["update:modelValue"],
+  methods: {
+    extract(event: Event) {
+      // @ts-expect-error
+      return event.target.value
+    }
+  }
 })
 </script>
 
+<!-- @ts-expect-error -->
 <template>
   <div>
     <FieldName :name="name"/>
@@ -32,15 +39,14 @@ export default defineComponent({
            class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
            :type="type"
            :placeholder="String(modelValue)"
-           @input="$emit('update:modelValue', $event.target.value)"
+           @input=" $emit('update:modelValue', extract($event))"
            required>
     <input v-else class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
            :type="type"
            :placeholder="String(modelValue)"
-           @input="$emit('update:modelValue', $event.target.value)"
+           @input="$emit('update:modelValue', extract($event))"
            required>
   </div>
-
 </template>
 
 <style scoped>
