@@ -16,7 +16,7 @@ export default defineComponent({
       <Entry class="" link="#manage/accounts" :label="$t('accounts')" icon="fa-users"/>
       <Entry class="" link="#manage/products" :label="$t('products')" icon="fa-boxes-stacked"/>
       <Entry class="" link="#manage/categories" :label="$t('categories')" icon="fa-layer-group"/>
-      <Entry class="" link="#manage/inventory" :label="$t('inventory')" icon="fa-warehouse"/>
+      <Entry class="" link="#manage/storage" :label="$t('storage')" icon="fa-warehouse"/>
       <Entry class="" link="#manage/cash" :label="$t('cash')" icon="fa-sack-dollar"/>
     </div>
   </div>

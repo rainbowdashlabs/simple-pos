@@ -1,14 +1,16 @@
 import {Reactive, reactive} from "vue";
 import {LazyAccount} from "./accounts.ts";
-import {Product} from "./product.ts";
+import {Product, StorageSummary} from "./product.ts";
 
 export interface Store {
     focusAccount: LazyAccount | null | undefined,
-    focusProduct: Product | null  | undefined
+    focusProduct: Product | null | undefined,
+    focusStorage: StorageSummary | null | undefined
 }
 
 export const store: Reactive<Store> = reactive({
         focusAccount: null,
-        focusProduct: null
+        focusProduct: null,
+        focusStorage: null
     }
 )

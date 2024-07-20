@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {createAccount} from "../../../../accounts.ts";
+import {createAccount} from "../../../../../../accounts.ts";
 
 export default defineComponent({
   name: "AccountCreate",

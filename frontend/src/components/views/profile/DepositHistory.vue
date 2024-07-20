@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import HistoryElement from "./deposithistory/HistoryElement.vue";
-import {store} from "../../../store.js.ts";
+import {store} from "../../../store.ts";
 import {Deposit, deposits} from "../../../accounts.ts";
 
 export default defineComponent({

@@ -2,7 +2,7 @@
 import {defineComponent} from 'vue'
 import HistoryElement from "./purchasehistory/HistoryElement.vue";
 import {History, history} from "../../../transactions.ts";
-import {store} from "../../../store.js.ts";
+import {store} from "../../../store.ts";
 
 export default defineComponent({
   name: "PurchaseHistory",

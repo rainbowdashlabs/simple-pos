@@ -1,15 +1,15 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import AccountEntry from "./accounts/AccountEntry.vue";
-import {ProductListing, products} from "../../../../product.ts";
+import {ProductListings, products} from "../../../../product.ts";
 import ProductEntry from "./products/ProductEntry.vue";
-import ProductCategory from "./products/ProductCategory.vue";
+import ProductGroup from "./products/ProductGroup.vue";
 
 export default defineComponent({
   name: "Products",
-  components: {ProductCategory, ProductEntry, AccountEntry},
+  components: {ProductGroup, ProductEntry, AccountEntry},
   computed: {
-    productList(): ProductListing {
+    productList(): ProductListings {
       return products()
     }
   },
@@ -36,7 +36,7 @@ export default defineComponent({
       <div class="font-bold text-center">{{$t('pledge_container')}}</div>
       <div class="font-bold text-center">{{$t('min_stock')}}</div>
     </div>
-    <ProductCategory v-for="item in productList.categories" :group="item"/>
+    <ProductGroup v-for="item in productList.categories" :group="item"/>
   </div>
 
 </template>

@@ -4,7 +4,7 @@ import ProductEntry from "./ProductEntry.vue";
 import {ProductGroup} from "../../../../../product.ts";
 
 export default defineComponent({
-  name: "ProductCategory",
+  name: "ProductGroup",
   components: {ProductEntry},
   props: {
     group:{

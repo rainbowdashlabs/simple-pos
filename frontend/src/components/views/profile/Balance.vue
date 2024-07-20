@@ -1,5 +1,5 @@
 <script lang="ts">
-import {store} from "../../../store.js.ts";
+import {store} from "../../../store.ts";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
 export default {

@@ -1,20 +1,13 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {
-  category,
-  Category,
-  inboundInventory,
-  Product,
-  salesProduct,
-  Timeframes
-} from "../../../../product.ts";
-import {store} from "../../../../store.js.ts";
-import CenterText from "../../../styles/text/CenterText.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import FullCol from "../../../styles/grid/FullCol.vue";
 import InventoryHistory from "./productinfo/InventoryHistory.vue";
 import SalesHistory from "./productinfo/SalesHistory.vue";
 import SalesStatistic from "./productinfo/SalesStatistic.vue";
+import FullCol from "../../../../../styles/grid/FullCol.vue";
+import CenterText from "../../../../../styles/text/CenterText.vue";
+import {category, Category, inboundInventory, Product, salesProduct, Timeframes} from "../../../../../../product.ts";
+import {store} from "../../../../../../store.ts";
 
 export default defineComponent({
   name: "ProductInfo",
@@ -59,7 +52,7 @@ export default defineComponent({
         <div class="col-span-2">
           <CenterText class="text-4xl" :value="focusCategory.name"/>
         </div>
-        <button class="bg-green-500">
+        <button class="bg-green-500" @click="editProduct">
           <font-awesome-icon icon="fa-pen"/>
         </button>
       </div>

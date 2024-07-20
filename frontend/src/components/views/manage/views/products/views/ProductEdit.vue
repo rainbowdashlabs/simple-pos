@@ -1,21 +1,22 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {categories, product, updateProduct} from "../../../../product.ts";
-import {store} from "../../../../store.js.ts";
-import ConfigureSection from "./products/ConfigureSection.vue";
-import FullCol from "../../../styles/grid/FullCol.vue";
 import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
+import FullCol from "../../../../../styles/grid/FullCol.vue";
+import ConfigureSection from "../ConfigureSection.vue";
+import {categories, category, Category, updateProduct} from "../../../../../../product.ts";
+import {store} from "../../../../../../store.ts";
 
 export default defineComponent({
   name: "ProductCreate.vue",
   components: {CategorySelector, FieldName, FullCol, ConfigureSection, FontAwesomeIcon},
   data() {
     return {
-      category: this.categoryNameToId(store.focusProduct?.category_id),
+      category: "",
       input_field_style: "text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl",
-      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl"
+      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl",
+      categories: categories()
     }
   },
   computed: {
@@ -32,22 +33,31 @@ export default defineComponent({
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
     },
-    categoryList() {
+    categoryList(): Category[] {
       return categories()
-    }
+    },
+    focusCategory(): Category {
+      return category(Number(this.product.category_id))
+    },
+
   },
   methods: {
     updateProd() {
       updateProduct(store.focusProduct!)
+      store.focusProduct!.category_id = this.categoryNameToId(this.category)
       window.location.href = "#manage/products/info"
     },
-    categoryNameToId(name: string) {
+    categoryNameToId(name: string): number {
+      //return 0
       return this.categoryList[this.categoryList.findIndex(e => e.name = name)].id
     },
-    categoryIdToName(id: number) {
-      return this.categoryList[this.categoryList.findIndex(e => e.id = id)].name
-    }
-  }
+    beforeMount() {
+      if (store.focusProduct === undefined) window.location.href = "#manage/products"
+    },
+  },
+  mounted() {
+    this.category = this.focusCategory.name
+  },
 })
 </script>
 
@@ -72,7 +82,8 @@ export default defineComponent({
             <select :class="input_field_style"
                     v-model="category"
                     required>
-              <CategorySelector v-for="item in categoryList" :category_id="item.id" :name="item.name" :current="categoryIdToName(product.category_id)"/>
+              <CategorySelector v-for="item in categoryList" :category_id="item.id" :name="item.name"
+                                :current="focusCategory"/>
             </select>
           </div>
         </ConfigureSection>
@@ -83,7 +94,7 @@ export default defineComponent({
             <input :class="input_field_style"
                    type="number"
                    placeholder="price"
-                   v-model="product.name"
+                   v-model="product.price"
                    required>
           </div>
         </ConfigureSection>
@@ -156,7 +167,7 @@ export default defineComponent({
                   type="submit"
                   :disabled="disabled"
                   @click="updateProd">
-            <font-awesome-icon class="text-4xl" icon="fa-square-plus"/>
+            <font-awesome-icon class="text-4xl" icon="fa-check"/>
           </button>
         </div>
       </div>

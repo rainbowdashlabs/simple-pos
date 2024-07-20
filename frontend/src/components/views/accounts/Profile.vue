@@ -1,5 +1,5 @@
 <script lang="ts">
-import {store} from "../../../store.js.ts";
+import {store} from "../../../store.ts";
 import Balance from "./profile/Balance.vue";
 import Name from "./profile/Name.vue";
 import {account} from "../../../accounts.ts";

@@ -4,7 +4,7 @@ import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {deleteAccount} from "../../../../../accounts.ts";
 import {Product} from "../../../../../product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
-import {store} from "../../../../../store.js.ts";
+import {store} from "../../../../../store.ts";
 
 export default defineComponent({
   name: "ProductEntry",

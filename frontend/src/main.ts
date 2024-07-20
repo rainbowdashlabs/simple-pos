@@ -31,8 +31,6 @@ const numberformats: DefaultNumberFormatSchema = {
         percent: {
             style: 'percent', useGrouping: false
         }
-
-
     }
 }
 
@@ -83,6 +81,7 @@ const i18n: I18n = createI18n({
             min_stock: "Min. Stock",
             active: "Active",
             category: "Category",
+            categories: "Categories",
             cash: "Cash",
             stock: "Stock",
             sales: "Sales",
@@ -94,7 +93,9 @@ const i18n: I18n = createI18n({
             purchases: "Purchases",
             revenue: "Revenue",
             month: "Month",
-            year: "Year"
+            year: "Year",
+            storage: "Storage",
+            piece: "Piece"
         },
         de: {
             accounts: "Konten",
@@ -112,11 +113,13 @@ const i18n: I18n = createI18n({
             name: "Name",
             purchase_price: "Einkaufspreis",
             container_size: "Packung",
+            container: "Packungen",
             pledge: "Pfand",
             pledge_container: "Packungspfand",
             min_stock: "Min. Vorrat",
             active: "Aktiv",
             category: "Kategorie",
+            categories: "Kategorien",
             cash: "Bargeld",
             stock: "Vorrat",
             sales: "Verkäufe",
@@ -129,7 +132,9 @@ const i18n: I18n = createI18n({
             revenue: "Umsatz",
             profit: "Gewinn",
             month: "Monat",
-            year: "Jahr"
+            year: "Jahr",
+            storage: "Lager",
+            piece: "Einheiten"
         }
     },
     datetime: datetimeFormats,

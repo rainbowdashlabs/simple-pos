@@ -5,14 +5,15 @@ import {Component, defineComponent} from "vue";
 import Overview from "./manage/views/Overview.vue";
 import Accounts from "./manage/views/Accounts.vue";
 import Products from "./manage/views/Products.vue";
-import Inventory from "./manage/views/Inventory.vue";
+import Storage from "./manage/views/Storage.vue";
 import Header from "./manage/Header.vue";
-import AccountCreate from "./manage/views/AccountCreate.vue";
-import ProductCreate from "./manage/views/ProductCreate.vue";
 import Cash from "./Cash.vue";
-import ProductInfo from "./manage/views/ProductInfo.vue";
-import ProductEdit from "./manage/views/ProductEdit.vue";
 import Categories from "./manage/views/Categories.vue";
+import AccountCreate from "./manage/views/accounts/views/AccountCreate.vue";
+import ProductCreate from "./manage/views/products/views/ProductCreate.vue";
+import ProductInfo from "./manage/views/products/views/ProductInfo.vue";
+import ProductEdit from "./manage/views/products/views/ProductEdit.vue";
+import StorageAdd from "./manage/views/inventory/views/StorageAdd.vue";
 
 const routes = {
   "accounts": Accounts,
@@ -21,7 +22,8 @@ const routes = {
   "products/create": ProductCreate,
   "products/info": ProductInfo,
   "products/edit": ProductEdit,
-  "inventory": Inventory,
+  "storage": Storage,
+  "storage/add": StorageAdd,
   "overview": Overview,
   "categories": Categories,
   "cash": Cash

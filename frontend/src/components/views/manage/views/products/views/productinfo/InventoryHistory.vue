@@ -1,14 +1,14 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {Inventory} from "../../../../../product.ts";
-import GridRowWrapper from "../../../../styles/grid/GridRowWrapper.vue";
+import GridRowWrapper from "../../../../../../styles/grid/GridRowWrapper.vue";
+import {StorageEntry} from "../../../../../../../product.ts";
 
 export default defineComponent({
   name: "InventoryHistory",
   components: {GridRowWrapper},
   props: {
     history: {
-      type: Object as PropType<Inventory[]>,
+      type: Object as PropType<StorageEntry[]>,
       required: true
     }
   }

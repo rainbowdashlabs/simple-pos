@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import FieldName from "../productcreate/FieldName.vue";
+import FieldName from "./views/productcreate/FieldName.vue";
 
 export default defineComponent({
   name: "ConfigureSection",

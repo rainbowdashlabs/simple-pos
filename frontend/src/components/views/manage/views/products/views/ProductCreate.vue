@@ -2,10 +2,11 @@
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import FieldName from "./productcreate/FieldName.vue";
-import {categories, createProduct} from "../../../../product.ts";
 import CategorySelector from "./productcreate/CategorySelector.vue";
-import ConfigureSection from "./products/ConfigureSection.vue";
-import FullCol from "../../../styles/grid/FullCol.vue";
+import FullCol from "../../../../../styles/grid/FullCol.vue";
+import ConfigureSection from "../ConfigureSection.vue";
+import categories from "../../Categories.vue";
+import {createProduct} from "../../../../../../product.ts";
 
 export default defineComponent({
   name: "ProductCreate.vue",

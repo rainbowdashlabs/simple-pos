@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {store} from "../../store.js.ts";
+import {store} from "../../store.ts";
 import BalanceAdd from "./balance/BalanceAdd.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import BalanceDisplay from "./balance/BalanceDisplay.vue";
