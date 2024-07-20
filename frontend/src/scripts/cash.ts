@@ -10,7 +10,7 @@ export function currentCash(): number {
     return Math.round(Math.random() * 100000) / 100
 }
 
-export function cashHistory(limit: number = 100): CashHistoryEntry {
+export function cashHistory(limit: number = 100): CashHistoryEntry[] {
     let res: CashHistoryEntry[] = []
     for (let i = 0; i < limit; i++) {
         res.push(

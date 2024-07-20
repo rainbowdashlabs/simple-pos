@@ -9,13 +9,13 @@ export default defineComponent({
   components: {FormattedText},
   props: {
     type: String,
-    value: String | Number,
+    value: [String, Number],
     size: String
   },
   computed: {
     displayType() {
-      if (types.includes(this.type)) return this.type
       if (!this.type) return "text"
+      if (types.includes(this.type)) return this.type
       console.error(`Unknown type ${this.type}`)
       return "text"
     }

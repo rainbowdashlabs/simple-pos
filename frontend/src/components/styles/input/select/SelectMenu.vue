@@ -7,18 +7,24 @@ export default defineComponent({
   components: {SelectMenuEntry},
   props: {
     options: {
-      type: Array<String>,
+      //type: Object as PropType<Array<Array<String>>>,
       required: true
     }, current: String
+  },
+  methods:{
+    extract(event: Event){
+      // @ts-expect-error
+      return [event.target.value, event.target.key]
+    }
   },
   emits: ["select"]
 })
 </script>
 
 <template>
-  <select @input="$emit('select', [$event.target.value, $event.target.key])"
+  <select @input="$emit('select', extract($event))"
           class="rounded-md form-select text-primary">
-    <SelectMenuEntry v-for="item in options" :value="item" :current="current"/>
+    <SelectMenuEntry v-for="item in options" :entry="item" :current="current"/>
   </select>
 </template>
 

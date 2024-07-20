@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent, PropType} from 'vue'
+import {defineComponent,} from 'vue'
 import GridRowWrapper from "../../../../styles/grid/GridRowWrapper.vue";
 import {cashHistory, CashHistoryEntry} from "../../../../../scripts/cash.ts";
 import FormattedText from "../../../../styles/text/FormattedText.vue";
@@ -10,7 +10,6 @@ import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
 export default defineComponent({
   name: "CashHistory",
   components: {GridWrapper, MoneyText, FormattedText, GridRowWrapper},
-  props: {},
   computed: {
     SizeGroup() {
       return SizeGroup

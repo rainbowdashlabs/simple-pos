@@ -25,13 +25,14 @@ export default defineComponent({
     sizeGroup() {
       return SizeGroup.xl5
     },
-    typeChange(value: Array<String>) {
+    typeChange(value: Array<string>):any {
       this.type = value[1]
     },
     currentCash,
     disabled() {
-      return this.amount = 0 || !this.note
+      return this.amount == 0 || !this.note
     }
+    // TODO Add submit for cash transaction
   }
 })
 </script>
@@ -52,7 +53,6 @@ export default defineComponent({
     </GridWrapper>
     <Container class="col-span-full">
       <CashHistory/>
-
     </Container>
   </GridWrapper>
 </template>

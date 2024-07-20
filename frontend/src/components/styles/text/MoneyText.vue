@@ -1,13 +1,15 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {SizeGroup} from "../../../scripts/text.ts";
 import FormattedText from "./FormattedText.vue";
 
 export default defineComponent({
   name: "MoneyText",
   components: {FormattedText},
   props: {
-    amount: Number,
+    amount: {
+      type: Number,
+      required: true
+    },
     size: {
       type: String
     }

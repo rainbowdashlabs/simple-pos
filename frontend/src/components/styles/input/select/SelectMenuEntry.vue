@@ -1,30 +1,34 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, PropType} from 'vue'
 
 export default defineComponent({
   name: "SelectMenuEntry",
   props: {
     current: String,
-    value: String | Array<String>
+    entry: {
+      type: Object as PropType<string | string[]>,
+      required: true
+    }
+
   },
   computed: {
     isCurrent() {
       if (!this.current) return false
-      if (this.value instanceof Array) {
-        return this.value[0] == this.current || this.value[1] == this.current
+      if (this.entry instanceof Array) {
+        return this.entry[0]! == this.current || this.entry[1]! == this.current
       }
-      return current == this.value
+      return this.current == this.entry
     },
-    isArray(){
-      return this.value instanceof Array
+    isArray() {
+      return this.entry instanceof Array
     },
     display() {
-      if (this.isArray) return this.value[0]
-      return this.value
+      if (this.isArray) return this!.entry[0]!
+      return this.entry
     },
-    key() {
-      if (this.isArray) return this.value[1]
-      return this.value
+    key() :PropertyKey {
+      if (this.isArray) return this!.entry[1]!
+      return String(this.entry)
     }
   }
 })
@@ -33,8 +37,8 @@ export default defineComponent({
 <template>
   <option v-if="isArray && !isCurrent" :key="key" :value="display">{{ display }}</option>
   <option v-else-if="isArray && isCurrent" :key="key" :value="display" selected>{{ display }}</option>
-  <option v-else-if="!isCurrent" :key="key" :value="value">{{ value }}</option>
-  <option v-else selected :key="key" :value="value">{{ value }}</option>
+  <option v-else-if="!isCurrent" :key="key" :value="entry">{{ entry }}</option>
+  <option v-else selected :key="key" :value="entry">{{ entry }}</option>
 </template>
 
 <style scoped>

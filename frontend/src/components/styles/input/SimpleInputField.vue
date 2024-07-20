@@ -15,6 +15,9 @@ export default defineComponent({
     required: {
       type: Object as PropType<boolean>
     },
+    placeholder:{
+      type: String
+    }
   }, emits: ["update"],
   methods: {
     extract(event: Event) {
@@ -31,12 +34,12 @@ export default defineComponent({
            class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-3xl"
            :type="type"
            value=""
-           :placeholder="$attrs.placeholder"
+           :placeholder="placeholder"
            @input=" $emit('update', extract($event))"
            required>
     <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-3xl"
            :type="type"
-           :placeholder="$attrs.placeholder"
+           :placeholder="placeholder"
            @input="$emit('update', extract($event))"
            required>
   </div>

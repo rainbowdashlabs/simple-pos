@@ -11,7 +11,7 @@ export default defineComponent({
       type: String,
       default: "text"
     },
-    value: String | Number,
+    value: [String, Number],
     size: {
       type: String,
       default: SizeGroup.md
@@ -23,6 +23,12 @@ export default defineComponent({
       if (!this.type) return "text"
       console.error(`Unknown type ${this.type}`)
       return "text"
+    },
+    valueString(){
+      return String(this.value)
+    },
+    valueNumber(){
+      return Number(this.value)
     }
   }
 })
@@ -31,10 +37,10 @@ export default defineComponent({
 <template>
   <div :class="size">
     <div v-if="displayType == 'text'">{{ value }}</div>
-    <div v-if="displayType == 'locale'">{{ $t(value) }}</div>
-    <div v-if="displayType == 'currency'">{{ $n(value, 'currency') }}</div>
-    <div v-if="displayType == 'date'">{{ $d(value * 1000) }}</div>
-    <div v-if="displayType == 'number'">{{ $n(value) }}</div>
+    <div v-if="displayType == 'locale'">{{ $t(valueString) }}</div>
+    <div v-if="displayType == 'currency'">{{ $n(valueNumber, 'currency') }}</div>
+    <div v-if="displayType == 'date'">{{ $d(valueNumber * 1000) }}</div>
+    <div v-if="displayType == 'number'">{{ $n(valueNumber) }}</div>
   </div>
 </template>
 
