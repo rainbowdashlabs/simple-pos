@@ -8,7 +8,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <p class="text-primary text-xl md:text-2xl lg:text-4xl mb-2">{{name}}</p>
+  <p class="text-xl md:text-2xl lg:text-4xl mb-2">{{name}}</p>
 </template>
 
 <style scoped>

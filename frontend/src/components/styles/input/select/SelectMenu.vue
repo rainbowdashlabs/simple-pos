@@ -5,6 +5,11 @@ import SelectMenuEntry from "./SelectMenuEntry.vue";
 export default defineComponent({
   name: "SelectMenu",
   components: {SelectMenuEntry},
+  data(){
+    return {
+      menuOpen: false
+    }
+  },
   props: {
     options: {
       //type: Object as PropType<Array<Array<String>>>,
@@ -23,7 +28,7 @@ export default defineComponent({
 
 <template>
   <select @input="$emit('select', extract($event))"
-          class="rounded-md form-select text-primary">
+          class="bg-accent dark:bg-accent-d rounded-md form-select">
     <SelectMenuEntry v-for="item in options" :entry="item" :current="current"/>
   </select>
 </template>

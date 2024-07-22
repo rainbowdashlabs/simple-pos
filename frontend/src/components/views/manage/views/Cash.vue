@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import GridWrapper from "../../../styles/grid/GridWrapper.vue";
-import {currentCash} from "../../../../scripts/cash.ts";
+import {currentCash, submitCash} from "../../../../scripts/cash.ts";
 import MoneyText from "../../../styles/text/MoneyText.vue";
 import {SizeGroup} from "../../../../scripts/text.ts";
 import Container from "../../../styles/container/Container.vue";
@@ -19,6 +19,11 @@ export default defineComponent({
       amount: 0,
       note: "",
       type: "other"
+    }
+  },
+  methods:{
+    submit(){
+      submitCash(this.amount, this.note, this.type)
     }
   },
   computed: {
@@ -39,7 +44,7 @@ export default defineComponent({
 
 <template>
   <GridWrapper cols="1">
-    <GridWrapper cols="1">
+    <GridWrapper cols="3">
       <Container class="col-span-full bg-secondary">
         <MoneyText :size="sizeGroup" :amount="currentCash"/>
       </Container>
@@ -49,7 +54,7 @@ export default defineComponent({
       <SelectMenu class="col-span-full" @select="typeChange"
                   :options="[[$t('pledge'), 'pledge'], [$t('other'), 'other']]"
                   :current="type"/>
-      <ConfirmButton :disabled="disabled" class="col-span-full"/>
+      <ConfirmButton @click="submit" :disabled="disabled" class="col-span-full"/>
     </GridWrapper>
     <Container class="col-span-full">
       <CashHistory/>

@@ -1,8 +1,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import IconButton from "./IconButton.vue";
 
 export default defineComponent({
   name: "ConfirmButton",
+  components: {IconButton},
   props: {
     icon: {
       type: String,
@@ -13,20 +15,17 @@ export default defineComponent({
       default: false
     }
   },
-  computed:{
-
-  color(){
-    return this.disabled ? "bg-slate-400 text-slate-100" : "bg-green-500"
-  }
+  computed: {
+    color() {
+      return this.disabled ? "bg-slate-400 text-slate-100" : "bg-green-500"
+    }
   },
   emits: ["click"]
 })
 </script>
 
 <template>
-  <button :disabled="disabled" :class="color" @click="$emit('click', $event)">
-    <font-awesome-icon class="text-2xl" :icon="icon"/>
-  </button>
+  <IconButton color="bg-green-500" @click="$emit('click', $event)" :disabled="disabled" :class="color" :icon="icon"/>
 </template>
 
 <style scoped>

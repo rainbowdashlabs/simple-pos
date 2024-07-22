@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
+import {SizeGroup} from "../../../scripts/text.ts";
 
 export default defineComponent({
   name: "SimpleInputField",
@@ -12,13 +13,25 @@ export default defineComponent({
       required: true,
       type: String
     },
-    required: {
-      type: Object as PropType<boolean>
-    },
-    placeholder:{
+    placeholder: {
       type: String
+    },
+    value: {
+      type: String
+    },
+    bg: {
+      type: String,
+      default: "secondary"
+    },
+    border: {
+      type: String,
+      default: "accent"
+    },
+    size: {
+      type: String,
+      default: SizeGroup.md
     }
-  }, emits: ["update"],
+  }, emits: ["update:modelValue"],
   methods: {
     extract(event: Event) {
       // @ts-expect-error
@@ -29,21 +42,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <input v-if="required"
-           class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-3xl"
-           :type="type"
-           value=""
-           :placeholder="placeholder"
-           @input=" $emit('update', extract($event))"
-           required>
-    <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-3xl"
-           :type="type"
-           :placeholder="placeholder"
-           @input="$emit('update', extract($event))"
-           required>
-  </div>
-
+  <input
+      :class="`bg-${bg} dark:bg-${bg}-d rounded-md border-2 border-${border} dark:border-${border}-d justify-stretch w-full ${size} text-dark dark:text-bright`"
+      :type="type"
+      :value="modelValue"
+      @input="$emit('update:modelValue', extract($event))">
 </template>
 
 <style scoped>

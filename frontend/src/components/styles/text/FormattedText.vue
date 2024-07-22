@@ -2,7 +2,7 @@
 import {defineComponent} from 'vue'
 import {SizeGroup} from "../../../scripts/text.ts";
 
-const types = ["text", "number", "currency", "date"]
+const types = ["text", "number", "currency", "date", "locale"]
 
 export default defineComponent({
   name: "FormattedText",
@@ -36,8 +36,8 @@ export default defineComponent({
 
 <template>
   <div :class="size">
-    <div v-if="displayType == 'text'">{{ value }}</div>
     <div v-if="displayType == 'locale'">{{ $t(valueString) }}</div>
+    <div v-if="displayType == 'text'">{{ value }}</div>
     <div v-if="displayType == 'currency'">{{ $n(valueNumber, 'currency') }}</div>
     <div v-if="displayType == 'date'">{{ $d(valueNumber * 1000) }}</div>
     <div v-if="displayType == 'number'">{{ $n(valueNumber) }}</div>

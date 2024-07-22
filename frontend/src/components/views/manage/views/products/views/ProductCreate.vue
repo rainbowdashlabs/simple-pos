@@ -7,10 +7,35 @@ import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {createProduct} from "../../../../../../scripts/product.ts";
 import {categories} from "../../../../../../scripts/categories.ts";
+import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
+import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
+import ColorContainer from "../../../../../styles/container/BgContainer.vue";
+import InputField from "../../../../../styles/input/InputField.vue";
+import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
+import FormattedText from "../../../../../styles/text/FormattedText.vue";
+import {SizeGroup} from "../../../../../../scripts/text.ts";
+import FreeButton from "../../../../../styles/buttons/FreeButton.vue";
+import TextButton from "../../../../../styles/buttons/TextButton.vue";
+import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 
 export default defineComponent({
   name: "ProductCreate.vue",
-  components: {FullCol, ConfigureSection, CategorySelector, FieldName, FontAwesomeIcon},
+  components: {
+    ConfirmButton,
+    TextButton,
+    FreeButton,
+    FormattedText,
+    SimpleInputField,
+    InputField,
+    ColorContainer,
+    GridWrapper,
+    SelectMenu,
+    FullCol,
+    ConfigureSection,
+    CategorySelector,
+    FieldName,
+    FontAwesomeIcon
+  },
   data() {
     return {
       name: "",
@@ -26,6 +51,9 @@ export default defineComponent({
     }
   },
   computed: {
+    SizeGroup() {
+      return SizeGroup
+    },
     disabled() {
       if (!this.name) return true
       if (!this.category) return true
@@ -41,6 +69,9 @@ export default defineComponent({
     }
   },
   methods: {
+    updateCategory(vk) {
+      this.category = vk[0]
+    },
     createProd() {
       createProduct({
         id: null,
@@ -61,148 +92,83 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <form @submit.prevent="createProd">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <ConfigureSection>
-          <div>
-            <FieldName :name="$t('name')"/>
-            <input :class="input_field_style"
-                   type="text"
-                   :placeholder="$t('name')"
-                   v-model="name"
-                   required>
-          </div>
-        </ConfigureSection>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <ColorContainer bg="secondary">
+      <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
+      <SimpleInputField type="text" v-model="name"/>
+    </ColorContainer>
 
-        <ConfigureSection>
-          <div>
-            <FieldName :name="$t('category')"/>
-            <select :class="input_field_style"
-                    v-model="category"
-                    required>
-              <CategorySelector v-for="item in categoryList" :category_id="item.id" :name="item.name"/>
-            </select>
-          </div>
-        </ConfigureSection>
+    <ColorContainer bg="secondary">
+      <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
+      <SelectMenu class="w-full" @select="updateCategory"
+                  :options="categoryList.map(e => {return [e.name, e.id]})" :current="category"/>
+    </ColorContainer>
 
-        <ConfigureSection>
-          <div>
-            <FieldName :name="$t('price')"/>
-            <input :class="input_field_style"
-                   type="number"
-                   placeholder="price"
-                   v-model="price"
-                   required>
-          </div>
-        </ConfigureSection>
+    <ColorContainer bg="secondary">
+      <FormattedText class="pb-5" :size="SizeGroup.xl2" value="price" type="locale"/>
+      <SimpleInputField type="number" v-model="price"/>
+    </ColorContainer>
 
-        <ConfigureSection>
-          <div>
-            <FieldName :name="$t('purchase_price')"/>
-            <input :class="input_field_style"
-                   type="number"
-                   placeholder="price"
-                   v-model="purchase_price"
-                   required>
-          </div>
-        </ConfigureSection>
+    <ColorContainer bg="secondary">
+      <FormattedText class="pb-5" :size="SizeGroup.xl2" value="purchase_price" type="locale"/>
+      <SimpleInputField type="number" v-model="purchase_price"/>
+    </ColorContainer>
 
-        <ConfigureSection cols="5">
-          <FullCol>
-            <FieldName :name="$t('container_size')"/>
-            <input :class="input_field_style"
-                   type="number"
-                   placeholder="price"
-                   v-model="container_size">
-          </FullCol>
-          <button :class="button_style" @click="container_size = 0">
-            0
-          </button>
-          <button :class="button_style" @click="container_size = 6">
-            6
-          </button>
-          <button :class="button_style" @click="container_size = 12">
-            12
-          </button>
-          <button :class="button_style" @click="container_size = 20">
-            20
-          </button>
-          <button :class="button_style" @click="container_size = 24">
-            24
-          </button>
-        </ConfigureSection>
-        <ConfigureSection cols="4">
-          <FullCol>
-            <FieldName :name="$t('pledge')"/>
-            <input :class="input_field_style"
-                   type="number"
-                   placeholder="price"
-                   v-model="pledge">
-          </FullCol>
-          <button :class="button_style" @click="pledge = 0">
-            {{ $n(0, 'currency') }}
-          </button>
-          <button :class="button_style" @click="pledge = 0.08">
-            {{ $n(0.08, 'currency') }}
-          </button>
-          <button :class="button_style" @click="pledge = 0.12">
-            {{ $n(0.12, 'currency') }}
-          </button>
-          <button :class="button_style" @click="pledge = 0.25">
-            {{ $n(0.25, 'currency') }}
-          </button>
-        </ConfigureSection>
-
-        <ConfigureSection cols="3">
-          <FullCol>
-            <FieldName :name="$t('pledge_container')"/>
-            <input :class="input_field_style"
-                   type="number"
-                   placeholder="price"
-                   v-model="pledge_container">
-          </FullCol>
-          <button :class="button_style" @click="pledge_container = 0">
-            {{ $n(0, 'currency') }}
-          </button>
-          <button :class="button_style" @click="pledge_container = 0.75">
-            {{ $n(0.75, 'currency') }}
-          </button>
-          <button :class="button_style" @click="pledge_container = 1.5">
-            {{ $n(1.5, 'currency') }}
-          </button>
-        </ConfigureSection>
-
-        <ConfigureSection cols="3">
-          <FullCol>
-            <FieldName :name="$t('min_stock')"/>
-            <input :class="input_field_style"
-                   type="number"
-                   placeholder="price"
-                   v-model="min_stock">
-          </FullCol>
-          <button :class="button_style" @click="min_stock = container_size || 1">
-            {{ container_size || 1 }}
-          </button>
-          <button :class="button_style" @click="min_stock = container_size * 2 || 5">
-            {{ container_size * 2 || 5 }}
-          </button>
-          <button :class="button_style" @click="min_stock = container_size * 3 || 10">
-            {{ container_size * 3 || 10 }}
-          </button>
-
-        </ConfigureSection>
-
-        <div class="col-span-full">
-          <button :class="`rounded-md mt-5 ${buttonColor} min-h-14 size-full`"
-                  type="submit"
-                  :disabled="disabled"
-                  @click="createProd">
-            <font-awesome-icon class="text-4xl" icon="fa-square-plus"/>
-          </button>
-        </div>
+    <ColorContainer bg="secondary">
+      <div class="pb-5">
+        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="container_size" type="locale"/>
+        <SimpleInputField type="number" v-model="container_size"/>
       </div>
-    </form>
+      <div class="flex justify-evenly w-full">
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
+                    @click="container_size = item"
+                    :value="item"
+                    type="number"/>
+      </div>
+    </ColorContainer>
+
+    <ColorContainer bg="secondary">
+      <div class="pb-5">
+        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge" type="locale"/>
+        <SimpleInputField type="number" v-model="pledge"/>
+      </div>
+      <div class="flex justify-evenly w-full">
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]"
+                    @click="pledge = item"
+                    :value="item"
+                    type="currency"/>
+      </div>
+    </ColorContainer>
+
+    <ColorContainer bg="secondary">
+      <div class="pb-5">
+        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge_container" type="locale"/>
+        <SimpleInputField type="number" v-model="pledge_container"/>
+      </div>
+      <div class="flex justify-evenly w-full">
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
+                    @click="pledge_container = item"
+                    :value="item"
+                    type="currency"/>
+      </div>
+    </ColorContainer>
+
+    <ColorContainer bg="secondary">
+      <div class="pb-5">
+        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="min_stock" type="locale"/>
+        <SimpleInputField type="number" v-model="min_stock"/>
+      </div>
+      <div class="flex justify-evenly w-full">
+        <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
+                    @click="min_stock = container_size * item[0] || item[1]"
+                    :value="container_size * item[0] || item[1]"
+                    type="number"/>
+      </div>
+    </ColorContainer>
+
+    <div class="col-span-full">
+      <ConfirmButton class="w-full" :disabled="disabled" @click="createProd"/>
+    </div>
   </div>
 
 </template>

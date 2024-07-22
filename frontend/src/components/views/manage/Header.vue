@@ -2,22 +2,23 @@
 import {defineComponent} from 'vue'
 import Entry from "../../header/MenuEntry.vue";
 import UserButton from "../../header/UserButton.vue";
+import ColorContainer from "../../styles/container/BgContainer.vue";
 
 export default defineComponent({
   name: "Header",
-  components: {UserButton, Entry}
+  components: {ColorContainer, UserButton, Entry}
 })
 </script>
 
 <template>
-  <div class="bg-slate-400 rounded-b-2xl p-5 mb-5 w-90 max-w-screen-lg">
-    <div class="max-w-screen-lg grid grid-cols-6 items-center gap-5">
-      <Entry class="" link="#manage/overview" :label="$t('overview')" icon="fa-chart-pie"/>
-      <Entry class="" link="#manage/accounts" :label="$t('accounts')" icon="fa-users"/>
-      <Entry class="" link="#manage/products" :label="$t('products')" icon="fa-boxes-stacked"/>
-      <Entry class="" link="#manage/categories" :label="$t('categories')" icon="fa-layer-group"/>
-      <Entry class="" link="#manage/storage" :label="$t('storage')" icon="fa-warehouse"/>
-      <Entry class="" link="#manage/cash" :label="$t('cash')" icon="fa-sack-dollar"/>
+  <div class="bg-accent dark:bg-accent-d rounded-b-2xl mb-5 w-90 max-w-screen-lg">
+    <div class="flex max-w-screen-lg justify-around overflow-scroll p-5">
+      <Entry link="#manage/overview" :label="$t('overview')" icon="fa-chart-pie"/>
+      <Entry link="#manage/accounts" :label="$t('accounts')" icon="fa-users"/>
+      <Entry link="#manage/products" :label="$t('products')" icon="fa-boxes-stacked"/>
+      <Entry link="#manage/categories" :label="$t('categories')" icon="fa-layer-group"/>
+      <Entry link="#manage/storage" :label="$t('storage')" icon="fa-warehouse"/>
+      <Entry link="#manage/cash" :label="$t('cash')" icon="fa-sack-dollar"/>
     </div>
   </div>
 </template>

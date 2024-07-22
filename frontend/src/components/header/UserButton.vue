@@ -1,9 +1,10 @@
 <script lang="ts">
 import {isLoggedIn} from '../../scripts/session.ts'
 import UserContext from "./UserContext.vue";
+import Icon from "../styles/Icon.vue";
 
 export default {
-  components: {UserContext},
+  components: {Icon, UserContext},
   data() {
     return {
       userContext: false,
@@ -39,8 +40,8 @@ export default {
 </script>
 
 <template>
-  <button class="bg-accent" @click="buttonAction">
-    <font-awesome-icon :icon="buttonIcon"/>
+  <button class="bg-accent dark:bg-accent-d" @click="buttonAction">
+    <Icon :icon="buttonIcon"/>
   </button>
   <div v-show="userContextActive()">
     <UserContext/>

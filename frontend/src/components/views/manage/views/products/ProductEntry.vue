@@ -5,10 +5,11 @@ import {deleteAccount} from "../../../../../scripts/accounts.ts";
 import {Product} from "../../../../../scripts/product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
 import {store} from "../../../../../scripts/store.ts";
+import TwoStepDeleteButton from "../../../../styles/buttons/TwoStepDeleteButton.vue";
 
 export default defineComponent({
   name: "ProductEntry",
-  components: {CenterText, FontAwesomeIcon},
+  components: {TwoStepDeleteButton, CenterText, FontAwesomeIcon},
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -42,7 +43,7 @@ export default defineComponent({
       if (this.deleted) {
         return "bg-red-400"
       }
-      return this.product.active ? "bg-secondary" : "bg-slate-400"
+      return this.product.active ? "bg-secondary dark:bg-secondary-d" : "bg-slate-300 dark:bg-slate-900 text-slate-600"
     }
   }
 })
@@ -58,18 +59,7 @@ export default defineComponent({
     <CenterText :value="product.pledge" type="currency"/>
     <CenterText :value="product.pledge_container" type="currency"/>
     <CenterText :value="product.min_stock" type="number"/>
-    <div>
-      <div v-if="!deleted" class="flex justify-center">
-        <button class="bg-accent" @click="toggleConfirm">
-          <font-awesome-icon class="text-2xl" icon="fa-square-minus"/>
-        </button>
-        <div v-if="confirm" class="absolute ml-32">
-          <button class="bg-red-600" @click="deleteProd">
-            <font-awesome-icon class="text-2xl" icon="fa-square-minus"/>
-          </button>
-        </div>
-      </div>
-    </div>
+    <TwoStepDeleteButton @click="deleteProd"/>
   </div>
 </template>
 

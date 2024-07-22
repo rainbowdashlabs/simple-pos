@@ -25,3 +25,7 @@ export function cashHistory(limit: number = 100): CashHistoryEntry[] {
     }
     return res
 }
+
+export function submitCash(amount: number, note: string, type: string) {
+    console.log(`Submit ${amount} with note "${note}" and type ${type}`)
+}

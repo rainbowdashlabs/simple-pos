@@ -8,7 +8,7 @@ export default defineComponent({
 </script>
 
 <template>
-<p class="text-dark">{{ value }}</p>
+<p class="text-dark dark:text-bright">{{ value }}</p>
 </template>
 
 <style scoped>

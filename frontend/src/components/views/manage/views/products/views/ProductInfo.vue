@@ -11,11 +11,28 @@ import {store} from "../../../../../../scripts/store.ts";
 import {category, Category} from "../../../../../../scripts/categories.ts";
 import {storageHistory} from "../../../../../../scripts/storage.ts";
 import {Timeframes} from "../../../../../../scripts/util.ts";
+import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
+import IconButton from "../../../../../styles/buttons/IconButton.vue";
+import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
+import FormattedText from "../../../../../styles/text/FormattedText.vue";
+import {SizeGroup} from "../../../../../../scripts/text.ts";
+import ColorContainer from "../../../../../styles/container/BgContainer.vue";
+import InfoEntry from "./productinfo/InfoEntry.vue";
 
 export default defineComponent({
   name: "ProductInfo",
-  components: {SalesStatistic, SalesHistory, InventoryHistory, FullCol, FontAwesomeIcon, CenterText},
+  components: {
+    InfoEntry,
+    ColorContainer,
+    FormattedText,
+    ConfirmButton,
+    IconButton,
+    GridWrapper, SalesStatistic, SalesHistory, InventoryHistory, FullCol, FontAwesomeIcon, CenterText
+  },
   computed: {
+    SizeGroup() {
+      return SizeGroup
+    },
     Timeframes() {
       return Timeframes
     },
@@ -35,7 +52,7 @@ export default defineComponent({
     }
   },
   methods: {
-    editProduct(){
+    editProduct() {
       window.location.href = "#manage/products/edit"
     }
   },
@@ -46,77 +63,69 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 auto-cols-auto">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 auto-cols-auto mx-5 md:mx-0">
     <FullCol>
-      <div class="grid grid-cols-7">
-        <div class="col-span-4">
+      <GridWrapper cols="7">
+        <FullCol class="md:col-span-4">
           <CenterText class="text-4xl" :value="focusProduct.name"/>
-        </div>
-        <div class="col-span-2">
+        </FullCol>
+        <FullCol class="md:col-span-2">
           <CenterText class="text-4xl" :value="focusCategory.name"/>
-        </div>
-        <button class="bg-green-500" @click="editProduct">
-          <font-awesome-icon icon="fa-pen"/>
-        </button>
-      </div>
+        </FullCol>
+        <ConfirmButton class="bg-green-500 col-span-full md:col-span-1" @click="editProduct" icon="fa-pen"/>
+      </GridWrapper>
     </FullCol>
+
     <FullCol>
-      <div class="grid grid-cols-3 gap-5">
+      <GridWrapper cols="2" class="md:grid-cols-3">
+        <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="prices"/>
+        <ColorContainer bg="accent">
+          <InfoEntry value="price" type="locale"/>
+          <InfoEntry :value="focusProduct.price" type="currency"/>
+        </ColorContainer>
+        <ColorContainer bg="accent">
+          <InfoEntry value="purchase_price" type="locale"/>
+          <InfoEntry :value="focusProduct.purchase_price" type="currency"/>
+        </ColorContainer>
+        <ColorContainer v-if="focusProduct.container_size != 0" bg="accent">
+          <InfoEntry value="container_size" type="locale"/>
+          <InfoEntry :value="focusProduct.container_size" type="number"/>
+        </ColorContainer>
+        <ColorContainer v-if="focusProduct.pledge != 0" bg="accent">
+          <InfoEntry value="pledge" type="locale"/>
+          <InfoEntry :value="focusProduct.pledge" type="currency"/>
+        </ColorContainer>
+        <ColorContainer v-if="focusProduct.pledge_container != 0" bg="accent">
+          <InfoEntry value="pledge_container" type="locale"/>
+          <InfoEntry :value="focusProduct.pledge_container" type="currency"/>
+        </ColorContainer>
+      </GridWrapper>
 
-        <div class="col-span-full text-4xl">{{ $t('prices') }}</div>
-        <div class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('price')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.price" type="currency"/>
-        </div>
-        <div class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('purchase_price')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.purchase_price" type="currency"/>
-        </div>
-        <div v-if="focusProduct.container_size != 0" class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('container_size')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.container_size" type="number"/>
-        </div>
-        <div v-if="focusProduct.pledge != 0" class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('pledge')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.pledge" type="currency"/>
-        </div>
-        <div v-if="focusProduct.pledge_container != 0" class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('pledge_container')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.pledge_container" type="currency"/>
-        </div>
-      </div>
+      <GridWrapper cols="2" class="md:grid-cols-3">
+        <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="inventory"/>
+        <ColorContainer bg="accent">
+          <InfoEntry value="stock" type="locale"/>
+          <InfoEntry :value="focusProduct.price" type="number"/>
+        </ColorContainer>
+        <ColorContainer bg="accent" v-if="focusProduct.min_stock != 0">
+          <InfoEntry value="min_stock" type="locale"/>
+          <InfoEntry :value="focusProduct.min_stock" type="number"/>
+        </ColorContainer>
+      </GridWrapper>
 
-      <div class="grid grid-cols-2 gap-5 mt-5">
-        <div class="col-span-full text-4xl">{{ $t('inventory') }}</div>
-        <div class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('stock')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.price" type="number"/>
-        </div>
-        <div v-if="focusProduct.min_stock != 0" class="bg-secondary p-5 rounded-md">
-          <CenterText class="font-bold text-primary text-2xl" :value="$t('min_stock')"/>
-          <CenterText class="font-bold text-primary text-2xl" :value="focusProduct.min_stock" type="number"/>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-3 gap-5 mt-5">
-        <div class="col-span-full text-4xl">{{ $t('statistic') }}</div>
+      <GridWrapper cols="2" class="md:grid-cols-3">
+        <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="statistic"/>
         <SalesStatistic :timeframe="Timeframes.year" :product_id="focusProduct.id!"/>
         <SalesStatistic :timeframe="Timeframes.month" :product_id="focusProduct.id!"/>
-      </div>
+      </GridWrapper>
 
-      <div class="grid grid-cols-2 gap-5 mt-5">
-        <div class="col-span-full text-4xl">{{ $t('history') }}</div>
+      <GridWrapper cols="1" class="md:grid-cols-1">
+        <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="history"/>
         <InventoryHistory :history="inventoryIn"/>
         <SalesHistory :history="inventoryOut"/>
-      </div>
+      </GridWrapper>
 
     </FullCol>
-    <div class="row-span-3 col-span-full">
-      <div class="grid grid-cols-2">
-
-      </div>
-
-    </div>
   </div>
 
 </template>

@@ -1,12 +1,22 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import IconButton from "./IconButton.vue";
 
 export default defineComponent({
   name: "BackButton",
+  components: {IconButton},
   props: {
-    icon:{
+    icon: {
       type: String,
       default: "fa-arrow-left"
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    color:{
+      type: String,
+      default: "bg-amber-500"
     }
   },
   emits: ["click"]
@@ -14,9 +24,7 @@ export default defineComponent({
 </script>
 
 <template>
-      <button class="bg-amber-500" @click="$emit('click', $event)">
-        <font-awesome-icon class="text-2xl" :icon="icon"/>
-      </button>
+  <IconButton :color="color" @click="(e) => {$emit('click', e)}" :disabled="false" :icon="icon"/>
 </template>
 
 <style scoped>

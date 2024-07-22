@@ -2,14 +2,16 @@
 import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../../../styles/text/CenterText.vue";
 import {salesCountProduct, Timeframe} from "../../../../../../../scripts/product.ts";
+import InfoEntry from "./InfoEntry.vue";
+import ColorContainer from "../../../../../../styles/container/BgContainer.vue";
 
 
 export default defineComponent({
   name: "SalesStatistic",
-  components: {CenterText},
+  components: {ColorContainer, InfoEntry, CenterText},
   props: {
     product_id: {
-      type: Object as PropType<number>,
+      type: Number,
       required: true
     },
     timeframe: {
@@ -28,18 +30,18 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="bg-secondary p-5 rounded-md">
-    <CenterText class="font-bold text-primary text-2xl" :value="$t('sales') + ' ' + $t(timeframe.locale)"/>
-    <CenterText class="font-bold text-primary text-2xl" :value="sales.sales" type="number"/>
-  </div>
-  <div class="bg-secondary p-5 rounded-md">
-    <CenterText class="font-bold text-primary text-2xl" :value="$t('revenue') + ' ' + $t(timeframe.locale)"/>
-    <CenterText class="font-bold text-primary text-2xl" :value="sales.revenue" type="number"/>
-  </div>
-  <div class="bg-secondary p-5 rounded-md">
-    <CenterText class="font-bold text-primary text-2xl" :value="$t('profit') + ' ' + $t(timeframe.locale)"/>
-    <CenterText class="font-bold text-primary text-2xl" :value="sales.profit" type="number"/>
-  </div>
+  <ColorContainer bg="accent">
+    <InfoEntry :value="$t('sales') + ' ' + $t(timeframe.locale)"/>
+    <InfoEntry :value="sales.sales" type="number"/>
+  </ColorContainer>
+  <ColorContainer bg="accent">
+    <InfoEntry :value="$t('revenue') + ' ' + $t(timeframe.locale)"/>
+    <InfoEntry :value="sales.revenue" type="number"/>
+  </ColorContainer>
+  <ColorContainer bg="accent">
+    <InfoEntry :value="$t('profit') + ' ' + $t(timeframe.locale)"/>
+    <InfoEntry :value="sales.profit" type="number"/>
+  </ColorContainer>
 
 </template>
 

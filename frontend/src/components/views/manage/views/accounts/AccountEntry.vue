@@ -20,7 +20,7 @@ export default defineComponent({
   },
   computed: {
     currentColor(): string {
-      return this.deleted ? "bg-red-400" : "bg-secondary"
+      return this.deleted ? "bg-red-400" : "bg-secondary dark:bg-secondary-d"
     }
   }
 })
@@ -32,7 +32,7 @@ export default defineComponent({
     <div class="text-center">{{ user.name }}</div>
     <div>
       <div v-if="!deleted" class="flex justify-center">
-        <button class="bg-accent" @click="confirm = !confirm">
+        <button class="bg-accent dark:bg-accent-d" @click="confirm = !confirm">
           <font-awesome-icon icon="fa-user-minus"/>
         </button>
         <div v-if="confirm" class="absolute ml-32">

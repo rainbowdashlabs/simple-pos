@@ -5,10 +5,19 @@ import BalanceAdd from "./balance/BalanceAdd.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import BalanceDisplay from "./balance/BalanceDisplay.vue";
 import {addDeposit} from "../../scripts/accounts.ts";
+import InputField from "../styles/input/InputField.vue";
+import SimpleInputField from "../styles/input/SimpleInputField.vue";
+import ColorContainer from "../styles/container/BgContainer.vue";
+import GridWrapper from "../styles/grid/GridWrapper.vue";
+import MoneyText from "../styles/text/MoneyText.vue";
+import Icon from "../styles/Icon.vue";
 
 export default defineComponent({
   name: "Balance",
-  components: {BalanceDisplay, FontAwesomeIcon, BalanceAdd},
+  components: {
+    Icon,
+    MoneyText,
+    GridWrapper, ColorContainer, SimpleInputField, InputField, BalanceDisplay, FontAwesomeIcon, BalanceAdd},
   data() {
     return {
       deposit: 0
@@ -26,9 +35,8 @@ export default defineComponent({
     resetDeposit() {
       this.deposit = 0
     },
-    valueUpdated(event: Event) {
-      // @ts-expect-error
-      this.deposit = Number(event.target.value) - store.focusAccount?.balance!
+    valueUpdated(event: string) {
+      this.deposit = Number(event) - store.focusAccount?.balance!
       console.log("Deposit is: " + this.deposit)
     },
     storeDeposit() {
@@ -42,6 +50,9 @@ export default defineComponent({
     },
     currentAmount() {
       return store.focusAccount?.balance! + this.deposit
+    },
+    currentDeposit(){
+      return Math.round(this.deposit * 100) / 100
     }
   }
 
@@ -49,22 +60,20 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-5 gap-5 pt-5">
+  <div class="grid grid-cols-5 gap-5 pt-5 sm:max-md:mx-5">
     <div class="col-span-full">
       <h1>{{ store.focusAccount?.name }}</h1>
     </div>
 
-    <div class="col-span-full">
-      <input class="text-2xl rounded-md w-full text-primary" @change="valueUpdated" :value="$n(deposit, 'currency')">
+    <div class="col-span-full ">
+      <SimpleInputField type="text" @update="valueUpdated" :value="$n(currentDeposit)"/>
     </div>
 
-    <div class="col-span-full bg-secondary rounded-md">
-      <div class="grid grid-cols-3 auto-cols-max gap-5, justify-center justify-items-center py-5">
-        <BalanceDisplay :value="store.focusAccount?.balance!"/>
-        <font-awesome-icon class="text-xl fa-xl text-primary" icon="fa-arrow-right"/>
-        <BalanceDisplay :value="currentAmount"/>
-      </div>
-    </div>
+    <ColorContainer class="col-span-full flex justify-evenly items-center" bg="secondary">
+        <MoneyText class="font-bold" :amount="store.focusAccount?.balance!"/>
+        <Icon class="text-xl" icon="fa-arrow-right"/>
+        <MoneyText class="font-bold" :amount="currentAmount"/>
+    </ColorContainer>
 
     <div class="col-span-full row-span-3">
       <div v-if="$i18n.locale === 'de'" class="grid grid-cols-5 gap-5">
