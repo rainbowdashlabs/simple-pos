@@ -6,10 +6,12 @@ import {Product} from "../../../../../scripts/product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
 import {store} from "../../../../../scripts/store.ts";
 import TwoStepDeleteButton from "../../../../styles/buttons/TwoStepDeleteButton.vue";
+import IconButton from "../../../../styles/buttons/IconButton.vue";
+import Icon from "../../../../styles/Icon.vue";
 
 export default defineComponent({
   name: "ProductEntry",
-  components: {TwoStepDeleteButton, CenterText, FontAwesomeIcon},
+  components: {Icon, IconButton, TwoStepDeleteButton, CenterText, FontAwesomeIcon},
   props: {
     product: {
       type: Object as PropType<Product>,
@@ -50,16 +52,26 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="`grid grid-cols-8 auto-rows-auto ${currentColor} rounded-md items-center min-h-14 hover:cursor-pointer`"
+  <div :class="`flex-col auto-rows-auto ${currentColor} rounded-md items-center p-5`"
        @click="openInfo">
-    <CenterText :value="product.name" type="text"/>
-    <CenterText :value="product.price" type="currency"/>
-    <CenterText :value="product.purchase_price" type="currency"/>
-    <CenterText :value="product.container_size" type="number"/>
-    <CenterText :value="product.pledge" type="currency"/>
-    <CenterText :value="product.pledge_container" type="currency"/>
-    <CenterText :value="product.min_stock" type="number"/>
-    <TwoStepDeleteButton @click="deleteProd"/>
+    <div class="flex justify-between">
+      <CenterText class="flex-none justify-start" :value="product.name" type="text"/>
+      <div class="flex">
+        <IconButton class="mr-5" icon="fa-question" @click="openInfo"/>
+        <TwoStepDeleteButton class="flex-none justify-end" @click="deleteProd"/>
+      </div>
+    </div>
+    <div>
+      <div class="flex">
+        <Icon icon="fa-cart-arrow-down"/>
+      </div>
+      <CenterText :value="product.price" type="currency"/>
+      <CenterText :value="product.purchase_price" type="currency"/>
+      <CenterText :value="product.container_size" type="number"/>
+      <CenterText :value="product.pledge" type="currency"/>
+      <CenterText :value="product.pledge_container" type="currency"/>
+      <CenterText :value="product.min_stock" type="number"/>
+    </div>
   </div>
 </template>
 
