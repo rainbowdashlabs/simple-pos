@@ -1,5 +1,4 @@
 import {getRandomItem} from "./sampling.ts";
-import CartEntry from "../components/views/pos/views/cartselection/mobilecart/CartEntry.vue";
 import {CartPosition} from "./cart.ts";
 
 /**
@@ -85,7 +84,7 @@ export function deposits(id: number, limit: number): Deposit[] {
 }
 
 export function purchase(id: number, entries: CartPosition[]) {
-
+    console.log("Saving entries for id: " + id + " :" + entries)
 }
 
 /**

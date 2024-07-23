@@ -1,9 +1,8 @@
 <script lang="ts">
-import {defineComponent, PropType} from 'vue'
+import {defineComponent} from 'vue'
 import {store} from "../../../../scripts/store.ts";
 import SelectMenu from "../../../styles/input/select/SelectMenu.vue";
 import {account, accounts, LazyAccount, purchase} from "../../../../scripts/accounts.ts";
-import {LazyResult} from "postcss";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
 import MoneyText from "../../../styles/text/MoneyText.vue";
 import FormattedText from "../../../styles/text/FormattedText.vue";
