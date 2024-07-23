@@ -40,8 +40,8 @@ export default defineComponent({
         <FormattedText class="content-center" :size="SizeGroup.xl" value="Cart"/>
         <FormattedText class="content-center" :size="SizeGroup.xl" :value="content.total" type="currency"/>
         <div class="justify-end">
-          <BackButton class="mr-5" @click="clearCart"/>
-          <ConfirmButton @click="checkout"/>
+          <BackButton class="z-10 mr-5" @click="clearCart"/>
+          <ConfirmButton class="z-10" @click="checkout"/>
         </div>
       </div>
       <div class="height overflow-y-scroll pb-5">

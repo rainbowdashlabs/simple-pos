@@ -24,7 +24,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <IconButton :color="color" @click="(e) => {$emit('click', e)}" :disabled="false" :icon="icon"/>
+  <IconButton :color="color" @click="(e) => {e.stopPropagation(); $emit('click', e)}" :disabled="false" :icon="icon"/>
 </template>
 
 <style scoped>
