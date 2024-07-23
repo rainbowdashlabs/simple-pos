@@ -61,6 +61,9 @@ export default defineComponent({
   beforeMount() {
     if (store.focusProduct === undefined) window.location.href = "#manage/products"
   },
+  mounted() {
+    console.log(this.focusProduct.recipe)
+  }
 })
 </script>
 
@@ -89,31 +92,11 @@ export default defineComponent({
           <InfoEntry value="purchase_price" type="locale"/>
           <InfoEntry :value="focusProduct.raw_price" type="currency"/>
         </ColorContainer>
-<!--        <ColorContainer v-if="focusProduct.container_size != 0" bg="accent">-->
-<!--          <InfoEntry value="container_size" type="locale"/>-->
-<!--          <InfoEntry :value="focusProduct.container_size" type="number"/>-->
-<!--        </ColorContainer>-->
-<!--        <ColorContainer v-if="focusProduct.pledge != 0" bg="accent">-->
-<!--          <InfoEntry value="pledge" type="locale"/>-->
-<!--          <InfoEntry :value="focusProduct.pledge" type="currency"/>-->
-<!--        </ColorContainer>-->
-<!--        <ColorContainer v-if="focusProduct.pledge_container != 0" bg="accent">-->
-<!--          <InfoEntry value="pledge_container" type="locale"/>-->
-<!--          <InfoEntry :value="focusProduct.pledge_container" type="currency"/>-->
-<!--        </ColorContainer>-->
       </GridWrapper>
 
-      <GridWrapper cols="1" class="md:grid-cols-3">
+      <GridWrapper cols="1">
         <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="ingredients"/>
         <ProductIngredientInfo v-for="item in focusProduct.recipe.entries" :entry="item"/>
-<!--        <ColorContainer bg="accent">-->
-<!--          <InfoEntry value="stock" type="locale"/>-->
-<!--          <InfoEntry :value="focusProduct.price" type="number"/>-->
-<!--        </ColorContainer>-->
-<!--        <ColorContainer bg="accent" v-if="focusProduct.min_stock != 0">-->
-<!--          <InfoEntry value="min_stock" type="locale"/>-->
-<!--          <InfoEntry :value="focusProduct.min_stock" type="number"/>-->
-<!--        </ColorContainer>-->
       </GridWrapper>
 
       <GridWrapper cols="2" class="md:grid-cols-3">

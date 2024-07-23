@@ -1,4 +1,4 @@
-import {categories, Category} from "./categories.ts";
+import {categories, CategoryGroup, Listing} from "./categories.ts";
 import {Ingredient} from "./Ingredient.ts";
 import {dummyIngredientCategories, dummyIngredients, randInt} from "./sampling.ts";
 
@@ -12,9 +12,7 @@ export interface InventoryCorrection {
     amount: number
 }
 
-export interface InventoryGroup {
-    category: Category,
-    products: InventoryEntry[]
+export interface InventoryGroup extends CategoryGroup<InventoryEntry> {
 }
 
 export interface StorageEntry {
@@ -33,13 +31,10 @@ export interface InboundStorage {
     amount: number
 }
 
-export interface StorageListings {
-    categories: StorageGroup[]
+export interface StorageListing extends Listing<StorageEntry> {
 }
 
-export interface StorageGroup {
-    category: Category,
-    products: StorageSummary[]
+export interface StorageGroup extends CategoryGroup<StorageSummary> {
 }
 
 export interface StorageSummary {
@@ -47,18 +42,22 @@ export interface StorageSummary {
     stock: number
 }
 
-export function storageInfo(id: number): StorageSummary {
-    return {ingredient: dummyIngredients.get(id)!, stock: randInt(50)}
+export interface IngredientsStock extends Ingredient {
+    stock: number
 }
 
-export function storageSummary(): StorageListings {
-    let res: StorageGroup[] = []
+export function storageInfo(id: number): IngredientsStock {
+    return {...dummyIngredients.get(id)!, stock: randInt(50)}
+}
+
+export function stockSummary(): Listing<IngredientsStock> {
+    let res: CategoryGroup<IngredientsStock>[] = []
     for (let category of categories()) {
-        let group: StorageSummary[] = []
+        let group: IngredientsStock[] = []
         for (let ingredient of dummyIngredientCategories.get(category.id)!) {
             group.push(storageInfo(ingredient.id!))
         }
-        res.push({category: category, products: group})
+        res.push({category: category, entries: group})
     }
     return {categories: res}
 }

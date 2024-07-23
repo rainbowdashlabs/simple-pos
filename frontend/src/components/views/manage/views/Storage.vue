@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import StorageGroup from "./storage/StorageGroup.vue";
-import {storageSummary} from "../../../../scripts/storage.ts";
+import {stockSummary} from "../../../../scripts/storage.ts";
 import ConfirmButton from "../../../styles/buttons/ConfirmButton.vue";
 import GridWrapper from "../../../styles/grid/GridWrapper.vue";
 
@@ -9,7 +9,7 @@ export default defineComponent({
   name: "Storage",
   components: {GridWrapper, ConfirmButton, StorageGroup},
   computed: {
-    inventorySummary: storageSummary
+    inventorySummary: stockSummary
   },
   methods:{
     inventory(){

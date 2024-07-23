@@ -21,7 +21,6 @@ export default defineComponent({
   },
   computed: {
     color() {
-      console.log(`bg-${this.bg} dark:bg-${this.bg}-d`)
       return `bg-${this.bg} dark:bg-${this.bg}-d`
     }
   }

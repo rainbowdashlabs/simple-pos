@@ -1,9 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import StorageEntry from "./StorageEntry.vue";
-import {StorageGroup} from "../../../../../scripts/storage.ts";
+import {IngredientsStock} from "../../../../../scripts/storage.ts";
 import FormattedText from "../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../scripts/text.ts";
+import {CategoryGroup} from "../../../../../scripts/categories.ts";
 
 export default defineComponent({
   name: "StorageGroup",
@@ -15,7 +16,7 @@ export default defineComponent({
   components: {FormattedText, StorageEntry},
   props: {
     group: {
-      type: Object as PropType<StorageGroup>,
+      type: Object as PropType<CategoryGroup<IngredientsStock>>,
       required: true
     }
   }
@@ -25,8 +26,8 @@ export default defineComponent({
 <template>
   <div class="pt-5">
     <FormattedText :value="group.category.name" :size="SizeGroup.xl2"/>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-5">
-      <StorageEntry v-for="item in group.products" :listing="item"/>
+    <div class="grid grid-cols-1 gap-5 pt-5">
+      <StorageEntry v-for="item in group.entries" :listing="item"/>
     </div>
   </div>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../../../styles/text/CenterText.vue";
-import {InventoryEntry} from "../../../../../../../scripts/storage.ts";
+import {IngredientsStock} from "../../../../../../../scripts/storage.ts";
 import SimpleInputField from "../../../../../../styles/input/SimpleInputField.vue";
 import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
 import NumberText from "../../../../../../styles/text/NumberText.vue";
@@ -15,12 +15,13 @@ export default defineComponent({
   data() {
     return {
       containerCount: 0,
-      pieceCount: 0
+      pieceCount: 0,
+      init_stock: this.listing.stock
     }
   },
   props: {
     listing: {
-      type: Object as PropType<InventoryEntry>,
+      type: Object as PropType<IngredientsStock>,
       required: true
     }
   },
@@ -29,10 +30,10 @@ export default defineComponent({
       return SizeGroup
     },
     diff() {
-      return this.count - this.listing.product.stock
+      return this.count - this.listing.stock
     },
     count() {
-      return this.containerCount * this.listing.product.ingredient.container_size + this.pieceCount
+      return this.containerCount * this.listing.container_size + this.pieceCount
     },
     bgColor() {
       if (this.diff > 0) return "okay"
@@ -51,8 +52,15 @@ export default defineComponent({
       this.updateAmount()
     },
     updateAmount() {
-      console.log("Set amount to " + this.count)
-      this.listing.amount = this.count
+      this.init_stock = this.count
+    }
+  },
+  watch: {
+    containerCount(newValue: string){
+      this.containerCount = Number(newValue)
+    },
+    count(newValue: string){
+      this.count = Number(newValue)
     }
   }
 })
@@ -60,11 +68,11 @@ export default defineComponent({
 
 <template>
   <ColorContainer :bg="bgColor" class="flex rounded-md items-center min-h-14 gap-5 px-5 py-2 justify-evenly max-w-full">
-    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.product.ingredient.name"/>
+    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.name"/>
     <div class="flex w-1/3 justify-evenly items-center">
       <FormattedText :size="SizeGroup.md" :value="count" type="number"/>
       <FormattedText :size="SizeGroup.md" value="of" type="locale"/>
-      <FormattedText :size="SizeGroup.md" :value="listing.product.stock" type="number"/>
+      <FormattedText :size="SizeGroup.md" :value="init_stock" type="number"/>
       <Icon :size="SizeGroup.md" icon="fa-equals"/>
       <NumberText :size="SizeGroup.md" :amount="diff"/>
     </div>

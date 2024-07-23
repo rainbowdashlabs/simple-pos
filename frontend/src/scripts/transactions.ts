@@ -1,4 +1,4 @@
-import {product, Product} from './product.ts'
+import {LazyProduct, product} from './product.ts'
 
 export interface Transaction {
     id: number
@@ -10,7 +10,7 @@ export interface Transaction {
 
 export interface History {
     transactions: Transaction[]
-    products: Map<number, Product>
+    products: Map<number, LazyProduct>
 }
 
 export function history(user_id: number, limit: number = 30): History {
@@ -25,7 +25,7 @@ export function history(user_id: number, limit: number = 30): History {
             date: Math.floor(Date.now() / 1000)
         })
     }
-    let products: Map<number, Product> = new Map()
+    let products: Map<number, LazyProduct> = new Map()
     products.set(1, product(1))
     console.log(`${result.length} transactions`)
     return {transactions: result, products: products}

@@ -17,7 +17,7 @@ export class Cart {
                 this.products.delete(product.id!)
             }
         } else {
-            this.products.set(product.id!, {ingredient: product, amount});
+            this.products.set(product.id!, {product: product, amount:amount});
         }
     }
 

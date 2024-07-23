@@ -55,14 +55,14 @@ for (let category of dummyCategories.values()) {
             price: randInt(5),
             min_stock: randChoice([10, 20, 30])
         }
-        let prod:Product = {
+        let prod: Product = {
             id: index,
             name: product,
             price: randDecimal(10) + 1,
             raw_price: ingredient.price,
             category_id: category.id,
-            active: randChoice([true, true,true, false]),
-            recipe: [ingredient]
+            active: randChoice([true, true, true, false]),
+            recipe: {entries: [{amount: 1, ingredient: ingredient}]}
         }
         categoryIngredients.push(ingredient)
         categoryProducts.push(prod)
@@ -86,7 +86,7 @@ export function randChoice<T>(choices: Array<T>): T {
     return choices[randInt(choices.length)]
 }
 
-export function randDate(delta:number = 0){
+export function randDate(delta: number = 0) {
     let date = new Date()
-    return Math.floor( date.setDate(date.getDate() - delta) / 1000)
+    return Math.floor(date.setDate(date.getDate() - delta) / 1000)
 }

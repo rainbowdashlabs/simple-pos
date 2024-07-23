@@ -16,7 +16,6 @@ export default defineComponent({
   },
   computed: {
     color() {
-      console.log(this.amount)
       return this.amount <= 0 ? "text-red-500" : "text-green-600"
     }
   },

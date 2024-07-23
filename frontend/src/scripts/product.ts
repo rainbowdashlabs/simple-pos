@@ -1,4 +1,4 @@
-import {CategoryGroup} from "./categories.ts";
+import {CategoryGroup, Listing} from "./categories.ts";
 import {createIngredient, Ingredient} from "./Ingredient.ts";
 import {dummyCategories, dummyProductCategories, dummyProducts} from "./sampling.ts";
 
@@ -70,9 +70,10 @@ export function updateProduct(product: Product) {
     console.log("Updated product " + product)
 }
 
-export function products(): ProductListings {
+export function products(): Listing<Product> {
     let res: ProductGroup[] = []
     for (let entry of dummyProductCategories.entries()) {
+        console.log(entry[1])
         res.push({category: dummyCategories.get(entry[0])!, entries: entry[1]})
     }
     return {categories: res}

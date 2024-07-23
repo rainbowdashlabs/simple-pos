@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent, resolveComponent} from 'vue'
+import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
@@ -17,7 +17,7 @@ import {SizeGroup} from "../../../../../../scripts/text.ts";
 import FreeButton from "../../../../../styles/buttons/FreeButton.vue";
 import TextButton from "../../../../../styles/buttons/TextButton.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import {ingredient, Ingredient, IngredientListing, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import {ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
 
 export default defineComponent({

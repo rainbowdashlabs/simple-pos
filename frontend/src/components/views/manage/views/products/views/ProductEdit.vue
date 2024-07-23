@@ -92,68 +92,12 @@ export default defineComponent({
                   :current="category"/>
     </ColorContainer>
 
-        <ColorContainer bg="secondary">
+    <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="price" type="locale"/>
       <SimpleInputField type="number" v-model="product.price"/>
     </ColorContainer>
 
-        <ColorContainer bg="secondary">
-      <FormattedText class="pb-5" :size="SizeGroup.xl2" value="purchase_price" type="locale"/>
-      <SimpleInputField type="number" v-model="product.purchase_price"/>
-    </ColorContainer>
-
-
-    <ColorContainer bg="secondary">
-      <div class="pb-5">
-        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="container_size" type="locale"/>
-        <SimpleInputField type="number" v-model="product.container_size"/>
-      </div>
-      <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
-                    @click="product.container_size = item"
-                    :value="item"
-                    type="number"/>
-      </div>
-    </ColorContainer>
-
-    <ColorContainer bg="secondary">
-      <div class="pb-5">
-        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge" type="locale"/>
-        <SimpleInputField type="number" v-model="product.pledge"/>
-      </div>
-      <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]"
-                    @click="product.pledge = item"
-                    :value="item"
-                    type="currency"/>
-      </div>
-    </ColorContainer>
-
-    <ColorContainer bg="secondary">
-      <div class="pb-5">
-        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge_container" type="locale"/>
-        <SimpleInputField type="number" v-model="product.pledge_container"/>
-      </div>
-      <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
-                    @click="product.pledge_container = item"
-                    :value="item"
-                    type="currency"/>
-      </div>
-    </ColorContainer>
-
-    <ColorContainer bg="secondary">
-      <div class="pb-5">
-        <FormattedText class="pb-5" :size="SizeGroup.xl2" value="min_stock" type="locale"/>
-        <SimpleInputField type="number" v-model="product.min_stock"/>
-      </div>
-      <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
-                    @click="product.min_stock = product.container_size * item[0] || item[1]"
-                    :value="product.container_size * item[0] || item[1]"
-                    type="number"/>
-      </div>
-    </ColorContainer>
+<!--    TODO add ingredient list-->
 
     <div class="col-span-full">
       <button :class="`rounded-md mt-5 ${buttonColor} min-h-14 size-full`"
