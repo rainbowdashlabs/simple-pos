@@ -18,10 +18,12 @@ import FormattedText from "../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../scripts/text.ts";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import InfoEntry from "./productinfo/InfoEntry.vue";
+import ProductIngredientInfo from "./productinfo/ProductIngredientInfo.vue";
 
 export default defineComponent({
   name: "ProductInfo",
   components: {
+    ProductIngredientInfo,
     InfoEntry,
     ColorContainer,
     FormattedText,
@@ -76,8 +78,8 @@ export default defineComponent({
       </GridWrapper>
     </FullCol>
 
-    <FullCol>
-      <GridWrapper cols="2" class="md:grid-cols-3">
+    <GridWrapper bg="none" cols="1" class="col-span-full" padding="0">
+      <GridWrapper cols="2">
         <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="prices"/>
         <ColorContainer bg="accent">
           <InfoEntry value="price" type="locale"/>
@@ -85,32 +87,33 @@ export default defineComponent({
         </ColorContainer>
         <ColorContainer bg="accent">
           <InfoEntry value="purchase_price" type="locale"/>
-          <InfoEntry :value="focusProduct.purchase_price" type="currency"/>
+          <InfoEntry :value="focusProduct.raw_price" type="currency"/>
         </ColorContainer>
-        <ColorContainer v-if="focusProduct.container_size != 0" bg="accent">
-          <InfoEntry value="container_size" type="locale"/>
-          <InfoEntry :value="focusProduct.container_size" type="number"/>
-        </ColorContainer>
-        <ColorContainer v-if="focusProduct.pledge != 0" bg="accent">
-          <InfoEntry value="pledge" type="locale"/>
-          <InfoEntry :value="focusProduct.pledge" type="currency"/>
-        </ColorContainer>
-        <ColorContainer v-if="focusProduct.pledge_container != 0" bg="accent">
-          <InfoEntry value="pledge_container" type="locale"/>
-          <InfoEntry :value="focusProduct.pledge_container" type="currency"/>
-        </ColorContainer>
+<!--        <ColorContainer v-if="focusProduct.container_size != 0" bg="accent">-->
+<!--          <InfoEntry value="container_size" type="locale"/>-->
+<!--          <InfoEntry :value="focusProduct.container_size" type="number"/>-->
+<!--        </ColorContainer>-->
+<!--        <ColorContainer v-if="focusProduct.pledge != 0" bg="accent">-->
+<!--          <InfoEntry value="pledge" type="locale"/>-->
+<!--          <InfoEntry :value="focusProduct.pledge" type="currency"/>-->
+<!--        </ColorContainer>-->
+<!--        <ColorContainer v-if="focusProduct.pledge_container != 0" bg="accent">-->
+<!--          <InfoEntry value="pledge_container" type="locale"/>-->
+<!--          <InfoEntry :value="focusProduct.pledge_container" type="currency"/>-->
+<!--        </ColorContainer>-->
       </GridWrapper>
 
-      <GridWrapper cols="2" class="md:grid-cols-3">
-        <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="inventory"/>
-        <ColorContainer bg="accent">
-          <InfoEntry value="stock" type="locale"/>
-          <InfoEntry :value="focusProduct.price" type="number"/>
-        </ColorContainer>
-        <ColorContainer bg="accent" v-if="focusProduct.min_stock != 0">
-          <InfoEntry value="min_stock" type="locale"/>
-          <InfoEntry :value="focusProduct.min_stock" type="number"/>
-        </ColorContainer>
+      <GridWrapper cols="1" class="md:grid-cols-3">
+        <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="ingredients"/>
+        <ProductIngredientInfo v-for="item in focusProduct.recipe.entries" :entry="item"/>
+<!--        <ColorContainer bg="accent">-->
+<!--          <InfoEntry value="stock" type="locale"/>-->
+<!--          <InfoEntry :value="focusProduct.price" type="number"/>-->
+<!--        </ColorContainer>-->
+<!--        <ColorContainer bg="accent" v-if="focusProduct.min_stock != 0">-->
+<!--          <InfoEntry value="min_stock" type="locale"/>-->
+<!--          <InfoEntry :value="focusProduct.min_stock" type="number"/>-->
+<!--        </ColorContainer>-->
       </GridWrapper>
 
       <GridWrapper cols="2" class="md:grid-cols-3">
@@ -125,7 +128,7 @@ export default defineComponent({
         <SalesHistory :history="inventoryOut"/>
       </GridWrapper>
 
-    </FullCol>
+    </GridWrapper>
   </div>
 
 </template>

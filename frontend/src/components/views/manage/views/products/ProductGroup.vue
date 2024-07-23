@@ -26,7 +26,7 @@ export default defineComponent({
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <FormattedText class="col-span-full" :value="group.category.name" :size="SizeGroup.xl"/>
-    <ProductEntry v-for="item in group.products" :product="item"/>
+    <ProductEntry v-for="item in group.entries" :product="item"/>
   </div>
 </template>
 

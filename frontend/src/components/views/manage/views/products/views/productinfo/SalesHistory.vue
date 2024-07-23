@@ -36,7 +36,7 @@ export default defineComponent({
 <!--    </div>-->
 <!--  </div>-->
   <ColorContainer bg="secondary" padding="0">
-    <FormattedText :size="SizeGroup.xl" value="sales" type="locale"/>
+    <FormattedText :size="SizeGroup.md" value="sales" type="locale"/>
     <div class="flex">
     </div>
     <div class="flex flex-col overflow-y-scroll height">

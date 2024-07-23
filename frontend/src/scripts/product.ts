@@ -1,27 +1,35 @@
-import {categories, Category} from "./categories.ts";
+import {CategoryGroup} from "./categories.ts";
+import {createIngredient, Ingredient} from "./Ingredient.ts";
+import {dummyCategories, dummyProductCategories, dummyProducts} from "./sampling.ts";
 
 export interface Timeframe {
     locale: string,
     days: number
 }
 
+export interface RecipeEntry{
+    ingredient: Ingredient
+    amount: number
+}
 
-export interface Product {
+export interface Recipe {
+    entries: RecipeEntry[]
+}
+
+export interface LazyProduct {
     id: number | null,
     name: string,
     category_id: number,
     price: number,
-    purchase_price: number,
-    container_size: number,
-    pledge: number,
-    pledge_container: number,
-    min_stock: number,
+    raw_price: number | undefined | null,
     active: boolean
 }
 
-export interface ProductGroup {
-    category: Category,
-    products: Product[]
+export interface Product extends LazyProduct {
+    recipe: Recipe
+}
+
+export interface ProductGroup extends CategoryGroup<Product> {
 }
 
 export interface ProductListings {
@@ -36,22 +44,25 @@ export interface ProductSalesStat {
     profit: number
 }
 
-export function product(id: number): Product {
-    return {
-        id: id,
-        category_id: (id % 5),
-        name: "Paulaner Spezi Zero 0.5 with extra steps",
-        price: 1.2,
-        purchase_price: 1.0,
-        container_size: 20,
-        pledge: 0.08,
-        pledge_container: 1.5,
-        min_stock: 10,
-        active: true
-    }
+export function product(id: number): LazyProduct {
+    return fullProduct(id)
 }
 
+export function fullProduct(id: number): Product {
+    return dummyProducts.get(id)!
+}
+
+/**
+ * Creates a new product and its ingredients if they were not created already.
+ *
+ * @param product
+ */
 export function createProduct(product: Product) {
+    for (let entry of product.recipe.entries) {
+        if (!entry.ingredient.id) {
+            entry.ingredient.id = createIngredient(entry.ingredient).id
+        }
+    }
     console.log("Created product " + product)
 }
 
@@ -61,15 +72,8 @@ export function updateProduct(product: Product) {
 
 export function products(): ProductListings {
     let res: ProductGroup[] = []
-    for (let category of categories()) {
-        let group: Product[] = []
-        for (let i = 0; i < 5; i++) {
-            let cur: Product = product(i)
-            cur.active = Math.random() > 0.3
-            cur.category_id = category.id
-            group.push(cur)
-        }
-        res.push({category: category, products: group})
+    for (let entry of dummyProductCategories.entries()) {
+        res.push({category: dummyCategories.get(entry[0])!, entries: entry[1]})
     }
     return {categories: res}
 }

@@ -20,12 +20,8 @@ export default defineComponent({
   },
   computed: {
     color() {
-      console.log(this.amount)
       return this.amount <= this.min ? "text-red-500" : "text-green-600"
     }
-  },
-  mounted() {
-    console.log(this.size)
   }
 })
 </script>

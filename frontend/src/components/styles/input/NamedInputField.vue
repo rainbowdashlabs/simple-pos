@@ -1,10 +1,18 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import FieldName from "../../views/manage/views/products/views/productcreate/FieldName.vue";
+import InputField from "./InputField.vue";
+import FormattedText from "../text/FormattedText.vue";
+import {SizeGroup} from "../../../scripts/text.ts";
 
 export default defineComponent({
   name: "NamedInputField",
-  components: {FieldName},
+  computed: {
+    SizeGroup() {
+      return SizeGroup
+    }
+  },
+  components: {FormattedText, InputField, FieldName},
   props: {
     name: {
       type: String,
@@ -32,20 +40,9 @@ export default defineComponent({
 
 <!-- @ts-expect-error -->
 <template>
-  <div class="bg-secondary rounded-md p-5">
-    <FieldName :name="name"/>
-    <input v-if="required"
-           class="text-primary bg-bright rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-           :type="type"
-           value=""
-           :placeholder="String(modelValue)"
-           @input=" $emit('update', extract($event))"
-           required>
-    <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-4xl"
-           :type="type"
-           :placeholder="String(modelValue)"
-           @input="$emit('update', extract($event))"
-           required>
+  <div class="rounded-md p-5">
+    <FormattedText :size="SizeGroup.xl" :name="name"/>
+    <InputField @input="$emit('update', extract($event))" :type="type" :modelValue="modelValue"/>
   </div>
 </template>
 

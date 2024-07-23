@@ -77,8 +77,8 @@ export default defineComponent({
       </ColorContainer>
 
       <GridWrapper bg="none" cols="2" padding="0">
-        <ConfirmButton @click="purchase"/>
         <BackButton @click="back"/>
+        <ConfirmButton @click="purchase"/>
       </GridWrapper>
     </GridWrapper>
   </GridWrapper>

@@ -5,8 +5,17 @@ export interface Category {
     name: string
 }
 
+export interface CategoryGroup<T> {
+    category: Category
+    entries: T[]
+}
+
+export interface Listing<T> {
+    categories: CategoryGroup<T>[]
+}
+
 export function category(id: number): Category {
-    return {id: id, name: dummyCategories.get(id)!}
+    return dummyCategories.get(id)!
 }
 
 export function updateCategory(category: Category) {
@@ -14,10 +23,5 @@ export function updateCategory(category: Category) {
 }
 
 export function categories(): Category[] {
-    let res: Category[] = []
-    for (let entry of dummyCategories.entries()) {
-        res.push({id: entry[0], name: entry[1]})
-    }
-    console.log("Generated categories: " + res)
-    return res
+    return Array.from(dummyCategories.values())
 }

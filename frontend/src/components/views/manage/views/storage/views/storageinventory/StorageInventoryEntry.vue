@@ -32,7 +32,7 @@ export default defineComponent({
       return this.count - this.listing.product.stock
     },
     count() {
-      return this.containerCount * this.listing.product.product.container_size + this.pieceCount
+      return this.containerCount * this.listing.product.ingredient.container_size + this.pieceCount
     },
     bgColor() {
       if (this.diff > 0) return "okay"
@@ -60,7 +60,7 @@ export default defineComponent({
 
 <template>
   <ColorContainer :bg="bgColor" class="flex rounded-md items-center min-h-14 gap-5 px-5 py-2 justify-evenly max-w-full">
-    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.product.product.name"/>
+    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.product.ingredient.name"/>
     <div class="flex w-1/3 justify-evenly items-center">
       <FormattedText :size="SizeGroup.md" :value="count" type="number"/>
       <FormattedText :size="SizeGroup.md" value="of" type="locale"/>

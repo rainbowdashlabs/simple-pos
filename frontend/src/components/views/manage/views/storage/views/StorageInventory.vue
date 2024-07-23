@@ -6,7 +6,6 @@ import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
-import {buildDarkMode} from "../../../../../../scripts/util.ts";
 
 export default defineComponent({
   name: "StorageInventory",
@@ -18,12 +17,11 @@ export default defineComponent({
   },
   computed: {},
   methods: {
-    buildDarkMode,
     submit() {
       let inventory = this.summary.flatMap((group:InventoryGroup) => {
         return group.products.map((entry :InventoryEntry)  => {
           return {
-            product_id: entry.product.product.id!,
+            product_id: entry.product.ingredient.id!,
             amount: entry.amount
           }
         })
@@ -39,7 +37,7 @@ export default defineComponent({
           products: e.products.map(p => {
             return {
               amount: 0,
-              product: p
+              ingredient: p
             }
           })
         }

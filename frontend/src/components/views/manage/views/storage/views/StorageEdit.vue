@@ -1,11 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import FieldName from "./productcreate/FieldName.vue";
-import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
-import ConfigureSection from "../ConfigureSection.vue";
-import {Product, updateProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
 import {categories, category, Category} from "../../../../../../scripts/categories.ts";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
@@ -14,24 +10,26 @@ import FormattedText from "../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../scripts/text.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import TextButton from "../../../../../styles/buttons/TextButton.vue";
+import {Ingredient, updateIngredient} from "../../../../../../scripts/Ingredient.ts";
+import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 
 export default defineComponent({
-  name: "ProductEdit",
+  name: "StorageEdit",
   components: {
+    ConfirmButton,
     TextButton,
     SelectMenu,
     FormattedText,
     SimpleInputField,
     ColorContainer,
-    CategorySelector, FieldName, FullCol, ConfigureSection, FontAwesomeIcon
+    FullCol,
+    FontAwesomeIcon
   },
   data() {
     return {
       category: "",
-      input_field_style: "text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl",
-      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl",
-      categories: categories(),
-      product: Object.assign({}, store.focusProduct) as Product
+      categories:categories(),
+      ingredient: Object.assign({}, store.focusIngredient) as Ingredient
     }
   },
   computed: {
@@ -39,9 +37,9 @@ export default defineComponent({
       return SizeGroup
     },
     disabled() {
-      if (!this.product.name) return true
+      if (!this.ingredient.name) return true
       if (!this.category) return true
-      if (!this.product.price) return true
+      if (!this.ingredient.price) return true
       return false
     },
     buttonColor() {
@@ -51,13 +49,13 @@ export default defineComponent({
       return categories()
     },
     focusCategory(): Category {
-      return category(Number(this.product.category_id))
+      return category(Number(this.ingredient.category_id))
     },
 
   },
   methods: {
-    updateProd() {
-      updateProduct(store.focusProduct!)
+    updateIngredient() {
+      updateIngredient(this.ingredient)
       store.focusProduct!.category_id = this.categoryNameToId(this.category)
       window.location.href = "#manage/products/info"
     },
@@ -82,7 +80,7 @@ export default defineComponent({
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
-      <SimpleInputField type="text" v-model="product.name"/>
+      <SimpleInputField type="text" v-model="ingredient.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
@@ -92,25 +90,19 @@ export default defineComponent({
                   :current="category"/>
     </ColorContainer>
 
-        <ColorContainer bg="secondary">
-      <FormattedText class="pb-5" :size="SizeGroup.xl2" value="price" type="locale"/>
-      <SimpleInputField type="number" v-model="product.price"/>
-    </ColorContainer>
-
-        <ColorContainer bg="secondary">
+    <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="purchase_price" type="locale"/>
-      <SimpleInputField type="number" v-model="product.purchase_price"/>
+      <SimpleInputField type="number" v-model="ingredient.price"/>
     </ColorContainer>
-
 
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="container_size" type="locale"/>
-        <SimpleInputField type="number" v-model="product.container_size"/>
+        <SimpleInputField type="number" v-model="ingredient.container_size"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
-                    @click="product.container_size = item"
+                    @click="ingredient.container_size = item"
                     :value="item"
                     type="number"/>
       </div>
@@ -119,11 +111,11 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge" type="locale"/>
-        <SimpleInputField type="number" v-model="product.pledge"/>
+        <SimpleInputField type="number" v-model="ingredient.pledge"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]"
-                    @click="product.pledge = item"
+                    @click="ingredient.pledge = item"
                     :value="item"
                     type="currency"/>
       </div>
@@ -132,11 +124,11 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge_container" type="locale"/>
-        <SimpleInputField type="number" v-model="product.pledge_container"/>
+        <SimpleInputField type="number" v-model="ingredient.pledge_container"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
-                    @click="product.pledge_container = item"
+                    @click="ingredient.pledge_container = item"
                     :value="item"
                     type="currency"/>
       </div>
@@ -145,23 +137,18 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="min_stock" type="locale"/>
-        <SimpleInputField type="number" v-model="product.min_stock"/>
+        <SimpleInputField type="number" v-model="ingredient.min_stock"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
-                    @click="product.min_stock = product.container_size * item[0] || item[1]"
-                    :value="product.container_size * item[0] || item[1]"
+                    @click="ingredient.min_stock = ingredient.container_size * item[0] || item[1]"
+                    :value="ingredient.container_size * item[0] || item[1]"
                     type="number"/>
       </div>
     </ColorContainer>
 
     <div class="col-span-full">
-      <button :class="`rounded-md mt-5 ${buttonColor} min-h-14 size-full`"
-              type="submit"
-              :disabled="disabled"
-              @click="updateProd">
-        <font-awesome-icon class="text-4xl" icon="fa-check"/>
-      </button>
+      <ConfirmButton @click="updateIngredient" :disabled="disabled"/>
     </div>
   </div>
 </template>

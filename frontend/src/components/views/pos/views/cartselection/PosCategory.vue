@@ -46,7 +46,7 @@ export default defineComponent({
       <Icon :icon="active ? 'fa-chevron-up' :'fa-chevron-down'"/>
     </ColorContainer>
     <GridWrapper v-if="active" bg="none" class="col-span-full sm:grid-cols-4 md:grid-cols-5 pt-5" cols="2" padding="0">
-      <PosProduct v-for="item in group.products" :product="item"/>
+      <PosProduct v-for="item in group.entries" :product="item"/>
     </GridWrapper>
 
 <!--    <ColorContainer @click="active = false" bg="accent" class="flex justify-between items-center col-span-full">-->

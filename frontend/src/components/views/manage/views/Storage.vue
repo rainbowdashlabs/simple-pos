@@ -1,18 +1,22 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import StorageGroup from "./inventory/StorageGroup.vue";
+import StorageGroup from "./storage/StorageGroup.vue";
 import {storageSummary} from "../../../../scripts/storage.ts";
 import ConfirmButton from "../../../styles/buttons/ConfirmButton.vue";
+import GridWrapper from "../../../styles/grid/GridWrapper.vue";
 
 export default defineComponent({
   name: "Storage",
-  components: {ConfirmButton, StorageGroup},
+  components: {GridWrapper, ConfirmButton, StorageGroup},
   computed: {
     inventorySummary: storageSummary
   },
   methods:{
     inventory(){
       window.location.href = "#manage/storage/inventory"
+    },
+    createIngredient(){
+      window.location.href= "#manage/storage/create"
     }
   }
 })
@@ -21,10 +25,11 @@ export default defineComponent({
 <template>
   <div>
   </div>
-  <div class="grid grid-cols-1 mx-5">
+  <GridWrapper bg="none" cols="2" class="mx-5">
+    <ConfirmButton icon="fa-square-plus" @click="createIngredient"/>
     <ConfirmButton icon="fa-check-double" @click="inventory"/>
-    <StorageGroup v-for="item in inventorySummary.categories" :group="item"/>
-  </div>
+    <StorageGroup class="col-span-full" v-for="item in inventorySummary.categories" :group="item"/>
+  </GridWrapper>
 </template>
 
 <style scoped>

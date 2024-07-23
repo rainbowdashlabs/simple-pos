@@ -1,5 +1,6 @@
 import {categories, Category} from "./categories.ts";
-import {product, Product} from "./product.ts";
+import {Ingredient} from "./Ingredient.ts";
+import {dummyIngredientCategories, dummyIngredients, randInt} from "./sampling.ts";
 
 export interface InventoryEntry {
     amount: number
@@ -42,19 +43,20 @@ export interface StorageGroup {
 }
 
 export interface StorageSummary {
-    product: Product
+    ingredient: Ingredient
     stock: number
+}
+
+export function storageInfo(id: number): StorageSummary {
+    return {ingredient: dummyIngredients.get(id)!, stock: randInt(50)}
 }
 
 export function storageSummary(): StorageListings {
     let res: StorageGroup[] = []
     for (let category of categories()) {
         let group: StorageSummary[] = []
-        for (let i = 0; i < 5; i++) {
-            let cur: Product = product(i)
-            cur.active = Math.random() > 0.3
-            cur.category_id = category.id
-            group.push({product: cur, stock: Math.floor(Math.random() * 50)})
+        for (let ingredient of dummyIngredientCategories.get(category.id)!) {
+            group.push(storageInfo(ingredient.id!))
         }
         res.push({category: category, products: group})
     }

@@ -18,7 +18,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <FreeButton class="flex flex-col p-5 bg-secondary dark:bg-secondary-d border-accent-d dark:border-accent border-2" @click="addBalance">
+  <FreeButton class="flex flex-col items-center bg-secondary dark:bg-secondary-d border-accent-d dark:border-accent border-2" @click="addBalance">
     <Icon class="content-center fa-xl" :icon="icon"/>
     {{ $n(Number(value), 'currency') }}
   </FreeButton>

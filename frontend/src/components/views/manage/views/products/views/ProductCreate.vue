@@ -76,14 +76,24 @@ export default defineComponent({
       createProduct({
         id: null,
         name: this.name,
-        category_id: this.categoryList[this.categoryList.findIndex(e => e.name = this.category)].id,
+        category_id: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)].id,
         price: this.price,
-        purchase_price: this.purchase_price,
-        container_size: this.container_size,
-        pledge: this.pledge,
-        pledge_container: this.pledge_container,
-        min_stock: this.min_stock,
-        active: true
+        raw_price: null,
+        active: true,
+        recipe: {
+          entries: [{
+            amount: 1, ingredient: {
+              id: null,
+              price: this.purchase_price,
+              name: this.name,
+              category_id: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)].id,
+              container_size: this.container_size,
+              min_stock: this.min_stock,
+              pledge: this.pledge,
+              pledge_container: this.pledge_container
+            }
+          }]
+        },
       })
       window.location.href = "#manage/products"
     }

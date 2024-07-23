@@ -65,38 +65,38 @@ export default defineComponent({
 
     <GridWrapper cols="2" gap="2" class="grid-cols-3 sm:max-lg::grid-cols-2 lg:grid-cols-3" bg="none">
 
-      <div class="flex items-center">
-        <Icon class="mr-2.5" icon="fa-cart-arrow-down"/>
-        <FormattedText :value="product.purchase_price" type="currency"/>
-      </div>
+<!--      <div class="flex items-center">-->
+<!--        <Icon class="mr-2.5" icon="fa-cart-arrow-down"/>-->
+<!--        <FormattedText :value="product.purchase_price" type="currency"/>-->
+<!--      </div>-->
 
       <div class="flex items-center">
         <Icon class="mr-2.5" icon="fa-coins"/>
         <FormattedText :value="product.price" type="currency"/>
       </div>
 
-      <div v-if="product.container_size != 0" class="flex items-center">
-        <Icon class="mr-2.5" icon="fa-box"/>
-        <FormattedText :value="product.container_size" type="number"/>
-      </div>
+      <!--      <div v-if="product.container_size != 0" class="flex items-center">-->
+<!--        <Icon class="mr-2.5" icon="fa-box"/>-->
+<!--        <FormattedText :value="product.container_size" type="number"/>-->
+<!--      </div>-->
 
-      <div v-if="product.pledge != 0" class="flex items-center">
-        <Icon class="mr-2.5" icon="fa-bottle-water"/>
-        <Icon class="mr-2.5" icon="fa-coins"/>
-        <FormattedText :value="product.pledge" type="currency"/>
-      </div>
+<!--      <div v-if="product.pledge != 0" class="flex items-center">-->
+<!--        <Icon class="mr-2.5" icon="fa-bottle-water"/>-->
+<!--        <Icon class="mr-2.5" icon="fa-coins"/>-->
+<!--        <FormattedText :value="product.pledge" type="currency"/>-->
+<!--      </div>-->
 
-      <div v-if="product.pledge_container != 0" class="flex items-center">
-        <Icon class="mr-2.5" icon="fa-box"/>
-        <Icon class="mr-2.5" icon="fa-coins"/>
-        <FormattedText :value="product.pledge_container" type="currency"/>
-      </div>
+<!--      <div v-if="product.pledge_container != 0" class="flex items-center">-->
+<!--        <Icon class="mr-2.5" icon="fa-box"/>-->
+<!--        <Icon class="mr-2.5" icon="fa-coins"/>-->
+<!--        <FormattedText :value="product.pledge_container" type="currency"/>-->
+<!--      </div>-->
 
-      <div v-if="product.pledge_container != 0" class="flex items-center">
-        <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>
-        <Icon class="mr-2.5" icon="fa-warehouse"/>
-        <FormattedText :value="product.min_stock" type="number"/>
-      </div>
+<!--      <div v-if="product.pledge_container != 0" class="flex items-center">-->
+<!--        <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>-->
+<!--        <Icon class="mr-2.5" icon="fa-warehouse"/>-->
+<!--        <FormattedText :value="product.min_stock" type="number"/>-->
+<!--      </div>-->
     </GridWrapper>
   </div>
 </template>
