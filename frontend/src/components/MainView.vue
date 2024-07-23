@@ -8,6 +8,7 @@ import Logout from "./views/Logout.vue";
 import Profile from "./views/Profile.vue";
 import {isLoggedIn} from "../scripts/session.ts";
 import Balance from "./views/Balance.vue";
+import ThemePreview from "./ThemePreview.vue";
 
 const routes = {
   "": POS,
@@ -17,7 +18,8 @@ const routes = {
   "login": Login,
   "logout": Logout,
   "profile": Profile,
-  "balance": Balance
+  "balance": Balance,
+  "theme": ThemePreview
 }
 
 export default {

@@ -2,12 +2,20 @@
 import {defineComponent, PropType} from 'vue'
 import ProductEntry from "./ProductEntry.vue";
 import {ProductGroup} from "../../../../../scripts/product.ts";
+import TextButton from "../../../../styles/buttons/TextButton.vue";
+import FormattedText from "../../../../styles/text/FormattedText.vue";
+import {SizeGroup} from "../../../../../scripts/text.ts";
 
 export default defineComponent({
   name: "ProductGroup",
-  components: {ProductEntry},
+  computed: {
+    SizeGroup() {
+      return SizeGroup
+    }
+  },
+  components: {FormattedText, TextButton, ProductEntry},
   props: {
-    group:{
+    group: {
       type: Object as PropType<ProductGroup>,
       required: true
     }
@@ -16,10 +24,10 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="grid grid-cols-1 gap-5">
-  <h2 class="text-3xl">{{group.category.name}}</h2>
-      <ProductEntry v-for="item in group.products" :product="item"/>
-</div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    <FormattedText class="col-span-full" :value="group.category.name" :size="SizeGroup.xl"/>
+    <ProductEntry v-for="item in group.products" :product="item"/>
+  </div>
 </template>
 
 <style scoped>

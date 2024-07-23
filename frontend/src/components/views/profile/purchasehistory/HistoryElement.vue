@@ -4,6 +4,8 @@ import Profile from "../../accounts/Profile.vue";
 import {product} from "../../../../scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
 import {transactionDelete} from "../../../../scripts/transactions.ts";
+import TwoStepDeleteButton from "../../../styles/buttons/TwoStepDeleteButton.vue";
+import IconButton from "../../../styles/buttons/IconButton.vue";
 
 export default defineComponent({
   name: "HistoryElement",
@@ -24,7 +26,7 @@ export default defineComponent({
     }
   },
   props: ['transaction', 'product'],
-  components: {DeleteHistoryButton, Profile, navigator}
+  components: {IconButton, TwoStepDeleteButton, DeleteHistoryButton, Profile, navigator}
 })
 </script>
 
@@ -34,7 +36,7 @@ export default defineComponent({
     <th :class="color">{{ product.name }}</th>
     <th :class="color">{{ $n(transaction.price, 'currency') }}</th>
     <th v-show="!deleted">
-      <DeleteHistoryButton @click="deleteTransaction" :id="transaction.id"/>
+      <IconButton icon="fa-trash-can" @click="deleteTransaction"/>
     </th>
   </tr>
 </template>

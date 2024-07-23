@@ -7,4 +7,6 @@ export class Timeframes {
     static readonly week: Timeframe = {locale: "week", days: 7}
 }
 
-
+export function buildDarkMode(color: string, prefix: string = "bg"){
+    return `${prefix}-${color} dark:${prefix}-${color}-d`
+}

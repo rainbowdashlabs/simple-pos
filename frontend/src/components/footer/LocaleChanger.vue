@@ -8,10 +8,11 @@ export default defineComponent({
   components: {SelectMenu},
   methods: {
     saveLocale(event: Event) {
+      console.log(event)
       // @ts-expect-error
       this.$i18n.locale = event[0]
       // @ts-expect-error
-      setLocale(event.target!.value)
+      setLocale(event[0])
     }
   }
 })

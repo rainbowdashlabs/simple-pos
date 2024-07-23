@@ -3,10 +3,16 @@ import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../styles/text/CenterText.vue";
 import {store} from "../../../../../scripts/store.ts";
 import {StorageSummary} from "../../../../../scripts/storage.ts";
+import ColorContainer from "../../../../styles/container/ColorContainer.vue";
+import FormattedText from "../../../../styles/text/FormattedText.vue";
+import NumberText from "../../../../styles/text/NumberText.vue";
+import {SizeGroup} from "../../../../../scripts/text.ts";
+import ConfirmButton from "../../../../styles/buttons/ConfirmButton.vue";
+import IconButton from "../../../../styles/buttons/IconButton.vue";
 
 export default defineComponent({
   name: "StorageEntry",
-  components: {CenterText},
+  components: {IconButton, ConfirmButton, NumberText, FormattedText, ColorContainer, CenterText},
   props: {
     listing: {
       type: Object as PropType<StorageSummary>,
@@ -14,18 +20,21 @@ export default defineComponent({
     }
   },
   computed: {
+    SizeGroup() {
+      return SizeGroup
+    },
     stockColor() {
-      return "text-2xl " + (this.outOfStock? "font-bold text-red-500" : "text-primary")
+      return "text-2xl " + (this.outOfStock ? "font-bold text-red-500" : "text-primary")
     },
     panelColor() {
-    return this.outOfStock ? "bg-red-200" : "bg-secondary"
+      return this.outOfStock ? "bg-warn dark:bg-warn-d" : "bg-secondary dark:bg-secondary-d"
     },
     outOfStock() {
       return this.listing.stock <= this.listing.product.min_stock
     }
   },
   methods: {
-    openInfo() {
+    add() {
       store.focusStorage = this.listing
       console.log(`Opening info of ${store.focusStorage}`)
       window.location.href = "#manage/storage/add"
@@ -35,14 +44,13 @@ export default defineComponent({
 </script>
 
 <template>
-  <div
-      :class="`grid grid-cols-2 text-primary ${panelColor} rounded-md items-center min-h-14 gap-5 px-5 py-2`">
-    <div class="col-span-2">{{ listing?.product.name }}</div>
-    <div :class="stockColor">{{ listing.stock }}</div>
-    <div class="flex justify-end">
-      <button class="bg-green-500" @click="openInfo">
-        <font-awesome-icon class="text-2xl" icon="fa-square-plus"/>
-      </button>
+  <div :class="panelColor" class="p-5 rounded-md">
+    <FormattedText :size="SizeGroup.md" class="pb-5" :value="listing?.product.name"/>
+    <div class="flex justify-between">
+      <NumberText class="content-center" :amount="listing.stock" :size="SizeGroup.lg" :min="listing.product.min_stock"/>
+      <div class="flex justify-end">
+        <IconButton icon="fa-square-plus" @click="add"/>
+      </div>
     </div>
   </div>
 

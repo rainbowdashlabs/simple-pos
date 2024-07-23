@@ -14,12 +14,14 @@ export default defineComponent({
       type: String,
       default: "secondary"
     },
-    padding:{
-      required: false
+    padding: {
+      required: false,
+      type: [String, Number]
     }
   },
   computed: {
     color() {
+      console.log(`bg-${this.bg} dark:bg-${this.bg}-d`)
       return `bg-${this.bg} dark:bg-${this.bg}-d`
     }
   }
@@ -27,7 +29,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <Container :class="color" :padding="padding"><slot/></Container>
+  <!--  ColorContainer -->
+  <Container :class="color" :padding="padding">
+    <slot/>
+  </Container>
 </template>
 
 <style scoped>

@@ -9,13 +9,18 @@ export default defineComponent({
     icon:{
       type: String,
       required: true
+    },
+    size:{
+      type: String,
+      required: false,
+      default: ""
     }
   }
 })
 </script>
 
 <template>
-<FontAwesomeIcon :icon="icon"/>
+<FontAwesomeIcon :class="size" :icon="icon"/>
 </template>
 
 <style scoped>

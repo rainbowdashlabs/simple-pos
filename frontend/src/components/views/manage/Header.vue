@@ -2,7 +2,7 @@
 import {defineComponent} from 'vue'
 import Entry from "../../header/MenuEntry.vue";
 import UserButton from "../../header/UserButton.vue";
-import ColorContainer from "../../styles/container/BgContainer.vue";
+import ColorContainer from "../../styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "Header",

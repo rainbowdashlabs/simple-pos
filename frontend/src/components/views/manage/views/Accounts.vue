@@ -3,7 +3,7 @@ import {defineComponent} from 'vue'
 import {accounts, LazyAccount} from "../../../../scripts/accounts.ts";
 import AccountEntry from "./accounts/AccountEntry.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import ColorContainer from "../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "Accounts",
@@ -33,21 +33,6 @@ export default defineComponent({
     </ColorContainer>
     <AccountEntry v-for="item in accounts" :user="item"/>
   </div>
-
-
-  <!--  <div class="bg-secondary p-5 text-primary rounded-md">-->
-  <!--    <table class="table-auto border-spacing-2 border">-->
-  <!--      <thead>-->
-  <!--      <tr class="text-left">-->
-  <!--        <th class="px-5">ID</th>-->
-  <!--        <th class="px-5">Name</th>-->
-  <!--        <th class="px-5">Delete</th>-->
-  <!--      </tr>-->
-  <!--      </thead>-->
-  <!--      <tbody>-->
-  <!--      </tbody>-->
-  <!--    </table>-->
-  <!--  </div>-->
 </template>
 
 <style scoped>

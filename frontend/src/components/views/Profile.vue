@@ -6,7 +6,7 @@ import {store} from "../../scripts/store.ts";
 import DepositHistory from "./profile/DepositHistory.vue";
 import IconButton from "../styles/buttons/IconButton.vue";
 import MoneyText from "../styles/text/MoneyText.vue";
-import ColorContainer from "../styles/container/BgContainer.vue";
+import ColorContainer from "../styles/container/ColorContainer.vue";
 import {SizeGroup} from "../../scripts/text.ts";
 
 export default {
@@ -39,7 +39,7 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-5">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-5 mx-5">
     <div class="col-span-full">
       <h1>{{ store.focusAccount?.name }}</h1>
     </div>

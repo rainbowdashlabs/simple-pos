@@ -21,7 +21,7 @@ export default defineComponent({
 <template>
   <div>
   </div>
-  <div class="grid grid-cols-1">
+  <div class="grid grid-cols-1 mx-5">
     <ConfirmButton icon="fa-check-double" @click="inventory"/>
     <StorageGroup v-for="item in inventorySummary.categories" :group="item"/>
   </div>

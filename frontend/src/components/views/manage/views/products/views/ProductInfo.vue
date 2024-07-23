@@ -16,7 +16,7 @@ import IconButton from "../../../../../styles/buttons/IconButton.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../scripts/text.ts";
-import ColorContainer from "../../../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import InfoEntry from "./productinfo/InfoEntry.vue";
 
 export default defineComponent({

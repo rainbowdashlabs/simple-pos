@@ -2,7 +2,7 @@
 import {defineComponent, PropType} from 'vue'
 import GridRowWrapper from "../../../../../../styles/grid/GridRowWrapper.vue";
 import {ProductSalesStat} from "../../../../../../../scripts/product.ts";
-import ColorContainer from "../../../../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../../scripts/text.ts";
 

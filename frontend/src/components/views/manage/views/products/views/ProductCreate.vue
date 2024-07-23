@@ -9,7 +9,7 @@ import {createProduct} from "../../../../../../scripts/product.ts";
 import {categories} from "../../../../../../scripts/categories.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
-import ColorContainer from "../../../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import InputField from "../../../../../styles/input/InputField.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
@@ -69,7 +69,7 @@ export default defineComponent({
     }
   },
   methods: {
-    updateCategory(vk) {
+    updateCategory(vk: Array<string>) {
       this.category = vk[0]
     },
     createProd() {

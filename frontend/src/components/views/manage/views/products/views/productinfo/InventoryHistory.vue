@@ -4,7 +4,7 @@ import GridRowWrapper from "../../../../../../styles/grid/GridRowWrapper.vue";
 
 import {StorageEntry} from "../../../../../../../scripts/storage.ts";
 import GridWrapper from "../../../../../../styles/grid/GridWrapper.vue";
-import ColorContainer from "../../../../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../../scripts/text.ts";
 

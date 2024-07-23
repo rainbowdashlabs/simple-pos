@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent, PropType} from 'vue'
+import {defineComponent} from 'vue'
 import {SizeGroup} from "../../../scripts/text.ts";
 
 export default defineComponent({

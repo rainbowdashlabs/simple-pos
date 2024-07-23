@@ -19,9 +19,15 @@ export default defineComponent({
       type: String,
       default: "bg-accent dark:bg-accent-d text-dark dark:text-bright"
     },
-    type:{},
-    size:{},
-    value:{required:true}
+    type: {
+      type: String
+    },
+    size: {
+      type: String
+    },
+    value: {
+      type: [String, Number],
+      required: true}
   },
   computed: {
     currentColor() {

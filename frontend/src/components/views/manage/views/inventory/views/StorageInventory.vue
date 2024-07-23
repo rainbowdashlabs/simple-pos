@@ -5,10 +5,12 @@ import StorageInventoryGroup from "./storageinventory/StorageInventoryGroup.vue"
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
+import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
+import {buildDarkMode} from "../../../../../../scripts/util.ts";
 
 export default defineComponent({
   name: "StorageInventory",
-  components: {SimpleInputField, ConfirmButton, GridWrapper, StorageInventoryGroup},
+  components: {ColorContainer, SimpleInputField, ConfirmButton, GridWrapper, StorageInventoryGroup},
   data() {
     return {
       summary: this.inventorySummary()
@@ -16,6 +18,7 @@ export default defineComponent({
   },
   computed: {},
   methods: {
+    buildDarkMode,
     submit() {
       let inventory = this.summary.flatMap((group:InventoryGroup) => {
         return group.products.map((entry :InventoryEntry)  => {
@@ -48,19 +51,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <GridWrapper :cols="1" padding="0">
-    <div :class="`grid grid-cols-8 text-primary bg-secondary rounded-md items-center min-h-14 gap-5 px-5 py-2 text-xl`">
-      <div class="col-span-3">{{ $t('product') }}</div>
-      <div>{{ $t('stock') }}</div>
-      <div>{{ $t('counted') }}</div>
-      <div>{{ $t('difference') }}</div>
-      <div>{{ $t('pieces') }}</div>
-      <div>{{ $t('container') }}</div>
-    </div>
-
+  <div class="mx-5 overflow-x-scroll">
     <StorageInventoryGroup v-for="item in summary" :group="item"/>
-    <ConfirmButton @click="submit"/>
-  </GridWrapper>
+    <ConfirmButton class="w-full mt-5" @click="submit"/>
+  </div>
 </template>
 
 <style scoped>

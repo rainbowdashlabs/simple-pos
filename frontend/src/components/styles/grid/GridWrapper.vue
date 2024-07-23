@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import ColorContainer from "../container/BgContainer.vue";
+import ColorContainer from "../container/ColorContainer.vue";
 
 export default defineComponent({
   name: "GridWrapper",
@@ -10,26 +10,22 @@ export default defineComponent({
       type: [Number, String],
       default: 1
     },
-    classes: {
-      type: String,
-      default: ""
-    },
     padding: {
       type: [Number, String],
       default: 5
     },
     gap: {
-      type: Number,
+      type: [Number, String],
       default: 5
     },
-    bg:{required:false},
-    text:{required: false}
+    bg:{type: String, required:false},
+    text:{type:String, required: false}
   }
 })
 </script>
 
 <template>
-  <ColorContainer :bg="bg" :text="text" :class="`grid grid-cols-${cols} gap-${gap} rounded-md ${classes} p-${padding}`">
+  <ColorContainer :bg="bg" :text="text" :padding="padding" :class="`grid grid-cols-${cols} gap-${gap} rounded-md`">
     <slot/>
   </ColorContainer>
 </template>

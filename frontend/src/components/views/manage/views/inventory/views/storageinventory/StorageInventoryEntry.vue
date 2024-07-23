@@ -3,10 +3,15 @@ import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../../../styles/text/CenterText.vue";
 import {InventoryEntry} from "../../../../../../../scripts/storage.ts";
 import SimpleInputField from "../../../../../../styles/input/SimpleInputField.vue";
+import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
+import NumberText from "../../../../../../styles/text/NumberText.vue";
+import FormattedText from "../../../../../../styles/text/FormattedText.vue";
+import Icon from "../../../../../../styles/Icon.vue";
+import {SizeGroup} from "../../../../../../../scripts/text.ts";
 
 export default defineComponent({
   name: "StorageInventoryEntry",
-  components: {SimpleInputField, CenterText},
+  components: {Icon, FormattedText, NumberText, ColorContainer, SimpleInputField, CenterText},
   data() {
     return {
       containerCount: 0,
@@ -20,34 +25,24 @@ export default defineComponent({
     }
   },
   computed: {
+    SizeGroup() {
+      return SizeGroup
+    },
     diff() {
       return this.count - this.listing.product.stock
     },
     count() {
       return this.containerCount * this.listing.product.product.container_size + this.pieceCount
     },
-    diffColor() {
-      if (this.diff > 0) {
-        return "font-bold text-green-700"
-      }
-      if (this.diff == 0) {
-        return "text-primary"
-      }
-      return "font-bold text-red-600"
-    },
     bgColor() {
-      if (this.diff > 0) {
-        return "bg-green-100"
-      }
-      if (this.diff == 0) {
-        return "bg-secondary"
-      }
-      return "bg-red-100"
+      if (this.diff > 0) return "okay"
+      if (this.diff == 0) return "secondary"
+      return "warn"
 
     }
   },
   methods: {
-    updatePieces(value:number) {
+    updatePieces(value: number) {
       this.pieceCount = Number(value)
       this.updateAmount()
     },
@@ -64,14 +59,24 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="`grid grid-cols-8 text-primary ${bgColor} rounded-md items-center min-h-14 gap-5 px-5 py-2 text-xl`">
-    <div class="col-span-3">{{ listing?.product.product.name }}</div>
-    <div>{{ listing.product.stock }}</div>
-    <div>{{ count }}</div>
-    <div :class="diffColor">{{ diff }}</div>
-    <SimpleInputField @update="updatePieces" type="number" :model-value="pieceCount"/>
-    <SimpleInputField class="text-sm" @update="updateContainer" type="number" :model-value="containerCount"/>
-  </div>
+  <ColorContainer :bg="bgColor" class="flex rounded-md items-center min-h-14 gap-5 px-5 py-2 justify-evenly max-w-full">
+    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.product.product.name"/>
+    <div class="flex w-1/3 justify-evenly items-center">
+      <FormattedText :size="SizeGroup.md" :value="count" type="number"/>
+      <FormattedText :size="SizeGroup.md" value="of" type="locale"/>
+      <FormattedText :size="SizeGroup.md" :value="listing.product.stock" type="number"/>
+      <Icon :size="SizeGroup.md" icon="fa-equals"/>
+      <NumberText :size="SizeGroup.md" :amount="diff"/>
+    </div>
+    <div class="flex w-1/6 items-center">
+      <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-bottle-water"/>
+      <SimpleInputField class="w-5/6" @update:modelValue="updatePieces" type="number" :model-value="pieceCount"/>
+    </div>
+    <div class="flex w-1/6 items-center">
+      <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-box"/>
+      <SimpleInputField class="w-5/6" @update:modelValue="updateContainer" type="number" :model-value="containerCount"/>
+    </div>
+  </ColorContainer>
 
 </template>
 

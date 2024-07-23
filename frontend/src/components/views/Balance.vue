@@ -7,7 +7,7 @@ import BalanceDisplay from "./balance/BalanceDisplay.vue";
 import {addDeposit} from "../../scripts/accounts.ts";
 import InputField from "../styles/input/InputField.vue";
 import SimpleInputField from "../styles/input/SimpleInputField.vue";
-import ColorContainer from "../styles/container/BgContainer.vue";
+import ColorContainer from "../styles/container/ColorContainer.vue";
 import GridWrapper from "../styles/grid/GridWrapper.vue";
 import MoneyText from "../styles/text/MoneyText.vue";
 import Icon from "../styles/Icon.vue";

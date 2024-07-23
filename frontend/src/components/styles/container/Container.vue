@@ -3,7 +3,8 @@ import {defineComponent} from 'vue'
 
 export default defineComponent({
   name: "Container", props: {
-    padding:{
+    padding: {
+      type: [String, Number],
       default: 5
     }
   }
@@ -11,9 +12,10 @@ export default defineComponent({
 </script>
 
 <template>
-<div :class="`rounded-md p-${padding}`">
-  <slot/>
-</div>
+  <!--  Container -->
+  <div :class="`rounded-md p-${padding}`">
+    <slot/>
+  </div>
 </template>
 
 <style scoped>

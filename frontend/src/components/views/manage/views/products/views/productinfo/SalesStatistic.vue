@@ -3,7 +3,7 @@ import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../../../styles/text/CenterText.vue";
 import {salesCountProduct, Timeframe} from "../../../../../../../scripts/product.ts";
 import InfoEntry from "./InfoEntry.vue";
-import ColorContainer from "../../../../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
 
 
 export default defineComponent({

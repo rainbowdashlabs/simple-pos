@@ -3,11 +3,12 @@ import {defineComponent} from 'vue'
 import HistoryElement from "./purchasehistory/HistoryElement.vue";
 import {History, history} from "../../../scripts/transactions.ts";
 import {store} from "../../../scripts/store.ts";
+import ColorContainer from "../../styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "PurchaseHistory",
   props: [],
-  components: {HistoryElement},
+  components: {ColorContainer, HistoryElement},
   computed: {
     purchases(): History {
       if (!store.focusAccount) return {transactions: [], products: new Map()}
@@ -18,7 +19,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="bg-secondary rounded-md text-dark max-h-96 overflow-y-scroll p-5">
+  <ColorContainer class="max-h-96 overflow-scroll" bg="secondary">
     <table class="table-auto table-padding">
       <thead>
       <tr>
@@ -33,7 +34,7 @@ export default defineComponent({
                       :product="purchases.products.get(item.product_id)"/>
       </tbody>
     </table>
-  </div>
+  </ColorContainer>
 </template>
 
 <style scoped>

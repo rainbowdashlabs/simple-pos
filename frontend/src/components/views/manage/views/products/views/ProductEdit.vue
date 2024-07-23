@@ -8,7 +8,7 @@ import ConfigureSection from "../ConfigureSection.vue";
 import {updateProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
 import {categories, category, Category} from "../../../../../../scripts/categories.ts";
-import ColorContainer from "../../../../../styles/container/BgContainer.vue";
+import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../scripts/text.ts";
@@ -64,7 +64,7 @@ export default defineComponent({
       store.focusProduct!.category_id = this.categoryNameToId(this.category)
       window.location.href = "#manage/products/info"
     },
-    updateCategory(vk) {
+    updateCategory(vk: Array<string>) {
       this.category = vk[0]
     },
     categoryNameToId(name: string): number {

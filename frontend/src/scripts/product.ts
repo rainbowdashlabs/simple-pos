@@ -40,7 +40,7 @@ export function product(id: number): Product {
     return {
         id: id,
         category_id: (id % 5),
-        name: "Paulaner Spezi Zero 0.5",
+        name: "Paulaner Spezi Zero 0.5 with extra steps",
         price: 1.2,
         purchase_price: 1.0,
         container_size: 20,

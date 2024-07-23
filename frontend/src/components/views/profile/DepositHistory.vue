@@ -3,13 +3,14 @@ import {defineComponent} from 'vue'
 import HistoryElement from "./deposithistory/HistoryElement.vue";
 import {store} from "../../../scripts/store.ts";
 import {Deposit, deposits} from "../../../scripts/accounts.ts";
+import ColorContainer from "../../styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "DepositHistory",
-  components: {HistoryElement},
+  components: {ColorContainer, HistoryElement},
   computed: {
-    deposits() :Deposit[] {
-      if(!store.focusAccount) return []
+    deposits(): Deposit[] {
+      if (!store.focusAccount) return []
       return deposits(store.focusAccount?.id!, 30)
     }
   }
@@ -17,7 +18,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="bg-secondary rounded-md text-dark max-h-96 overflow-y-scroll p-5">
+  <ColorContainer class="max-h-96 overflow-scroll" bg="secondary">
     <table class="table-auto table-padding justify-stretch w-full">
       <thead>
       <tr>
@@ -29,7 +30,7 @@ export default defineComponent({
       <HistoryElement v-for="item in deposits" :deposit="item"/>
       </tbody>
     </table>
-  </div>
+  </ColorContainer>
 </template>
 
 <style scoped>
