@@ -1,6 +1,5 @@
 <script lang="ts">
 import Login from "./Login.vue";
-import {isLoggedIn} from "../../scripts/session.ts";
 import {Component, defineComponent} from "vue";
 import Overview from "./manage/views/Overview.vue";
 import Accounts from "./manage/views/Accounts.vue";
@@ -39,7 +38,6 @@ export default defineComponent({
   data() {
     return {
       currentPath: window.location.hash,
-      loggedIn: isLoggedIn()
     }
   },
   computed: {
@@ -54,7 +52,6 @@ export default defineComponent({
   mounted() {
     window.addEventListener('hashchange', () => {
       this.currentPath = window.location.hash
-      this.loggedIn = isLoggedIn()
     })
   }
 })

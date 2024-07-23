@@ -2,15 +2,22 @@
 import {store} from "../../../scripts/store.ts";
 import Balance from "./profile/Balance.vue";
 import Name from "./profile/Name.vue";
-import {account} from "../../../scripts/accounts.ts";
+import {account, LazyAccount} from "../../../scripts/accounts.ts";
 import MoneyText from "../../styles/text/MoneyText.vue";
+import {PropType} from "vue";
+import ColorContainer from "../../styles/container/ColorContainer.vue";
 
 export default {
-  components: {MoneyText, Balance, Name},
-  props: ["id", "name", "balance"],
+  components: {ColorContainer, MoneyText, Balance, Name},
+  props: {
+    account: {
+      type: Object as PropType<LazyAccount>,
+      required: true
+    }
+  },
   methods: {
     openProfile() {
-      store.focusAccount = account(this.id)
+      store.focusAccount = account(this.account.id)
       window.location.href = `#profile`
     }
   }
@@ -20,10 +27,10 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 justify-items-start gap-2 bg-secondary dark:bg-secondary-d  rounded-md p-5" @click="openProfile">
-    <Name class="text-xl" :value="name"/>
-    <MoneyText class="font-bold" :amount="balance"/>
-  </div>
+  <ColorContainer @click="openProfile" bg="secondary" class="justify-items-start gap-2">
+    <Name class="text-xl" :value="account.name"/>
+    <MoneyText class="font-bold" :amount="account.balance"/>
+  </ColorContainer>
 </template>
 
 <style scoped>

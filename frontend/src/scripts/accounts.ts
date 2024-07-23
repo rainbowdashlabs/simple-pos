@@ -1,4 +1,6 @@
 import {getRandomItem} from "./sampling.ts";
+import CartEntry from "../components/views/pos/views/cartselection/mobilecart/CartEntry.vue";
+import {CartPosition} from "./cart.ts";
 
 /**
  * Describes a user account
@@ -54,7 +56,7 @@ export function accounts(): LazyAccount[] {
  * Retrieve a full account by id
  * @param id
  */
-export function account(id: number): FullAccount {
+export function account(id: number): LazyAccount {
     return randomUser(id)
 }
 
@@ -80,6 +82,10 @@ export function deposits(id: number, limit: number): Deposit[] {
     }
     console.log(result)
     return result
+}
+
+export function purchase(id: number, entries: CartPosition[]) {
+
 }
 
 /**

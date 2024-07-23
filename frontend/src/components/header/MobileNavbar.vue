@@ -9,7 +9,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="absolute flex bg-secondary dark:bg-secondary-d w-full">
+  <div class="absolute flex bg-secondary z-10 dark:bg-secondary-d w-full">
     <div class="flex-none px-5">
       <slot/>
     </div>

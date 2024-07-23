@@ -3,6 +3,7 @@ import {defineComponent} from 'vue'
 import Icon from "../Icon.vue";
 import FreeButton from "./FreeButton.vue";
 import {buildDarkMode} from "../../../scripts/util.ts";
+import {SizeGroup} from "../../../scripts/text.ts";
 
 export default defineComponent({
   name: "IconButton",
@@ -24,6 +25,10 @@ export default defineComponent({
     text: {
       type: String,
       default: "text-dark dark:text-bright"
+    },
+    size:{
+      type: String,
+      default: SizeGroup.xl2
     }
   },
   computed: {
@@ -37,7 +42,7 @@ export default defineComponent({
 
 <template>
   <FreeButton @click="$emit('click', $event)" :disabled="disabled" :color="currentColor">
-    <Icon class="text-2xl" :icon="icon"/>
+    <Icon :class="size" :icon="icon"/>
   </FreeButton>
 </template>
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {ProductListings, products} from "../../../scripts/product.ts";
+import {ProductListings, products} from "../../../../../scripts/product.ts";
 import PosCategory from "./PosCategory.vue";
-import ProductGroup from "../manage/views/products/ProductGroup.vue";
+import ProductGroup from "../../../manage/views/products/ProductGroup.vue";
 
 export default defineComponent({
   name: "PosProducts",
@@ -16,7 +16,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-5 p-5 content-center items-center">
+  <div class="grid grid-cols-1 gap-5 content-center items-center">
     <PosCategory v-for="item in productList.categories" :group="item"/>
   </div>
 

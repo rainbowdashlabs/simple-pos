@@ -1,5 +1,4 @@
 <script lang="ts">
-import Entry from "./profile/Entry.vue";
 import PurchaseHistory from "./profile/PurchaseHistory.vue";
 import Balance from "./profile/Balance.vue";
 import {store} from "../../scripts/store.ts";
@@ -11,7 +10,7 @@ import {SizeGroup} from "../../scripts/text.ts";
 
 export default {
   name: "Profile",
-  components: {ColorContainer, MoneyText, IconButton, DepositHistory, PurchaseHistory, Balance, Entry},
+  components: {ColorContainer, MoneyText, IconButton, DepositHistory, PurchaseHistory, Balance},
   data() {
     return {
       id: -1

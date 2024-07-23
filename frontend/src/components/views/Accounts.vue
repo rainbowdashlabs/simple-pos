@@ -13,8 +13,8 @@ export default {
 </script>
 
 <template>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 pt-5">
-    <Profile v-for="item in accounts" :id="item.id" :name="item.name" :balance="item.balance"/>
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 pt-5 mx-5 mb-5">
+    <Profile v-for="item in accounts" :account="item"/>
   </div>
 </template>
 

@@ -1,23 +1,46 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {Component, defineComponent} from 'vue'
 import GridWrapper from "../styles/grid/GridWrapper.vue";
-import PosProducts from "./pos/PosProducts.vue";
+import PosProducts from "./pos/views/cartselection/PosProducts.vue";
+import MobileCart from "./pos/views/cartselection/MobileCart.vue";
+import CartSelection from "./pos/views/CartSelection.vue";
+import Checkout from "./pos/views/Checkout.vue";
+
+const routes = {
+  "checkout": Checkout
+}
 
 export default defineComponent({
   name: "POS",
-  components: {PosProducts, GridWrapper}
+  components: {MobileCart, PosProducts, GridWrapper},
+  data() {
+    return {
+      currentPath: window.location.hash,
+    }
+  },
+  computed: {
+    currentView(): Component {
+      // TODO: remove some day
+      let subpage = this.currentPath.replace("#pos/", "")
+      console.log(`Going to ${subpage}`)
+      // @ts-expect-error
+      return routes[subpage] || CartSelection
+    }
+  },
+  mounted() {
+    window.addEventListener('hashchange', () => {
+      this.currentPath = window.location.hash
+    })
+
+  }
 })
 </script>
 
 <template>
-  <GridWrapper class="mx-5 mt-5" cols="1" padding="0">
-    <PosProducts/>
-    <GridWrapper cols="1"></GridWrapper>
-  </GridWrapper>
+  <div class="flex justify-center full">
+    <component :is="currentView"/>
+  </div>
 </template>
 
 <style scoped>
-.width{
-  width: 100%;
-}
 </style>
