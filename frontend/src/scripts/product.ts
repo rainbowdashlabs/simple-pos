@@ -1,4 +1,4 @@
-import {CategoryGroup, Listing} from "./categories.ts";
+import {Category, CategoryGroup, Listing} from "./categories.ts";
 import {createIngredient, Ingredient} from "./Ingredient.ts";
 import {dummyCategories, dummyProductCategories, dummyProducts} from "./sampling.ts";
 
@@ -19,7 +19,7 @@ export interface Recipe {
 export interface LazyProduct {
     id: number | null,
     name: string,
-    category_id: number,
+    category: Category,
     price: number,
     raw_price: number | undefined | null,
     active: boolean

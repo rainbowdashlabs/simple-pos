@@ -16,7 +16,7 @@ export default defineComponent({
     },
     color:{
       type: String,
-      default: "bg-amber-500"
+      default: "bg-amber-300"
     }
   },
   emits: ["click"]
@@ -24,7 +24,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <IconButton :color="color" @click="(e) => {e.stopPropagation(); $emit('click', e)}" :disabled="false" :icon="icon"/>
+  <IconButton :color="color" class="text-dark" @click="(e) => {e.stopPropagation(); $emit('click', e)}" :disabled="false" :icon="icon"/>
 </template>
 
 <style scoped>

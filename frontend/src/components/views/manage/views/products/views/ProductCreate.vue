@@ -76,7 +76,7 @@ export default defineComponent({
       createProduct({
         id: null,
         name: this.name,
-        category_id: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)].id,
+        category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
         price: this.price,
         raw_price: null,
         active: true,
@@ -86,7 +86,7 @@ export default defineComponent({
               id: null,
               price: this.purchase_price,
               name: this.name,
-              category_id: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)].id,
+              category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
               container_size: this.container_size,
               min_stock: this.min_stock,
               pledge: this.pledge,

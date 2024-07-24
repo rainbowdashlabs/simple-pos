@@ -19,7 +19,7 @@ export default defineComponent({
     <IconButton @click="e => {e.stopPropagation(); confirm = !confirm}" icon="fa-trash-can"/>
     <Transition>
       <div v-if="confirm" class="absolute mr-32">
-        <IconButton color="bg-red-500 text-dark" @click="e =>  {e.stopPropagation(); $emit('click', e)}"
+        <IconButton color="bg-red-400 text-dark" @click="e =>  {e.stopPropagation(); $emit('click', e)}"
                     icon="fa-trash-can"/>
       </div>
     </Transition>

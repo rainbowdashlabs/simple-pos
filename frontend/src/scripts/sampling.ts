@@ -47,10 +47,10 @@ for (let category of dummyCategories.values()) {
         index += 1
         let ingredient: Ingredient = {
             id: index,
-            category_id: category.id,
+            category: category,
             name: product,
             pledge: randChoice([0, 0.08, 0.15, 0.25]),
-            pledge_container: randChoice([0, 75, 1.5]),
+            pledge_container: randChoice([0, 0.75, 1.5]),
             container_size: randChoice([0, 6, 12, 20, 24]),
             price: randInt(5),
             min_stock: randChoice([10, 20, 30])
@@ -60,7 +60,7 @@ for (let category of dummyCategories.values()) {
             name: product,
             price: randDecimal(10) + 1,
             raw_price: ingredient.price,
-            category_id: category.id,
+            category: category,
             active: randChoice([true, true, true, false]),
             recipe: {entries: [{amount: 1, ingredient: ingredient}]}
         }

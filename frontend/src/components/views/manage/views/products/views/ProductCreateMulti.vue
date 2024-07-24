@@ -82,7 +82,7 @@ export default defineComponent({
         id: null,
         name: this.name,
         raw_price: undefined,
-        category_id: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)].id,
+        category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
         price: this.price,
         active: true,
         recipe: this.recipe
@@ -92,17 +92,12 @@ export default defineComponent({
     updateIngredient(data: Array<number>) {
       let id = data[0]
       let count = data[1]
-      console.log(`Update for ${id}:${ingredient(id).name}`)
       let index = this.recipe.entries.findIndex(e => e.ingredient.id == id)
-      console.log(`Found entry at ${index}`)
       if (count == 0 && index != -1) {
-        console.log("Delete ingredient")
         this.recipe.entries.splice(index, 1)
       } else if (index != -1) {
-        console.log(`Set new amount to ${count}`)
         this.recipe.entries[index].amount = count
       } else if (count != 0) {
-        console.log(`Add new entry with count ${count}`)
         this.recipe.entries.push({amount: count, ingredient: ingredient(id)})
       }
     }

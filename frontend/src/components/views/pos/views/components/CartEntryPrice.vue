@@ -16,7 +16,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex justify-between">
+  <div class="flex justify-evenly w-full my-2 items-center">
     <FormattedText :value="entry.amount" type="number"/>
     <FormattedText value=" x "/>
     <FormattedText :value="entry.product.price" type="currency"/>

@@ -8,7 +8,7 @@ import FullCol from "../../../../../styles/grid/FullCol.vue";
 import CenterText from "../../../../../styles/text/CenterText.vue";
 import {Product, salesProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
-import {category, Category} from "../../../../../../scripts/categories.ts";
+import {Category} from "../../../../../../scripts/categories.ts";
 import {storageHistory} from "../../../../../../scripts/storage.ts";
 import {Timeframes} from "../../../../../../scripts/util.ts";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
@@ -42,7 +42,7 @@ export default defineComponent({
       return store.focusProduct!
     },
     focusCategory(): Category {
-      return category(Number(this.focusProduct.category_id))
+      return this.focusProduct.category
     },
     inventoryIn() {
       return storageHistory(this.focusProduct.id!)

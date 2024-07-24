@@ -46,8 +46,9 @@ export default defineComponent({
                  v-model="password"
                  required>
         </div>
-          <button :class="`rounded-md m-5 ${buttonColor}`" type="submit" :disabled="disabled" @click="submit">Login
-          </button>
+        <!-- TODO: Proper styling -->
+                  <button :class="`rounded-md m-5 ${buttonColor}`" type="submit" :disabled="disabled" @click="submit">Login
+                  </button>
       </div>
     </form>
   </div>

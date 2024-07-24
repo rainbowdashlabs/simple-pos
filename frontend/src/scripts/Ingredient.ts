@@ -1,4 +1,4 @@
-import {CategoryGroup, Listing} from "./categories.ts";
+import {Category, CategoryGroup, Listing} from "./categories.ts";
 import {dummyCategories, dummyIngredientCategories, dummyIngredients} from "./sampling.ts";
 
 export interface IngredientListing extends Listing<Ingredient> {
@@ -10,7 +10,7 @@ export interface IngredientGroup extends CategoryGroup<Ingredient> {
 
 export interface Ingredient {
     id: number | null | undefined,
-    category_id: number,
+    category: Category,
     name: string,
     price: number,
     container_size: number,

@@ -27,7 +27,7 @@ export default defineComponent({
   },
   data() {
     return {
-      category: "",
+      category: {} as Category,
       categories:categories(),
       ingredient: Object.assign({}, store.focusIngredient) as Ingredient
     }
@@ -49,21 +49,20 @@ export default defineComponent({
       return categories()
     },
     focusCategory(): Category {
-      return category(Number(this.ingredient.category_id))
+      return category(Number(this.ingredient.category))
     },
 
   },
   methods: {
     updateIngredient() {
       updateIngredient(this.ingredient)
-      store.focusProduct!.category_id = this.categoryNameToId(this.category)
+      store.focusProduct!.category = this.category!
       window.location.href = "#manage/products/info"
     },
     updateCategory(vk: Array<string>) {
-      this.category = vk[0]
+      this.category = {name: vk[0], id: Number(vk[1])}
     },
     categoryNameToId(name: string): number {
-      //return 0
       return this.categoryList[this.categoryList.findIndex(e => e.name == name)].id
     },
     beforeMount() {
@@ -71,7 +70,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.category = this.focusCategory.name
+    this.category = this.focusCategory
   },
 })
 </script>
@@ -87,7 +86,7 @@ export default defineComponent({
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
       <SelectMenu class="w-full" @select="updateCategory"
                   :options="categoryList.map(e => {return [e.name, e.id]})"
-                  :current="category"/>
+                  :current="category.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">

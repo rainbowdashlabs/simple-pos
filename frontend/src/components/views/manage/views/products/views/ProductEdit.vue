@@ -5,7 +5,7 @@ import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
-import {Product, updateProduct} from "../../../../../../scripts/product.ts";
+import {Product, RecipeEntry, updateProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
 import {categories, category, Category} from "../../../../../../scripts/categories.ts";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
@@ -14,24 +14,36 @@ import FormattedText from "../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../scripts/text.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import TextButton from "../../../../../styles/buttons/TextButton.vue";
+import ProductIngredientInfo from "./productinfo/ProductIngredientInfo.vue";
+import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
+import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
+import {ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
+import {roundCurrency} from "../../../../../../scripts/util.ts";
 
 export default defineComponent({
   name: "ProductEdit",
   components: {
+    ConfirmButton,
+    ProductIngredientGroup,
+    GridWrapper,
+    ProductIngredientInfo,
     TextButton,
     SelectMenu,
     FormattedText,
     SimpleInputField,
     ColorContainer,
-    CategorySelector, FieldName, FullCol, ConfigureSection, FontAwesomeIcon
+    CategorySelector,
+    FieldName,
+    FullCol,
+    ConfigureSection,
+    FontAwesomeIcon
   },
   data() {
     return {
-      category: "",
-      input_field_style: "text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl",
-      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl",
-      categories: categories(),
-      product: Object.assign({}, store.focusProduct) as Product
+      category: store.focusProduct?.category,
+      product: Object.assign({}, store.focusProduct) as Product,
+      recipe: Object.assign({}, store.focusProduct?.recipe)
     }
   },
   computed: {
@@ -50,31 +62,46 @@ export default defineComponent({
     categoryList(): Category[] {
       return categories()
     },
-    focusCategory(): Category {
-      return category(Number(this.product.category_id))
+    rawPrice() {
+      // TODO: Check with real data
+      return this.recipe.entries.reduce((e: number, cur: RecipeEntry) => {
+        return e + (cur.ingredient.price * cur.amount)
+      }, 0)
     },
-
+    ingredientList() {
+      return ingredients()
+    }
   },
   methods: {
     updateProd() {
       updateProduct(store.focusProduct!)
-      store.focusProduct!.category_id = this.categoryNameToId(this.category)
+      store.focusProduct!.category = this.category!
       window.location.href = "#manage/products/info"
     },
     updateCategory(vk: Array<string>) {
-      this.category = vk[0]
+      this.category = {id: Number(vk[1]), name: vk[0]}
     },
-    categoryNameToId(name: string): number {
-      //return 0
-      return this.categoryList[this.categoryList.findIndex(e => e.name == name)].id
-    },
-    beforeMount() {
-      if (store.focusProduct === undefined) window.location.href = "#manage/products"
-    },
+    updateIngredient(data: Array<number>) {
+      let id = data[0]
+      let count = data[1]
+      let index = this.recipe.entries.findIndex(e => e.ingredient.id == id)
+      if (count == 0 && index != -1) {
+        this.recipe.entries.splice(index, 1)
+      } else if (index != -1) {
+        this.recipe.entries[index].amount = count
+      } else if (count != 0) {
+        this.recipe.entries.push({amount: count, ingredient: ingredient(id)})
+      }
+    }
   },
-  mounted() {
-    this.category = this.focusCategory.name
+  beforeMount() {
+    if (store.focusProduct === undefined) window.location.href = "#manage/products"
   },
+  watch:{
+    "product.price"(newValue: String){
+      this.product.price = roundCurrency(Number(newValue))
+    }
+  }
 })
 </script>
 
@@ -89,7 +116,7 @@ export default defineComponent({
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
       <SelectMenu class="w-full" @select="updateCategory"
                   :options="categoryList.map(e => {return [e.name, e.id]})"
-                  :current="category"/>
+                  :current="category?.id!"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
@@ -97,16 +124,18 @@ export default defineComponent({
       <SimpleInputField type="number" v-model="product.price"/>
     </ColorContainer>
 
-<!--    TODO add ingredient list-->
+    <ColorContainer>
+      <FormattedText value="Raw Price"/>
+      <FormattedText :value="rawPrice" type="currency"/>
+    </ColorContainer>
 
-    <div class="col-span-full">
-      <button :class="`rounded-md mt-5 ${buttonColor} min-h-14 size-full`"
-              type="submit"
-              :disabled="disabled"
-              @click="updateProd">
-        <font-awesome-icon class="text-4xl" icon="fa-check"/>
-      </button>
-    </div>
+    <ColorContainer class="max-h-96 overflow-y-scroll col-span-full">
+      <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="ingredients"/>
+      <ProductIngredientGroup @update="updateIngredient" v-for="item in ingredientList.categories" :group="item"
+                              :recipe="recipe"/>
+    </ColorContainer>
+
+    <ConfirmButton class="col-span-full" :disabled="disabled" @click="updateProd"/>
   </div>
 </template>
 

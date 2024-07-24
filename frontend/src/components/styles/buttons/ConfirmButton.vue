@@ -25,7 +25,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <IconButton color="bg-green-500" @click="$emit('click', $event)" :disabled="disabled" :class="color" :icon="icon"/>
+  <IconButton color="bg-green-400" class="text-dark" @click="$emit('click', $event)" :disabled="disabled" :class="color" :icon="icon"/>
 </template>
 
 <style scoped>

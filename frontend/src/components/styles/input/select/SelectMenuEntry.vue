@@ -4,9 +4,9 @@ import {defineComponent, PropType} from 'vue'
 export default defineComponent({
   name: "SelectMenuEntry",
   props: {
-    current: String,
+    current: [String, Number],
     entry: {
-      type: Object as PropType<string | string[]>,
+      type: Object as PropType<string | Array<string|number>>,
       required: true
     }
 

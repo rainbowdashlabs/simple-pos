@@ -34,7 +34,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="sticky origin-bottom w-screen max-w-screen-lg bg-accent dark:bg-accent-d rounded-t-2xl border-t-2  border-accent-d dark:border-accent">
+  <div class="sticky origin-bottom w-screen max-w-screen-lg bg-secondary dark:bg-secondary-d rounded-t-2xl border-y-2  border-accent-d dark:border-accent">
     <div class="max-w-screen-lg flex-none px-5 gap-5">
       <div class="flex justify-between border-b-2 border-secondary dark:border-secondary-d py-2">
         <FormattedText class="content-center" :size="SizeGroup.xl" value="Cart"/>

@@ -7,15 +7,7 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="grid grid-cols-2 gap-5">
-  <div class="w-5/12 h-96 bg-secondary gap-5 rounded-3xl"></div>
-  <div class="w-5/12 h-96 bg-secondary gap-5 rounded-3xl"></div>
-  <div class="w-5/12 h-96 bg-secondary gap-5 rounded-3xl"></div>
-  <div class="w-5/12 h-96 bg-secondary gap-5 rounded-3xl"></div>
-  <div class="w-5/12 h-96 bg-secondary gap-5 rounded-3xl"></div>
-  <div class="w-5/12 h-96 bg-secondary gap-5 rounded-3xl"></div>
-
-</div>
+    todo
 </template>
 
 <style scoped>

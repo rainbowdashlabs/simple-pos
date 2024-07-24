@@ -79,7 +79,7 @@ export default defineComponent({
       createIngredient({
         id: null,
         name: this.name,
-        category_id: this.categoryList[this.categoryList.findIndex((e: Category) => e.name == this.category)].id,
+        category: this.categoryList[this.categoryList.findIndex((e: Category) => e.name == this.category)],
         price: this.price,
         container_size: this.container_size,
         pledge: this.pledge,
