@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.configuration.security;
 
 import dev.chojo.simplepos.service.UserService;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +21,6 @@ public class LoginService implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest req, HttpServletResponse res, Authentication auth) throws IOException, ServletException {
-        auth.getCredentials();
         res.getOutputStream().write(new String("This is your token").getBytes());
     }
 }

@@ -28,10 +28,6 @@ class CategoryServiceTest {
         postgresContainer.start();
     }
 
-    @AfterEach
-    void afterEach() {
-    }
-
     @AfterAll
     static void afterAll() {
         postgresContainer.stop();

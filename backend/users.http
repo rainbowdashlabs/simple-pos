@@ -1,14 +1,36 @@
-### GET request to example server
-POST http://localhost:8888/api/user
+### Create a new user
+POST http://localhost:8888/api/auth/signup
 Content-Type: application/json
 
 {
-  "username": "Lilly",
+  "username": "Lilly2",
   "password": "test"
 }
 
-###
-POST http://localhost:8888/api/login
+### Login
+POST http://localhost:8888/api/auth/login
 Content-Type: application/x-www-form-urlencoded
 
-username=Lilly&password=test
+username=Lilly2&password=test
+
+> {% client.global.set("auth_token", response.body.token.token); client.global.set("refresh_token", response.body.refresh.token) %}
+
+### Refresh token
+POST http://localhost:8888/api/auth/refresh
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+token={{refresh_token}}
+
+> {% client.global.set("auth_token", response.body.token.token); client.global.set("refresh_token", response.body.refresh.token) %}
+
+### Get self user
+GET http://localhost:8888/api/user/me
+Authorization: Bearer {{auth_token}}
+
+
+### Access admin only endpoint
+GET http://localhost:8888/api/user/admin
+Authorization: Bearer {{auth_token}}
+
+
