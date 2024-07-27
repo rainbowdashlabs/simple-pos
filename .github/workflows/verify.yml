@@ -17,7 +17,7 @@ jobs:
           java-version: 22
       - name: Build with Gradle
         run: ./gradlew --build-cache test build
-        working-directory: frontend
+        working-directory: backend
 
   build-frontend:
     runs-on: ubuntu-latest
