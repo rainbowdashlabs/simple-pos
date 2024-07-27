@@ -3,6 +3,7 @@ package dev.chojo.simplepos.configuration;
 import dev.chojo.simplepos.configuration.security.JwtAuthenticationFilter;
 import dev.chojo.simplepos.configuration.security.LoginService;
 import dev.chojo.simplepos.service.UserService;
+import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,12 +36,13 @@ public class WebSecurityConfig {
 
     private static final String TOKEN = "authorization";
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter, LoginService loginService) throws Exception {
         return http
-//                .cors(Customizer.withDefaults())
+                .cors(conf -> conf.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
-                .authorizeHttpRequests(conf -> conf.requestMatchers("/#login", "/#logout", "/api/auth/**", "/api/user", "/swagger-ui/**", "/api-docs/**")
+                .authorizeHttpRequests(conf -> conf.requestMatchers("/", "/index.html", "/assets/**", "/api/auth/**", "/api/user", "/swagger-ui/**", "/api-docs/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
@@ -67,10 +70,10 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(UserService service, PasswordEncoder encoder) {
+    public AuthenticationProvider authenticationProvider(UserService userService, PasswordEncoder encoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(encoder);
-        provider.setUserDetailsService(service);
-        provider.setUserDetailsPasswordService(service);
+        provider.setUserDetailsService(userService);
+        provider.setUserDetailsPasswordService(userService);
         return provider;
     }
 
@@ -78,7 +81,7 @@ public class WebSecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:8005"));
+        configuration.setAllowedOrigins(List.of("*")); // todo
         configuration.setAllowedMethods(List.of("GET", "POST"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 

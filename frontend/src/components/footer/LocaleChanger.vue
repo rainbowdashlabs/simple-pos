@@ -10,9 +10,9 @@ export default defineComponent({
     saveLocale(event: Event) {
       console.log(event)
       // @ts-expect-error
-      this.$i18n.locale = event[0]
+      this.$i18n.locale = event
       // @ts-expect-error
-      setLocale(event[0])
+      setLocale(event)
     }
   }
 })

@@ -106,7 +106,9 @@ const i18n: I18n = createI18n({
             type: "Type",
             user: "User",
             of: "of",
-            ingredients: "Ingredients"
+            ingredients: "Ingredients",
+            other: "Other",
+            null: "Unknown"
         },
         de: {
             accounts: "Konten",
@@ -156,7 +158,9 @@ const i18n: I18n = createI18n({
             type: "Art",
             user: "Nutzer",
             of: "von",
-            ingredients: "Zutaten"
+            ingredients: "Zutaten",
+            other: "Sonstige",
+            null: "Unbekannt"
         }
     },
     datetime: datetimeFormats,

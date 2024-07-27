@@ -19,7 +19,7 @@ export default defineComponent({
   methods:{
     extract(event: Event){
       // @ts-expect-error
-      return [event.target.value, event.target.key]
+      return event.target.value
     }
   },
   emits: ["select"]

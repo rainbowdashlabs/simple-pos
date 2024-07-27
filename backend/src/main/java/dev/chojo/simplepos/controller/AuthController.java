@@ -3,7 +3,7 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dao.UserDto;
+import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
 import dev.chojo.simplepos.service.AuthenticationService;

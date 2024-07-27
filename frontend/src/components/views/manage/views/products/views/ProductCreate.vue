@@ -69,8 +69,8 @@ export default defineComponent({
     }
   },
   methods: {
-    updateCategory(vk: Array<string>) {
-      this.category = vk[0]
+    updateCategory(vk: string) {
+      this.category = vk
     },
     createProd() {
       createProduct({

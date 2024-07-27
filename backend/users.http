@@ -33,4 +33,7 @@ Authorization: Bearer {{auth_token}}
 GET http://localhost:8888/api/user/admin
 Authorization: Bearer {{auth_token}}
 
-
+### Get cash
+GET http://localhost:8888/api/cash
+Authorization: Bearer {{auth_token}}
+Accept: application/json

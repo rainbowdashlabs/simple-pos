@@ -29,12 +29,15 @@ export default defineComponent({
       type: "other",
       withdraw: false,
       deposit: false,
-      active: false
+      active: false,
+      history_key: Date.now(),
+      current_cash: 0
     }
   },
   methods: {
-    submit() {
-      submitCash(this.amount, this.note, this.type)
+    async submit() {
+      await submitCash(this.amount, this.note, this.type)
+      this.history_key = Date.now()
     },
     toggleDeposit() {
       this.deposit = !this.deposit
@@ -50,7 +53,11 @@ export default defineComponent({
     },
     evalActive() {
       this.active = this.deposit || this.withdraw
-    }
+    },
+    typeChange(value: string): any {
+      console.log(`Change to ${value}`)
+      this.type = value
+    },
   },
   computed: {
     SizeGroup() {
@@ -59,10 +66,6 @@ export default defineComponent({
     sizeGroup() {
       return SizeGroup.xl5
     },
-    typeChange(value: Array<string>): any {
-      this.type = value[1]
-    },
-    currentCash,
     disabled() {
       return this.amount == 0 || !this.note
     },
@@ -77,7 +80,10 @@ export default defineComponent({
       return "withdraw"
     }
     // TODO Add submit for cash transaction
-  }
+  },
+  mounted() {
+      currentCash().then(value => this.current_cash = value.amount)
+  },
 })
 </script>
 
@@ -85,7 +91,7 @@ export default defineComponent({
   <div class="mx-5">
     <GridWrapper bg="none" cols="1" padding="0">
       <ColorContainer bg="secondary" class="col-span-full">
-        <MoneyText class="text-center" :size="sizeGroup" :amount="currentCash"/>
+        <MoneyText class="text-center" :size="sizeGroup" :amount="current_cash"/>
       </ColorContainer>
 
       <GridWrapper bg="none" cols="2" padding="0">
@@ -107,7 +113,7 @@ export default defineComponent({
         </GridWrapper>
       </Transition>
     </GridWrapper>
-    <CashHistory class="mt-5"/>
+    <CashHistory :key="history_key" class="mt-5"/>
   </div>
 </template>
 

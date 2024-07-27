@@ -10,14 +10,21 @@ import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
 export default defineComponent({
   name: "CashHistory",
   components: {GridWrapper, MoneyText, FormattedText, GridRowWrapper},
+  data() {
+    return {history: [] as CashHistoryEntry[]}
+  },
   computed: {
     SizeGroup() {
       return SizeGroup
-    },
-    history(): CashHistoryEntry[] {
-      return cashHistory()
     }
-  }
+  }, methods: {
+    async fetchHistory(): Promise<CashHistoryEntry[]> {
+      return await cashHistory()
+    }
+  },
+  mounted() {
+      this.fetchHistory().then(res => this.history = res)
+  },
 })
 </script>
 

@@ -1,31 +1,29 @@
-export interface CashHistoryEntry {
+import {getJson, postJson} from "./http.ts";
+
+export interface CashHistoryEntry extends CashDto {
     username: string,
-    date: number,
+    date: number
+}
+
+export interface CashDto {
     amount: number,
     type: string,
     note: string
 }
 
-export function currentCash(): number {
-    return Math.round(Math.random() * 100000) / 100
+export interface CashTotal{
+    amount: number
 }
 
-export function cashHistory(limit: number = 100): CashHistoryEntry[] {
-    let res: CashHistoryEntry[] = []
-    for (let i = 0; i < limit; i++) {
-        res.push(
-            {
-                username: 'someone',
-                date: Math.floor(Date.now() / 1000),
-                amount: Math.round(Math.random() * 100 - 50) / 100,
-                type: 'pledge',
-                note: 'money \\o/. No seriously there has to be a reason. Sometimes even a very loooooong reason.'
-            }
-        )
-    }
-    return res
+export async function currentCash(): Promise<CashTotal> {
+    return await getJson("/api/cash/total")
 }
 
-export function submitCash(amount: number, note: string, type: string) {
+export async function cashHistory(limit: number = 100): Promise<CashHistoryEntry[]> {
+    return await getJson("api/cash", new Map([["limit", limit]]))
+}
+
+export async function submitCash(amount: number, note: string, type: string) {
     console.log(`Submit ${amount} with note "${note}" and type ${type}`)
+    await postJson("api/cash", {date: Date.now(), amount: amount, note: note, type: type} as CashDto)
 }

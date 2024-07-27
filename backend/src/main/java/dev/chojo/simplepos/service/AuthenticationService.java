@@ -2,7 +2,7 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dao.UserDto;
+import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import jakarta.transaction.Transactional;

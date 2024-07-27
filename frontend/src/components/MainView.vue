@@ -28,11 +28,11 @@ export default {
   data() {
     return {
       currentPath: window.location.hash,
-      loggedIn: isLoggedIn()
+      loggedIn: true as Boolean
     }
   },
   computed: {
-    currentView() :any {
+    currentView(): any {
       // TODO: remove some day
       console.debug(`Switching to path: ${this.currentPath}`)
       // @ts-expect-error
@@ -40,12 +40,13 @@ export default {
     }
   },
   beforeUpdate() {
-    this.loggedIn = isLoggedIn()
   },
   mounted() {
     window.addEventListener('hashchange', () => {
       this.currentPath = window.location.hash
-      this.loggedIn = isLoggedIn()
+      isLoggedIn().catch(err => {
+        console.log("Could not determine login state", err)
+      }).then(res => this.loggedIn = res!)
     })
   }
 }

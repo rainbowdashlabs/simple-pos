@@ -59,8 +59,8 @@ export default defineComponent({
       store.focusProduct!.category = this.category!
       window.location.href = "#manage/products/info"
     },
-    updateCategory(vk: Array<string>) {
-      this.category = {name: vk[0], id: Number(vk[1])}
+    updateCategory(vk: string) {
+      this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
     },
     categoryNameToId(name: string): number {
       return this.categoryList[this.categoryList.findIndex(e => e.name == name)].id

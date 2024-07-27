@@ -1,18 +1,21 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {login} from "../../scripts/session.ts";
+import ConfirmButton from "../styles/buttons/ConfirmButton.vue";
 
 export default defineComponent({
   name: "Login",
+  components: {ConfirmButton},
   data() {
     return {
       username: "",
       password: ""
     };
   }, methods: {
-    submit() {
-      login(this.username, this.password)
-      window.location.href = "#"
+    async submit() {
+      if (await login(this.username, this.password)) {
+        window.location.href = "#"
+      }
     }
   }, computed: {
     disabled() {
@@ -46,9 +49,7 @@ export default defineComponent({
                  v-model="password"
                  required>
         </div>
-        <!-- TODO: Proper styling -->
-                  <button :class="`rounded-md m-5 ${buttonColor}`" type="submit" :disabled="disabled" @click="submit">Login
-                  </button>
+        <ConfirmButton @click="submit" :disabled="disabled"/>
       </div>
     </form>
   </div>

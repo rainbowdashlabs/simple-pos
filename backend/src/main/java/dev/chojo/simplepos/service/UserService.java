@@ -1,20 +1,13 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.slf4j.Logger;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsPasswordService;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -41,9 +34,5 @@ public class UserService implements UserDetailsService, UserDetailsPasswordServi
         log.info("Retrieved user data");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username %s not known"));
-    }
-
-    public void createToken() {
-
     }
 }
