@@ -9,17 +9,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-#      - uses: gradle/wrapper-validation-action@v3
-#      - name: Set up JDK
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: temurin
-#          java-version: 22
-#      - name: Build with Gradle
-#        run: ./gradlew --build-cache build
-#      - name: Test with Gradle
-#        run: ./gradlew test --info
+      - uses: gradle/wrapper-validation-action@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 22
+      - name: Build with Gradle
+        run: ./gradlew --build-cache build
+      - name: Test with Gradle
+        run: ./gradlew test --info
 
+  build-frontend:
+    runs-on: ubuntu-latest
+    name: Npm Build Backend
+
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build
 
   build-docker-frontend:
     runs-on: ubuntu-latest
