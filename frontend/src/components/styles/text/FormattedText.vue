@@ -24,11 +24,20 @@ export default defineComponent({
       console.error(`Unknown type ${this.type}`)
       return "text"
     },
-    valueString(){
+    valueString() {
       return String(this.value)
     },
-    valueNumber(){
+    valueNumber() {
       return Number(this.value)
+    },
+    valueDate(): Date | number {
+      if (typeof this.value === "number" || !isNaN(this.valueNumber)) {
+        return this.valueNumber
+      }
+      if (typeof this.value === "string") {
+        return new Date(this.valueString)
+      }
+      return this.valueNumber
     }
   }
 })
@@ -39,7 +48,7 @@ export default defineComponent({
     <div v-if="displayType == 'locale'">{{ $t(valueString) }}</div>
     <div v-if="displayType == 'text'">{{ value }}</div>
     <div v-if="displayType == 'currency'">{{ $n(valueNumber, 'currency') }}</div>
-    <div v-if="displayType == 'date'">{{ $d(valueNumber * 1000) }}</div>
+    <div v-if="displayType == 'date'">{{ $d(valueDate) }}</div>
     <div v-if="displayType == 'number'">{{ $n(valueNumber) }}</div>
   </div>
 </template>

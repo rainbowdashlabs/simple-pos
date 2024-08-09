@@ -171,7 +171,7 @@ const i18n: I18n = createI18n({
 const app = createApp(App);
 
 app.config.errorHandler = err => {
-    console.error(err)
+    console.error(`Unexpected Error:`, err)
 }
 // noinspection TypeScriptValidateTypes
 app.use(i18n)

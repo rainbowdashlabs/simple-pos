@@ -16,6 +16,11 @@ const refresh_token: string = "REFRESH_TOKEN"
 const token_expire: string = "TOKEN_EXPIRE"
 const refresh_token_expire: string = "REFRESH_TOKEN_EXPIRE"
 const day_millis: number = 86400000
+let refreshing = false
+
+async function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export function logout() {
     Cookies.remove(token)
@@ -43,12 +48,18 @@ export async function getSessionToken() {
         return Cookies.get(token)
     }
 
+    if (refreshing) {
+        console.log("Token refresh is active. Waiting for completion")
+        while (refreshing) await delay(1000)
+        return getSessionToken()
+    }
+
     await refreshSession()
     return await getSessionToken()
 }
 
 export async function login(username: string, password: string) {
-    let response = await fetch(getHost()+ "/api/auth/login", {
+    let response = await fetch(getHost() + "/api/auth/login", {
         method: "POST",
         headers: {
             "Accept": "application/json",
@@ -84,6 +95,7 @@ function storeTokens(username: string, cred: TokenResponse) {
 }
 
 async function refreshSession() {
+    refreshing = true
     console.log("Attempting to refresh session token")
     if (Number(Cookies.get(refresh_token_expire)) < Date.now()) {
         console.log("Refresh token expired. Logging out")
@@ -109,10 +121,13 @@ async function refreshSession() {
             return
         }
 
-        console.log(await response.text())
+        let body = await response.text()
+        console.log(`Response: ${body}`)
 
-        storeTokens(getUsername()!, await response.json())
+        storeTokens(getUsername()!, JSON.parse(body))
+        refreshing = false
     } catch (ex) {
+        refreshing = false
         console.log(ex)
         throw new Error("Could not refresh token")
     }

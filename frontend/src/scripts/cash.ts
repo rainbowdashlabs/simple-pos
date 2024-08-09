@@ -2,7 +2,7 @@ import {getJson, postJson} from "./http.ts";
 
 export interface CashHistoryEntry extends CashDto {
     username: string,
-    date: number
+    created: number
 }
 
 export interface CashDto {
