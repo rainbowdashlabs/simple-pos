@@ -9,7 +9,7 @@ on:
 
 jobs:
   docker-build:
-    name: Build Frontend
+    name: Build Frontend Docker
     runs-on: ubuntu-latest
     permissions:
       packages: write
