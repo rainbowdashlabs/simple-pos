@@ -31,13 +31,13 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex">
-    <FormattedText class="w-1/2" :value="entry.product.name"/>
-    <div class="w-1/2 flex justify-evenly items-center">
-      <div class="flex justify-evenly mr-2 w-5/6">
+  <div class="flex items-center">
+    <FormattedText class="w-1/3" :value="entry.product.name"/>
+    <div class="w-2/3 flex justify-evenly items-center">
+      <div class="flex mr-2 w-5/6">
         <CartEntryPrice :entry="entry"/>
       </div>
-      <Icon @click="decrease" :size="SizeGroup.xl2" class="text-red-500 p-0 w-1/6" icon="fa-square-minus"/>
+      <Icon @click="decrease" :size="SizeGroup.xl2" class="text-red-400 p-0 w-1/6" icon="fa-square-minus"/>
     </div>
   </div>
 </template>

@@ -8,7 +8,7 @@ export default {
   data() {
     return {
       userContext: false,
-      loggedIn: isLoggedIn()
+      loggedIn: true
     }
   },
   computed: {
@@ -22,7 +22,7 @@ export default {
   beforeUpdate() {
   },
   methods: {
-    userContextActive(){
+    userContextActive() {
       return this.userContext && this.loggedIn
     },
     toggleContext() {
@@ -31,9 +31,11 @@ export default {
     login() {
       window.location.href = "#login"
     }
-  },   mounted() {
+  }, mounted() {
     window.addEventListener('hashchange', () => {
-      this.loggedIn = isLoggedIn()
+      isLoggedIn().then(res => {
+        this.loggedIn = res
+      })
     })
   }
 }

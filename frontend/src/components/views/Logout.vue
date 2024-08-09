@@ -4,6 +4,9 @@ import {defineComponent} from 'vue'
 export default defineComponent({
   name: "Logout",
   mounted() {
+    setTimeout(() =>{
+      window.location.href = "#login"
+    }, 5000)
   }
 })
 </script>

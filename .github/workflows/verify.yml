@@ -6,20 +6,47 @@ jobs:
   build-backend:
     runs-on: ubuntu-latest
     name: Gradle Build Backend
+    needs:
+      - build-frontend
 
     steps:
       - uses: actions/checkout@v4
-#      - uses: gradle/wrapper-validation-action@v3
-#      - name: Set up JDK
-#        uses: actions/setup-java@v4
-#        with:
-#          distribution: temurin
-#          java-version: 22
-#      - name: Build with Gradle
-#        run: ./gradlew --build-cache build
-#      - name: Test with Gradle
-#        run: ./gradlew test --info
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install npm dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      - uses: gradle/wrapper-validation-action@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 22
+      - name: Build with Gradle
+        run: ./gradlew --build-cache test build
+        working-directory: backend
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    name: Npm Build Frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Build static page
+        run: npm run build
+        working-directory: frontend
 
   build-docker-frontend:
     runs-on: ubuntu-latest

@@ -14,12 +14,12 @@ export default defineComponent({
     options: {
       //type: Object as PropType<Array<Array<String>>>,
       required: true
-    }, current: String
+    }, current: [String, Number]
   },
   methods:{
     extract(event: Event){
       // @ts-expect-error
-      return [event.target.value, event.target.key]
+      return event.target.value
     }
   },
   emits: ["select"]

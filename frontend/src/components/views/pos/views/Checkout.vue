@@ -39,8 +39,8 @@ export default defineComponent({
     }
   },
   methods: {
-    checkoutAccount(value: Array<String>) {
-      this.account = account(Number(value[1]))!
+    checkoutAccount(value: string) {
+      this.account = account(Number(value))!
     },
     purchase() {
       // @ts-expect-error

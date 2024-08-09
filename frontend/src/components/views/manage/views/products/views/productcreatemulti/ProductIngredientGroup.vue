@@ -4,6 +4,7 @@ import {IngredientGroup} from "../../../../../../../scripts/Ingredient.ts";
 import ProductIngredient from "./ProductIngredient.vue";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../../scripts/text.ts";
+import {Recipe} from "../../../../../../../scripts/product.ts";
 
 export default defineComponent({
   name: "ProductIngredientGroup",
@@ -17,7 +18,8 @@ export default defineComponent({
     group: {
       type: Object as PropType<IngredientGroup>,
       required: true
-    }
+    },
+    recipe: Object as PropType<Recipe>
   },
   emits: ["update"]
 })
@@ -26,7 +28,7 @@ export default defineComponent({
 <template>
   <div class="my-1">
     <FormattedText :size="SizeGroup.xl" :value="group.category.name"/>
-    <ProductIngredient @update="(e:Array<number>) => {$emit('update', e)}" v-for="item in group.entries" :entry="item"/>
+    <ProductIngredient @update="(e:Array<number>) => {$emit('update', e)}" v-for="item in group.entries" :entry="item" :recipe="recipe"/>
   </div>
 </template>
 

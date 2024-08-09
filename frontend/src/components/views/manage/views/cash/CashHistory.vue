@@ -10,14 +10,21 @@ import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
 export default defineComponent({
   name: "CashHistory",
   components: {GridWrapper, MoneyText, FormattedText, GridRowWrapper},
+  data() {
+    return {history: [] as CashHistoryEntry[]}
+  },
   computed: {
     SizeGroup() {
       return SizeGroup
-    },
-    history(): CashHistoryEntry[] {
-      return cashHistory()
     }
-  }
+  }, methods: {
+    async fetchHistory(): Promise<CashHistoryEntry[]> {
+      return await cashHistory()
+    }
+  },
+  mounted() {
+      this.fetchHistory().then(res => this.history = res)
+  },
 })
 </script>
 
@@ -27,7 +34,7 @@ export default defineComponent({
     <div class="overflow-y-scroll height">
       <div class="grid grid-cols-6 gap-x-2 auto-cols-max border-slate-400 border-b"
            v-for="item in history">
-        <FormattedText class="col-span-2" :value="item.date" :size="SizeGroup.sm" type="date"/>
+        <FormattedText class="col-span-2" :value="item.created" :size="SizeGroup.sm" type="date"/>
         <FormattedText class="col-span-2" :value="item.username" :size="SizeGroup.sm"/>
         <MoneyText class="col-span-2" :amount="item.amount" :size="SizeGroup.sm"/>
         <FormattedText class="col-start-1 col-span-2" :value="item.type" :size="SizeGroup.sm" type="locale"/>

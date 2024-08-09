@@ -4,9 +4,9 @@ import {defineComponent, PropType} from 'vue'
 export default defineComponent({
   name: "SelectMenuEntry",
   props: {
-    current: String,
+    current: [String, Number],
     entry: {
-      type: Object as PropType<string | string[]>,
+      type: Object as PropType<string | Array<string|number>>,
       required: true
     }
 
@@ -23,11 +23,11 @@ export default defineComponent({
       return this.entry instanceof Array
     },
     display() {
-      if (this.isArray) return this!.entry[0]!
+      if (this.isArray) return this.entry[0]!
       return this.entry
     },
     key() :PropertyKey {
-      if (this.isArray) return this!.entry[1]!
+      if (this.isArray) return this.entry[1]!
       return String(this.entry)
     }
   }
@@ -35,10 +35,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <option v-if="isArray && !isCurrent" :key="key" :value="display">{{ display }}</option>
-  <option v-else-if="isArray && isCurrent" :key="key" :value="display" selected>{{ display }}</option>
-  <option v-else-if="!isCurrent" :key="key" :value="entry">{{ entry }}</option>
-  <option v-else selected :key="key" :value="entry">{{ entry }}</option>
+  <option v-if="isArray && !isCurrent" :data-key="key" :key="key" :value="key">{{ display }}</option>
+  <option v-else-if="isArray && isCurrent" :data-key="key" :value="key" selected>{{ display }}</option>
+  <option v-else-if="!isCurrent" :data-key="key" :value="key">{{ display }}</option>
+  <option v-else selected :data-key="key" :value="key">{{ display }}</option>
 </template>
 
 <style scoped>
