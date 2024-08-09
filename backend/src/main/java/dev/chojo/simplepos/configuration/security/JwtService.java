@@ -12,6 +12,7 @@ import java.security.Key;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 @Service
@@ -53,6 +54,7 @@ public class JwtService {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
+                .claim("nonce", ThreadLocalRandom.current().nextLong(1000000000))
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))

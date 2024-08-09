@@ -17,7 +17,7 @@ public class Cash {
     //Todo find something to not serialize the full user but a sparse representation
     private User user;
 
-    @JsonFormat(with = JsonFormat.Feature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
+    //@JsonFormat(shape = JsonFormat.Shape.NUMBER_INT, without = JsonFormat.Feature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
     private Instant created = Instant.now();
     private double amount;
     private String type;
