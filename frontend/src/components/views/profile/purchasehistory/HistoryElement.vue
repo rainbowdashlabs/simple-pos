@@ -3,7 +3,7 @@ import {defineComponent} from 'vue'
 import Profile from "../../accounts/Profile.vue";
 import {product} from "../../../../scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {transactionDelete} from "../../../../scripts/transactions.ts";
+import {transactionDelete} from "../../../../scripts/purchase.ts";
 import TwoStepDeleteButton from "../../../styles/buttons/TwoStepDeleteButton.vue";
 import IconButton from "../../../styles/buttons/IconButton.vue";
 

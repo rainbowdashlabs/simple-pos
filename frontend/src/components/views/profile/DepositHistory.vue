@@ -2,14 +2,14 @@
 import {defineComponent} from 'vue'
 import HistoryElement from "./deposithistory/HistoryElement.vue";
 import {store} from "../../../scripts/store.ts";
-import {Deposit, deposits} from "../../../scripts/accounts.ts";
+import {Balance, deposits} from "../../../scripts/accounts.ts";
 import ColorContainer from "../../styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "DepositHistory",
   components: {ColorContainer, HistoryElement},
   computed: {
-    deposits(): Deposit[] {
+    deposits(): Balance[] {
       if (!store.focusAccount) return []
       return deposits(store.focusAccount?.id!, 30)
     }

@@ -2,7 +2,7 @@
 import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../styles/text/CenterText.vue";
 import {store} from "../../../../../scripts/store.ts";
-import {IngredientsStock} from "../../../../../scripts/storage.ts";
+import {StorageSummary} from "../../../../../scripts/storage.ts";
 import ColorContainer from "../../../../styles/container/ColorContainer.vue";
 import FormattedText from "../../../../styles/text/FormattedText.vue";
 import NumberText from "../../../../styles/text/NumberText.vue";
@@ -21,7 +21,7 @@ export default defineComponent({
   },
   props: {
     listing: {
-      type: Object as PropType<IngredientsStock>,
+      type: Object as PropType<StorageSummary>,
       required: true
     }
   },
@@ -36,7 +36,7 @@ export default defineComponent({
       return this.outOfStock ? "bg-warn dark:bg-warn-d" : "bg-secondary dark:bg-secondary-d"
     },
     outOfStock() {
-      return this.listing.stock <= this.listing.min_stock
+      return this.listing.stock <= this.listing.ingredient.min_stock
     }
   },
   methods: {
@@ -56,9 +56,9 @@ export default defineComponent({
 <template>
   <div :class="panelColor" class="p-5 rounded-md">
     <div class="flex w-full justify-between items-center pb-5">
-      <FormattedText :size="SizeGroup.xl" class="items-center" :value="listing?.name"/>
+      <FormattedText :size="SizeGroup.xl" class="items-center" :value="listing?.ingredient.name"/>
       <NumberText class="content-center" :amount="listing.stock" :size="SizeGroup.xl"
-                  :min="listing.min_stock"/>
+                  :min="listing.ingredient.min_stock"/>
       <div class="flex justify-end gap-2">
         <IconButton icon="fa-pen" @click="edit"/>
         <IconButton icon="fa-square-plus" @click="add"/>
@@ -68,30 +68,30 @@ export default defineComponent({
     <GridWrapper bg="none" padding="0" cols="2" class="">
       <div class="flex items-center">
         <Icon class="mr-2.5" icon="fa-cart-arrow-down"/>
-        <FormattedText :value="listing.price" type="currency"/>
+        <FormattedText :value="listing.ingredient.price" type="currency"/>
       </div>
 
-      <div v-if="listing.container_size != 0" class="flex items-center">
+      <div v-if="listing.ingredient.container_size != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-box"/>
-        <FormattedText :value="listing.container_size" type="number"/>
+        <FormattedText :value="listing.ingredient.container_size" type="number"/>
       </div>
 
-      <div v-if="listing.pledge != 0" class="flex items-center">
+      <div v-if="listing.ingredient.pledge != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-bottle-water"/>
         <Icon class="mr-2.5" icon="fa-coins"/>
-        <FormattedText :value="listing.pledge" type="currency"/>
+        <FormattedText :value="listing.ingredient.pledge" type="currency"/>
       </div>
 
-      <div v-if="listing.pledge_container != 0" class="flex items-center">
+      <div v-if="listing.ingredient.pledge_container != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-box"/>
         <Icon class="mr-2.5" icon="fa-coins"/>
-        <FormattedText :value="listing.pledge_container" type="currency"/>
+        <FormattedText :value="listing.ingredient.pledge_container" type="currency"/>
       </div>
 
-      <div v-if="listing.min_stock != 0" class="flex items-center">
+      <div v-if="listing.ingredient.min_stock != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>
         <Icon class="mr-2.5" icon="fa-warehouse"/>
-        <FormattedText :value="listing.min_stock" type="number"/>
+        <FormattedText :value="listing.ingredient.min_stock" type="number"/>
       </div>
     </GridWrapper>
   </div>

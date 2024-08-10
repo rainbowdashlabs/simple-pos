@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import StorageInventoryEntry from "./StorageInventoryEntry.vue";
-import {IngredientsStock} from "../../../../../../../scripts/storage.ts";
+import {StorageSummary} from "../../../../../../../scripts/storage.ts";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../../scripts/text.ts";
 import {CategoryGroup} from "../../../../../../../scripts/categories.ts";
@@ -16,7 +16,7 @@ export default defineComponent({
   components: {FormattedText, StorageInventoryEntry},
   props: {
     group: {
-      type: Object as PropType<CategoryGroup<IngredientsStock>>,
+      type: Object as PropType<CategoryGroup<StorageSummary>>,
       required: true
     }
   }

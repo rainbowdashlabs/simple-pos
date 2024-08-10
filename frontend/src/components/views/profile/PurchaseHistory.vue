@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import HistoryElement from "./purchasehistory/HistoryElement.vue";
-import {History, history} from "../../../scripts/transactions.ts";
+import {History, history} from "../../../scripts/purchase.ts";
 import {store} from "../../../scripts/store.ts";
 import ColorContainer from "../../styles/container/ColorContainer.vue";
 
@@ -11,7 +11,7 @@ export default defineComponent({
   components: {ColorContainer, HistoryElement},
   computed: {
     purchases(): History {
-      if (!store.focusAccount) return {transactions: [], products: new Map()}
+      if (!store.focusAccount) return {purchases: [], products: new Map()}
       return history(store.focusAccount?.id!, 30)
     }
   }
@@ -30,8 +30,8 @@ export default defineComponent({
       </tr>
       </thead>
       <tbody class="max-h-64 overflow-y-scroll">
-      <HistoryElement v-for="item in purchases.transactions" :transaction="item"
-                      :product="purchases.products.get(item.product_id)"/>
+      <HistoryElement v-for="item in purchases.purchases" :transaction="item"
+                      :product="purchases.products.get(item.productId)"/>
       </tbody>
     </table>
   </ColorContainer>

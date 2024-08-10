@@ -1,26 +1,26 @@
 import {LazyProduct, product} from './product.ts'
 
-export interface Transaction {
+export interface Purchase {
     id: number
     user_id: number
-    product_id: number
+    productId: number
     price: number
     date: number
 }
 
 export interface History {
-    transactions: Transaction[]
+    purchases: Purchase[]
     products: Map<number, LazyProduct>
 }
 
 export function history(user_id: number, limit: number = 30): History {
     console.log(`Retrieve ${limit} transactions for user ${user_id}`)
-    let result: Transaction[] = []
+    let result: Purchase[] = []
     for (let i = 0; i < limit; i++) {
         result.push({
             id: i,
             user_id: user_id,
-            product_id: 1,
+            productId: 1,
             price: 1.2,
             date: Math.floor(Date.now() / 1000)
         })
@@ -28,7 +28,7 @@ export function history(user_id: number, limit: number = 30): History {
     let products: Map<number, LazyProduct> = new Map()
     products.set(1, product(1))
     console.log(`${result.length} transactions`)
-    return {transactions: result, products: products}
+    return {purchases: result, products: products}
 }
 
 // @ts-expect-error

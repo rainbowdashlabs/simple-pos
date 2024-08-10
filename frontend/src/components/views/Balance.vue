@@ -41,7 +41,7 @@ export default defineComponent({
       this.deposit = 0
     },
     storeDeposit() {
-      addDeposit(store.focusAccount?.id!, this.deposit)
+      addDeposit(store.focusAccount!, this.deposit)
       window.location.href = "#profile"
     }
   },

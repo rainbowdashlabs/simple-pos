@@ -1,7 +1,8 @@
 import {getJson, postJson} from "./http.ts";
+import {User} from "./user.ts";
 
 export interface CashHistoryEntry extends CashDto {
-    username: string,
+    user: User,
     created: number
 }
 
@@ -24,6 +25,5 @@ export async function cashHistory(limit: number = 100): Promise<CashHistoryEntry
 }
 
 export async function submitCash(amount: number, note: string, type: string) {
-    console.log(`Submit ${amount} with note "${note}" and type ${type}`)
     await postJson("api/cash", {date: Date.now(), amount: amount, note: note, type: type} as CashDto)
 }

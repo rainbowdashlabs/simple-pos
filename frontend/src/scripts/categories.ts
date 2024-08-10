@@ -1,4 +1,4 @@
-import {dummyCategories} from "./sampling.ts";
+import {getJson, patchJson} from "./http.ts";
 
 export interface Category {
     id: number,
@@ -14,14 +14,14 @@ export interface Listing<T> {
     categories: CategoryGroup<T>[]
 }
 
-export function category(id: number): Category {
-    return dummyCategories.get(id)!
+export function category(id: number): Promise<Category> {
+    return getJson("api/category/" + id)
 }
 
-export function updateCategory(category: Category) {
-    console.log("Updated category: " + category)
+export function updateCategory(category: Category): Promise<Category> {
+    return patchJson("api/category/", category)
 }
 
-export function categories(): Category[] {
-    return Array.from(dummyCategories.values())
+export function categories(): Promise<Category[]> {
+    return getJson("api/category/")
 }

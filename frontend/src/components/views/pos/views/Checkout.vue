@@ -2,7 +2,7 @@
 import {defineComponent} from 'vue'
 import {store} from "../../../../scripts/store.ts";
 import SelectMenu from "../../../styles/input/select/SelectMenu.vue";
-import {account, accounts, LazyAccount, purchase} from "../../../../scripts/accounts.ts";
+import {account, accounts, Account, purchase} from "../../../../scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
 import MoneyText from "../../../styles/text/MoneyText.vue";
 import FormattedText from "../../../styles/text/FormattedText.vue";
@@ -35,7 +35,7 @@ export default defineComponent({
       accounts()
     },
     accountOptions() {
-      return accounts().map((value: LazyAccount) => [value.name, value.id])
+      return accounts().map((value: Account) => [value.name, value.id])
     }
   },
   methods: {

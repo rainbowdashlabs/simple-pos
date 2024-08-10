@@ -8,7 +8,7 @@ import GridRowWrapper from "../../../../../styles/grid/GridRowWrapper.vue";
 import RawGridRowWrapper from "../../../../../styles/grid/RawGridRowWrapper.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import BackButton from "../../../../../styles/buttons/BackButton.vue";
-import {addStorage} from "../../../../../../scripts/storage.ts";
+import {addStorage, InboundStorage} from "../../../../../../scripts/storage.ts";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../scripts/text.ts";
@@ -30,7 +30,7 @@ export default defineComponent({
   },
   data() {
     return {
-      price: store.focusStorage!.price,
+      price: store.focusStorage!.ingredient.price,
       pieceCount: 0,
       containerCount: 0,
       pledgePieces: 0,
@@ -41,16 +41,16 @@ export default defineComponent({
   methods: {
     setContainerCounts(value: number) {
       this.containerCount = value
-      this.setPieceCounts(value * this.listing.container_size)
-      if (this.listing.pledge_container) {
-        this.pledgeContainers = value * this.listing.pledge_container
+      this.setPieceCounts(value * this.ingredient.container_size)
+      if (this.ingredient.pledge_container) {
+        this.pledgeContainers = value * this.ingredient.pledge_container
       }
       console.log("Updating container count to value " + value)
     },
     setPieceCounts(value: number) {
       this.pieceCount = value
-      if (this.listing.pledge) {
-        this.pledgePieces = value * this.listing.pledge
+      if (this.ingredient.pledge) {
+        this.pledgePieces = value * this.ingredient.pledge
       }
       console.log("Updating piece count to value " + value)
     },
@@ -67,32 +67,36 @@ export default defineComponent({
     },
     submit() {
       addStorage({
-        product_id: this.listing.id!,
+        ingredient: this.ingredient,
+        purchased: new Date(),
         price: this.price,
         amount: this.pieceCount,
         pledge: this.pledgePieces + this.pledgeContainers
-      })
+      } as InboundStorage)
       window.location.href = "#manage/storage"
     }
   }, computed: {
     SizeGroup() {
       return SizeGroup
     },
-    listing() {
+    summary() {
       return store.focusStorage!
+    },
+    ingredient() {
+      return this.summary.ingredient
     },
     states() {
       let listing = store.focusStorage
       if (!listing) return []
       let states: string[] = ["price"]
-      if (listing.container_size) {
+      if (listing.ingredient.container_size) {
         states.push("container_count")
       }
       states.push("piece_count")
-      if (listing.pledge_container) {
+      if (listing.ingredient.pledge_container) {
         states.push("pledge_container")
       }
-      if (listing.pledge) {
+      if (listing.ingredient.pledge) {
         states.push("pledge_pieces")
       }
       states.push("overview")
@@ -111,7 +115,7 @@ export default defineComponent({
 
 <template>
   <div class="grid grid-cols-1 auto-rows-max gap-5 mx-5">
-    <h1 class="col-span-full">{{ listing.name }}</h1>
+    <h1 class="col-span-full">{{ ingredient.name }}</h1>
 
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'price'">
       <FormattedText :size="SizeGroup.xl"
@@ -125,7 +129,7 @@ export default defineComponent({
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'container_count'">
       <FormattedText :size="SizeGroup.xl"
                      class="col-span-full"
-                     :value="$t('container') + ' (' + listing.container_size + ' '+ $t('pieces') + ')'"/>
+                     :value="$t('container') + ' (' + ingredient.container_size + ' '+ $t('pieces') + ')'"/>
       <SimpleInputField class="col-span-full"
                         @update:modelValue="setContainerCounts"
                         type="number"
@@ -157,7 +161,7 @@ export default defineComponent({
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'pledge_container'">
       <FormattedText :size="SizeGroup.xl"
                      class="col-span-full"
-                     :value="$t('pledge') + ' ' + $t('container') + ' (' + containerCount + ' x ' + $n(listing.pledge_container, 'currency') + ')'"/>
+                     :value="$t('pledge') + ' ' + $t('container') + ' (' + containerCount + ' x ' + $n(ingredient.pledge_container, 'currency') + ')'"/>
       <SimpleInputField class="col-span-full"
                         type="number"
                         :model-value="pledgeContainers"
@@ -172,7 +176,7 @@ export default defineComponent({
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'pledge_pieces'">
       <FormattedText :size="SizeGroup.xl"
                      class="col-span-full"
-                     :value="$t('pledge') + ' ' + $t('piece') + ' (' + pieceCount + ' x ' + $n(listing.pledge, 'currency') + ')'"/>
+                     :value="$t('pledge') + ' ' + $t('piece') + ' (' + pieceCount + ' x ' + $n(ingredient.pledge, 'currency') + ')'"/>
       <SimpleInputField class="col-span-full"
                         type="number"
                         :model-value="pledgePieces"

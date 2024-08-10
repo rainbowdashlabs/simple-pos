@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {accounts, LazyAccount} from "../../../../scripts/accounts.ts";
+import {accounts, Account} from "../../../../scripts/accounts.ts";
 import AccountEntry from "./accounts/AccountEntry.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import ColorContainer from "../../../styles/container/ColorContainer.vue";
@@ -9,7 +9,7 @@ export default defineComponent({
   name: "Accounts",
   components: {ColorContainer, FontAwesomeIcon, AccountEntry},
   computed: {
-    accounts(): LazyAccount[] {
+    accounts(): Account[] {
       return accounts()
     }
   },

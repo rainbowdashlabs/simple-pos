@@ -1,15 +1,15 @@
 import {Reactive, reactive} from "vue";
-import {LazyAccount} from "./accounts.ts";
+import {Account} from "./accounts.ts";
 import {Product} from "./product.ts";
-import {IngredientsStock} from "./storage.ts";
+import {StorageSummary} from "./storage.ts";
 import {Cart} from "./cart.ts";
 import {Ingredient} from "./Ingredient.ts";
 
 export interface Store {
-    focusAccount: LazyAccount | null | undefined,
+    focusAccount: Account | null | undefined,
     focusProduct: Product | null | undefined,
     focusIngredient: Ingredient | null | undefined,
-    focusStorage: IngredientsStock | null | undefined,
+    focusStorage: StorageSummary | null | undefined,
     theme: string | null | undefined,
     cart: Cart
 }

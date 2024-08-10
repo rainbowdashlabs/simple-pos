@@ -18,9 +18,6 @@ export default defineComponent({
     color() {
       return this.amount <= 0 ? "text-red-500" : "text-green-600"
     }
-  },
-  mounted() {
-    console.log(this.size)
   }
 })
 </script>

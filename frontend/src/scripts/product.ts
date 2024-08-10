@@ -1,13 +1,13 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
-import {createIngredient, Ingredient} from "./Ingredient.ts";
-import {dummyCategories, dummyProductCategories, dummyProducts} from "./sampling.ts";
+import {Ingredient} from "./Ingredient.ts";
+import {getJson, postJson, putJson} from "./http.ts";
 
 export interface Timeframe {
     locale: string,
     days: number
 }
 
-export interface RecipeEntry{
+export interface RecipeEntry {
     ingredient: Ingredient
     amount: number
 }
@@ -44,12 +44,8 @@ export interface ProductSalesStat {
     profit: number
 }
 
-export function product(id: number): LazyProduct {
-    return fullProduct(id)
-}
-
-export function fullProduct(id: number): Product {
-    return dummyProducts.get(id)!
+export function product(id: number): Promise<Product> {
+    return getJson("api/product/" + id)
 }
 
 /**
@@ -57,26 +53,16 @@ export function fullProduct(id: number): Product {
  *
  * @param product
  */
-export function createProduct(product: Product) {
-    for (let entry of product.recipe.entries) {
-        if (!entry.ingredient.id) {
-            entry.ingredient.id = createIngredient(entry.ingredient).id
-        }
-    }
-    console.log("Created product " + product)
+export function createProduct(product: Product): Promise<Product> {
+    return postJson("api/product/", product)
 }
 
-export function updateProduct(product: Product) {
-    console.log("Updated product " + product)
+export function updateProduct(product: Product): Promise<Product> {
+    return putJson("api/product/", product)
 }
 
-export function products(): Listing<Product> {
-    let res: ProductGroup[] = []
-    for (let entry of dummyProductCategories.entries()) {
-        console.log(entry[1])
-        res.push({category: dummyCategories.get(entry[0])!, entries: entry[1]})
-    }
-    return {categories: res}
+export function products(): Promise<Listing<Product>> {
+    return getJson("api/product/")
 }
 
 /**
