@@ -7,11 +7,17 @@ import ProductGroup from "../../../manage/views/products/ProductGroup.vue";
 export default defineComponent({
   name: "PosProducts",
   components: {PosCategory, ProductGroup},
-  computed: {
-    productList(): ProductListings {
-      return products()
+  data() {
+    return {
+      productList: {categories: []} as ProductListings
     }
-  }
+  },
+  computed: {},
+  mounted() {
+    products().then(e => {
+      this.productList = e
+    })
+  },
 })
 </script>
 

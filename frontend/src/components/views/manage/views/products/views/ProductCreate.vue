@@ -6,7 +6,7 @@ import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {createProduct} from "../../../../../../scripts/product.ts";
-import {categories} from "../../../../../../scripts/categories.ts";
+import {categories, Category} from "../../../../../../scripts/categories.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
@@ -42,12 +42,11 @@ export default defineComponent({
       price: 0,
       purchase_price: 0,
       container_size: 0,
-      category: "",
+      category: {id: -1, name: "none"} as Category,
       pledge: 0,
       pledge_container: 0,
       min_stock: 0,
-      input_field_style: "text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl",
-      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl"
+      categoryList: [] as Category[]
     }
   },
   computed: {
@@ -56,27 +55,24 @@ export default defineComponent({
     },
     disabled() {
       if (!this.name) return true
-      if (!this.category) return true
+      if (this.category.id === -1) return true
       if (!this.price) return true
       if (!this.purchase_price) return true
       return false
     },
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
-    },
-    categoryList() {
-      return categories()
     }
   },
   methods: {
     updateCategory(vk: string) {
-      this.category = vk
+      this.category = this.categoryList[this.categoryList.findIndex(e => e.name == vk)]
     },
     createProd() {
       createProduct({
         id: null,
         name: this.name,
-        category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
+        category: this.category,
         price: this.price,
         raw_price: null,
         active: true,
@@ -86,7 +82,7 @@ export default defineComponent({
               id: null,
               price: this.purchase_price,
               name: this.name,
-              category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
+              category: this.category,
               container_size: this.container_size,
               min_stock: this.min_stock,
               pledge: this.pledge,
@@ -97,7 +93,13 @@ export default defineComponent({
       })
       window.location.href = "#manage/products"
     }
-  }
+  },
+  mounted() {
+    categories().then(e => {
+      this.categoryList = e
+      this.category = this.categoryList[0]
+    })
+  },
 })
 </script>
 
@@ -111,7 +113,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
       <SelectMenu class="w-full" @select="updateCategory"
-                  :options="categoryList.map(e => {return [e.name, e.id]})" :current="category"/>
+                  :options="categoryList.map(e => {return [e.name, e.id]})" :current="category.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">

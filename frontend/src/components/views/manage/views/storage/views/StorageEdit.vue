@@ -3,7 +3,7 @@ import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import {store} from "../../../../../../scripts/store.ts";
-import {categories, category, Category} from "../../../../../../scripts/categories.ts";
+import {categories, Category} from "../../../../../../scripts/categories.ts";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
@@ -28,7 +28,7 @@ export default defineComponent({
   data() {
     return {
       category: {} as Category,
-      categories:categories(),
+      categoryList: [] as Category[],
       ingredient: Object.assign({}, store.focusIngredient) as Ingredient
     }
   },
@@ -44,33 +44,28 @@ export default defineComponent({
     },
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
-    },
-    categoryList(): Category[] {
-      return categories()
-    },
-    focusCategory(): Category {
-      return category(Number(this.ingredient.category))
-    },
-
+    }
   },
   methods: {
     updateIngredient() {
       updateIngredient(this.ingredient)
-      store.focusProduct!.category = this.category!
-      window.location.href = "#manage/products/info"
+          .then(() => {
+            store.focusProduct!.category = this.category!
+            window.location.href = "#manage/products/info"
+          })
     },
     updateCategory(vk: string) {
       this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
-    },
-    categoryNameToId(name: string): number {
-      return this.categoryList[this.categoryList.findIndex(e => e.name == name)].id
     },
     beforeMount() {
       if (store.focusProduct === undefined) window.location.href = "#manage/products"
     },
   },
   mounted() {
-    this.category = this.focusCategory
+    this.category = store.focusIngredient?.category!
+    categories().then(e => {
+      this.categoryList = e
+    })
   },
 })
 </script>

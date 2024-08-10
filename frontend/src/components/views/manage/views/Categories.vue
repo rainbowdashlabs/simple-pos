@@ -2,16 +2,19 @@
 import {defineComponent} from 'vue'
 import CategoryEntry from "./categories/CategoryEntry.vue";
 
-import {categories} from "../../../../scripts/categories.ts";
+import {categories, Category} from "../../../../scripts/categories.ts";
 
 export default defineComponent({
   name: "Categories",
-  computed: {
-    categoryList() {
-      return categories()
-    }
+  data() {
+      return {
+        categoryList: [] as Category[]
+      }
   },
-  components: {CategoryEntry}
+  components: {CategoryEntry},
+  mounted() {
+      categories().then(e => {this.categoryList = e})
+  },
 })
 </script>
 

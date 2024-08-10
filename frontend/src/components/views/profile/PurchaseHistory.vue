@@ -9,12 +9,16 @@ export default defineComponent({
   name: "PurchaseHistory",
   props: [],
   components: {ColorContainer, HistoryElement},
+  data() {
+      return{
+        purchases: {purchases: [], products: new Map()} as History
+      }
+  },
   computed: {
-    purchases(): History {
-      if (!store.focusAccount) return {purchases: [], products: new Map()}
-      return history(store.focusAccount?.id!, 30)
-    }
-  }
+  },
+  mounted() {
+      history(store.focusAccount?.id!, 30).then(e => {this.purchases = e})
+  },
 })
 </script>
 

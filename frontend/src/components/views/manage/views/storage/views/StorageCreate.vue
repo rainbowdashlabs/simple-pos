@@ -45,8 +45,7 @@ export default defineComponent({
       pledge: 0,
       pledge_container: 0,
       min_stock: 0,
-      input_field_style: "text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl",
-      button_style: "bg-secondary text-primary text-xl md:text-2xl lg:text-3xl"
+      categoryList: [] as Category[]
     }
   },
   computed: {
@@ -61,9 +60,6 @@ export default defineComponent({
     },
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
-    },
-    categoryList() {
-      return categories()
     },
     categoryOptions() {
       return this.categoryList.map((e: Category) => {
@@ -88,7 +84,10 @@ export default defineComponent({
       })
       window.location.href = "#manage/products"
     }
-  }
+  },
+  mounted() {
+      categories().then(e => {this.categoryList = e})
+  },
 })
 </script>
 

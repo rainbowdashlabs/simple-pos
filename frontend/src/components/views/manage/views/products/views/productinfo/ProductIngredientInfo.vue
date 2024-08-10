@@ -15,13 +15,13 @@ export default defineComponent({
       required: true
     }
   },
-  computed: {
-    stock() {
-      return storageInfo(this.entry?.ingredient.id!).stock
-    }
+  data() {
+      return{
+        stock: -1
+      }
   },
   mounted() {
-    console.log(this.entry)
+    storageInfo(this.entry?.ingredient.id!).then(e => {this.stock = e.stock})
   }
 })
 </script>

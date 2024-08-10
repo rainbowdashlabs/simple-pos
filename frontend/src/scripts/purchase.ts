@@ -1,4 +1,5 @@
-import {LazyProduct, product} from './product.ts'
+import {LazyProduct} from './product.ts'
+import {getJson} from "./http.ts";
 
 export interface Purchase {
     id: number
@@ -13,22 +14,8 @@ export interface History {
     products: Map<number, LazyProduct>
 }
 
-export function history(user_id: number, limit: number = 30): History {
-    console.log(`Retrieve ${limit} transactions for user ${user_id}`)
-    let result: Purchase[] = []
-    for (let i = 0; i < limit; i++) {
-        result.push({
-            id: i,
-            user_id: user_id,
-            productId: 1,
-            price: 1.2,
-            date: Math.floor(Date.now() / 1000)
-        })
-    }
-    let products: Map<number, LazyProduct> = new Map()
-    products.set(1, product(1))
-    console.log(`${result.length} transactions`)
-    return {purchases: result, products: products}
+export function history(user_id: number, limit: number = 30): Promise<History> {
+    return getJson(`api/account/${user_id}/purchase`, new Map([["limit", limit]]))
 }
 
 // @ts-expect-error

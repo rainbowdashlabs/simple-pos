@@ -1,15 +1,21 @@
 <script lang="ts">
-import {accounts} from "../../scripts/accounts.ts";
+import {defineComponent} from "vue";
+import {Account, accounts} from "../../scripts/accounts.ts";
 import Profile from "./accounts/Profile.vue";
 
-export default {
+export default defineComponent({
+  name: "Accounts",
   components: {Profile},
   data() {
     return {
-      accounts: accounts()
+      accounts: [] as Account[]
     }
+  }, mounted() {
+    accounts().then(e => {
+      this.accounts = e
+    })
   }
-}
+})
 </script>
 
 <template>

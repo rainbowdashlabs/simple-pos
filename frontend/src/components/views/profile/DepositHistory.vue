@@ -8,12 +8,17 @@ import ColorContainer from "../../styles/container/ColorContainer.vue";
 export default defineComponent({
   name: "DepositHistory",
   components: {ColorContainer, HistoryElement},
+  data() {
+      return {
+        deposits: [] as Balance[]
+      }
+  },
   computed: {
-    deposits(): Balance[] {
-      if (!store.focusAccount) return []
-      return deposits(store.focusAccount?.id!, 30)
-    }
-  }
+  },
+  mounted() {
+      deposits(store.focusAccount?.id!, 30)
+          .then(e => {this.deposits = e})
+  },
 })
 </script>
 

@@ -17,8 +17,10 @@ export default {
   },
   methods: {
     openProfile() {
-      store.focusAccount = account(this.account.id)
-      window.location.href = `#profile`
+      account(this.account.id).then(e => {
+        store.focusAccount = e
+        window.location.href = `#profile`
+      })
     }
   }
 }

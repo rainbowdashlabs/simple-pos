@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineAsyncComponent, defineComponent,} from 'vue'
+import {defineComponent} from 'vue'
 import GridRowWrapper from "../../../../styles/grid/GridRowWrapper.vue";
 import {cashHistory, CashHistoryEntry} from "../../../../../scripts/cash.ts";
 import FormattedText from "../../../../styles/text/FormattedText.vue";
