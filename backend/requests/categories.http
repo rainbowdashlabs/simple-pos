@@ -1,0 +1,20 @@
+### Create a category
+POST localhost:8888/api/category/
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "name": "Test Category"
+}
+
+
+### Update a category
+PATCH localhost:8888/api/category/
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "id": 2,
+  "name": "Test Category 2"
+}
+

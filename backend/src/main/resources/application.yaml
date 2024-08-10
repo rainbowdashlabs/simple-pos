@@ -39,7 +39,5 @@ security:
   jwt:
      secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
      # 1h in millisecond
-     # expiration-time: 3600000
-     expiration-time: 60000 # 5 min
+     expiration-time: 3600000
      refresh-expiration-time: 604800000
-     # refresh-expiration-time: 3600000

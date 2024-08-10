@@ -8,7 +8,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-public class Ingredient {
+public class Ingredient implements Comparable<Ingredient> {
     @Id
     @GeneratedValue
     private Integer id;
@@ -22,7 +22,7 @@ public class Ingredient {
     private Double price;
     @Column(nullable = false)
     private int containerSize;
-    @Column( nullable = false)
+    @Column(nullable = false)
     private double deposit;
     @Column(nullable = false)
     private double depositContainer;
@@ -105,5 +105,10 @@ public class Ingredient {
 
     public void setMinStock(int minStock) {
         this.minStock = minStock;
+    }
+
+    @Override
+    public int compareTo(Ingredient o) {
+        return name.compareTo(o.name);
     }
 }
