@@ -54,7 +54,7 @@ class ProductServiceTest {
         Category cat = categories.create("Test");
         Ingredient ingredient = ingredients.create(new Ingredient(null, cat, "Test", 0d, 0, 0, 0, 0));
         RecipeEntry recipeEntry = new RecipeEntry(null, ingredient, 1);
-        Recipe recipe = new Recipe(null, List.of(recipeEntry));
+        Recipe recipe = new Recipe(null, null, List.of(recipeEntry));
         Product product = new Product(null, cat, "Test", 1.0, true, recipe);
         product = products.create(product);
         Assertions.assertNotNull(product.getId());
