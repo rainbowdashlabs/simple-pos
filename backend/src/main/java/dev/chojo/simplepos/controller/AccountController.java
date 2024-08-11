@@ -46,8 +46,8 @@ public class AccountController {
     }
 
     @PostMapping("/")
-    ResponseEntity<Account> create(Account account) {
-        return ResponseEntity.accepted().body(accountRepository.save(account));
+    ResponseEntity<Account> create(@RequestBody AccountDto account) {
+        return ResponseEntity.accepted().body(accountRepository.save(new Account(null,account.getName(), Instant.now())));
     }
 
     @GetMapping("/{id}")
@@ -70,7 +70,7 @@ public class AccountController {
     }
 
     @PostMapping("/{id}/balance")
-    ResponseEntity<Balance> deposit(@PathVariable int id, DepositDto deposit) {
+    ResponseEntity<Balance> deposit(@PathVariable int id, @RequestBody DepositDto deposit) {
         Optional<Account> byId = accountRepository.findById(id);
         if (byId.isEmpty()) return ResponseEntity.notFound().build();
         var balance = balanceRepository.save(new Balance(null, byId.get(), Instant.now(), deposit.amount()));

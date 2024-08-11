@@ -36,13 +36,13 @@ export default defineComponent({
 
     <div class="flex gap-2 items-center">
       <Icon class="mr-2.5" icon="fa-warehouse"/>
-      <NumberText :min="entry.ingredient.min_stock" :amount="stock"/>
+      <NumberText :min="entry.ingredient.minStock" :amount="stock"/>
     </div>
 
     <div class="flex gap-2 items-center">
       <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>
       <Icon class="mr-2.5" icon="fa-warehouse"/>
-      <FormattedText :value="entry.ingredient.min_stock" type="number"/>
+      <FormattedText :value="entry.ingredient.minStock" type="number"/>
     </div>
   </div>
 </template>

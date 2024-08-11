@@ -40,12 +40,12 @@ export default defineComponent({
     return {
       name: "",
       price: 0,
-      purchase_price: 0,
-      container_size: 0,
+      purchasePrice: 0,
+      containerSize: 0,
       category: {id: -1, name: "none"} as Category,
       pledge: 0,
-      pledge_container: 0,
-      min_stock: 0,
+      pledgeContainer: 0,
+      minStock: 0,
       categoryList: [] as Category[]
     }
   },
@@ -54,10 +54,11 @@ export default defineComponent({
       return SizeGroup
     },
     disabled() {
+      console.log(this.name, this.category, this.price, this.purchasePrice)
       if (!this.name) return true
       if (this.category.id === -1) return true
       if (!this.price) return true
-      if (!this.purchase_price) return true
+      if (!this.purchasePrice) return true
       return false
     },
     buttonColor() {
@@ -65,8 +66,9 @@ export default defineComponent({
     }
   },
   methods: {
-    updateCategory(vk: string) {
-      this.category = this.categoryList[this.categoryList.findIndex(e => e.name == vk)]
+    updateCategory(vk: number) {
+      console.log(vk)
+      this.category = this.categoryList[this.categoryList.findIndex(e => e.id == vk)]
     },
     createProd() {
       createProduct({
@@ -74,24 +76,24 @@ export default defineComponent({
         name: this.name,
         category: this.category,
         price: this.price,
-        raw_price: null,
         active: true,
         recipe: {
           entries: [{
             amount: 1, ingredient: {
               id: null,
-              price: this.purchase_price,
+              price: this.purchasePrice,
               name: this.name,
               category: this.category,
-              container_size: this.container_size,
-              min_stock: this.min_stock,
+              containerSize: this.containerSize,
+              minStock: this.minStock,
               pledge: this.pledge,
-              pledge_container: this.pledge_container
+              pledgeContainer: this.pledgeContainer
             }
           }]
         },
+      }).then(() => {
+        window.location.href = "#manage/products"
       })
-      window.location.href = "#manage/products"
     }
   },
   mounted() {
@@ -123,17 +125,17 @@ export default defineComponent({
 
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="purchase_price" type="locale"/>
-      <SimpleInputField type="number" v-model="purchase_price"/>
+      <SimpleInputField type="number" v-model="purchasePrice"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="container_size" type="locale"/>
-        <SimpleInputField type="number" v-model="container_size"/>
+        <SimpleInputField type="number" v-model="containerSize"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
-                    @click="container_size = item"
+                    @click="containerSize = item"
                     :value="item"
                     type="number"/>
       </div>
@@ -155,11 +157,11 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge_container" type="locale"/>
-        <SimpleInputField type="number" v-model="pledge_container"/>
+        <SimpleInputField type="number" v-model="pledgeContainer"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
-                    @click="pledge_container = item"
+                    @click="pledgeContainer = item"
                     :value="item"
                     type="currency"/>
       </div>
@@ -168,12 +170,12 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="min_stock" type="locale"/>
-        <SimpleInputField type="number" v-model="min_stock"/>
+        <SimpleInputField type="number" v-model="minStock"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
-                    @click="min_stock = container_size * item[0] || item[1]"
-                    :value="container_size * item[0] || item[1]"
+                    @click="minStock = containerSize * item[0] || item[1]"
+                    :value="containerSize * item[0] || item[1]"
                     type="number"/>
       </div>
     </ColorContainer>

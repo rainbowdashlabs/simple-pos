@@ -10,35 +10,37 @@ import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query("""
-            SELECT a.id, a.name, a.created, b.balance - p.purchase as balance
+            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0))
             FROM Account a
             LEFT JOIN (
-              SELECT account.id, sum(amount) AS balance
+              SELECT account.id AS id, sum(amount) AS balance
               FROM Balance
               WHERE account.id = ?1
               GROUP BY account) b
             ON a.id = b.id
             LEFT JOIN (
-              SELECT account.id, sum(amount * price) AS purchase
+              SELECT account.id AS id, sum(amount * price) AS purchase
               FROM Purchase
               WHERE account.id = ?1
               GROUP BY account.id
             ) p
+            ON a.id = p.id
             WHERE a.id = ?1""")
     Optional<AccountDto> findAccountById(int id);
 
     @Query("""
-            SELECT a.id, a.name, a.created, b.balance - p.purchase as balance
+            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0))
             FROM Account a
             LEFT JOIN (
-              SELECT account.id, sum(amount) AS balance
+              SELECT account.id AS id, sum(amount) AS balance
               FROM Balance
               GROUP BY account) b
             ON a.id = b.id
             LEFT JOIN (
-              SELECT account.id, sum(amount * price) AS purchase
+              SELECT account.id AS id, sum(amount * price) AS purchase
               FROM Purchase
               GROUP BY account.id
-            ) p""")
+            ) p
+            ON a.id = p.id""")
     List<AccountDto> findAllAccounts();
 }

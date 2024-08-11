@@ -11,7 +11,7 @@ export default defineComponent({
       type: String,
       default: "text"
     },
-    value: [String, Number],
+    value: [String, Number, Date],
     size: {
       type: String,
       default: SizeGroup.md

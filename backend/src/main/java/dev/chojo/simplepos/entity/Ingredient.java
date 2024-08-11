@@ -1,9 +1,11 @@
 package dev.chojo.simplepos.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 
@@ -13,7 +15,7 @@ public class Ingredient implements Comparable<Ingredient> {
     @GeneratedValue
     private Integer id;
 
-    @OneToOne
+    @ManyToOne
     private Category category;
 
     @NotNull
@@ -23,20 +25,20 @@ public class Ingredient implements Comparable<Ingredient> {
     @Column(nullable = false)
     private int containerSize;
     @Column(nullable = false)
-    private double deposit;
+    private double pledge;
     @Column(nullable = false)
-    private double depositContainer;
+    private double pledgeContainer;
     @Column(nullable = false)
     private int minStock;
 
-    public Ingredient(Integer id, Category category, String name, Double price, int containerSize, double deposit, double depositContainer, int minStock) {
+    public Ingredient(Integer id, Category category, String name, Double price, int containerSize, double pledge, double pledgeContainer, int minStock) {
         this.id = id;
         this.category = category;
         this.name = name;
         this.price = price;
         this.containerSize = containerSize;
-        this.deposit = deposit;
-        this.depositContainer = depositContainer;
+        this.pledge = pledge;
+        this.pledgeContainer = pledgeContainer;
         this.minStock = minStock;
     }
 
@@ -83,20 +85,20 @@ public class Ingredient implements Comparable<Ingredient> {
         this.containerSize = containerSize;
     }
 
-    public double getDeposit() {
-        return deposit;
+    public double getPledge() {
+        return pledge;
     }
 
-    public void setDeposit(double deposit) {
-        this.deposit = deposit;
+    public void setPledge(double deposit) {
+        this.pledge = deposit;
     }
 
-    public double getDepositContainer() {
-        return depositContainer;
+    public double getPledgeContainer() {
+        return pledgeContainer;
     }
 
-    public void setDepositContainer(double depositContainer) {
-        this.depositContainer = depositContainer;
+    public void setPledgeContainer(double depositContainer) {
+        this.pledgeContainer = depositContainer;
     }
 
     public int getMinStock() {

@@ -33,7 +33,7 @@ export default defineComponent({
       return this.count - this.listing.stock
     },
     count() {
-      return this.containerCount * this.listing.ingredient.container_size + this.pieceCount
+      return this.containerCount * this.listing.ingredient.containerSize + this.pieceCount
     },
     bgColor() {
       if (this.diff > 0) return "okay"

@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.entity.dto;
 
 import dev.chojo.simplepos.entity.Ingredient;
+import jakarta.persistence.Tuple;
 
 public class StorageSummary implements Comparable<StorageSummary> {
     private Ingredient ingredient;
@@ -9,6 +10,11 @@ public class StorageSummary implements Comparable<StorageSummary> {
     public StorageSummary(Ingredient ingredient, int stock) {
         this.ingredient = ingredient;
         this.stock = stock;
+    }
+
+    public StorageSummary(Tuple tuple){
+        this.ingredient = (Ingredient) tuple.get("ingredient");
+        this.stock = (int) tuple.get("stock");
     }
 
     public Ingredient getIngredient() {

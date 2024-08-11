@@ -77,10 +77,10 @@ export default defineComponent({
         name: this.name,
         category: this.categoryList[this.categoryList.findIndex((e: Category) => e.name == this.category)],
         price: this.price,
-        container_size: this.container_size,
+        containerSize: this.container_size,
         pledge: this.pledge,
-        pledge_container: this.pledge_container,
-        min_stock: this.min_stock
+        pledgeContainer: this.pledge_container,
+        minStock: this.min_stock
       })
       window.location.href = "#manage/products"
     }

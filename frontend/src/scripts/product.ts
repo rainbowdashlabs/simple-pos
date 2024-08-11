@@ -1,6 +1,6 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
 import {Ingredient} from "./Ingredient.ts";
-import {getJson, postJson, putJson} from "./http.ts";
+import {deleteJson, getJson, postJson, putJson} from "./http.ts";
 
 export interface Timeframe {
     locale: string,
@@ -21,7 +21,6 @@ export interface LazyProduct {
     name: string,
     category: Category,
     price: number,
-    raw_price: number | undefined | null,
     active: boolean
 }
 
@@ -65,6 +64,10 @@ export function products(): Promise<Listing<Product>> {
     return getJson("api/product/")
 }
 
+export function deleteProduct(id: number) {
+    return deleteJson("api/product/" + id)
+}
+
 /**
  * The sales for this product since date per day
  * @param id product id
@@ -72,20 +75,8 @@ export function products(): Promise<Listing<Product>> {
  * @param [limit=30] amount of entries to retrieve
  */
 // @ts-expect-error
-export function salesProduct(id: number, date: Date, limit: number = 30): ProductSalesStat[] {
-    let res: ProductSalesStat[] = []
-    let currDate = new Date()
-    for (let i = 0; i < limit; i++) {
-        var timestamp = currDate.setDate(currDate.getDate() - 1)
-        res.push({
-            day: timestamp,
-            product_id: id,
-            sales: Math.floor(Math.random() * 10),
-            profit: 0,
-            revenue: 0
-        })
-    }
-    return res
+export function salesProduct(id: number, limit: number = 30): Promise<ProductSalesStat[]> {
+    return getJson(`api/product/${id}/sales/stat`, new Map([["limit", limit]]))
 }
 
 export function salesCountProduct(id: number, date: Date): ProductSalesStat {

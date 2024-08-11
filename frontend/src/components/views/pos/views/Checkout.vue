@@ -40,13 +40,16 @@ export default defineComponent({
       })
     },
     purchase() {
+      console.log(Array.from(this.cart.products.values()))
       // @ts-expect-error
-      purchase(this.account.id, this.cart.products.values())
-      this.cart.clearCart()
-      account(this.account.id).then(e => {
-        store.focusAccount = e
-        window.location.href = "#profile"
-      })
+      purchase(this.account.id, Array.from(this.cart.products.values()))
+          .then(() => {
+            this.cart.clearCart()
+            account(this.account.id).then(e => {
+              store.focusAccount = e
+              window.location.href = "#profile"
+            })
+          })
     },
     back() {
       window.location.href = "#pos"
@@ -55,6 +58,7 @@ export default defineComponent({
   mounted() {
     accounts().then(e => {
       this.accountOptions = e.map((value: Account) => [value.name, value.id])
+      this.account = e[0]
     })
   },
 })

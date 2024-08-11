@@ -36,7 +36,7 @@ export default defineComponent({
       return this.outOfStock ? "bg-warn dark:bg-warn-d" : "bg-secondary dark:bg-secondary-d"
     },
     outOfStock() {
-      return this.listing.stock <= this.listing.ingredient.min_stock
+      return this.listing.stock <= this.listing.ingredient.minStock
     }
   },
   methods: {
@@ -58,7 +58,7 @@ export default defineComponent({
     <div class="flex w-full justify-between items-center pb-5">
       <FormattedText :size="SizeGroup.xl" class="items-center" :value="listing?.ingredient.name"/>
       <NumberText class="content-center" :amount="listing.stock" :size="SizeGroup.xl"
-                  :min="listing.ingredient.min_stock"/>
+                  :min="listing.ingredient.minStock"/>
       <div class="flex justify-end gap-2">
         <IconButton icon="fa-pen" @click="edit"/>
         <IconButton icon="fa-square-plus" @click="add"/>
@@ -71,9 +71,9 @@ export default defineComponent({
         <FormattedText :value="listing.ingredient.price" type="currency"/>
       </div>
 
-      <div v-if="listing.ingredient.container_size != 0" class="flex items-center">
+      <div v-if="listing.ingredient.containerSize != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-box"/>
-        <FormattedText :value="listing.ingredient.container_size" type="number"/>
+        <FormattedText :value="listing.ingredient.containerSize" type="number"/>
       </div>
 
       <div v-if="listing.ingredient.pledge != 0" class="flex items-center">
@@ -82,16 +82,16 @@ export default defineComponent({
         <FormattedText :value="listing.ingredient.pledge" type="currency"/>
       </div>
 
-      <div v-if="listing.ingredient.pledge_container != 0" class="flex items-center">
+      <div v-if="listing.ingredient.pledgeContainer != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-box"/>
         <Icon class="mr-2.5" icon="fa-coins"/>
-        <FormattedText :value="listing.ingredient.pledge_container" type="currency"/>
+        <FormattedText :value="listing.ingredient.pledgeContainer" type="currency"/>
       </div>
 
-      <div v-if="listing.ingredient.min_stock != 0" class="flex items-center">
+      <div v-if="listing.ingredient.minStock != 0" class="flex items-center">
         <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>
         <Icon class="mr-2.5" icon="fa-warehouse"/>
-        <FormattedText :value="listing.ingredient.min_stock" type="number"/>
+        <FormattedText :value="listing.ingredient.minStock" type="number"/>
       </div>
     </GridWrapper>
   </div>

@@ -92,11 +92,11 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="container_size" type="locale"/>
-        <SimpleInputField type="number" v-model="ingredient.container_size"/>
+        <SimpleInputField type="number" v-model="ingredient.containerSize"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
-                    @click="ingredient.container_size = item"
+                    @click="ingredient.containerSize = item"
                     :value="item"
                     type="number"/>
       </div>
@@ -118,7 +118,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge_container" type="locale"/>
-        <SimpleInputField type="number" v-model="ingredient.pledge_container"/>
+        <SimpleInputField type="number" v-model="ingredient.pledgeContainer"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
@@ -131,12 +131,12 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="min_stock" type="locale"/>
-        <SimpleInputField type="number" v-model="ingredient.min_stock"/>
+        <SimpleInputField type="number" v-model="ingredient.minStock"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
-                    @click="ingredient.min_stock = ingredient.container_size * item[0] || item[1]"
-                    :value="ingredient.container_size * item[0] || item[1]"
+                    @click="ingredient.minStock = ingredient.containerSize * item[0] || item[1]"
+                    :value="ingredient.containerSize * item[0] || item[1]"
                     type="number"/>
       </div>
     </ColorContainer>

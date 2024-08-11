@@ -20,15 +20,15 @@ export async function deleteJson(url: string, params: Map<string, string | numbe
 }
 
 export async function requestJson(url: string, method: string, params: Map<string, string | number> = new Map(), body: Object | null = null) {
-    console.log(`${method} Request`)
     let header = await headers()
     header.append("Content-Type", "application/json")
     let requrl = constructUrl(url, params);
     let response
     if (body) {
-        console.log(`${requrl}: ${JSON.stringify(body)}`)
+        console.log(`${method} ${requrl}: ${JSON.stringify(body)}`)
         response = await fetch(requrl, {method: method, headers: header, body: JSON.stringify(body)})
     } else {
+        console.log(`${method} ${requrl}`)
         response = await fetch(requrl, {method: method, headers: header})
     }
 
@@ -48,7 +48,6 @@ export async function requestJson(url: string, method: string, params: Map<strin
 }
 
 async function headers() {
-    console.log("Building header")
     let header: Headers = new Headers()
     header.append("Authorization", `Bearer ${(await getSessionToken())!}`)
     return header

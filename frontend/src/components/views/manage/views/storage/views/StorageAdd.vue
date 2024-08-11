@@ -41,9 +41,9 @@ export default defineComponent({
   methods: {
     setContainerCounts(value: number) {
       this.containerCount = value
-      this.setPieceCounts(value * this.ingredient.container_size)
-      if (this.ingredient.pledge_container) {
-        this.pledgeContainers = value * this.ingredient.pledge_container
+      this.setPieceCounts(value * this.ingredient.containerSize)
+      if (this.ingredient.pledgeContainer) {
+        this.pledgeContainers = value * this.ingredient.pledgeContainer
       }
       console.log("Updating container count to value " + value)
     },
@@ -89,11 +89,11 @@ export default defineComponent({
       let listing = store.focusStorage
       if (!listing) return []
       let states: string[] = ["price"]
-      if (listing.ingredient.container_size) {
+      if (listing.ingredient.containerSize) {
         states.push("container_count")
       }
       states.push("piece_count")
-      if (listing.ingredient.pledge_container) {
+      if (listing.ingredient.pledgeContainer) {
         states.push("pledge_container")
       }
       if (listing.ingredient.pledge) {
@@ -129,7 +129,7 @@ export default defineComponent({
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'container_count'">
       <FormattedText :size="SizeGroup.xl"
                      class="col-span-full"
-                     :value="$t('container') + ' (' + ingredient.container_size + ' '+ $t('pieces') + ')'"/>
+                     :value="$t('container') + ' (' + ingredient.containerSize + ' '+ $t('pieces') + ')'"/>
       <SimpleInputField class="col-span-full"
                         @update:modelValue="setContainerCounts"
                         type="number"
@@ -161,7 +161,7 @@ export default defineComponent({
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'pledge_container'">
       <FormattedText :size="SizeGroup.xl"
                      class="col-span-full"
-                     :value="$t('pledge') + ' ' + $t('container') + ' (' + containerCount + ' x ' + $n(ingredient.pledge_container, 'currency') + ')'"/>
+                     :value="$t('pledge') + ' ' + $t('container') + ' (' + containerCount + ' x ' + $n(ingredient.pledgeContainer, 'currency') + ')'"/>
       <SimpleInputField class="col-span-full"
                         type="number"
                         :model-value="pledgeContainers"

@@ -13,10 +13,10 @@ export interface Ingredient {
     category: Category,
     name: string,
     price: number,
-    container_size: number,
+    containerSize: number,
     pledge: number,
-    pledge_container: number,
-    min_stock: number
+    pledgeContainer: number,
+    minStock: number
 }
 
 export function createIngredient(ingredient: Ingredient): Promise<Ingredient> {

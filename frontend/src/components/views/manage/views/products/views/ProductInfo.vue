@@ -60,12 +60,9 @@ export default defineComponent({
     if (store.focusProduct === undefined) window.location.href = "#manage/products"
   },
   mounted() {
-    let date = new Date()
-    date.setDate(date.getDate() - 30)
-    this.inventoryOut = salesProduct(this.focusProduct.id!, date)
-    storageHistory(this.focusProduct.id!)
+    salesProduct(this.focusProduct.id!)
         .then(e => {
-          this.inventoryIn = e
+          this.inventoryOut = e
         })
   }
 })
@@ -94,7 +91,7 @@ export default defineComponent({
         </ColorContainer>
         <ColorContainer bg="accent">
           <InfoEntry value="purchase_price" type="locale"/>
-          <InfoEntry :value="focusProduct.raw_price" type="currency"/>
+          <InfoEntry :value="focusProduct.price" type="currency"/>
         </ColorContainer>
       </GridWrapper>
 
@@ -111,7 +108,8 @@ export default defineComponent({
 
       <GridWrapper cols="1" class="md:grid-cols-1">
         <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="history"/>
-        <InventoryHistory :history="inventoryIn"/>
+        <!--        We dont purchase products but inventory -->
+        <!--        <InventoryHistory :history="inventoryIn"/>-->
         <SalesHistory :history="inventoryOut"/>
       </GridWrapper>
 

@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.storage.StorageTransaction;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -28,10 +29,11 @@ public class StorageService {
         this.ingredientRepository = ingredientRepository;
     }
 
+    @Transactional
     public Storage addStorage(Storage storage) {
         Storage created = storageRepository.save(storage);
         if (created.getPrice() > 0) {
-            ingredientRepository.updateById(storage.getIngredient().getId(), storage.getPrice());
+            ingredientRepository.updateByIdIs(storage.getIngredient().getId(), storage.getPrice());
         }
         return created;
     }
@@ -40,7 +42,7 @@ public class StorageService {
         for (InventoryCorrection correction : corrections) {
             Optional<Ingredient> optIngredient = ingredientRepository.findById(correction.ingredient());
             if (optIngredient.isEmpty()) continue;
-            StorageSummary summary = storageRepository.summaryById(correction.ingredient());
+            StorageSummary summary = new StorageSummary(storageRepository.summaryById(correction.ingredient()));
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;
             if (delta > 0) {

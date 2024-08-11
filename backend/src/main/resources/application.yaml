@@ -33,7 +33,7 @@ springdoc:
 
 logging:
   level:
-    root: debug
+    root: info
 
 security:
   jwt:

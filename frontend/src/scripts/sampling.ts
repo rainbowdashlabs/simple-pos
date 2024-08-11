@@ -50,10 +50,10 @@ for (let category of dummyCategories.values()) {
             category: category,
             name: product,
             pledge: randChoice([0, 0.08, 0.15, 0.25]),
-            pledge_container: randChoice([0, 0.75, 1.5]),
-            container_size: randChoice([0, 6, 12, 20, 24]),
+            pledgeContainer: randChoice([0, 0.75, 1.5]),
+            containerSize: randChoice([0, 6, 12, 20, 24]),
             price: randInt(5),
-            min_stock: randChoice([10, 20, 30])
+            minStock: randChoice([10, 20, 30])
         }
         let prod: Product = {
             id: index,

@@ -6,7 +6,7 @@ export interface Purchase {
     user_id: number
     productId: number
     price: number
-    date: number
+    purchased: number
 }
 
 export interface History {

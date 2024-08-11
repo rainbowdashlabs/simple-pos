@@ -18,7 +18,7 @@ export interface Balance {
     id: number | null | undefined,
     account: Account | null | undefined,
     amount: number;
-    date: number | Date;
+    added: number | Date | string;
 }
 
 export interface Deposit {

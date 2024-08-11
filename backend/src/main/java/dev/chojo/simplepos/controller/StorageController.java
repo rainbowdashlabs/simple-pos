@@ -12,6 +12,7 @@ import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.StorageService;
+import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Optional;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @RestController
 @RequestMapping("/api/storage")
 public class StorageController {
+    private static final Logger log = getLogger(StorageController.class);
     private final StorageRepository storageRepository;
     private final IngredientRepository ingredientRepository;
     private final StorageService storageService;
@@ -56,13 +60,13 @@ public class StorageController {
     @GetMapping("/stock/{id}")
     @ResponseStatus(HttpStatus.OK)
     public StorageSummary getStock(@PathVariable int id) {
-        return storageRepository.summaryById(id);
+        return new StorageSummary(storageRepository.summaryById(id));
     }
 
     @GetMapping("/stock")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Listing<StorageSummary>> getStock() {
-        return ResponseEntity.ok(Listing.map(storageRepository.summary(), e -> e.getIngredient().getCategory()));
+        return ResponseEntity.ok(Listing.map(storageRepository.summary().stream().map(StorageSummary::new).toList(), e -> e.getIngredient().getCategory()));
     }
 
     @GetMapping("/{id}")
@@ -71,21 +75,22 @@ public class StorageController {
                                               @RequestParam(value = "limit", defaultValue = "100") int limit,
                                               @RequestParam(value = "page", defaultValue = "0") int page) {
         Optional<Ingredient> ingredient = ingredientRepository.findById(id);
-        return ingredient.map(value -> ResponseEntity.ok(storageRepository.findAllByIngredient(value, PageRequest.of(page, limit), Sort.by("id").descending())))
+        return ingredient.map(value -> ResponseEntity.ok(storageRepository.findAllByIngredient(value, PageRequest.of(page, limit).withSort(Sort.by("id").descending()))))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Storage> add(InboundStorage storage) {
+    ResponseEntity<Storage> add(@RequestBody InboundStorage storage) {
+        log.info(storage.toString());
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Ingredient> ingredient = ingredientRepository.findById(storage.ingredient().getId());
         if (ingredient.isEmpty()) return ResponseEntity.notFound().build();
         if (storage.price() > 0) {
-            cashRepository.save(new Cash(current, storage.price(), "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
+            cashRepository.save(new Cash(current, -storage.price(), "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
         }
         if (storage.pledge() > 0) {
-            cashRepository.save(new Cash(current, storage.pledge(), "pledge", "%s".formatted(storage.ingredient().getName())));
+            cashRepository.save(new Cash(current, -storage.pledge(), "pledge", "%s".formatted(storage.ingredient().getName())));
         }
         return ResponseEntity.accepted().body(storageService.addStorage(new Storage(null, ingredient.get(), storage.purchased(), storage.price(), storage.amount(), 0)));
     }

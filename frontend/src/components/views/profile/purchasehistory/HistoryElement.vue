@@ -1,11 +1,12 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, PropType} from 'vue'
 import Profile from "../../accounts/Profile.vue";
-import {product} from "../../../../scripts/product.ts";
+import {Product, product} from "../../../../scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {transactionDelete} from "../../../../scripts/purchase.ts";
+import {Purchase, transactionDelete} from "../../../../scripts/purchase.ts";
 import TwoStepDeleteButton from "../../../styles/buttons/TwoStepDeleteButton.vue";
 import IconButton from "../../../styles/buttons/IconButton.vue";
+import FormattedText from "../../../styles/text/FormattedText.vue";
 
 export default defineComponent({
   name: "HistoryElement",
@@ -22,19 +23,28 @@ export default defineComponent({
   methods: {
     deleteTransaction() {
       this.deleted = true
-      transactionDelete(this.transaction.id)
+      transactionDelete(this.purchase.id)
     }
   },
-  props: ['transaction', 'product'],
-  components: {IconButton, TwoStepDeleteButton, DeleteHistoryButton, Profile, navigator}
+  props: {
+    purchase:{
+      type: Object as PropType<Purchase>,
+      required: true
+    },
+    product: {
+      type: Object as PropType<Product>,
+      required: true
+    }
+  },
+  components: {FormattedText, IconButton, TwoStepDeleteButton, DeleteHistoryButton, Profile, navigator}
 })
 </script>
 
 <template>
   <tr>
-    <th :class="color">{{ $d(new Date(transaction.date * 1000)) }}</th>
-    <th :class="color">{{ product.name }}</th>
-    <th :class="color">{{ $n(transaction.price, 'currency') }}</th>
+    <th :class="color"><FormattedText :value="purchase.purchased" type="date"/></th>
+    <th :class="color"><FormattedText :value="product.name"/></th>
+    <th :class="color"><FormattedText :value="purchase.price" type="currency"/></th>
     <th v-show="!deleted">
       <IconButton icon="fa-trash-can" @click="deleteTransaction"/>
     </th>

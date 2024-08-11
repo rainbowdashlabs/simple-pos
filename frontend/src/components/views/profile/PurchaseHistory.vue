@@ -34,8 +34,8 @@ export default defineComponent({
       </tr>
       </thead>
       <tbody class="max-h-64 overflow-y-scroll">
-      <HistoryElement v-for="item in purchases.purchases" :transaction="item"
-                      :product="purchases.products.get(item.productId)"/>
+      <HistoryElement v-for="item in purchases.purchases" :purchase="item"
+                      :product="purchases.products[item.productId]"/>
       </tbody>
     </table>
   </ColorContainer>

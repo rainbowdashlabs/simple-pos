@@ -4,5 +4,5 @@ import dev.chojo.simplepos.entity.Ingredient;
 
 import java.time.Instant;
 
-public record InboundStorage(Ingredient ingredient, Instant purchased, double price, double pledge, int amount) {
+public record InboundStorage(Ingredient ingredient, Instant purchased, Double price, Double pledge, Integer amount) {
 }
