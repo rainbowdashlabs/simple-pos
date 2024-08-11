@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {category, Category, updateCategory} from "../../../../../scripts/categories.ts";
+import {Category, deleteCategory, updateCategory} from "../../../../../scripts/categories.ts";
 import ColorContainer from "../../../../styles/container/ColorContainer.vue";
 import InputField from "../../../../styles/input/InputField.vue";
 import ConfirmButton from "../../../../styles/buttons/ConfirmButton.vue";
@@ -34,8 +34,11 @@ export default defineComponent({
   },
   methods: {
     deleteCategory() {
-      this.deleted = true
       // TODO: Check that nothing is linked to that category
+      deleteCategory(this.category.id)
+          .then(() => {
+            this.deleted = true
+          })
     },
     updateCategory() {
       this.edit = false
@@ -56,13 +59,13 @@ export default defineComponent({
       <FormattedText class="text-center text-red-500 w-2/3" :value="category.name"/>
     </div>
 
-      <div v-else-if="edit" class="flex justify-evenly">
-        <SimpleInputField class="w-2/3 mr-5" type="text" v-model="newName"/>
-        <div class="flex">
-          <ConfirmButton class="mr-2.5" @click="updateCategory"/>
-          <BackButton @click="cancelEdit"/>
-        </div>
+    <div v-else-if="edit" class="flex justify-evenly">
+      <SimpleInputField class="w-2/3 mr-5" type="text" v-model="newName"/>
+      <div class="flex">
+        <ConfirmButton class="mr-2.5" @click="updateCategory"/>
+        <BackButton @click="cancelEdit"/>
       </div>
+    </div>
 
     <div v-else class="flex items-center">
       <FormattedText class="w-2/3 pr-5" :value="category.name"/>

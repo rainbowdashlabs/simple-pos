@@ -1,10 +1,10 @@
 ### Create a new user
-POST http://localhost:8080/api/auth/signup
+POST https://simple-pos.chojo.dev/api/auth/signup
 Content-Type: application/json
 
 {
-  "username": "Lilly",
-  "password": "test"
+  "username": "flocke",
+  "password": "6EdkuaXKntDxPsgUytLyM"
 }
 
 ### Login

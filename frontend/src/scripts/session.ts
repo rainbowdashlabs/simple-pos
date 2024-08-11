@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie'
 import {getHost, urlEncode} from "./http.ts";
+import {store} from "./store.ts";
 
 interface Token {
     token: string
@@ -27,11 +28,15 @@ export function logout() {
     Cookies.remove(token_expire)
     Cookies.remove(refresh_token)
     Cookies.remove(refresh_token_expire)
+    store.loggedIn = false
+    window.location.href = "#login"
 }
 
 export async function isLoggedIn() {
     let token = await getSessionToken()
+    if (!token) return false
     console.debug(`User is logged in ${token != null}`)
+    store.loggedIn = true
     return true;
 }
 

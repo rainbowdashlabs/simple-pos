@@ -50,11 +50,11 @@ public class CategoryController {
         return ResponseEntity.accepted().body(categoryRepository.save(category));
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Void> delete(@RequestBody Category category) {
+    ResponseEntity<Void> delete(@PathVariable int id) {
         // TODO check that no entity is associated
-        categoryRepository.delete(category);
+        categoryRepository.deleteById(id);
         return ResponseEntity.accepted().build();
     }
 }

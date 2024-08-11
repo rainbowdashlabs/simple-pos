@@ -11,7 +11,8 @@ export interface Store {
     focusIngredient: Ingredient | null | undefined,
     focusStorage: StorageSummary | null | undefined,
     theme: string | null | undefined,
-    cart: Cart
+    cart: Cart,
+    loggedIn: boolean
 }
 
 export const store: Reactive<Store> = reactive({
@@ -20,6 +21,7 @@ export const store: Reactive<Store> = reactive({
         focusStorage: null,
         focusIngredient: null,
         theme: null,
-        cart: new Cart()
+        cart: new Cart(),
+        loggedIn: false
     }
 )

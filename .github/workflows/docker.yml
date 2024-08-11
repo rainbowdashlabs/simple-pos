@@ -1,14 +1,14 @@
 name: Docker Build
 
 on:
-  push:
   release:
     types:
       - published
+  push:
     tags:
     branches:
       - main
-      - development
+      - dev*
 
 jobs:
   docker-build:

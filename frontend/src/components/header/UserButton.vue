@@ -2,29 +2,28 @@
 import {isLoggedIn} from '../../scripts/session.ts'
 import UserContext from "./UserContext.vue";
 import Icon from "../styles/Icon.vue";
+import {store} from "../../scripts/store.ts";
 
 export default {
   components: {Icon, UserContext},
   data() {
     return {
-      userContext: false,
-      loggedIn: true
+      userContext: false
     }
   },
   computed: {
     buttonIcon() {
-      return this.loggedIn ? "fa-user" : "fa-right-to-bracket"
+      return store.loggedIn ? "fa-user" : "fa-right-to-bracket"
     },
     buttonAction() {
-      return this.loggedIn ? this.toggleContext : this.login
+      return store.loggedIn ? this.toggleContext : this.login
+    },
+    userContextActive() {
+      return this.userContext && store.loggedIn
     }
-  },
-  beforeUpdate() {
+
   },
   methods: {
-    userContextActive() {
-      return this.userContext && this.loggedIn
-    },
     toggleContext() {
       this.userContext = !this.userContext
     },
@@ -34,7 +33,7 @@ export default {
   }, mounted() {
     window.addEventListener('hashchange', () => {
       isLoggedIn().then(res => {
-        this.loggedIn = res
+        store.loggedIn = res
       })
     })
   }
@@ -45,7 +44,7 @@ export default {
   <button class="bg-accent dark:bg-accent-d" @click="buttonAction">
     <Icon :icon="buttonIcon"/>
   </button>
-  <div v-show="userContextActive()">
+  <div v-show="userContextActive">
     <UserContext/>
   </div>
 </template>
