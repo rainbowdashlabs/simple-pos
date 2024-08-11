@@ -11,7 +11,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         enable_lazy_load_no_trans: true
-        default_schema: simple_pos
     show-sql: true
     hibernate:
       ddl-auto: update
