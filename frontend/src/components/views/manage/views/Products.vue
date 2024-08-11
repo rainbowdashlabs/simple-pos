@@ -13,13 +13,15 @@ import {SizeGroup} from "../../../../scripts/text.ts";
 export default defineComponent({
   name: "Products",
   components: {Icon, FreeButton, ConfirmButton, ColorContainer, ProductGroup, ProductEntry, AccountEntry},
+  data() {
+    return {
+      productList: {categories: []} as ProductListings
+    }
+  },
   computed: {
     SizeGroup() {
       return SizeGroup
     },
-    productList(): ProductListings {
-      return products()
-    }
   },
   methods: {
     createProduct() {
@@ -28,7 +30,12 @@ export default defineComponent({
     createMultiProduct() {
       window.location.href = "#manage/products/createmulti"
     }
-  }
+  },
+  mounted() {
+    products().then(e => {
+      this.productList = e
+    })
+  },
 
 })
 </script>
@@ -42,7 +49,8 @@ export default defineComponent({
       <Icon icon="fa-square-plus"/>
       <Icon icon="fa-bottle-water"/>
     </FreeButton>
-    <FreeButton :class="SizeGroup.xl2" color="bg-green-500" class="flex gap-5 justify-center" @click="createMultiProduct">
+    <FreeButton :class="SizeGroup.xl2" color="bg-green-500" class="flex gap-5 justify-center"
+                @click="createMultiProduct">
       <Icon icon="fa-square-plus"/>
       <Icon icon="fa-box"/>
     </FreeButton>

@@ -9,6 +9,7 @@ export class Cart {
     products: Map<number, CartPosition> = new Map();
 
     addProduct(product: Product, amount: number): void {
+        console.log(`Adding product ${product.name} to cart`)
         const existingProduct = this.products.get(product.id!);
 
         if (existingProduct) {
@@ -28,6 +29,7 @@ export class Cart {
     }
 
     clearCart(): void {
+        console.log("Clearing cart")
         this.products.clear();
     }
 }

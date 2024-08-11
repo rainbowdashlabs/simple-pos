@@ -1,8 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {deleteAccount} from "../../../../../scripts/accounts.ts";
-import {Product} from "../../../../../scripts/product.ts";
+import {deleteProduct, Product} from "../../../../../scripts/product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
 import {store} from "../../../../../scripts/store.ts";
 import TwoStepDeleteButton from "../../../../styles/buttons/TwoStepDeleteButton.vue";
@@ -28,7 +27,7 @@ export default defineComponent({
   }, methods: {
     deleteProd(event: Event) {
       event.stopPropagation()
-      deleteAccount(this.product.id!)
+      deleteProduct(this.product.id!)
       this.deleted = true
     },
     openInfo() {

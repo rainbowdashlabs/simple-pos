@@ -7,27 +7,27 @@ export default defineComponent({
   components: {FormattedText},
   props: {
     amount: {
-      type: Number,
+      type: [Number],
       required: true
     },
     size: {
       type: String
     },
-    min:{
-      type:Number,
+    min: {
+      type: Number,
       default: 0
     }
   },
   computed: {
     color() {
-      return this.amount <= this.min ? "text-red-500" : "text-green-600"
+      return (this.amount ?? 0) <= this.min ? "text-red-500" : "text-green-600"
     }
   }
 })
 </script>
 
 <template>
-  <FormattedText :class="color" :value="amount" :size="size" type="number"/>
+  <FormattedText :class="color" :value="amount ?? 0" :size="size" type="number"/>
 </template>
 
 <style scoped>

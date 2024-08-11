@@ -1,13 +1,13 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
-import {createIngredient, Ingredient} from "./Ingredient.ts";
-import {dummyCategories, dummyProductCategories, dummyProducts} from "./sampling.ts";
+import {Ingredient} from "./Ingredient.ts";
+import {deleteJson, getJson, postJson, putJson} from "./http.ts";
 
 export interface Timeframe {
     locale: string,
     days: number
 }
 
-export interface RecipeEntry{
+export interface RecipeEntry {
     ingredient: Ingredient
     amount: number
 }
@@ -21,7 +21,6 @@ export interface LazyProduct {
     name: string,
     category: Category,
     price: number,
-    raw_price: number | undefined | null,
     active: boolean
 }
 
@@ -44,12 +43,8 @@ export interface ProductSalesStat {
     profit: number
 }
 
-export function product(id: number): LazyProduct {
-    return fullProduct(id)
-}
-
-export function fullProduct(id: number): Product {
-    return dummyProducts.get(id)!
+export function product(id: number): Promise<Product> {
+    return getJson("api/product/" + id)
 }
 
 /**
@@ -57,26 +52,20 @@ export function fullProduct(id: number): Product {
  *
  * @param product
  */
-export function createProduct(product: Product) {
-    for (let entry of product.recipe.entries) {
-        if (!entry.ingredient.id) {
-            entry.ingredient.id = createIngredient(entry.ingredient).id
-        }
-    }
-    console.log("Created product " + product)
+export function createProduct(product: Product): Promise<Product> {
+    return postJson("api/product", product)
 }
 
-export function updateProduct(product: Product) {
-    console.log("Updated product " + product)
+export function updateProduct(product: Product): Promise<Product> {
+    return putJson("api/product", product)
 }
 
-export function products(): Listing<Product> {
-    let res: ProductGroup[] = []
-    for (let entry of dummyProductCategories.entries()) {
-        console.log(entry[1])
-        res.push({category: dummyCategories.get(entry[0])!, entries: entry[1]})
-    }
-    return {categories: res}
+export function products(): Promise<Listing<Product>> {
+    return getJson("api/product")
+}
+
+export function deleteProduct(id: number) {
+    return deleteJson("api/product/" + id)
 }
 
 /**
@@ -85,21 +74,8 @@ export function products(): Listing<Product> {
  * @param date date
  * @param [limit=30] amount of entries to retrieve
  */
-// @ts-expect-error
-export function salesProduct(id: number, date: Date, limit: number = 30): ProductSalesStat[] {
-    let res: ProductSalesStat[] = []
-    let currDate = new Date()
-    for (let i = 0; i < limit; i++) {
-        var timestamp = currDate.setDate(currDate.getDate() - 1)
-        res.push({
-            day: timestamp,
-            product_id: id,
-            sales: Math.floor(Math.random() * 10),
-            profit: 0,
-            revenue: 0
-        })
-    }
-    return res
+export function salesProduct(id: number, limit: number = 30): Promise<ProductSalesStat[]> {
+    return getJson(`api/product/${id}/sales/stat`, new Map([["limit", limit]]))
 }
 
 export function salesCountProduct(id: number, date: Date): ProductSalesStat {

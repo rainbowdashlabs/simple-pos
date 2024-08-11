@@ -6,10 +6,9 @@ import SalesHistory from "./productinfo/SalesHistory.vue";
 import SalesStatistic from "./productinfo/SalesStatistic.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import CenterText from "../../../../../styles/text/CenterText.vue";
-import {Product, salesProduct} from "../../../../../../scripts/product.ts";
+import {Product, ProductSalesStat, salesProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
 import {Category} from "../../../../../../scripts/categories.ts";
-import {storageHistory} from "../../../../../../scripts/storage.ts";
 import {Timeframes} from "../../../../../../scripts/util.ts";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import IconButton from "../../../../../styles/buttons/IconButton.vue";
@@ -31,6 +30,12 @@ export default defineComponent({
     IconButton,
     GridWrapper, SalesStatistic, SalesHistory, InventoryHistory, FullCol, FontAwesomeIcon, CenterText
   },
+  data() {
+    return {
+      //inventoryIn: [] as StorageEntry[],
+      inventoryOut: [] as ProductSalesStat[]
+    }
+  },
   computed: {
     SizeGroup() {
       return SizeGroup
@@ -43,14 +48,6 @@ export default defineComponent({
     },
     focusCategory(): Category {
       return this.focusProduct.category
-    },
-    inventoryIn() {
-      return storageHistory(this.focusProduct.id!)
-    },
-    inventoryOut() {
-      let date = new Date()
-      date.setDate(date.getDate() - 30)
-      return salesProduct(this.focusProduct.id!, date)
     }
   },
   methods: {
@@ -62,7 +59,10 @@ export default defineComponent({
     if (store.focusProduct === undefined) window.location.href = "#manage/products"
   },
   mounted() {
-    console.log(this.focusProduct.recipe)
+    salesProduct(this.focusProduct.id!)
+        .then(e => {
+          this.inventoryOut = e
+        })
   }
 })
 </script>
@@ -90,7 +90,7 @@ export default defineComponent({
         </ColorContainer>
         <ColorContainer bg="accent">
           <InfoEntry value="purchase_price" type="locale"/>
-          <InfoEntry :value="focusProduct.raw_price" type="currency"/>
+          <InfoEntry :value="focusProduct.price" type="currency"/>
         </ColorContainer>
       </GridWrapper>
 
@@ -107,7 +107,8 @@ export default defineComponent({
 
       <GridWrapper cols="1" class="md:grid-cols-1">
         <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="history"/>
-        <InventoryHistory :history="inventoryIn"/>
+        <!--        We dont purchase products but inventory -->
+        <!--        <InventoryHistory :history="inventoryIn"/>-->
         <SalesHistory :history="inventoryOut"/>
       </GridWrapper>
 

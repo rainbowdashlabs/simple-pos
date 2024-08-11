@@ -27,7 +27,7 @@ public class CashController {
         this.cashRepository = cashRepository;
     }
 
-    @PostMapping()
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void add(@RequestBody CashDto cash) {
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

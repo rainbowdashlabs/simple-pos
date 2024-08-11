@@ -2,18 +2,23 @@
 import {defineComponent} from 'vue'
 import HistoryElement from "./deposithistory/HistoryElement.vue";
 import {store} from "../../../scripts/store.ts";
-import {Deposit, deposits} from "../../../scripts/accounts.ts";
+import {Balance, deposits} from "../../../scripts/accounts.ts";
 import ColorContainer from "../../styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "DepositHistory",
   components: {ColorContainer, HistoryElement},
+  data() {
+      return {
+        deposits: [] as Balance[]
+      }
+  },
   computed: {
-    deposits(): Deposit[] {
-      if (!store.focusAccount) return []
-      return deposits(store.focusAccount?.id!, 30)
-    }
-  }
+  },
+  mounted() {
+      deposits(store.focusAccount?.id!, 30)
+          .then(e => {this.deposits = e})
+  },
 })
 </script>
 

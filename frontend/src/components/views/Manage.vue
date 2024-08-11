@@ -65,8 +65,10 @@ export default defineComponent({
 
 <template>
   <Header/>
-  <div class="flex justify-center full my-5">
-    <component :is="currentView"/>
+  <div class="flex justify-center my-5 mb-auto">
+    <div class="mb-5">
+      <component :is="currentView"/>
+    </div>
   </div>
 </template>
 

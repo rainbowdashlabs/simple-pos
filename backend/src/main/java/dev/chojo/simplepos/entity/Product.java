@@ -1,7 +1,9 @@
 package dev.chojo.simplepos.entity;
 
+import dev.chojo.simplepos.entity.dto.LazyProduct;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -9,9 +11,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.context.annotation.Lazy;
 
 @Entity
-public class Product {
+public class Product implements Comparable<Product> {
     @Id
     @GeneratedValue
     private Integer id;
@@ -28,7 +31,7 @@ public class Product {
 
     private boolean active = true;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private Recipe recipe;
 
@@ -91,5 +94,14 @@ public class Product {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public LazyProduct asLazyProduct(){
+        return new LazyProduct(id, category, name, price, active);
+    }
+
+    @Override
+    public int compareTo(Product o) {
+        return name.compareTo(o.name);
     }
 }

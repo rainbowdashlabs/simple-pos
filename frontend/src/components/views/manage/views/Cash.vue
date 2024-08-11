@@ -29,30 +29,35 @@ export default defineComponent({
       type: "other",
       withdraw: false,
       deposit: false,
-      active: false,
-      history_key: Date.now(),
+      componentKey: 0,
       current_cash: 0
     }
   },
   methods: {
-    async submit() {
-      await submitCash(this.amount, this.note, this.type)
-      this.history_key = Date.now()
+    submit() {
+      submitCash(this.deposit ? this.amount : -this.amount, this.note, this.type)
+          .then(() => {
+            this.reset()
+            this.componentKey += 1
+            currentCash().then(value => this.current_cash = value.amount)
+          })
+    },
+    reset() {
+      this.withdraw = false
+      this.deposit = false
+      this.type = "other"
+      this.amount = 0
+      this.note = ""
     },
     toggleDeposit() {
       this.deposit = !this.deposit
       this.withdraw = false
       this.amount = 0
-      this.evalActive()
     },
     toggleWithdraw() {
       this.withdraw = !this.withdraw
       this.deposit = false
       this.amount = 0
-      this.evalActive()
-    },
-    evalActive() {
-      this.active = this.deposit || this.withdraw
     },
     typeChange(value: string): any {
       console.log(`Change to ${value}`)
@@ -73,7 +78,7 @@ export default defineComponent({
       return this.deposit || this.withdraw
     },
     inputMode() {
-      if(!this.inputActive) return
+      if (!this.inputActive) return
       if (this.deposit) {
         return "deposit"
       }
@@ -82,7 +87,7 @@ export default defineComponent({
     // TODO Add submit for cash transaction
   },
   mounted() {
-      currentCash().then(value => this.current_cash = value.amount)
+    currentCash().then(value => this.current_cash = value.amount)
   },
 })
 </script>
@@ -107,13 +112,13 @@ export default defineComponent({
           <SimpleInputField v-model="note" type="text"
                             :placeholder="$t('note')"/>
           <SelectMenu class="col-span-full" @select="typeChange"
-                      :options="[[$t('pledge'), 'pledge'], [$t('other'), 'other']]"
+                      :options="[[$t('pledge'), 'pledge'], [$t('purchase'), 'purchase'], [$t('other'), 'other']]"
                       :current="type"/>
-          <ConfirmButton @click="submit" :disabled="disabled" class="col-span-full"/>
+          <ConfirmButton @click="() => submit()" :disabled="disabled" class="col-span-full"/>
         </GridWrapper>
       </Transition>
     </GridWrapper>
-    <CashHistory :key="history_key" class="mt-5"/>
+    <CashHistory :key="componentKey" class="mt-5"/>
   </div>
 </template>
 

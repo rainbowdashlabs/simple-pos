@@ -5,8 +5,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Comparator;
+
 @Entity
-public class Category {
+public class Category implements Comparable<Category>, Comparator<Category> {
     @Id
     @GeneratedValue
     private Integer id;
@@ -36,5 +38,15 @@ public class Category {
 
     public void setName(@NotNull String name) {
         this.name = name;
+    }
+
+    @Override
+    public int compareTo(Category o) {
+        return name.compareTo(o.name);
+    }
+
+    @Override
+    public int compare(Category o1, Category o2) {
+        return o1.compareTo(o2);
     }
 }

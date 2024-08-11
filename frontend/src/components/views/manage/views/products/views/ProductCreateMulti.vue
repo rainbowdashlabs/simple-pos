@@ -17,7 +17,7 @@ import {SizeGroup} from "../../../../../../scripts/text.ts";
 import FreeButton from "../../../../../styles/buttons/FreeButton.vue";
 import TextButton from "../../../../../styles/buttons/TextButton.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import {ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import {ingredient, IngredientListing, ingredients} from "../../../../../../scripts/Ingredient.ts";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
 
 export default defineComponent({
@@ -44,7 +44,9 @@ export default defineComponent({
       name: "",
       price: 0,
       category: "",
-      recipe: {entries: []} as Recipe
+      recipe: {entries: []} as Recipe,
+      categoryList: [] as Category[],
+      ingredientList: {categories: []} as IngredientListing
     }
   },
   computed: {
@@ -61,13 +63,7 @@ export default defineComponent({
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
     },
-    categoryList() :Category[]{
-      return categories()
-    },
-    ingredientList() {
-      return ingredients()
-    },
-    rawPrice(){
+    rawPrice() {
       return this.recipe.entries.reduce((e: number, cur: RecipeEntry) => {
         return e + cur.ingredient.price * cur.amount
       }, 0)
@@ -81,7 +77,6 @@ export default defineComponent({
       createProduct({
         id: null,
         name: this.name,
-        raw_price: undefined,
         category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
         price: this.price,
         active: true,
@@ -98,7 +93,9 @@ export default defineComponent({
       } else if (index != -1) {
         this.recipe.entries[index].amount = count
       } else if (count != 0) {
-        this.recipe.entries.push({amount: count, ingredient: ingredient(id)})
+        ingredient(id).then(e => {
+          this.recipe.entries.push({amount: count, ingredient: e})
+        })
       }
     }
   },
@@ -106,7 +103,15 @@ export default defineComponent({
     price(newVal) {
       this.price = Number(newVal)
     }
-  }
+  },
+  mounted() {
+    categories().then(e => {
+      this.categoryList = e
+    })
+    ingredients().then(e => {
+      this.ingredientList = e
+    })
+  },
 })
 </script>
 

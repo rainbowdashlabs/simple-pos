@@ -108,7 +108,9 @@ const i18n: I18n = createI18n({
             of: "of",
             ingredients: "Ingredients",
             other: "Other",
-            null: "Unknown"
+            null: "Unknown",
+            undefined: "Undefined",
+            purchase: "Purchase"
         },
         de: {
             accounts: "Konten",
@@ -160,7 +162,9 @@ const i18n: I18n = createI18n({
             of: "von",
             ingredients: "Zutaten",
             other: "Sonstige",
-            null: "Unbekannt"
+            null: "Unbekannt",
+            undefined: "Undefiniert",
+            purchase: "Einkauf"
         }
     },
     datetime: datetimeFormats,

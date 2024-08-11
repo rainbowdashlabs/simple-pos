@@ -1,35 +1,53 @@
 import {getSessionToken} from "./session.ts";
 
 export async function postJson(url: string, body: Object) {
-    console.log("Post Request")
-    let header = await headers()
-    header.append("Content-Type", "application/json")
-    let requrl = constructUrl(url);
-    console.log(`${requrl}: ${JSON.stringify(body)}`)
-    let response = await fetch(requrl, {method: "POST", headers: header, body: JSON.stringify(body)})
+    return requestJson(url, "POST", new Map(), body)
+}
 
-    if (!response.ok) {
-        console.error(response.text())
-        // todo error handling
-        return null
-    }
+export async function putJson(url: string, body: Object) {
+    return requestJson(url, "PUT", new Map(), body)
+}
 
-    return response.json()
+export async function patchJson(url: string, body: Object) {
+    return requestJson(url, "PATCH", new Map(), body)
 }
 
 export async function getJson(url: string, params: Map<string, string | number> = new Map()) {
-    let response = await fetch(constructUrl(url, params), {method: "GET", headers: await headers()})
+    return requestJson(url, "GET", params, null)
+}
+export async function deleteJson(url: string, params: Map<string, string | number> = new Map()) {
+    return requestJson(url, "DELETE", params, null)
+}
+
+export async function requestJson(url: string, method: string, params: Map<string, string | number> = new Map(), body: Object | null = null) {
+    let header = await headers()
+    header.append("Content-Type", "application/json")
+    let requrl = constructUrl(url, params);
+    let response
+    if (body) {
+        console.log(`${method} ${requrl}: ${JSON.stringify(body)}`)
+        response = await fetch(requrl, {method: method, headers: header, body: JSON.stringify(body)})
+    } else {
+        console.log(`${method} ${requrl}`)
+        response = await fetch(requrl, {method: method, headers: header})
+    }
+
     if (!response.ok) {
         console.error(response.text())
         // todo error handling
         return null
     }
 
-    return response.json()
+    let resBody = await response.text()
+    if (resBody) {
+        return JSON.parse(resBody)
+    }
+
+    return null
+
 }
 
 async function headers() {
-    console.log("Building header")
     let header: Headers = new Headers()
     header.append("Authorization", `Bearer ${(await getSessionToken())!}`)
     return header
@@ -51,12 +69,7 @@ export function urlEncode(data: Object) {
 }
 
 export function getHost() {
-    let backend = import.meta.env.VITE_BACKEND_HOST
-    console.log(`Backend: ${backend}`)
-    if (backend) {
-        console.log("Found backend override")
-        return backend
-    }
-    return "http://localhost:8888"
-    return window.location.protocol + window.location.host
+    //return "http://localhost:8888"
+    console.log(window.location.protocol + window.location.host)
+    return window.location.protocol + "//" + window.location.host
 }

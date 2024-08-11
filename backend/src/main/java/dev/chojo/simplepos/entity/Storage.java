@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -14,6 +15,7 @@ public class Storage {
     private Integer id;
 
     @ManyToOne
+    @JsonIgnore
     private Ingredient ingredient;
 
     private Instant purchased;
@@ -79,5 +81,9 @@ public class Storage {
 
     public void setSold(int sold) {
         this.sold = sold;
+    }
+
+    public void take(){
+        sold += 1;
     }
 }

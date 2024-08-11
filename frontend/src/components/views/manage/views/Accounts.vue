@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {accounts, LazyAccount} from "../../../../scripts/accounts.ts";
+import {Account, accounts} from "../../../../scripts/accounts.ts";
 import AccountEntry from "./accounts/AccountEntry.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import ColorContainer from "../../../styles/container/ColorContainer.vue";
@@ -8,16 +8,21 @@ import ColorContainer from "../../../styles/container/ColorContainer.vue";
 export default defineComponent({
   name: "Accounts",
   components: {ColorContainer, FontAwesomeIcon, AccountEntry},
-  computed: {
-    accounts(): LazyAccount[] {
-      return accounts()
+  data() {
+    return {
+      accounts: [] as Account[]
     }
   },
   methods: {
-    createAccount(){
+    createAccount() {
       window.location.href = "#manage/accounts/create"
     }
-  }
+  },
+  mounted() {
+    accounts().then(e => {
+      this.accounts = e
+    })
+  },
 })
 </script>
 

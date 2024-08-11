@@ -53,7 +53,7 @@ export default {
 </script>
 
 <template>
-  <div class="mx-auto max-w-screen-lg">
+  <div class="mx-auto mb-auto max-w-screen-lg">
     <Login v-if="!loggedIn"/>
     <component v-if="loggedIn" :is="currentView"/>
   </div>

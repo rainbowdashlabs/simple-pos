@@ -2,7 +2,7 @@
 import {defineComponent} from 'vue'
 import {store} from "../../../../scripts/store.ts";
 import SelectMenu from "../../../styles/input/select/SelectMenu.vue";
-import {account, accounts, LazyAccount, purchase} from "../../../../scripts/accounts.ts";
+import {account, Account, accounts, purchase} from "../../../../scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
 import MoneyText from "../../../styles/text/MoneyText.vue";
 import FormattedText from "../../../styles/text/FormattedText.vue";
@@ -21,7 +21,8 @@ export default defineComponent({
   },
   data() {
     return {
-      account: {id: -1, name: "", balance: 0}
+      account: {id: -1, name: "", balance: 0},
+      accountOptions: [] as Array<Array<string | number>>
     }
   },
   computed: {
@@ -30,29 +31,35 @@ export default defineComponent({
     },
     cart() {
       return store.cart
-    },
-    accounts() {
-      accounts()
-    },
-    accountOptions() {
-      return accounts().map((value: LazyAccount) => [value.name, value.id])
     }
   },
   methods: {
     checkoutAccount(value: string) {
-      this.account = account(Number(value))!
+      account(Number(value))!.then(e => {
+        this.account = e
+      })
     },
     purchase() {
-      // @ts-expect-error
-      purchase(this.account.id, this.cart.products.values())
-      this.cart.clearCart()
-      store.focusAccount = account(this.account.id)
-      window.location.href = "#profile"
+      console.log(Array.from(this.cart.products.values()))
+      purchase(this.account.id, Array.from(this.cart.products.values()))
+          .then(() => {
+            this.cart.clearCart()
+            account(this.account.id).then(e => {
+              store.focusAccount = e
+              window.location.href = "#profile"
+            })
+          })
     },
     back() {
       window.location.href = "#pos"
     }
-  }
+  },
+  mounted() {
+    accounts().then(e => {
+      this.accountOptions = e.map((value: Account) => [value.name, value.id])
+      this.account = e[0]
+    })
+  },
 })
 </script>
 

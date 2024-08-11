@@ -1,5 +1,5 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
-import {dummyCategories, dummyIngredientCategories, dummyIngredients} from "./sampling.ts";
+import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
 
 export interface IngredientListing extends Listing<Ingredient> {
 
@@ -13,29 +13,28 @@ export interface Ingredient {
     category: Category,
     name: string,
     price: number,
-    container_size: number,
+    containerSize: number,
     pledge: number,
-    pledge_container: number,
-    min_stock: number
+    pledgeContainer: number,
+    minStock: number
 }
 
-export function createIngredient(ingredient: Ingredient) {
-    ingredient.id = Math.floor(Math.random() * 1000)
-    return ingredient
+export function createIngredient(ingredient: Ingredient): Promise<Ingredient> {
+    return postJson("api/ingredient", ingredient)
 }
 
-export function ingredients(): IngredientListing {
-    let res: IngredientGroup[] = []
-    for (let entry of dummyIngredientCategories.entries()) {
-        res.push({category: dummyCategories.get(entry[0])!, entries: entry[1]})
-    }
-    return {categories: res}
+export function ingredients(): Promise<IngredientListing> {
+    return getJson("api/ingredient")
 }
 
-export function updateIngredient(data: Ingredient) {
-    console.log(`updated ingredient ${data.id}:${data.name}`)
+export function updateIngredient(data: Ingredient): Promise<Ingredient> {
+    return patchJson("api/ingredient", data)
 }
 
-export function ingredient(id: number) {
-    return dummyIngredients.get(id)!
+export function ingredient(id: number): Promise<Ingredient> {
+    return getJson("api/ingredient/" + id)
+}
+
+export function deleteIngredient(id: number): Promise<any> {
+    return deleteJson("api/ingredient/" + id)
 }

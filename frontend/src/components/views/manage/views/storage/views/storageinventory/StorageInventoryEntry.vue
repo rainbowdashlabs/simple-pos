@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import CenterText from "../../../../../../styles/text/CenterText.vue";
-import {IngredientsStock} from "../../../../../../../scripts/storage.ts";
+import {StorageSummary} from "../../../../../../../scripts/storage.ts";
 import SimpleInputField from "../../../../../../styles/input/SimpleInputField.vue";
 import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
 import NumberText from "../../../../../../styles/text/NumberText.vue";
@@ -21,7 +21,7 @@ export default defineComponent({
   },
   props: {
     listing: {
-      type: Object as PropType<IngredientsStock>,
+      type: Object as PropType<StorageSummary>,
       required: true
     }
   },
@@ -33,7 +33,7 @@ export default defineComponent({
       return this.count - this.listing.stock
     },
     count() {
-      return this.containerCount * this.listing.container_size + this.pieceCount
+      return this.containerCount * this.listing.ingredient.containerSize + this.pieceCount
     },
     bgColor() {
       if (this.diff > 0) return "okay"
@@ -52,27 +52,24 @@ export default defineComponent({
       this.updateAmount()
     },
     updateAmount() {
-      this.init_stock = this.count
+      this.$emit("changed", {ingredient: this.listing.ingredient.id, amount: this.count})
     }
   },
   watch: {
-    containerCount(newValue: string){
+    containerCount(newValue: string) {
       this.containerCount = Number(newValue)
-    },
-    count(newValue: string){
-      this.count = Number(newValue)
     }
-  }
+  }, emits:["changed"]
 })
 </script>
 
 <template>
   <ColorContainer :bg="bgColor" class="flex rounded-md items-center min-h-14 gap-5 px-5 py-2 justify-evenly max-w-full">
-    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.name"/>
+    <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.ingredient.name"/>
     <div class="flex w-1/3 justify-evenly items-center">
       <FormattedText :size="SizeGroup.md" :value="count" type="number"/>
       <FormattedText :size="SizeGroup.md" value="of" type="locale"/>
-      <FormattedText :size="SizeGroup.md" :value="init_stock" type="number"/>
+      <FormattedText :size="SizeGroup.md" :value="listing.stock" type="number"/>
       <Icon :size="SizeGroup.md" icon="fa-equals"/>
       <NumberText :size="SizeGroup.md" :amount="diff"/>
     </div>

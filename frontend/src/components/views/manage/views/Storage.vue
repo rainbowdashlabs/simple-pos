@@ -1,24 +1,32 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import StorageGroup from "./storage/StorageGroup.vue";
-import {stockSummary} from "../../../../scripts/storage.ts";
+import {stockSummary, StorageSummary} from "../../../../scripts/storage.ts";
 import ConfirmButton from "../../../styles/buttons/ConfirmButton.vue";
 import GridWrapper from "../../../styles/grid/GridWrapper.vue";
+import {Listing} from "../../../../scripts/categories.ts";
 
 export default defineComponent({
   name: "Storage",
   components: {GridWrapper, ConfirmButton, StorageGroup},
-  computed: {
-    inventorySummary: stockSummary
+  data() {
+    return {
+      inventorySummary: {categories: []} as Listing<StorageSummary>
+    }
   },
-  methods:{
-    inventory(){
+  methods: {
+    inventory() {
       window.location.href = "#manage/storage/inventory"
     },
-    createIngredient(){
-      window.location.href= "#manage/storage/create"
+    createIngredient() {
+      window.location.href = "#manage/storage/create"
     }
-  }
+  },
+  mounted() {
+      stockSummary().then(e => {
+        this.inventorySummary = e
+      })
+  },
 })
 </script>
 

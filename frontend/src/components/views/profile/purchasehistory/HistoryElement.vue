@@ -1,11 +1,12 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, PropType} from 'vue'
 import Profile from "../../accounts/Profile.vue";
-import {product} from "../../../../scripts/product.ts";
+import {Product} from "../../../../scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {transactionDelete} from "../../../../scripts/transactions.ts";
+import {Purchase, transactionDelete} from "../../../../scripts/purchase.ts";
 import TwoStepDeleteButton from "../../../styles/buttons/TwoStepDeleteButton.vue";
 import IconButton from "../../../styles/buttons/IconButton.vue";
+import FormattedText from "../../../styles/text/FormattedText.vue";
 
 export default defineComponent({
   name: "HistoryElement",
@@ -20,25 +21,47 @@ export default defineComponent({
     }
   },
   methods: {
-    deleteTransaction() {
+    deletePurchase() {
       this.deleted = true
-      transactionDelete(this.transaction.id)
+      transactionDelete(this.purchase.id)
     }
   },
-  props: ['transaction', 'product'],
-  components: {IconButton, TwoStepDeleteButton, DeleteHistoryButton, Profile, navigator}
+  props: {
+    purchase: {
+      type: Object as PropType<Purchase>,
+      required: true
+    },
+    product: {
+      type: Object as PropType<Product>,
+      required: true
+    }
+  },
+  components: {FormattedText, IconButton, TwoStepDeleteButton, DeleteHistoryButton, Profile, navigator}
 })
 </script>
 
 <template>
-  <tr>
-    <th :class="color">{{ $d(new Date(transaction.date * 1000)) }}</th>
-    <th :class="color">{{ product.name }}</th>
-    <th :class="color">{{ $n(transaction.price, 'currency') }}</th>
-    <th v-show="!deleted">
-      <IconButton icon="fa-trash-can" @click="deleteTransaction"/>
-    </th>
-  </tr>
+  <div class="flex justify-between gap-5 border-2 px-5 items-center py-2 my-2 rounded-md border-accent dark:border-accent-d" :class="color">
+    <div class="flex flex-col justify-between w-5/6">
+      <div class="flex items-center gap-5">
+        <FormattedText :value="purchase.purchased" type="date"/>
+        <FormattedText :value="product.name"/>
+      </div>
+      <div class="flex gap-5 items-center">
+        <FormattedText :value="purchase.amount" type="number"/>
+        <FormattedText value="x" type="text"/>
+        <FormattedText :value="purchase.price" type="currency"/>
+        <FormattedText value="=" type="text"/>
+        <FormattedText :value="purchase.amount * purchase.price" type="currency"/>
+      </div>
+    </div>
+    <div class="w-1/6 flex justify-end">
+      <div v-show="!deleted">
+        <IconButton icon="fa-trash-can" @click="deletePurchase"/>
+      </div>
+
+    </div>
+  </div>
 </template>
 
 <style scoped>

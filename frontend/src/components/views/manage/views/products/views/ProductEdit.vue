@@ -7,7 +7,7 @@ import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {Product, RecipeEntry, updateProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
-import {categories, category, Category} from "../../../../../../scripts/categories.ts";
+import {categories, Category} from "../../../../../../scripts/categories.ts";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
@@ -17,7 +17,7 @@ import TextButton from "../../../../../styles/buttons/TextButton.vue";
 import ProductIngredientInfo from "./productinfo/ProductIngredientInfo.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
-import {ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import {ingredient, IngredientListing, ingredients} from "../../../../../../scripts/Ingredient.ts";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 import {roundCurrency} from "../../../../../../scripts/util.ts";
 
@@ -43,7 +43,9 @@ export default defineComponent({
     return {
       category: store.focusProduct?.category,
       product: Object.assign({}, store.focusProduct) as Product,
-      recipe: Object.assign({}, store.focusProduct?.recipe)
+      recipe: Object.assign({}, store.focusProduct?.recipe),
+      categoryList: [] as Category[],
+      ingredientList: {} as IngredientListing
     }
   },
   computed: {
@@ -59,17 +61,11 @@ export default defineComponent({
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
     },
-    categoryList(): Category[] {
-      return categories()
-    },
     rawPrice() {
       // TODO: Check with real data
       return this.recipe.entries.reduce((e: number, cur: RecipeEntry) => {
         return e + (cur.ingredient.price * cur.amount)
       }, 0)
-    },
-    ingredientList() {
-      return ingredients()
     }
   },
   methods: {
@@ -90,23 +86,33 @@ export default defineComponent({
       } else if (index != -1) {
         this.recipe.entries[index].amount = count
       } else if (count != 0) {
-        this.recipe.entries.push({amount: count, ingredient: ingredient(id)})
+        ingredient(id).then(e => {
+          this.recipe.entries.push({amount: count, ingredient: e})
+        })
       }
     }
   },
   beforeMount() {
     if (store.focusProduct === undefined) window.location.href = "#manage/products"
   },
-  watch:{
-    "product.price"(newValue: String){
+  watch: {
+    "product.price"(newValue: String) {
       this.product.price = roundCurrency(Number(newValue))
     }
-  }
+  },
+  mounted() {
+    ingredients().then(e => {
+      this.ingredientList = e
+    })
+    categories().then(e => {
+      this.categoryList = e
+    })
+  },
 })
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
       <SimpleInputField type="text" v-model="product.name"/>

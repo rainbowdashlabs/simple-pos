@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,13 +17,15 @@ public class Recipe {
     private Integer id;
 
     @OneToOne
+    @JsonIgnore
     private Product product;
 
     @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
     private List<RecipeEntry> entries;
 
-    public Recipe(Integer id, List<RecipeEntry> entries) {
+    public Recipe(Integer id, Product product, List<RecipeEntry> entries) {
         this.id = id;
+        this.product = product;
         this.entries = entries;
     }
 
@@ -43,5 +46,13 @@ public class Recipe {
 
     public void setEntries(List<RecipeEntry> ingredients) {
         this.entries = ingredients;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }

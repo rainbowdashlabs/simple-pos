@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {storageInfo} from "../../../../../../../scripts/storage.ts";
+import {stockInfo} from "../../../../../../../scripts/storage.ts";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import NumberText from "../../../../../../styles/text/NumberText.vue";
 import {RecipeEntry} from "../../../../../../../scripts/product.ts";
@@ -15,13 +15,13 @@ export default defineComponent({
       required: true
     }
   },
-  computed: {
-    stock() {
-      return storageInfo(this.entry?.ingredient.id!).stock
-    }
+  data() {
+      return{
+        stock: -1
+      }
   },
   mounted() {
-    console.log(this.entry)
+    stockInfo(this.entry?.ingredient.id!).then(e => {this.stock = e.stock})
   }
 })
 </script>
@@ -36,13 +36,13 @@ export default defineComponent({
 
     <div class="flex gap-2 items-center">
       <Icon class="mr-2.5" icon="fa-warehouse"/>
-      <NumberText :min="entry.ingredient.min_stock" :amount="stock"/>
+      <NumberText :min="entry.ingredient.minStock" :amount="stock"/>
     </div>
 
     <div class="flex gap-2 items-center">
       <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>
       <Icon class="mr-2.5" icon="fa-warehouse"/>
-      <FormattedText :value="entry.ingredient.min_stock" type="number"/>
+      <FormattedText :value="entry.ingredient.minStock" type="number"/>
     </div>
   </div>
 </template>
