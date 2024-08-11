@@ -1,7 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {deleteAccount} from "../../../../../scripts/accounts.ts";
 import {deleteProduct, Product} from "../../../../../scripts/product.ts";
 import CenterText from "../../../../styles/text/CenterText.vue";
 import {store} from "../../../../../scripts/store.ts";

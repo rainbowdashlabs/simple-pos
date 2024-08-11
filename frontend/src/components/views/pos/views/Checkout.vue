@@ -41,7 +41,6 @@ export default defineComponent({
     },
     purchase() {
       console.log(Array.from(this.cart.products.values()))
-      // @ts-expect-error
       purchase(this.account.id, Array.from(this.cart.products.values()))
           .then(() => {
             this.cart.clearCart()

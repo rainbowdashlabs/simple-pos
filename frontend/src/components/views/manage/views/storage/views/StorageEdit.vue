@@ -122,7 +122,7 @@ export default defineComponent({
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
-                    @click="ingredient.pledge_container = item"
+                    @click="ingredient.pledgeContainer = item"
                     :value="item"
                     type="currency"/>
       </div>

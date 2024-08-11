@@ -74,7 +74,6 @@ export function deleteProduct(id: number) {
  * @param date date
  * @param [limit=30] amount of entries to retrieve
  */
-// @ts-expect-error
 export function salesProduct(id: number, limit: number = 30): Promise<ProductSalesStat[]> {
     return getJson(`api/product/${id}/sales/stat`, new Map([["limit", limit]]))
 }

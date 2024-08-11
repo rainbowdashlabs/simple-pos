@@ -77,7 +77,6 @@ export default defineComponent({
       createProduct({
         id: null,
         name: this.name,
-        raw_price: undefined,
         category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
         price: this.price,
         active: true,

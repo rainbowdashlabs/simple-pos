@@ -9,7 +9,6 @@ import CenterText from "../../../../../styles/text/CenterText.vue";
 import {Product, ProductSalesStat, salesProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
 import {Category} from "../../../../../../scripts/categories.ts";
-import {StorageEntry, storageHistory} from "../../../../../../scripts/storage.ts";
 import {Timeframes} from "../../../../../../scripts/util.ts";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import IconButton from "../../../../../styles/buttons/IconButton.vue";
@@ -33,7 +32,7 @@ export default defineComponent({
   },
   data() {
     return {
-      inventoryIn: [] as StorageEntry[],
+      //inventoryIn: [] as StorageEntry[],
       inventoryOut: [] as ProductSalesStat[]
     }
   },

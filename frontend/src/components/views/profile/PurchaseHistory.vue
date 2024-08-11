@@ -4,6 +4,7 @@ import HistoryElement from "./purchasehistory/HistoryElement.vue";
 import {History, history} from "../../../scripts/purchase.ts";
 import {store} from "../../../scripts/store.ts";
 import ColorContainer from "../../styles/container/ColorContainer.vue";
+import {Product} from "../../../scripts/product.ts";
 
 export default defineComponent({
   name: "PurchaseHistory",
@@ -13,6 +14,12 @@ export default defineComponent({
       return{
         purchases: {purchases: [], products: new Map()} as History
       }
+  },
+  methods: {
+    productFromId(id: number) : Product{
+      // @ts-expect-error
+      return this.purchases.products[id]
+    }
   },
   computed: {
   },
@@ -35,7 +42,7 @@ export default defineComponent({
       </thead>
       <tbody class="max-h-64 overflow-y-scroll">
       <HistoryElement v-for="item in purchases.purchases" :purchase="item"
-                      :product="purchases.products[item.productId]"/>
+                      :product="productFromId(item.productId)"/>
       </tbody>
     </table>
   </ColorContainer>
