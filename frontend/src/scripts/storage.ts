@@ -37,8 +37,8 @@ export interface StorageSummary {
 }
 
 
-export function storageInfo(id: number): Promise<StorageSummary> {
-    return getJson("api/storage/" + id)
+export function stockInfo(id: number): Promise<StorageSummary> {
+    return getJson("api/storage/stock/" + id)
 }
 
 export function stockSummary(): Promise<Listing<StorageSummary>> {
@@ -50,9 +50,9 @@ export function storageHistory(id: number, limit: number = 30): Promise<StorageE
 }
 
 export function addStorage(data: InboundStorage):Promise<StorageEntry> {
-    return postJson("api/storage/", data)
+    return postJson("api/storage", data)
 }
 
 export function submitInventory(data: InventoryCorrection[]) {
-    return putJson("api/storage/", data)
+    return putJson("api/storage", data)
 }

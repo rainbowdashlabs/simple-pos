@@ -1,5 +1,5 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
-import {getJson, patchJson, postJson} from "./http.ts";
+import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
 
 export interface IngredientListing extends Listing<Ingredient> {
 
@@ -20,7 +20,7 @@ export interface Ingredient {
 }
 
 export function createIngredient(ingredient: Ingredient): Promise<Ingredient> {
-    return postJson("api/ingredient/", ingredient)
+    return postJson("api/ingredient", ingredient)
 }
 
 export function ingredients(): Promise<IngredientListing> {
@@ -33,4 +33,8 @@ export function updateIngredient(data: Ingredient): Promise<Ingredient> {
 
 export function ingredient(id: number): Promise<Ingredient> {
     return getJson("api/ingredient/" + id)
+}
+
+export function deleteIngredient(id: number): Promise<any> {
+    return deleteJson("api/ingredient/" + id)
 }

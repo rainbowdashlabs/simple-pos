@@ -49,7 +49,7 @@ public class StorageController {
         this.cashRepository = cashRepository;
     }
 
-    @GetMapping("/")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Storage> getSummary() {
         // TODO: Probably group by ingredient.
@@ -79,7 +79,7 @@ public class StorageController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/")
+    @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Storage> add(@RequestBody InboundStorage storage) {
         log.info(storage.toString());
@@ -95,7 +95,7 @@ public class StorageController {
         return ResponseEntity.accepted().body(storageService.addStorage(new Storage(null, ingredient.get(), storage.purchased(), storage.price(), storage.amount(), 0)));
     }
 
-    @PutMapping("/")
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public void updateInventory(@RequestBody List<InventoryCorrection> corrections) {
         storageService.processInventoryCorrection(corrections);

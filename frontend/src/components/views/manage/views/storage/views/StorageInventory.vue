@@ -1,11 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {
-  InventoryCorrection,
-  stockSummary,
-  StorageSummary,
-  submitInventory
-} from "../../../../../../scripts/storage.ts";
+import {InventoryCorrection, stockSummary, StorageSummary, submitInventory} from "../../../../../../scripts/storage.ts";
 import StorageInventoryGroup from "./storageinventory/StorageInventoryGroup.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
@@ -18,35 +13,43 @@ export default defineComponent({
   components: {ColorContainer, SimpleInputField, ConfirmButton, GridWrapper, StorageInventoryGroup},
   data() {
     return {
-      summary: {categories: []} as Listing<StorageSummary>
+      summary: {categories: []} as Listing<StorageSummary>,
+      ingredients: new Map() as Map<Number, Number>
     }
   },
   computed: {},
   methods: {
     submit() {
-      let inventory = this.summary.categories.flatMap((group: CategoryGroup<StorageSummary>) => {
-        return group.entries.map((entry: StorageSummary) => {
-          return {
-            ingredient: entry.ingredient.id!,
-            amount: entry.stock
-          } as InventoryCorrection
-        })
+      let inventory = [] as InventoryCorrection[]
+      this.ingredients.forEach((v, k) => {
+        inventory.push({ingredient: k, amount: v} as InventoryCorrection)
       })
       submitInventory(inventory)
-      window.location.href = "#manage/storage"
+          .then(() => {
+            window.location.href = "#manage/storage"
+          })
+    },
+    changed(e: { ingredient: number, amount: number }) {
+      console.log(`Set count for ${e.ingredient} to ${e.amount}`)
+      this.ingredients.set(e.ingredient, e.amount)
     }
   },
   mounted() {
     stockSummary().then(e => {
       this.summary = {categories: e.categories.map(e => Object.assign({}, e))}
+      this.summary.categories.flatMap((group: CategoryGroup<StorageSummary>) => {
+        return group.entries.forEach((entry: StorageSummary) => {
+          this.ingredients.set(entry.ingredient.id!, 0)
+        })
+      })
     })
-  },
+  }
 })
 </script>
 
 <template>
   <div class="mx-5 overflow-x-scroll">
-    <StorageInventoryGroup v-for="item in summary.categories" :group="item"/>
+    <StorageInventoryGroup v-for="item in summary.categories" :group="item" @changed="changed"/>
     <ConfirmButton class="w-full mt-5" @click="submit"/>
   </div>
 </template>

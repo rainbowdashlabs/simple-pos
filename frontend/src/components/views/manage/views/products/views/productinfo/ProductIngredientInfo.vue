@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {storageInfo} from "../../../../../../../scripts/storage.ts";
+import {stockInfo} from "../../../../../../../scripts/storage.ts";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import NumberText from "../../../../../../styles/text/NumberText.vue";
 import {RecipeEntry} from "../../../../../../../scripts/product.ts";
@@ -21,7 +21,7 @@ export default defineComponent({
       }
   },
   mounted() {
-    storageInfo(this.entry?.ingredient.id!).then(e => {this.stock = e.stock})
+    stockInfo(this.entry?.ingredient.id!).then(e => {this.stock = e.stock})
   }
 })
 </script>

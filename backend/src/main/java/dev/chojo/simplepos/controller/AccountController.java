@@ -45,7 +45,7 @@ public class AccountController {
         this.purchaseRepository = purchaseRepository;
     }
 
-    @PostMapping("/")
+    @PostMapping
     ResponseEntity<Account> create(@RequestBody AccountDto account) {
         return ResponseEntity.accepted().body(accountRepository.save(new Account(null,account.getName(), Instant.now())));
     }
@@ -64,7 +64,7 @@ public class AccountController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/")
+    @GetMapping
     ResponseEntity<List<AccountDto>> get() {
         return ResponseEntity.ok(accountRepository.findAllAccounts());
     }

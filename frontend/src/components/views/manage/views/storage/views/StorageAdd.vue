@@ -73,7 +73,9 @@ export default defineComponent({
         amount: this.pieceCount,
         pledge: this.pledgePieces + this.pledgeContainers
       } as InboundStorage)
-      window.location.href = "#manage/storage"
+          .then(() => {
+            window.location.href = "#manage/storage"
+          })
     }
   }, computed: {
     SizeGroup() {
@@ -189,23 +191,23 @@ export default defineComponent({
     </ColorContainer>
 
     <div v-if="state == 'overview'" class="flex-col">
-        <GridWrapper class="col-span-full bg-secondary" :cols="3">
-          <RawGridRowWrapper :entries="[$t('pieces'), pieceCount, $n(price  * pieceCount, 'currency')]"/>
-          <RawGridRowWrapper
-              :entries="[$t('container'), '',containerCount]"/>
-          <RawGridRowWrapper
-              :entries="[$t('pledge') +': '+ $t('container'), '', $n(pledgeContainers, 'currency')]"/>
-          <RawGridRowWrapper
-              :entries="[$t('pledge') +': '+ $t('pieces'), '', $n(pledgePieces, 'currency')]"/>
-          <RawGridRowWrapper
-              :entries="[$t('total') +' '+ $t('pledge'),'', $n(pledgeContainers + pledgePieces, 'currency')]"/>
-          <RawGridRowWrapper class="font-bold"
-                             :entries="[$t('total'), '', $n(pledgeContainers + pledgePieces + price * pieceCount, 'currency')]"/>
-        </GridWrapper>
-        <div class="flex gap-5 pt-5">
-          <BackButton class="w-1/4" @click="previousState"/>
-          <ConfirmButton class="w-3/4" @click="submit"/>
-        </div>
+      <GridWrapper class="col-span-full bg-secondary" :cols="3">
+        <RawGridRowWrapper :entries="[$t('pieces'), pieceCount, $n(price  * pieceCount, 'currency')]"/>
+        <RawGridRowWrapper
+            :entries="[$t('container'), '',containerCount]"/>
+        <RawGridRowWrapper
+            :entries="[$t('pledge') +': '+ $t('container'), '', $n(pledgeContainers, 'currency')]"/>
+        <RawGridRowWrapper
+            :entries="[$t('pledge') +': '+ $t('pieces'), '', $n(pledgePieces, 'currency')]"/>
+        <RawGridRowWrapper
+            :entries="[$t('total') +' '+ $t('pledge'),'', $n(pledgeContainers + pledgePieces, 'currency')]"/>
+        <RawGridRowWrapper class="font-bold"
+                           :entries="[$t('total'), '', $n(pledgeContainers + pledgePieces + price * pieceCount, 'currency')]"/>
+      </GridWrapper>
+      <div class="flex gap-5 pt-5">
+        <BackButton class="w-1/4" @click="previousState"/>
+        <ConfirmButton class="w-3/4" @click="submit"/>
+      </div>
     </div>
   </div>
 </template>

@@ -69,12 +69,7 @@ export function urlEncode(data: Object) {
 }
 
 export function getHost() {
-    let backend = import.meta.env.VITE_BACKEND_HOST
-    console.log(`Backend: ${backend}`)
-    if (backend) {
-        console.log("Found backend override")
-        return backend
-    }
-    return "http://localhost:8888"
-    return window.location.protocol + window.location.host
+    //return "http://localhost:8888"
+    console.log(window.location.protocol + window.location.host)
+    return window.location.protocol + "//" + window.location.host
 }

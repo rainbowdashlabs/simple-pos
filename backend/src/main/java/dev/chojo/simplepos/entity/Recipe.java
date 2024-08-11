@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +17,7 @@ public class Recipe {
     private Integer id;
 
     @OneToOne
+    @JsonIgnore
     private Product product;
 
     @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)

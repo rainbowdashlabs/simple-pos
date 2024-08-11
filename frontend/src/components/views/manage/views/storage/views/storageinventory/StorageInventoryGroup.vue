@@ -19,7 +19,8 @@ export default defineComponent({
       type: Object as PropType<CategoryGroup<StorageSummary>>,
       required: true
     }
-  }
+  },
+  emits: ["changed"]
 })
 </script>
 
@@ -27,7 +28,7 @@ export default defineComponent({
   <div class="pt-5">
     <FormattedText :size="SizeGroup.xl" :value="group.category.name"/>
     <div class="grid grid-cols-1 gap-5 pt-5">
-      <StorageInventoryEntry v-for="item in group.entries" :listing="item"/>
+      <StorageInventoryEntry v-for="item in group.entries" :listing="item" @changed="e => {$emit('changed', e)}"/>
     </div>
   </div>
 

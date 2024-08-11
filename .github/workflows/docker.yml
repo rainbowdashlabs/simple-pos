@@ -2,6 +2,9 @@ name: Docker Build
 
 on:
   push:
+  release:
+    types:
+      - published
     tags:
     branches:
       - main
@@ -9,7 +12,7 @@ on:
 
 jobs:
   docker-build:
-    name: Build Frontend Docker
+    name: Build Docker Image
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -35,26 +38,23 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}-frontend:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
       - name: Tag & Push branch image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}-frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository }}-frontend:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
       - name: Tag & Push latest image
         if: github.ref_name == 'main'
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}-frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository }}-frontend:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:latest

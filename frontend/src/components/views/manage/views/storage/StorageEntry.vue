@@ -55,7 +55,7 @@ export default defineComponent({
 
 <template>
   <div :class="panelColor" class="p-5 rounded-md">
-    <div class="flex w-full justify-between items-center pb-5">
+    <div class="flex w-full justify-between items-center pb-5 gap-5">
       <FormattedText :size="SizeGroup.xl" class="items-center" :value="listing?.ingredient.name"/>
       <NumberText class="content-center" :amount="listing.stock" :size="SizeGroup.xl"
                   :min="listing.ingredient.minStock"/>

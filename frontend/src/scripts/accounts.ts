@@ -29,7 +29,7 @@ export interface Deposit {
  * Retrieve all accounts
  */
 export function accounts(): Promise<Account[]> {
-    return getJson("api/account/")
+    return getJson("api/account")
 }
 
 /**
@@ -75,5 +75,5 @@ export function deleteAccount(id: number): Promise<any> {
  * @param name name of the new account
  */
 export function createAccount(name: string): Promise<Account> {
-    return postJson("api/account/", {name: name})
+    return postJson("api/account", {name: name})
 }

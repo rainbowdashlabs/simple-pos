@@ -48,7 +48,7 @@ public class StorageService {
             if (delta > 0) {
                 takeStorage(optIngredient.get(), delta);
             } else {
-                addStorage(new Storage(null, summary.getIngredient(), Instant.now(), 0, delta, 0));
+                addStorage(new Storage(null, summary.getIngredient(), Instant.now(), 0, Math.abs(delta), 0));
             }
         }
     }
@@ -56,8 +56,9 @@ public class StorageService {
     public synchronized Collection<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
         Map<Integer, StorageTransaction> taken = new HashMap<>();
         for (int i = 0; i < amount; i++) {
-            var optNext = storageRepository.findNextIngredient(ingredient);
-            optNext.ifPresent(storage -> {
+            var optNext = storageRepository.findNextIngredient(ingredient.getId());
+            optNext.ifPresent(id -> {
+                Storage storage = storageRepository.findById(id).get();
                 storage.take();
                 taken.computeIfAbsent(storage.getId(), s -> new StorageTransaction()).update(storageRepository.save(storage));
             });

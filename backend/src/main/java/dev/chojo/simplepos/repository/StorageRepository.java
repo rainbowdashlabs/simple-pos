@@ -2,10 +2,8 @@ package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
-import dev.chojo.simplepos.entity.dto.StorageSummary;
 import jakarta.persistence.Tuple;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -21,6 +19,6 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
 
     List<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
 
-    @Query("SELECT Storage FROM Storage WHERE amount > sold AND ingredient = ?1 ORDER BY purchased ASC LIMIT 1")
-    Optional<Storage> findNextIngredient(Ingredient ingredient);
+    @Query(value = "SELECT id FROM storage WHERE amount > sold AND ingredient_id = ?1 ORDER BY purchased LIMIT 1", nativeQuery = true)
+    Optional<Integer> findNextIngredient(int ingredient);
 }

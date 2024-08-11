@@ -53,15 +53,15 @@ export function product(id: number): Promise<Product> {
  * @param product
  */
 export function createProduct(product: Product): Promise<Product> {
-    return postJson("api/product/", product)
+    return postJson("api/product", product)
 }
 
 export function updateProduct(product: Product): Promise<Product> {
-    return putJson("api/product/", product)
+    return putJson("api/product", product)
 }
 
 export function products(): Promise<Listing<Product>> {
-    return getJson("api/product/")
+    return getJson("api/product")
 }
 
 export function deleteProduct(id: number) {

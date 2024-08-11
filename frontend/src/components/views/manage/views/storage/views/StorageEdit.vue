@@ -27,9 +27,9 @@ export default defineComponent({
   },
   data() {
     return {
-      category: {} as Category,
+      category: store.focusStorage?.ingredient.category as Category,
       categoryList: [] as Category[],
-      ingredient: Object.assign({}, store.focusIngredient) as Ingredient
+      ingredient: Object.assign({}, store.focusStorage?.ingredient) as Ingredient,
     }
   },
   computed: {
@@ -48,10 +48,12 @@ export default defineComponent({
   },
   methods: {
     updateIngredient() {
+      this.ingredient.category = this.category
       updateIngredient(this.ingredient)
           .then(() => {
-            store.focusProduct!.category = this.category!
-            window.location.href = "#manage/products/info"
+            store.focusIngredient = this.ingredient
+            store.focusStorage!.ingredient.category = this.category!
+            window.location.href = "#manage/storage"
           })
     },
     updateCategory(vk: string) {
@@ -62,7 +64,6 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.category = store.focusIngredient?.category!
     categories().then(e => {
       this.categoryList = e
     })

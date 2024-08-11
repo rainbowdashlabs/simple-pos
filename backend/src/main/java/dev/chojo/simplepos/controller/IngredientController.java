@@ -24,25 +24,25 @@ public class IngredientController {
         this.ingredientRepository = ingredientRepository;
     }
 
-    @PostMapping("/")
+    @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Ingredient> create(@RequestBody Ingredient ingredient) {
         return ResponseEntity.accepted().body(ingredientRepository.save(ingredient));
     }
 
-    @GetMapping("/")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Listing<Ingredient>> all() {
         return ResponseEntity.ok(Listing.map(ingredientRepository.findAll(), Ingredient::getCategory));
     }
 
-    @PatchMapping("/")
+    @PatchMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Ingredient> update(@RequestBody Ingredient ingredient) {
         return ResponseEntity.accepted().body(ingredientRepository.save(ingredient));
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Void> delete(@RequestBody Ingredient ingredient) {
         // TODO check that ingredient is unused

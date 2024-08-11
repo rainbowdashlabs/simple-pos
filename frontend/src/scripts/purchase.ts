@@ -1,12 +1,12 @@
 import {LazyProduct} from './product.ts'
-import {getJson} from "./http.ts";
+import {deleteJson, getJson} from "./http.ts";
 
 export interface Purchase {
     id: number
-    user_id: number
     productId: number
-    price: number
     purchased: number
+    amount: number
+    price: number
 }
 
 export interface History {
@@ -18,7 +18,6 @@ export function history(user_id: number, limit: number = 30): Promise<History> {
     return getJson(`api/account/${user_id}/purchase`, new Map([["limit", limit]]))
 }
 
-// @ts-expect-error
-export function transactionDelete(id: number) {
-
+export function transactionDelete(id: number): Promise<any> {
+    return deleteJson(`api/purchase/${id}`)
 }

@@ -27,13 +27,13 @@ public class CategoryController {
         this.categoryRepository = categoryRepository;
     }
 
-    @PostMapping("/")
+    @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Category> create(@RequestBody Category category) {
         return ResponseEntity.accepted().body(categoryRepository.save(category));
     }
 
-    @GetMapping("/")
+    @GetMapping
     ResponseEntity<List<Category>> all() {
         return ResponseEntity.ok(categoryRepository.findAll(Sort.by("name").ascending()));
     }
@@ -44,13 +44,13 @@ public class CategoryController {
         return category.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
-    @PatchMapping("/")
+    @PatchMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Category> update(@RequestBody Category category) {
         return ResponseEntity.accepted().body(categoryRepository.save(category));
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Void> delete(@RequestBody Category category) {
         // TODO check that no entity is associated

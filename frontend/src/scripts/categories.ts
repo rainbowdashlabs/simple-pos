@@ -19,9 +19,9 @@ export function category(id: number): Promise<Category> {
 }
 
 export function updateCategory(category: Category): Promise<Category> {
-    return patchJson("api/category/", category)
+    return patchJson("api/category", category)
 }
 
 export function categories(): Promise<Category[]> {
-    return getJson("api/category/")
+    return getJson("api/category")
 }

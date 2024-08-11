@@ -11,9 +11,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         enable_lazy_load_no_trans: true
+        default_schema: simple_pos
     show-sql: true
     hibernate:
       ddl-auto: update
+
   data:
     rest:
       base-path: /api
@@ -25,7 +27,7 @@ spring:
 #      read-date-timestamps-as-nanoseconds: true
 
 server:
-  port: 8888
+  port: 8080
 
 springdoc:
   api-docs:

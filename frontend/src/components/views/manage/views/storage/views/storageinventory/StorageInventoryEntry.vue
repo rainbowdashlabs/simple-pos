@@ -52,17 +52,14 @@ export default defineComponent({
       this.updateAmount()
     },
     updateAmount() {
-      this.init_stock = this.count
+      this.$emit("changed", {ingredient: this.listing.ingredient.id, amount: this.count})
     }
   },
   watch: {
-    containerCount(newValue: string){
+    containerCount(newValue: string) {
       this.containerCount = Number(newValue)
-    },
-    count(newValue: string){
-      this.count = Number(newValue)
     }
-  }
+  }, emits:["changed"]
 })
 </script>
 
@@ -72,7 +69,7 @@ export default defineComponent({
     <div class="flex w-1/3 justify-evenly items-center">
       <FormattedText :size="SizeGroup.md" :value="count" type="number"/>
       <FormattedText :size="SizeGroup.md" value="of" type="locale"/>
-      <FormattedText :size="SizeGroup.md" :value="init_stock" type="number"/>
+      <FormattedText :size="SizeGroup.md" :value="listing.stock" type="number"/>
       <Icon :size="SizeGroup.md" icon="fa-equals"/>
       <NumberText :size="SizeGroup.md" :amount="diff"/>
     </div>

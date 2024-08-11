@@ -11,40 +11,31 @@ export default defineComponent({
   props: [],
   components: {ColorContainer, HistoryElement},
   data() {
-      return{
-        purchases: {purchases: [], products: new Map()} as History
-      }
+    return {
+      purchases: {purchases: [], products: new Map()} as History
+    }
   },
   methods: {
-    productFromId(id: number) : Product{
+    productFromId(id: number): Product {
       // @ts-expect-error
       return this.purchases.products[id]
     }
   },
-  computed: {
-  },
+  computed: {},
   mounted() {
-      history(store.focusAccount?.id!, 30).then(e => {this.purchases = e})
+    history(store.focusAccount?.id!, 30).then(e => {
+      this.purchases = e
+    })
   },
 })
 </script>
 
 <template>
   <ColorContainer class="max-h-96 overflow-scroll" bg="secondary">
-    <table class="table-auto table-padding">
-      <thead>
-      <tr>
-        <th>{{ $t('date') }}</th>
-        <th>{{ $t('product') }}</th>
-        <th>{{ $t('price') }}</th>
-        <th>{{ $t('delete') }}</th>
-      </tr>
-      </thead>
-      <tbody class="max-h-64 overflow-y-scroll">
+    <div>
       <HistoryElement v-for="item in purchases.purchases" :purchase="item"
                       :product="productFromId(item.productId)"/>
-      </tbody>
-    </table>
+    </div>
   </ColorContainer>
 </template>
 

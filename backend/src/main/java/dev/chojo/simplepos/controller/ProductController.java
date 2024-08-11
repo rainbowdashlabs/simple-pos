@@ -55,13 +55,13 @@ public class ProductController {
     }
 
 
-    @GetMapping("/")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Listing<Product>> get() {
         return ResponseEntity.ok(Listing.map(productRepository.findAll(), Product::getCategory));
     }
 
-    @PostMapping("/")
+    @PostMapping
     ResponseEntity<Product> create(@RequestBody Product product) {
         return ResponseEntity.accepted().body(productService.create(product));
     }
@@ -74,7 +74,7 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/")
+    @PutMapping
     ResponseEntity<Product> update(@RequestBody Product product) {
         return ResponseEntity.accepted().body(productRepository.save(product));
     }

@@ -112,7 +112,7 @@ export default defineComponent({
           <SimpleInputField v-model="note" type="text"
                             :placeholder="$t('note')"/>
           <SelectMenu class="col-span-full" @select="typeChange"
-                      :options="[[$t('pledge'), 'pledge'], [$t('other'), 'other']]"
+                      :options="[[$t('pledge'), 'pledge'], [$t('purchase'), 'purchase'], [$t('other'), 'other']]"
                       :current="type"/>
           <ConfirmButton @click="() => submit()" :disabled="disabled" class="col-span-full"/>
         </GridWrapper>
