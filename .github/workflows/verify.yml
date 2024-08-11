@@ -48,20 +48,11 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-  build-docker-frontend:
+  build-docker:
     runs-on: ubuntu-latest
-    name: Verify Docker Build Frontend
+    name: Verify Docker Build
 
     steps:
       - uses: actions/checkout@v4
       - name: Build as Docker image
-        run: docker build . -f frontend/Dockerfile
-
-  build-docker-backend:
-    runs-on: ubuntu-latest
-    name: Verify Docker Build Backend
-
-    steps:
-      - uses: actions/checkout@v4
-#      - name: Build as Docker image
-#        run: cd backend && docker build .
+        run: docker build .
