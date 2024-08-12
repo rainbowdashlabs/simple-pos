@@ -67,7 +67,6 @@ export function urlEncode(data: Object) {
 }
 
 export function getHost() {
-    return "http://localhost:8888"
-    console.log(window.location.protocol + window.location.host)
+    // return "http://localhost:8888"
     return window.location.protocol + "//" + window.location.host
 }
