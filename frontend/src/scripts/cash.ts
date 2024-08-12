@@ -19,6 +19,12 @@ export interface CashTotal{
 export async function currentCash(): Promise<CashTotal> {
     return await getJson("/api/cash/total")
 }
+export async function currentPledge(): Promise<CashTotal> {
+    return await getJson("/api/cash/total/pledge")
+}
+export async function currentBalance(): Promise<CashTotal> {
+    return await getJson("/api/cash/total/balance")
+}
 
 export async function cashHistory(limit: number = 100): Promise<CashHistoryEntry[]> {
     return await getJson("api/cash", new Map([["limit", limit]]))

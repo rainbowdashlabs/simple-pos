@@ -6,7 +6,7 @@ import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {createProduct, Recipe, RecipeEntry} from "../../../../../../scripts/product.ts";
-import {categories, Category} from "../../../../../../scripts/categories.ts";
+import {categories, Category, Listing} from "../../../../../../scripts/categories.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
@@ -17,7 +17,7 @@ import {SizeGroup} from "../../../../../../scripts/text.ts";
 import FreeButton from "../../../../../styles/buttons/FreeButton.vue";
 import TextButton from "../../../../../styles/buttons/TextButton.vue";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import {ingredient, IngredientListing, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import {Ingredient, ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
 
 export default defineComponent({
@@ -46,7 +46,7 @@ export default defineComponent({
       category: "",
       recipe: {entries: []} as Recipe,
       categoryList: [] as Category[],
-      ingredientList: {categories: []} as IngredientListing
+      ingredientList: {categories: []} as Listing<Ingredient>
     }
   },
   computed: {

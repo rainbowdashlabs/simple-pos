@@ -31,8 +31,6 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-  </div>
   <GridWrapper bg="none" cols="2" class="mx-5">
     <ConfirmButton icon="fa-square-plus" @click="createIngredient"/>
     <ConfirmButton icon="fa-check-double" @click="inventory"/>

@@ -11,5 +11,8 @@ public interface CashRepository extends JpaRepository<Cash, Integer> {
     List<Cash> findByOrderByCreatedDesc(Pageable pageable);
 
     @Query("SELECT sum(amount) FROM Cash")
-    double totalAmount();
+    Double totalAmount();
+
+    @Query("SELECT sum(amount) FROM Cash WHERE type = ?1")
+    Double totalAmount(String type);
 }

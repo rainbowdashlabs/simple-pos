@@ -55,10 +55,8 @@ async function headers() {
 
 function constructUrl(url: string, params: Map<string, string | number> = new Map()) {
     let req = new URL(url, getHost())
-    Object.keys(params)
-        .forEach(key => req.searchParams.append(key, String(params.get(key)!)))
-
-    return req
+    params.forEach((v,k) => req.searchParams.append(k,String(v)))
+    return req.toString()
 }
 
 export function urlEncode(data: Object) {
@@ -69,7 +67,7 @@ export function urlEncode(data: Object) {
 }
 
 export function getHost() {
-    //return "http://localhost:8888"
+    return "http://localhost:8888"
     console.log(window.location.protocol + window.location.host)
     return window.location.protocol + "//" + window.location.host
 }

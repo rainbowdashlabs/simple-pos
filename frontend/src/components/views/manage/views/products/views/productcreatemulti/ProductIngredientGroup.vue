@@ -1,10 +1,11 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {IngredientGroup} from "../../../../../../../scripts/Ingredient.ts";
 import ProductIngredient from "./ProductIngredient.vue";
 import FormattedText from "../../../../../../styles/text/FormattedText.vue";
 import {SizeGroup} from "../../../../../../../scripts/text.ts";
 import {Recipe} from "../../../../../../../scripts/product.ts";
+import {CategoryGroup} from "../../../../../../../scripts/categories.ts";
+import {Ingredient} from "../../../../../../../scripts/Ingredient.ts";
 
 export default defineComponent({
   name: "ProductIngredientGroup",
@@ -16,7 +17,7 @@ export default defineComponent({
   components: {FormattedText, ProductIngredient},
   props: {
     group: {
-      type: Object as PropType<IngredientGroup>,
+      type: Object as PropType<CategoryGroup<Ingredient>>,
       required: true
     },
     recipe: Object as PropType<Recipe>

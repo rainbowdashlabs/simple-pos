@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import GridWrapper from "../../../styles/grid/GridWrapper.vue";
-import {currentCash, submitCash} from "../../../../scripts/cash.ts";
+import {currentBalance, currentCash, currentPledge, submitCash} from "../../../../scripts/cash.ts";
 import MoneyText from "../../../styles/text/MoneyText.vue";
 import {SizeGroup} from "../../../../scripts/text.ts";
 import Container from "../../../styles/container/Container.vue";
@@ -30,7 +30,9 @@ export default defineComponent({
       withdraw: false,
       deposit: false,
       componentKey: 0,
-      current_cash: 0
+      current_cash: 0,
+      current_pledge: 0,
+      current_balance: 0
     }
   },
   methods: {
@@ -39,7 +41,7 @@ export default defineComponent({
           .then(() => {
             this.reset()
             this.componentKey += 1
-            currentCash().then(value => this.current_cash = value.amount)
+            this.refreshCash()
           })
     },
     reset() {
@@ -63,13 +65,18 @@ export default defineComponent({
       console.log(`Change to ${value}`)
       this.type = value
     },
+    refreshCash() {
+      currentCash().then(value => this.current_cash = value.amount)
+      currentBalance().then(value => this.current_balance = value.amount)
+      currentPledge().then(value => this.current_pledge = value.amount)
+    }
   },
   computed: {
     SizeGroup() {
       return SizeGroup
     },
     sizeGroup() {
-      return SizeGroup.xl5
+      return SizeGroup.xl3
     },
     disabled() {
       return this.amount == 0 || !this.note
@@ -87,38 +94,48 @@ export default defineComponent({
     // TODO Add submit for cash transaction
   },
   mounted() {
-    currentCash().then(value => this.current_cash = value.amount)
+    this.refreshCash()
   },
 })
 </script>
 
 <template>
-  <div class="mx-5">
-    <GridWrapper bg="none" cols="1" padding="0">
-      <ColorContainer bg="secondary" class="col-span-full">
-        <MoneyText class="text-center" :size="sizeGroup" :amount="current_cash"/>
-      </ColorContainer>
+  <div class="flex flex-col mx-5 gap-y-5">
+    <ColorContainer bg="secondary">
+      <FormattedText :size="SizeGroup.xl" value="cash" type="locale"/>
+      <MoneyText class="text-center" :size="SizeGroup.xl" :amount="current_cash"/>
+    </ColorContainer>
 
-      <GridWrapper bg="none" cols="2" padding="0">
-        <IconButton bg="okay" icon="fa-download" @click="toggleDeposit"/>
-        <IconButton bg="warn" icon="fa-upload" @click="toggleWithdraw"/>
+    <ColorContainer class="flex justify-evenly gap-5" bg="secondary">
+      <div class="flex-col">
+        <FormattedText :size="SizeGroup.md" value="pledge" type="locale"/>
+        <MoneyText class="text-center" :size="SizeGroup.md" :amount="current_pledge"/>
+      </div>
+      <div>
+        <FormattedText :size="SizeGroup.md" value="balance" type="locale"/>
+        <MoneyText class="text-center" :size="SizeGroup.md" :amount="current_balance"/>
+      </div>
+    </ColorContainer>
+
+    <div class="flex justify-evenly gap-5">
+      <IconButton class="w-full" bg="okay" icon="fa-download" @click="toggleDeposit"/>
+      <IconButton class="w-full" bg="warn" icon="fa-upload" @click="toggleWithdraw"/>
+    </div>
+
+    <Transition>
+      <GridWrapper v-show="inputActive" cols="1">
+        <FormattedText :value="inputMode" :size="SizeGroup.lg" type="locale"/>
+        <SimpleInputField v-model="amount" type="number"
+                          :placeholder="$t('amount')"/>
+        <SimpleInputField v-model="note" type="text"
+                          :placeholder="$t('note')"/>
+        <SelectMenu class="col-span-full" @select="typeChange"
+                    :options="[[$t('pledge'), 'pledge'], [$t('purchase'), 'purchase'], [$t('other'), 'other']]"
+                    :current="type"/>
+        <ConfirmButton @click="() => submit()" :disabled="disabled" class="col-span-full"/>
       </GridWrapper>
-
-      <Transition>
-        <GridWrapper v-show="inputActive" cols="1">
-          <FormattedText :value="inputMode" :size="SizeGroup.lg" type="locale"/>
-          <SimpleInputField v-model="amount" type="number"
-                            :placeholder="$t('amount')"/>
-          <SimpleInputField v-model="note" type="text"
-                            :placeholder="$t('note')"/>
-          <SelectMenu class="col-span-full" @select="typeChange"
-                      :options="[[$t('pledge'), 'pledge'], [$t('purchase'), 'purchase'], [$t('other'), 'other']]"
-                      :current="type"/>
-          <ConfirmButton @click="() => submit()" :disabled="disabled" class="col-span-full"/>
-        </GridWrapper>
-      </Transition>
-    </GridWrapper>
-    <CashHistory :key="componentKey" class="mt-5"/>
+    </Transition>
+    <CashHistory :key="componentKey"/>
   </div>
 </template>
 

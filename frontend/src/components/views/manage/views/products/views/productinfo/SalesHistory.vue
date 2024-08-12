@@ -42,7 +42,7 @@ export default defineComponent({
     <div class="flex flex-col overflow-y-scroll height">
       <div v-for="entry in history" class="flex border-accent border-2 rounded-md my-1 p-1 justify-between">
         <div class="flex justify-start">
-          {{ $d(entry.day) }}
+          {{ $d(entry.day!) }}
         </div>
         <div class="flex justify-between gap-5">
           <div class="flex">

@@ -3,10 +3,11 @@ import {defineComponent, PropType} from 'vue'
 import Profile from "../../accounts/Profile.vue";
 import {Product} from "../../../../scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {Purchase, transactionDelete} from "../../../../scripts/purchase.ts";
+import {Purchase, purchaseDelete} from "../../../../scripts/purchase.ts";
 import TwoStepDeleteButton from "../../../styles/buttons/TwoStepDeleteButton.vue";
 import IconButton from "../../../styles/buttons/IconButton.vue";
 import FormattedText from "../../../styles/text/FormattedText.vue";
+import {SizeGroup} from "../../../../scripts/text.ts";
 
 export default defineComponent({
   name: "HistoryElement",
@@ -16,6 +17,9 @@ export default defineComponent({
     }
   },
   computed: {
+    SizeGroup() {
+      return SizeGroup
+    },
     color() {
       return this.deleted ? "text-red-500" : ""
     }
@@ -23,7 +27,7 @@ export default defineComponent({
   methods: {
     deletePurchase() {
       this.deleted = true
-      transactionDelete(this.purchase.id)
+      purchaseDelete(this.purchase.id)
     }
   },
   props: {
