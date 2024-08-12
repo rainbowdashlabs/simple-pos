@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -45,15 +46,20 @@ public class ProductController {
 
     @GetMapping("/{id}/sales/stat")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<List<ProductSalesStatDto>> get(@PathVariable int id,
-                                                  @RequestParam(defaultValue = "100") int limit,
-                                                  @RequestParam(defaultValue = "0") int page) {
+    ResponseEntity<List<ProductSalesStatDto>> getSalesStat(@PathVariable int id,
+                                                           @RequestParam(defaultValue = "100") int limit,
+                                                           @RequestParam(defaultValue = "0") int page) {
         List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, PageRequest.of(page, limit)).stream()
                 .map(ProductSalesStatDto::new)
                 .toList();
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/{id}/sales/stat/summary")
+    ResponseEntity<ProductSalesStatDto> getSalesStatSummary(@PathVariable int id, @RequestParam Instant after) {
+        ProductSalesStatDto dto = new ProductSalesStatDto(purchaseRepository.getSalesStatSummary(id, after), after);
+        return ResponseEntity.ok(dto);
+    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)

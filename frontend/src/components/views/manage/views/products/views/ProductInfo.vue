@@ -6,7 +6,7 @@ import SalesHistory from "./productinfo/SalesHistory.vue";
 import SalesStatistic from "./productinfo/SalesStatistic.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import CenterText from "../../../../../styles/text/CenterText.vue";
-import {Product, ProductSalesStat, salesProduct} from "../../../../../../scripts/product.ts";
+import {Product, ProductSalesStat, salesStat} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
 import {Category} from "../../../../../../scripts/categories.ts";
 import {Timeframes} from "../../../../../../scripts/util.ts";
@@ -48,6 +48,9 @@ export default defineComponent({
     },
     focusCategory(): Category {
       return this.focusProduct.category
+    },
+    raw_price(): number{
+      return this.focusProduct.recipe.entries.reduce((p, c) => p + c.ingredient.price * c.amount, 0)
     }
   },
   methods: {
@@ -59,7 +62,7 @@ export default defineComponent({
     if (store.focusProduct === undefined) window.location.href = "#manage/products"
   },
   mounted() {
-    salesProduct(this.focusProduct.id!)
+    salesStat(this.focusProduct.id!)
         .then(e => {
           this.inventoryOut = e
         })
@@ -90,7 +93,7 @@ export default defineComponent({
         </ColorContainer>
         <ColorContainer bg="accent">
           <InfoEntry value="purchase_price" type="locale"/>
-          <InfoEntry :value="focusProduct.price" type="currency"/>
+          <InfoEntry :value="raw_price" type="currency"/>
         </ColorContainer>
       </GridWrapper>
 

@@ -4,8 +4,6 @@ import jakarta.persistence.Tuple;
 import org.slf4j.Logger;
 
 import java.time.Instant;
-import java.util.Locale;
-import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -28,6 +26,12 @@ public final class ProductSalesStatDto {
 
     public ProductSalesStatDto(Tuple tuple) {
         this.day = (Instant) tuple.get("day");
+        this.sales = ((Long) tuple.get("sales")).intValue();
+        this.revenue = (double) tuple.get("revenue");
+        this.profit = (double) tuple.get("profit");
+    }
+    public ProductSalesStatDto(Tuple tuple, Instant instant) {
+        this.day = instant;
         this.sales = ((Long) tuple.get("sales")).intValue();
         this.revenue = (double) tuple.get("revenue");
         this.profit = (double) tuple.get("profit");

@@ -1,4 +1,5 @@
 import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
+import {store} from "./store.ts";
 
 export interface Category {
     id: number,
@@ -19,6 +20,7 @@ export function category(id: number): Promise<Category> {
 }
 
 export function updateCategory(category: Category): Promise<Category> {
+    store.productCache.invalidate()
     return patchJson("api/category", category)
 }
 

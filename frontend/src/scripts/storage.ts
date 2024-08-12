@@ -49,10 +49,14 @@ export function storageHistory(id: number, limit: number = 30): Promise<StorageE
     return getJson("api/storage/" + id, new Map([["limit", limit]]))
 }
 
-export function addStorage(data: InboundStorage):Promise<StorageEntry> {
+export function addStorage(data: InboundStorage): Promise<StorageEntry> {
     return postJson("api/storage", data)
 }
 
 export function submitInventory(data: InventoryCorrection[]) {
     return putJson("api/storage", data)
+}
+
+export function stockLow(limit: number = 100): Promise<StorageSummary[]> {
+    return getJson("api/storage/stock/low", new Map([["limit", limit]]))
 }

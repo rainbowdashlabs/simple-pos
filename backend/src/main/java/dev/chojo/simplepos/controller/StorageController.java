@@ -87,7 +87,7 @@ public class StorageController {
         Optional<Ingredient> ingredient = ingredientRepository.findById(storage.ingredient().getId());
         if (ingredient.isEmpty()) return ResponseEntity.notFound().build();
         if (storage.price() > 0) {
-            cashRepository.save(new Cash(current, -storage.price(), "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
+            cashRepository.save(new Cash(current, (-storage.price()) * storage.amount() , "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
         }
         if (storage.pledge() > 0) {
             cashRepository.save(new Cash(current, -storage.pledge(), "pledge", "%s".formatted(storage.ingredient().getName())));
@@ -99,5 +99,13 @@ public class StorageController {
     @ResponseStatus(HttpStatus.OK)
     public void updateInventory(@RequestBody List<InventoryCorrection> corrections) {
         storageService.processInventoryCorrection(corrections);
+    }
+
+    @GetMapping("/stock/low")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<StorageSummary>> getStockLow(@RequestParam(value = "limit", defaultValue = "100") int limit,
+                                                            @RequestParam(value = "page", defaultValue = "0") int page) {
+        List<StorageSummary> list = storageRepository.lowStock(PageRequest.of(page, limit)).stream().map(StorageSummary::new).toList();
+        return ResponseEntity.ok(list);
     }
 }
