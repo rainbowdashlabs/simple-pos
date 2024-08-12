@@ -7,7 +7,7 @@ import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {Product, RecipeEntry, updateProduct} from "../../../../../../scripts/product.ts";
 import {store} from "../../../../../../scripts/store.ts";
-import {categories, Category} from "../../../../../../scripts/categories.ts";
+import {categories, Category, Listing} from "../../../../../../scripts/categories.ts";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
 import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
 import FormattedText from "../../../../../styles/text/FormattedText.vue";
@@ -17,7 +17,7 @@ import TextButton from "../../../../../styles/buttons/TextButton.vue";
 import ProductIngredientInfo from "./productinfo/ProductIngredientInfo.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
-import {ingredient, IngredientListing, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import {Ingredient, ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
 import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
 import {roundCurrency} from "../../../../../../scripts/util.ts";
 
@@ -45,7 +45,7 @@ export default defineComponent({
       product: Object.assign({}, store.focusProduct) as Product,
       recipe: Object.assign({}, store.focusProduct?.recipe),
       categoryList: [] as Category[],
-      ingredientList: {} as IngredientListing
+      ingredientList: {} as Listing<Ingredient>
     }
   },
   computed: {
