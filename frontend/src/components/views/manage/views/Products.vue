@@ -34,7 +34,7 @@ export default defineComponent({
   mounted() {
     products().then(e => {
       this.productList = e
-    })
+    }).catch(err => console.log(err))
   },
 
 })

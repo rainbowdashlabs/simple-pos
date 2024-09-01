@@ -57,6 +57,7 @@ export interface ProductSalesStat {
 }
 
 export function product(id: number): Promise<Product> {
+    return getJson("api/product/" + id)
     return store.productCache.promiseById(id) ?? getJson("api/product/" + id)
 }
 
@@ -66,14 +67,17 @@ export function product(id: number): Promise<Product> {
  * @param product
  */
 export function createProduct(product: Product): Promise<Product> {
+    return postJson("api/product", product)
     return store.productCache.cachePromise(postJson("api/product", product))
 }
 
 export function updateProduct(product: Product): Promise<Product> {
+    return putJson("api/product", product)
     return store.productCache.cachePromise(putJson("api/product", product))
 }
 
 export function products(): Promise<Listing<Product>> {
+    return getJson("api/product")
     return store.productCache.allAsListingPromise() ?? store.productCache.cacheListingPromise(getJson("api/product"))
 }
 
