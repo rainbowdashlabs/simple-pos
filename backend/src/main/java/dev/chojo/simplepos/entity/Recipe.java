@@ -3,8 +3,10 @@ package dev.chojo.simplepos.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 
@@ -20,7 +22,8 @@ public class Recipe {
     @JsonIgnore
     private Product product;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "recipe_id")
     private List<RecipeEntry> entries;
 
     public Recipe(Integer id, Product product, List<RecipeEntry> entries) {

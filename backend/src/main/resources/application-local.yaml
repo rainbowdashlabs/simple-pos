@@ -1,5 +1,7 @@
 spring:
   datasource:
-    url: "jdbc:postgresql://0.0.0.0:5433/postgres"
+    url: "jdbc:postgresql://localhost/simple_pos"
+    username: simple_pos
+    password: m2Yjve7AocF4mnpCHeZAr
 server:
   port: 8888

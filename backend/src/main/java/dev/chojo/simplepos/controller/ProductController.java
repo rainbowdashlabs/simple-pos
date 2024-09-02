@@ -82,6 +82,6 @@ public class ProductController {
 
     @PutMapping
     ResponseEntity<Product> update(@RequestBody Product product) {
-        return ResponseEntity.accepted().body(productRepository.save(product));
+        return ResponseEntity.accepted().body(productService.update(product));
     }
 }

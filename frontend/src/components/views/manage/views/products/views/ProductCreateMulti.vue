@@ -6,7 +6,7 @@ import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {createProduct, Recipe, RecipeEntry} from "../../../../../../scripts/product.ts";
-import {categories, Category, Listing} from "../../../../../../scripts/categories.ts";
+import {categories, category, Category, Listing} from "../../../../../../scripts/categories.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
@@ -43,7 +43,7 @@ export default defineComponent({
     return {
       name: "",
       price: 0,
-      category: "",
+      category: {} as Category,
       recipe: {entries: []} as Recipe,
       categoryList: [] as Category[],
       ingredientList: {categories: []} as Listing<Ingredient>
@@ -71,13 +71,14 @@ export default defineComponent({
   },
   methods: {
     updateCategory(vk: string) {
-      this.category = vk
+      console.log(vk)
+      this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
     },
     createProd() {
       createProduct({
         id: null,
         name: this.name,
-        category: this.categoryList[this.categoryList.findIndex(e => e.name == this.category)],
+        category: this.category,
         price: this.price,
         active: true,
         recipe: this.recipe
@@ -107,6 +108,7 @@ export default defineComponent({
   mounted() {
     categories().then(e => {
       this.categoryList = e
+              this.category
     })
     ingredients().then(e => {
       this.ingredientList = e
@@ -125,7 +127,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
       <SelectMenu class="w-full" @select="updateCategory"
-                  :options="categoryList.map(e => {return [e.name, e.id]})" :current="category"/>
+                  :options="categoryList.map(e => {return [e.name, e.id]})" :current="category.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">

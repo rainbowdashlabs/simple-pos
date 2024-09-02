@@ -8,10 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.context.annotation.Lazy;
 
 @Entity
 public class Product implements Comparable<Product> {
@@ -31,7 +29,7 @@ public class Product implements Comparable<Product> {
 
     private boolean active = true;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "id")
     private Recipe recipe;
 
@@ -96,7 +94,7 @@ public class Product implements Comparable<Product> {
         this.active = active;
     }
 
-    public LazyProduct asLazyProduct(){
+    public LazyProduct asLazyProduct() {
         return new LazyProduct(id, category, name, price, active);
     }
 

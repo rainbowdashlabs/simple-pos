@@ -70,9 +70,15 @@ export default defineComponent({
   },
   methods: {
     updateProd() {
-      updateProduct(store.focusProduct!)
-      store.focusProduct!.category = this.category!
-      window.location.href = "#manage/products/info"
+      this.product.recipe = this.recipe
+      this.product.category = this.category!
+      console.log(this.product)
+      updateProduct(this.product)
+          .then(e => {
+            console.log(e)
+            store.focusProduct = this.product // TODO: This should actually be the returned entity
+            window.location.href = "#manage/products/info"
+          })
     },
     updateCategory(vk: string) {
       this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
