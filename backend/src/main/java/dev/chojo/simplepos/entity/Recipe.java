@@ -20,7 +20,7 @@ public class Recipe {
     @JsonIgnore
     private Product product;
 
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL)
     private List<RecipeEntry> entries;
 
     public Recipe(Integer id, Product product, List<RecipeEntry> entries) {
