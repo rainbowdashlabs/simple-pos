@@ -58,6 +58,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 WHERE p.product_id = ?1
                     AND purchased > ?2
               ) p
+              ORDER BY sales DESC
             """, nativeQuery = true)
     Tuple getSalesStatSummary(int id, Instant after);
 

@@ -46,7 +46,7 @@ public class PurchaseController {
                                                    @RequestParam(defaultValue = "sales") String sorting,
                                                    @RequestParam(defaultValue = "100") int limit,
                                                    @RequestParam(defaultValue = "0") int page) {
-        var sales = purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(sorting)))
+        var sales = purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting)))
                 .stream()
                 .map(t -> SalesStatDto.build(t, productRepository))
                 .toList();
