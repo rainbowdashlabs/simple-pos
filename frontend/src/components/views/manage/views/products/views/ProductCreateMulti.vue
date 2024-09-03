@@ -108,7 +108,6 @@ export default defineComponent({
   mounted() {
     categories().then(e => {
       this.categoryList = e
-              this.category
     })
     ingredients().then(e => {
       this.ingredientList = e
