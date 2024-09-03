@@ -6,7 +6,7 @@ import CategorySelector from "./productcreate/CategorySelector.vue";
 import FullCol from "../../../../../styles/grid/FullCol.vue";
 import ConfigureSection from "../ConfigureSection.vue";
 import {createProduct, Recipe, RecipeEntry} from "../../../../../../scripts/product.ts";
-import {categories, category, Category, Listing} from "../../../../../../scripts/categories.ts";
+import {categories, Category, Listing} from "../../../../../../scripts/categories.ts";
 import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
 import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
 import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
