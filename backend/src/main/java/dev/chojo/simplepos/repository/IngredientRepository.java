@@ -14,5 +14,4 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
 
     @Query("SELECT Ingredient ")
     List<Ingredient> findBy(double price);
-
 }

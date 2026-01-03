@@ -3,9 +3,11 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
+import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
+import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,11 +29,13 @@ public class CashController {
     private final CashRepository cashRepository;
     private final PurchaseRepository purchaseRepository;
     private final BalanceRepository balanceRepository;
+    private final IngredientRepository ingredientRepository;
 
-    public CashController(CashRepository cashRepository, PurchaseRepository purchaseRepository, BalanceRepository balanceRepository) {
+    public CashController(CashRepository cashRepository, PurchaseRepository purchaseRepository, BalanceRepository balanceRepository, IngredientRepository ingredientRepository) {
         this.cashRepository = cashRepository;
         this.purchaseRepository = purchaseRepository;
         this.balanceRepository = balanceRepository;
+        this.ingredientRepository = ingredientRepository;
     }
 
     @PostMapping
@@ -50,10 +54,11 @@ public class CashController {
 
     @GetMapping("/total")
     public CashResponse totalCash() {
-        Double pledge = Objects.requireNonNullElse(cashRepository.totalAmount("pledge"), 0.);
+        // The sum of cash entries and exits
+        Double cash = Objects.requireNonNullElse(cashRepository.totalAmount(), 0.);
+        // sum of deposit of accounts
         Double balance = Objects.requireNonNullElse(balanceRepository.totalBalance(), 0.);
-        Double purchases = Objects.requireNonNullElse(purchaseRepository.totalPurchases(), 0.);
-        return new CashResponse(pledge + (balance - purchases));
+        return new CashResponse(cash + balance);
     }
 
     @GetMapping("/total/balance")
