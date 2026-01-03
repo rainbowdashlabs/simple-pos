@@ -22,7 +22,7 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      - uses: gradle/wrapper-validation-action@v3
+      - uses: gradle/actions/wrapper-validation@v5
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
