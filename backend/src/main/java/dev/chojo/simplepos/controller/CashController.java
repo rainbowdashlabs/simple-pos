@@ -50,10 +50,10 @@ public class CashController {
 
     @GetMapping("/total")
     public CashResponse totalCash() {
-        Double cash = Objects.requireNonNullElse(cashRepository.totalAmount(), 0.);
+        Double pledge = Objects.requireNonNullElse(cashRepository.totalAmount("pledge"), 0.);
         Double balance = Objects.requireNonNullElse(balanceRepository.totalBalance(), 0.);
         Double purchases = Objects.requireNonNullElse(purchaseRepository.totalPurchases(), 0.);
-        return new CashResponse(cash + (balance - purchases));
+        return new CashResponse(pledge + (balance - purchases));
     }
 
     @GetMapping("/total/balance")
