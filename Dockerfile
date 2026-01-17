@@ -9,7 +9,7 @@ RUN nix-shell --run "npm ci"
 COPY ./frontend/ .
 RUN nix-shell --run "npm run build"
 
-FROM gradle:8.14-jdk21-alpine AS spring
+FROM gradle:9.3-jdk21-alpine AS spring
 
 COPY backend/ .
 RUN rm src/main/resources/public -rf
