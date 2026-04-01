@@ -1,16 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
-  ],
-  "packageRules": [
-    {
-      "matchManagers": [
-        "npm"
-      ],
-      "enabled": true,
-      "automerge": true
-    },
+    "github>rainbowdashlabs/rainbowdashlabs"
+  ],  "packageRules": [
     {
       "groupName": "jjwt",
       "packagePatterns": [
