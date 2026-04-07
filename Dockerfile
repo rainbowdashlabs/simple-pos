@@ -17,7 +17,7 @@ COPY --from=frontend /build/dist/ ./src/main/resources/public
 
 RUN gradle bootJar -x test
 
-FROM eclipse-temurin:21-alpine
+FROM eclipse-temurin:25-alpine
 
 WORKDIR /app
 
