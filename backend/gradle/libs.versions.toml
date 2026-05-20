@@ -1,5 +1,5 @@
 [versions]
-spring-boot = "4.0.0"
+spring-boot = "4.0.6"
 springdoc = "3.0.3"
 jjwt = "0.13.0"
 testcontainers = "1.20.4"
