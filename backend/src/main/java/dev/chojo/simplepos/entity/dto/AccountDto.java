@@ -6,9 +6,9 @@ public class AccountDto {
     private Integer id;
     private  String name;
     private  Instant created;
-    private  double balance;
+    private  Double balance;
 
-    public AccountDto(Integer id, String name, Instant created, double balance) {
+    public AccountDto(Integer id, String name, Instant created, Double balance) {
         this.id = id;
         this.name = name;
         this.created = created;
@@ -42,11 +42,11 @@ public class AccountDto {
         this.created = created;
     }
 
-    public double getBalance() {
+    public Double getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
+    public void setBalance(Double balance) {
         this.balance = balance;
     }
 }

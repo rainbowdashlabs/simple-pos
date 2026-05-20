@@ -91,7 +91,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    statsTop(this.type, this.timeframe.getDate(), 30)
+    statsTop(this.type, this.timeframe.getDate(), 10)
         .then(e => this.stat = e)
   }
 })

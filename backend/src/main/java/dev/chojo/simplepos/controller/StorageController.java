@@ -161,10 +161,10 @@ public class StorageController {
             ));
         }
 
-        // Sort by daysRemaining ASC, nulls last
+        // Sort by daysRemaining ASC, nulls last — only return the 10 items that will run out soonest
         projections.sort(Comparator.comparing(StockProjectionDto::daysRemaining, Comparator.nullsLast(Comparator.naturalOrder())));
 
-        return ResponseEntity.ok(projections);
+        return ResponseEntity.ok(projections.stream().limit(10).toList());
     }
 
     @GetMapping("/stock/low")

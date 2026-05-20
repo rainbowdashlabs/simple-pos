@@ -29,7 +29,7 @@ export default defineComponent({
       return store.theme === 'dark' ? '#e0ecf6' : '#121417'
     },
     chartOption() {
-      const items = this.projections.filter(p => p.daysRemaining !== null).slice(0, 15)
+      const items = this.projections.filter(p => p.daysRemaining !== null).slice(0, 10)
       const names = items.map(p => p.ingredient.name)
       const days = items.map(p => p.daysRemaining!)
 
