@@ -1,23 +1,26 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {createAccount} from "@/scripts/accounts.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormLabel from "@/components/styles/input/FormLabel.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "AccountCreate",
-  components: {ViewWrapper, FontAwesomeIcon},
+  components: {ConfirmButton, FormLabel, SimpleInputField, ViewWrapper},
   data() {
     return {
       name: ""
     }
   },
   computed: {
+    SizeGroup() {
+      return SizeGroup
+    },
     disabled() {
       return this.name === ""
-    },
-    buttonColor() {
-      return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
     }
   },
   methods: {
@@ -32,25 +35,12 @@ export default defineComponent({
 
 <template>
   <ViewWrapper>
-    <div class="grid grid-cols-1">
-      <div class="">
-        <p class="text-xl md:text-2xl lg:text-4xl">Name</p>
-        <input class="text-dark bg-secondary rounded-md justify-stretch w-full text-xl md:text-2xl lg:text-4xl"
-               type="text"
-               placeholder="name"
-               v-model="name"
-               required>
+    <div class="grid grid-cols-1 gap-4">
+      <div>
+        <FormLabel :label="$t('name')"/>
+        <SimpleInputField type="text" v-model="name" :placeholder="$t('name')" :size="SizeGroup.xl"/>
       </div>
-      <button :class="`rounded-md mt-5 ${buttonColor} min-h-14`"
-              :disabled="disabled"
-              @click="createAccount">
-        <font-awesome-icon class="text-4xl" icon="fa-user-plus"/>
-      </button>
+      <ConfirmButton icon="fa-user-plus" :disabled="disabled" @click="createAccount"/>
     </div>
   </ViewWrapper>
-
 </template>
-
-<style scoped>
-
-</style>

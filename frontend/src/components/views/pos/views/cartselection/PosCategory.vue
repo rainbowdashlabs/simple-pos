@@ -11,7 +11,7 @@ export default defineComponent({
   name: "PosCategory",
   data() {
     return {
-      active: false
+      active: this.initiallyActive
     }
   },
   computed: {
@@ -27,6 +27,10 @@ export default defineComponent({
     group: {
       type: Object as PropType<ProductGroup>,
       required: true
+    },
+    initiallyActive: {
+      type: Boolean,
+      default: false
     }
   }
 })

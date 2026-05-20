@@ -10,7 +10,8 @@ export interface Ingredient {
     containerSize: number,
     pledge: number,
     pledgeContainer: number,
-    minStock: number
+    minStock: number,
+    active: boolean
 }
 
 
@@ -38,4 +39,8 @@ export function deleteIngredient(id: number): Promise<any> {
     return deleteJson("api/ingredient/" + id)
     store.ingredientCache.delete(id)
     return deleteJson("api/ingredient/" + id)
+}
+
+export function toggleIngredientActive(id: number): Promise<Ingredient> {
+    return patchJson("api/ingredient/" + id + "/active", {})
 }

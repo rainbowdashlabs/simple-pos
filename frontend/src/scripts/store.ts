@@ -114,6 +114,9 @@ export class ListingCache<T> extends Cache<T> {
     }
 }
 
+export const COLOR_THEMES = ['blue', 'red', 'green', 'pink'] as const
+export type ColorTheme = typeof COLOR_THEMES[number]
+
 export interface Store {
     productCache: ListingCache<Product>
     accountCache: Cache<Account>
@@ -121,12 +124,14 @@ export interface Store {
     categoryCache: Cache<Category>
     storageSummaryCache: Cache<StorageSummary>
     theme: string | null | undefined,
+    colorTheme: ColorTheme,
     cart: Cart,
     loggedIn: boolean
 }
 
 export const store: Reactive<Store> = reactive({
         theme: null,
+        colorTheme: 'blue' as ColorTheme,
         cart: new Cart(),
         loggedIn: false,
         productCache: new ListingCache<Product>(e => e.id!, e => e.category),

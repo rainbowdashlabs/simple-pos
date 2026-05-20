@@ -19,14 +19,15 @@ export default defineComponent({
       type: Object as PropType<ProductGroup>,
       required: true
     }
-  }
+  },
+  emits: ['deleted']
 })
 </script>
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <FormattedText class="col-span-full" :value="group.category.name" :size="SizeGroup.xl"/>
-    <ProductEntry v-for="item in group.entries" :product="item"/>
+    <ProductEntry v-for="item in group.entries" :key="item.id!" :product="item" @deleted="$emit('deleted')"/>
   </div>
 </template>
 

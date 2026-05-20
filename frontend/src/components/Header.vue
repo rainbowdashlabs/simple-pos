@@ -33,12 +33,12 @@ export default {
     <div class="max-w-screen-xl mx-auto">
 
       <div class="flex flex-none max-md:hidden justify-around">
-        <div class="content-center justify-items-start">
+        <router-link to="/" class="content-center justify-items-start hover:opacity-80">
           <div>
             <p class="mx-3">Simple</p>
             <p class="mx-3">POS</p>
           </div>
-        </div>
+        </router-link>
 
         <Entry to="/" label="POS" icon="fa-money-bill"/>
         <Entry to="/accounts" :label="$t('accounts')" icon="fa-users"/>
@@ -57,13 +57,12 @@ export default {
         <Icon icon="fa-bars"/>
       </div>
 
-      <div class="flex-grow items-center justify-center text-center">
+      <router-link to="/" class="flex-grow items-center justify-center text-center hover:opacity-80">
         <p class="mx-3">Simple</p>
         <p class="mx-3">POS</p>
-      </div>
-      <div
-          class="flex flex-none text-3xl px-5 text-center items-center justify-center border-l-2 border-accent dark:border-accent-d">
-        <Icon icon="fa-user"/>
+      </router-link>
+      <div class="flex flex-none px-5 text-center items-center justify-center border-l-2 border-accent dark:border-accent-d">
+        <UserButton/>
       </div>
     </div>
     <transition>

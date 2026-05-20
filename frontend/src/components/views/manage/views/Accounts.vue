@@ -2,12 +2,12 @@
 import {defineComponent} from 'vue'
 import {Account, accounts} from "@/scripts/accounts.ts";
 import AccountEntry from "./accounts/AccountEntry.vue";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 
 export default defineComponent({
   name: "Accounts",
-  components: {ViewWrapper, FontAwesomeIcon, AccountEntry},
+  components: {ConfirmButton, ViewWrapper, AccountEntry},
   data() {
     return {
       accounts: [] as Account[]
@@ -16,24 +16,22 @@ export default defineComponent({
   methods: {
     createAccount() {
       this.$router.push({name: 'manage-accounts-create'})
+    },
+    loadAccounts() {
+      accounts().then(e => this.accounts = e)
     }
   },
   mounted() {
-    accounts().then(e => {
-      this.accounts = e
-    })
+    this.loadAccounts()
   },
 })
 </script>
 
 <template>
   <ViewWrapper>
-    <button class="bg-green-500 min-h-14 rounded-md" @click="createAccount">
-      <font-awesome-icon class="text-4xl" icon="fa-user-plus"/>
-    </button>
-    <AccountEntry v-for="item in accounts" :key="item.id" :user="item"/>
+    <ConfirmButton icon="fa-user-plus" @click="createAccount"/>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <AccountEntry v-for="item in accounts" :key="item.id" :user="item" @deleted="loadAccounts"/>
+    </div>
   </ViewWrapper>
 </template>
-
-<style scoped>
-</style>

@@ -23,12 +23,13 @@ export default defineComponent({
     productFromId(id: number): Product {
       // @ts-expect-error
       return this.purchases.products[id]
+    },
+    loadHistory() {
+      history(this.accountId, 30).then(e => this.purchases = e)
     }
   },
   mounted() {
-    history(this.accountId, 30).then(e => {
-      this.purchases = e
-    })
+    this.loadHistory()
   },
 })
 </script>
@@ -36,8 +37,8 @@ export default defineComponent({
 <template>
   <ColorContainer class="max-h-96 overflow-scroll" bg="secondary">
     <div>
-      <HistoryElement v-for="item in purchases.purchases" :purchase="item"
-                      :product="productFromId(item.productId)"/>
+      <HistoryElement v-for="item in purchases.purchases" :key="item.id" :purchase="item"
+                      :product="productFromId(item.productId)" @deleted="loadHistory"/>
     </div>
   </ColorContainer>
 </template>

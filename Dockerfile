@@ -28,6 +28,15 @@ RUN ./gradlew bootJar -x test --no-daemon
 # --- Runtime ---
 FROM eclipse-temurin:25.0.3_9-jre-alpine
 
+ARG GITHUB_ACTIONS=false
+ARG GITHUB_REF_TYPE=null
+ARG GITHUB_REF_NAME=null
+ARG GITHUB_SHA=null
+ENV GITHUB_ACTIONS=$GITHUB_ACTIONS
+ENV GITHUB_REF_TYPE=$GITHUB_REF_TYPE
+ENV GITHUB_REF_NAME=$GITHUB_REF_NAME
+ENV GITHUB_SHA=$GITHUB_SHA
+
 WORKDIR /app
 
 COPY --from=backend /build/build/libs/simple-pos*.jar app.jar

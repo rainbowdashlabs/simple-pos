@@ -29,6 +29,9 @@ import StorageAdd from '@/components/views/manage/views/storage/views/StorageAdd
 import StorageEdit from '@/components/views/manage/views/storage/views/StorageEdit.vue'
 import StorageInventory from '@/components/views/manage/views/storage/views/StorageInventory.vue'
 import Cash from '@/components/views/manage/views/Cash.vue'
+import Settings from '@/components/views/Settings.vue'
+
+const APP_NAME = 'Simple POS'
 
 const router = createRouter({
     history: createWebHistory(),
@@ -37,70 +40,81 @@ const router = createRouter({
             path: '/login',
             name: 'login',
             component: Login,
-            meta: {public: true}
+            meta: {public: true, title: 'Login'}
         },
         {
             path: '/logout',
             name: 'logout',
             component: Logout,
-            meta: {public: true}
+            meta: {public: true, title: 'Logout'}
         },
         {
             path: '/',
             component: POS,
             children: [
-                {path: '', name: 'pos', component: CartSelection},
-                {path: 'checkout', name: 'pos-checkout', component: Checkout},
+                {path: '', name: 'pos', component: CartSelection, meta: {title: 'POS'}},
+                {path: 'checkout', name: 'pos-checkout', component: Checkout, meta: {title: 'Checkout'}},
             ]
         },
         {
             path: '/accounts',
             name: 'accounts',
-            component: Accounts
+            component: Accounts,
+            meta: {title: 'Accounts'}
         },
         {
             path: '/accounts/:id',
             name: 'profile',
             component: Profile,
-            props: true
+            props: true,
+            meta: {title: 'Profile'}
         },
         {
             path: '/accounts/:id/balance',
             name: 'balance',
             component: Balance,
-            props: true
+            props: true,
+            meta: {title: 'Balance'}
         },
         {
             path: '/manage',
             component: Manage,
             children: [
                 {path: '', redirect: {name: 'manage-overview'}},
-                {path: 'overview', name: 'manage-overview', component: Overview},
-                {path: 'accounts', name: 'manage-accounts', component: ManageAccounts},
-                {path: 'accounts/create', name: 'manage-accounts-create', component: AccountCreate},
-                {path: 'products', name: 'manage-products', component: Products},
-                {path: 'products/create', name: 'manage-products-create', component: ProductCreate},
-                {path: 'products/createmulti', name: 'manage-products-createmulti', component: ProductCreateMulti},
-                {path: 'products/:id', name: 'manage-products-info', component: ProductInfo, props: true},
-                {path: 'products/:id/edit', name: 'manage-products-edit', component: ProductEdit, props: true},
-                {path: 'categories', name: 'manage-categories', component: Categories},
-                {path: 'storage', name: 'manage-storage', component: Storage},
-                {path: 'storage/create', name: 'manage-storage-create', component: StorageCreate},
-                {path: 'storage/:id/add', name: 'manage-storage-add', component: StorageAdd, props: true},
-                {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true},
-                {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory},
-                {path: 'cash', name: 'manage-cash', component: Cash},
+                {path: 'overview', name: 'manage-overview', component: Overview, meta: {title: 'Overview'}},
+                {path: 'accounts', name: 'manage-accounts', component: ManageAccounts, meta: {title: 'Accounts'}},
+                {path: 'accounts/create', name: 'manage-accounts-create', component: AccountCreate, meta: {title: 'New Account'}},
+                {path: 'products', name: 'manage-products', component: Products, meta: {title: 'Products'}},
+                {path: 'products/create', name: 'manage-products-create', component: ProductCreate, meta: {title: 'New Product'}},
+                {path: 'products/createmulti', name: 'manage-products-createmulti', component: ProductCreateMulti, meta: {title: 'New Products'}},
+                {path: 'products/:id', name: 'manage-products-info', component: ProductInfo, props: true, meta: {title: 'Product Details'}},
+                {path: 'products/:id/edit', name: 'manage-products-edit', component: ProductEdit, props: true, meta: {title: 'Edit Product'}},
+                {path: 'categories', name: 'manage-categories', component: Categories, meta: {title: 'Categories'}},
+                {path: 'storage', name: 'manage-storage', component: Storage, meta: {title: 'Storage'}},
+                {path: 'storage/create', name: 'manage-storage-create', component: StorageCreate, meta: {title: 'New Ingredient'}},
+                {path: 'storage/:id/add', name: 'manage-storage-add', component: StorageAdd, props: true, meta: {title: 'Add Stock'}},
+                {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {title: 'Edit Ingredient'}},
+                {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory, meta: {title: 'Inventory Check'}},
+                {path: 'cash', name: 'manage-cash', component: Cash, meta: {title: 'Cash'}},
             ]
+        },
+        {
+            path: '/settings',
+            name: 'settings',
+            component: Settings,
+            meta: {title: 'Settings'}
         },
         {
             path: '/theme',
             name: 'theme',
-            component: ThemePreview
+            component: ThemePreview,
+            meta: {title: 'Theme'}
         },
         {
             path: '/:pathMatch(.*)*',
             name: 'not-found',
-            component: NotFound
+            component: NotFound,
+            meta: {title: 'Not Found'}
         }
     ]
 })
@@ -117,6 +131,11 @@ router.beforeEach(async (to) => {
     const loggedIn = await isLoggedIn()
     if (!loggedIn) return {name: 'login'}
     return true
+})
+
+router.afterEach((to) => {
+    const title = to.meta.title as string | undefined
+    document.title = title ? `${title} — ${APP_NAME}` : APP_NAME
 })
 
 export default router

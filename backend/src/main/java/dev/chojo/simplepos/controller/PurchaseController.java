@@ -57,6 +57,17 @@ public class PurchaseController {
         return ResponseEntity.ok(sales);
     }
 
+    @GetMapping("stats/bottom")
+    ResponseEntity<List<SalesStatDto>> getBottomSales(@RequestParam() Instant after,
+                                                      @RequestParam(defaultValue = "10") int limit,
+                                                      @RequestParam(defaultValue = "0") int page) {
+        var sales = purchaseRepository.getBottomSales(after, PageRequest.of(page, limit))
+                .stream()
+                .map(t -> SalesStatDto.build(t, productRepository))
+                .toList();
+        return ResponseEntity.ok(sales);
+    }
+
     @GetMapping("stats/daily")
     ResponseEntity<List<Map<String, Object>>> getDailyStats(@RequestParam() Instant after) {
         return ResponseEntity.ok(purchaseRepository.getDailyStats(after).stream().map(t -> {

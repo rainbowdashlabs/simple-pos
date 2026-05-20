@@ -1,10 +1,13 @@
 <script lang="ts">
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {PropType} from "vue";
 import {Account} from "@/scripts/accounts.ts";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default {
-  components: {FontAwesomeIcon},
+  components: {IconButton, ColorContainer, MoneyText},
   props: {
     account: {
       type: Object as PropType<Account>,
@@ -12,13 +15,10 @@ export default {
     }
   },
   computed: {
-    valueStyle() {
-      if (this.account.balance >= 0) {
-        return "text-green-500"
-      }
-      return "text-red-500"
+    SizeGroup() {
+      return SizeGroup
     },
-    value(){
+    value() {
       return this.account.balance || 0
     }
   },
@@ -32,16 +32,9 @@ export default {
 
 <template>
   <div class="grid grid-cols-1 gap-5">
-    <div class="flex bg-secondary items-center justify-center rounded-md text-dark">
-      <p :class="`text-5xl font-bold ${valueStyle}`">{{ $n(value, 'currency') }}</p>
-    </div>
-    <button class="flex bg-accent text-primary items-center justify-center" @click="addBalance">
-      <font-awesome-icon class="fa-2x" icon="fa-sack-dollar"/>
-    </button>
+    <ColorContainer bg="secondary">
+      <MoneyText class="font-bold text-center" :amount="value" :size="SizeGroup.xl3"/>
+    </ColorContainer>
+    <IconButton icon="fa-sack-dollar" class="w-full" @click="addBalance"/>
   </div>
-
 </template>
-
-<style scoped>
-
-</style>

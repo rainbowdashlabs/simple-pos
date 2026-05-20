@@ -10,7 +10,7 @@ export default defineComponent({
 <template>
   <a
       :href="href"
-      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+      class="block px-4 py-2 text-sm text-dark dark:text-bright hover:bg-accent/20 dark:hover:bg-accent-d/30"
       role="menuitem"
   >
     {{ text }}

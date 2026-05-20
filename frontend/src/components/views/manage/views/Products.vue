@@ -26,12 +26,15 @@ export default defineComponent({
     },
     createMultiProduct() {
       this.$router.push({name: 'manage-products-createmulti'})
+    },
+    loadProducts() {
+      products().then(e => {
+        this.productList = e
+      }).catch(err => console.log(err))
     }
   },
   mounted() {
-    products().then(e => {
-      this.productList = e
-    }).catch(err => console.log(err))
+    this.loadProducts()
   },
 
 })
@@ -53,14 +56,7 @@ export default defineComponent({
         <Icon icon="fa-box"/>
       </FreeButton>
     </div>
-    <ProductGroup v-for="item in productList.categories" :group="item"/>
+    <ProductGroup v-for="item in productList.categories" :key="item.category.id" :group="item" @deleted="loadProducts"/>
   </ViewWrapper>
 
 </template>
-
-<style scoped>
-button {
-  min-height: 0;
-  min-width: 0;
-}
-</style>

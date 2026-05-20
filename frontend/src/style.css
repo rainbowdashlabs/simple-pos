@@ -11,21 +11,85 @@
   --color-warn: #ff9d9d;
   --color-okay-d: #085200;
   --color-okay: #b8eea1;
-  --color-bg: #e8e8e8;
-  --color-bg-d: #121417;
   --color-dark: #121417;
   --color-bright: #f1f1f1;
   --color-text-d: #121417;
   --color-text: #f1f1f1;
+
+  /* Default / Blue theme - light */
+  --color-bg: #e8e8e8;
   --color-primary: #e0ecf6;
-  --color-primary-d: #484848;
   --color-primary-accent: #6bb2fc;
-  --color-primary-accent-d: #365873;
   --color-secondary: #bad0e7;
-  --color-secondary-d: #243254;
   --color-highlight: #6899CA;
   --color-accent: #5193d5;
+
+  /* Default / Blue theme - dark */
+  --color-bg-d: #121417;
+  --color-primary-d: #484848;
+  --color-primary-accent-d: #365873;
+  --color-secondary-d: #243254;
   --color-accent-d: #2062af;
+}
+
+/* Blue (default) */
+[data-theme="blue"] {
+  --color-bg: #e8e8e8;
+  --color-primary: #e0ecf6;
+  --color-primary-accent: #6bb2fc;
+  --color-secondary: #bad0e7;
+  --color-highlight: #6899CA;
+  --color-accent: #5193d5;
+  --color-bg-d: #121417;
+  --color-primary-d: #484848;
+  --color-primary-accent-d: #365873;
+  --color-secondary-d: #243254;
+  --color-accent-d: #2062af;
+}
+
+/* Red */
+[data-theme="red"] {
+  --color-bg: #eae6e6;
+  --color-primary: #f6e0e0;
+  --color-primary-accent: #fc6b6b;
+  --color-secondary: #e7baba;
+  --color-highlight: #ca6868;
+  --color-accent: #d55151;
+  --color-bg-d: #171212;
+  --color-primary-d: #484040;
+  --color-primary-accent-d: #733636;
+  --color-secondary-d: #542424;
+  --color-accent-d: #af2020;
+}
+
+/* Green */
+[data-theme="green"] {
+  --color-bg: #e6eae6;
+  --color-primary: #e0f6e4;
+  --color-primary-accent: #6bfc83;
+  --color-secondary: #bae7c3;
+  --color-highlight: #68ca78;
+  --color-accent: #51a55d;
+  --color-bg-d: #121714;
+  --color-primary-d: #404848;
+  --color-primary-accent-d: #367342;
+  --color-secondary-d: #1e4228;
+  --color-accent-d: #208f35;
+}
+
+/* Magenta */
+[data-theme="pink"] {
+  --color-bg: #e9e6ea;
+  --color-primary: #f0e0f6;
+  --color-primary-accent: #d946ef;
+  --color-secondary: #dbbae7;
+  --color-highlight: #a855f7;
+  --color-accent: #c026d3;
+  --color-bg-d: #150e18;
+  --color-primary-d: #44404a;
+  --color-primary-accent-d: #6b2f80;
+  --color-secondary-d: #3b1e50;
+  --color-accent-d: #9333ea;
 }
 
 :root {

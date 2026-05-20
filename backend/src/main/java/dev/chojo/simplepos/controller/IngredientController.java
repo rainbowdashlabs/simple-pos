@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/ingredient")
@@ -57,5 +58,14 @@ public class IngredientController {
     ResponseEntity<Ingredient> get(@PathVariable int id) {
         return ingredientRepository.findById(id).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}/active")
+    ResponseEntity<Ingredient> toggleActive(@PathVariable int id) {
+        Optional<Ingredient> byId = ingredientRepository.findById(id);
+        if (byId.isEmpty()) return ResponseEntity.notFound().build();
+        Ingredient ingredient = byId.get();
+        ingredient.setActive(!ingredient.isActive());
+        return ResponseEntity.ok(ingredientRepository.save(ingredient));
     }
 }

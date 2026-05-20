@@ -1,33 +1,31 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import Profile from "@/components/views/accounts/Profile.vue";
 import {Product} from "@/scripts/product.ts";
-import DeleteHistoryButton from "./DeleteHistoryButton.vue";
 import {Purchase, purchaseDelete} from "@/scripts/purchase.ts";
-import TwoStepDeleteButton from "@/components/styles/buttons/TwoStepDeleteButton.vue";
 import IconButton from "@/components/styles/buttons/IconButton.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
+import ConfirmModal from "@/components/styles/modal/ConfirmModal.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "HistoryElement",
   data() {
     return {
-      deleted: false
+      showDeleteModal: false
     }
   },
   computed: {
     SizeGroup() {
       return SizeGroup
-    },
-    color() {
-      return this.deleted ? "text-red-500" : ""
     }
   },
+  emits: ['deleted'],
   methods: {
-    deletePurchase() {
-      this.deleted = true
-      purchaseDelete(this.purchase.id)
+    doDelete() {
+      this.showDeleteModal = false
+      purchaseDelete(this.purchase.id).then(() => {
+        this.$emit('deleted')
+      })
     }
   },
   props: {
@@ -40,12 +38,12 @@ export default defineComponent({
       required: true
     }
   },
-  components: {FormattedText, IconButton, TwoStepDeleteButton, DeleteHistoryButton, Profile, navigator}
+  components: {ConfirmModal, FormattedText, IconButton}
 })
 </script>
 
 <template>
-  <div class="flex justify-between gap-5 border-2 px-5 items-center py-2 my-2 rounded-md border-accent dark:border-accent-d" :class="color">
+  <div class="flex justify-between gap-5 border-2 px-5 items-center py-2 my-2 rounded-md border-accent dark:border-accent-d">
     <div class="flex flex-col justify-between w-5/6">
       <div class="flex items-center gap-5">
         <FormattedText :value="purchase.purchased" type="date"/>
@@ -60,14 +58,13 @@ export default defineComponent({
       </div>
     </div>
     <div class="w-1/6 flex justify-end">
-      <div v-show="!deleted">
-        <IconButton icon="fa-trash-can" @click="deletePurchase"/>
-      </div>
-
+      <IconButton icon="fa-trash-can" @click="showDeleteModal = true"/>
     </div>
   </div>
+
+  <ConfirmModal :visible="showDeleteModal"
+                :title="$t('delete')"
+                :message="$t('confirm_delete')"
+                @confirm="doDelete"
+                @cancel="showDeleteModal = false"/>
 </template>
-
-<style scoped>
-
-</style>

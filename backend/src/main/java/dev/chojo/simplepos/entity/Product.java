@@ -2,6 +2,7 @@ package dev.chojo.simplepos.entity;
 
 import dev.chojo.simplepos.entity.dto.LazyProduct;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -28,6 +29,9 @@ public class Product implements Comparable<Product> {
     private double price;
 
     private boolean active = true;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean deleted = false;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "id")
@@ -92,6 +96,14 @@ public class Product implements Comparable<Product> {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public LazyProduct asLazyProduct() {

@@ -124,6 +124,26 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             """, nativeQuery = true)
     List<Tuple> getSalesByCategory(Instant after);
 
+    @Query(value = """
+            SELECT
+              pr.id as product_id,
+              coalesce(sum(p.amount), 0) as sales,
+              coalesce(sum(p.price * p.amount), 0) as revenue,
+              coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
+            FROM product pr
+            LEFT JOIN purchase p ON p.product_id = pr.id AND p.purchased > ?1
+            LEFT JOIN (
+                SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                FROM purchase_part pp
+                LEFT JOIN storage s ON pp.storage_id = s.id
+                GROUP BY pp.purchase_id
+            ) raw ON p.id = raw.id
+            WHERE pr.active = true
+            GROUP BY pr.id
+            ORDER BY sales ASC, pr.name ASC
+            """, nativeQuery = true)
+    List<Tuple> getBottomSales(Instant after, Pageable pageable);
+
     @Query("SELECT sum(price * amount) FROM Purchase")
     Double totalPurchases();
 

@@ -1,10 +1,10 @@
 <script lang="ts">
 import UserContext from "./UserContext.vue";
-import Icon from "@/components/styles/Icon.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
 import {store} from "@/scripts/store.ts";
 
 export default {
-  components: {Icon, UserContext},
+  components: {IconButton, UserContext},
   data() {
     return {
       userContext: false
@@ -34,9 +34,7 @@ export default {
 </script>
 
 <template>
-  <button class="bg-accent dark:bg-accent-d" @click="buttonAction">
-    <Icon :icon="buttonIcon"/>
-  </button>
+  <IconButton :icon="buttonIcon" @click="buttonAction"/>
   <div v-show="userContextActive">
     <UserContext/>
   </div>

@@ -31,6 +31,9 @@ public class Ingredient implements Comparable<Ingredient> {
     @Column(nullable = false)
     private int minStock;
 
+    @Column(columnDefinition = "boolean default true")
+    private boolean active = true;
+
     public Ingredient(Integer id, Category category, String name, Double price, int containerSize, double pledge, double pledgeContainer, int minStock) {
         this.id = id;
         this.category = category;
@@ -107,6 +110,14 @@ public class Ingredient implements Comparable<Ingredient> {
 
     public void setMinStock(int minStock) {
         this.minStock = minStock;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override

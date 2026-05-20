@@ -88,7 +88,8 @@ export default defineComponent({
               containerSize: this.containerSize,
               minStock: this.minStock,
               pledge: this.pledge,
-              pledgeContainer: this.pledgeContainer
+              pledgeContainer: this.pledgeContainer,
+              active: true
             }
           }]
         },

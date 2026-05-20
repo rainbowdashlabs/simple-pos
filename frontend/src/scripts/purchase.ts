@@ -38,6 +38,14 @@ export function statsTop(type: string, after: Date, limit: number = 30): Promise
     return getJson("api/purchase/stats/top", args)
 }
 
+export function statsBottom(after: Date, limit: number = 10): Promise<SalesStat[]> {
+    let args = new Map([
+        ["limit", String(limit)],
+        ["after", after.toISOString()]
+    ]);
+    return getJson("api/purchase/stats/bottom", args)
+}
+
 export interface DailyStat {
     day: string
     sales: number

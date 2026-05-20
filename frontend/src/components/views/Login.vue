@@ -2,11 +2,13 @@
 import {defineComponent} from 'vue'
 import {login} from "@/scripts/session.ts";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormLabel from "@/components/styles/input/FormLabel.vue";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "Login",
-  components: {ViewWrapper, ConfirmButton},
+  components: {FormLabel, SimpleInputField, ViewWrapper, ConfirmButton},
   data() {
     return {
       username: "",
@@ -29,37 +31,19 @@ export default defineComponent({
 <template>
   <ViewWrapper>
     <div class="flex items-center justify-center min-h-[70vh]">
-    <form @submit.prevent="submit" class="w-full max-w-sm">
-      <div class="grid grid-cols-1 gap-4">
-        <div>
-          <label for="username" class="block pb-1">Username</label>
-          <input id="username"
-                 class="text-dark bg-secondary rounded-md w-full"
-                 type="text"
-                 name="username"
-                 autocomplete="username"
-                 placeholder="username"
-                 v-model="username"
-                 required>
+      <form @submit.prevent="submit" class="w-full max-w-sm">
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <FormLabel label="Username" html-for="username"/>
+            <SimpleInputField type="text" v-model="username" placeholder="username"/>
+          </div>
+          <div>
+            <FormLabel label="Password" html-for="password"/>
+            <SimpleInputField type="password" v-model="password" placeholder="password"/>
+          </div>
+          <ConfirmButton type="submit" :disabled="disabled"/>
         </div>
-        <div>
-          <label for="password" class="block pb-1">Password</label>
-          <input id="password"
-                 class="text-dark bg-secondary rounded-md w-full"
-                 type="password"
-                 name="password"
-                 autocomplete="current-password"
-                 placeholder="password"
-                 v-model="password"
-                 required>
-        </div>
-        <ConfirmButton type="submit" :disabled="disabled"/>
-      </div>
-    </form>
+      </form>
     </div>
   </ViewWrapper>
 </template>
-
-<style scoped>
-
-</style>

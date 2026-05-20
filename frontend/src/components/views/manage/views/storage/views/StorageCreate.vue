@@ -83,7 +83,8 @@ export default defineComponent({
         containerSize: this.container_size,
         pledge: this.pledge,
         pledgeContainer: this.pledge_container,
-        minStock: this.min_stock
+        minStock: this.min_stock,
+        active: true
       }).then(() => {
         this.$router.push({name: 'manage-storage'})
       })

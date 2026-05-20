@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 import java.time.Instant;
 import java.util.List;
@@ -64,7 +67,13 @@ public class ProductController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Listing<Product>> get() {
-        return ResponseEntity.ok(Listing.map(productRepository.findAll(), Product::getCategory));
+        return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalse(), Product::getCategory));
+    }
+
+    @GetMapping("/active")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Listing<Product>> getActive() {
+        return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalseAndActiveTrue(), Product::getCategory));
     }
 
     @PostMapping
@@ -73,11 +82,25 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Product> delete(@PathVariable int id) {
-        boolean exists = productRepository.existsById(id);
-        if (!exists) return ResponseEntity.notFound().build();
-        productRepository.deleteById(id);
+    ResponseEntity<Void> delete(@PathVariable int id) {
+        Optional<Product> byId = productRepository.findById(id);
+        if (byId.isEmpty()) return ResponseEntity.notFound().build();
+        Product product = byId.get();
+        if (product.isDeleted()) return ResponseEntity.notFound().build();
+        product.setDeleted(true);
+        product.setActive(false);
+        productRepository.save(product);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/active")
+    ResponseEntity<Product> toggleActive(@PathVariable int id) {
+        Optional<Product> byId = productRepository.findById(id);
+        if (byId.isEmpty()) return ResponseEntity.notFound().build();
+        Product product = byId.get();
+        if (product.isDeleted()) return ResponseEntity.notFound().build();
+        product.setActive(!product.isActive());
+        return ResponseEntity.ok(productRepository.save(product));
     }
 
     @PutMapping
