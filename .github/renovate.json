@@ -4,6 +4,7 @@
     "github>rainbowdashlabs/rainbowdashlabs"
   ],
   "baseBranchPatterns": ["main"],
+  "schedule": ["on friday"],
   "packageRules": [
     {
       "groupName": "jjwt",

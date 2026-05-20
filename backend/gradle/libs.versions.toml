@@ -2,7 +2,7 @@
 spring-boot = "4.0.6"
 springdoc = "3.0.3"
 jjwt = "0.13.0"
-testcontainers = "1.20.4"
+testcontainers = "2.0.5"
 
 [libraries]
 # Spring Boot starters
@@ -28,10 +28,10 @@ jjwt-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jjwt" 
 jjwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jjwt" }
 jjwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jjwt" }
 
-# Testcontainers
+# Database testing
+testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
 testcontainers-core = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
-testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
-testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
 
 # Test
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
@@ -39,7 +39,11 @@ junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform
 [bundles]
 spring-security = ["spring-security-web", "spring-security-config"]
 jjwt-runtime = ["jjwt-impl", "jjwt-jackson"]
-testcontainers = ["testcontainers-core", "testcontainers-junit", "testcontainers-postgres"]
+testcontainers = [
+    "testcontainers-core",
+    "testcontainers-junit",
+    "testcontainers-postgres"
+]
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
