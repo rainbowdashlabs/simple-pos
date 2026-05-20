@@ -10,6 +10,11 @@
       "packagePatterns": [
         "^io\\.jsonwebtoken"
       ]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "branch"
     }
   ]
 }
