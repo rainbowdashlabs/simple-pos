@@ -1,7 +1,7 @@
 [versions]
 spring-boot = "4.0.0"
 springdoc = "3.0.0"
-jjwt = "0.12.6"
+jjwt = "0.13.0"
 testcontainers = "1.20.4"
 
 [libraries]
