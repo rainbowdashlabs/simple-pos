@@ -8,7 +8,7 @@ public class AccountDto {
     private  Instant created;
     private  double balance;
 
-    public AccountDto(int id, String name, Instant created, double balance) {
+    public AccountDto(Integer id, String name, Instant created, double balance) {
         this.id = id;
         this.name = name;
         this.created = created;
