@@ -1,6 +1,10 @@
 spring:
   application:
     name: simple-pos
+  autoconfigure:
+    exclude:
+      - org.springdoc.core.configuration.SpringDocDataRestConfiguration
+      - org.springdoc.core.configuration.SpringDocHateoasConfiguration
   datasource:
     url: "jdbc:postgresql://0.0.0.0/postgres"
     username: postgres
@@ -28,6 +32,9 @@ spring:
 server:
   port: 8080
 
+spring.web.resources:
+  static-locations: file:/app/public/,classpath:/public/
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -35,6 +42,9 @@ springdoc:
 logging:
   level:
     root: info
+
+demo:
+  enabled: false
 
 security:
   jwt:

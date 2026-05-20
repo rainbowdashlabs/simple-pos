@@ -1,5 +1,5 @@
 import {CartPosition} from "./cart.ts";
-import {deleteJson, getJson, postJson} from "./http.ts";
+import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
 
 /**
  * Describes a user account
@@ -62,10 +62,10 @@ export function purchase(id: number, entries: CartPosition[]): Promise<any> {
     return postJson(`api/account/${id}/purchase`, entries)
 }
 
-/**
- * Deletes am account
- * @param id
- */
+export function renameAccount(id: number, name: string): Promise<Account> {
+    return patchJson(`api/account/${id}`, {name: name})
+}
+
 export function deleteAccount(id: number): Promise<any> {
     return deleteJson(`api/account/${id}`)
 }

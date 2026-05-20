@@ -3,26 +3,28 @@ import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
-import FullCol from "../../../../../styles/grid/FullCol.vue";
-import ConfigureSection from "../ConfigureSection.vue";
-import {createProduct, Recipe, RecipeEntry} from "../../../../../../scripts/product.ts";
-import {categories, Category, Listing} from "../../../../../../scripts/categories.ts";
-import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
-import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
-import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
-import InputField from "../../../../../styles/input/InputField.vue";
-import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../scripts/text.ts";
-import FreeButton from "../../../../../styles/buttons/FreeButton.vue";
-import TextButton from "../../../../../styles/buttons/TextButton.vue";
-import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import {Ingredient, ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
+import FullCol from "@/components/styles/grid/FullCol.vue";
+import ConfigureSection from "@/components/views/manage/views/products/ConfigureSection.vue";
+import {createProduct, Recipe, RecipeEntry} from "@/scripts/product.ts";
+import {categories, Category, Listing} from "@/scripts/categories.ts";
+import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import InputField from "@/components/styles/input/InputField.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import FreeButton from "@/components/styles/buttons/FreeButton.vue";
+import TextButton from "@/components/styles/buttons/TextButton.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import {Ingredient, ingredient, ingredients} from "@/scripts/Ingredient.ts";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
 
 export default defineComponent({
   name: "ProductCreateMulti",
   components: {
+    ViewWrapper,
     ProductIngredientGroup,
     ConfirmButton,
     TextButton,
@@ -71,8 +73,7 @@ export default defineComponent({
   },
   methods: {
     updateCategory(vk: string) {
-      console.log(vk)
-      this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
+      this.category = this.categoryList.find(e => e.id == Number(vk)) ?? this.category
     },
     createProd() {
       createProduct({
@@ -83,7 +84,7 @@ export default defineComponent({
         active: true,
         recipe: this.recipe
       })
-      window.location.href = "#manage/products"
+      this.$router.push({name: 'manage-products'})
     },
     updateIngredient(data: Array<number>) {
       let id = data[0]
@@ -108,6 +109,7 @@ export default defineComponent({
   mounted() {
     categories().then(e => {
       this.categoryList = e
+      if (e.length > 0) this.category = e[0]
     })
     ingredients().then(e => {
       this.ingredientList = e
@@ -117,7 +119,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+  <ViewWrapper>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
       <SimpleInputField type="text" v-model="name"/>
@@ -146,7 +149,8 @@ export default defineComponent({
     <div class="col-span-full">
       <ConfirmButton class="w-full" :disabled="disabled" @click="createProd"/>
     </div>
-  </div>
+    </div>
+  </ViewWrapper>
 
 </template>
 

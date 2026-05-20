@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {SizeGroup} from "../../../scripts/text.ts";
+import {SizeGroup} from "@/scripts/text.ts";
 
 const types = ["text", "number", "currency", "date", "locale"]
 

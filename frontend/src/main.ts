@@ -1,15 +1,14 @@
 import {createApp} from 'vue'
-import './style.css'
-import App from './App.vue'
+import '@/style.css'
+import App from '@/App.vue'
 
 import {library} from '@fortawesome/fontawesome-svg-core'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {fas} from '@fortawesome/free-solid-svg-icons'
-import {createI18n, DefaultDateTimeFormatSchema, DefaultNumberFormatSchema, I18n} from "vue-i18n";
+import {createI18n} from "vue-i18n";
 
-const numberformats: DefaultNumberFormatSchema = {
+const numberformats = {
     en: {
-// @ts-expect-error
         currency: {
             style: 'currency', currency: 'USD', notation: 'standard'
         },
@@ -21,7 +20,6 @@ const numberformats: DefaultNumberFormatSchema = {
         }
     },
     de: {
-// @ts-expect-error
         currency: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
@@ -32,11 +30,10 @@ const numberformats: DefaultNumberFormatSchema = {
             style: 'percent', useGrouping: false
         }
     }
-}
+} as const
 
-const datetimeFormats: DefaultDateTimeFormatSchema = {
+const datetimeFormats = {
     en: {
-// @ts-expect-error
         short: {
             year: 'numeric', month: 'short', day: 'numeric'
         },
@@ -46,7 +43,6 @@ const datetimeFormats: DefaultDateTimeFormatSchema = {
         }
     },
     de: {
-// @ts-expect-error
         short: {
             year: 'numeric', month: 'short', day: 'numeric'
         },
@@ -55,10 +51,10 @@ const datetimeFormats: DefaultDateTimeFormatSchema = {
             weekday: 'short', hour: 'numeric', minute: 'numeric'
         }
     }
-}
+} as const
 
-const i18n: I18n = createI18n({
-    locale: "en",
+const i18n = createI18n({
+    locale: "de",
     messages: {
         en: {
             accounts: "Accounts",
@@ -111,7 +107,21 @@ const i18n: I18n = createI18n({
             null: "Unknown",
             undefined: "Undefined",
             purchase: "Purchase",
-            balance: "Balance"
+            balance: "Balance",
+            stock_projection: "Stock Projection",
+            daily_consumption: "Daily consumption",
+            days_remaining: "Days remaining",
+            days: "Days",
+            profit: "Profit",
+            low_stock: "Low Stock",
+            total_revenue: "Total Revenue",
+            total_profit: "Total Profit",
+            total_sales: "Total Sales",
+            this_month: "This month",
+            no_data: "No data",
+            revenue_trend: "Revenue Trend",
+            revenue_by_category: "Revenue by Category",
+            cash_overview: "Cash Overview"
         },
         de: {
             accounts: "Konten",
@@ -166,20 +176,34 @@ const i18n: I18n = createI18n({
             null: "Unbekannt",
             undefined: "Undefiniert",
             purchase: "Einkauf",
-            balance: "Guthaben"
+            balance: "Guthaben",
+            stock_projection: "Bestandsprognose",
+            daily_consumption: "Tagesverbrauch",
+            days_remaining: "Tage verbleibend",
+            days: "Tage",
+            low_stock: "Niedriger Bestand",
+            total_revenue: "Gesamtumsatz",
+            total_profit: "Gesamtgewinn",
+            total_sales: "Gesamtverkäufe",
+            this_month: "Dieser Monat",
+            no_data: "Keine Daten",
+            revenue_trend: "Umsatzverlauf",
+            revenue_by_category: "Umsatz nach Kategorie",
+            cash_overview: "Kassenübersicht"
         }
     },
-    datetime: datetimeFormats,
-    // @ts-expect-error
+    datetimeFormats: datetimeFormats,
     numberFormats: numberformats
 })
+
+import router from '@/router.ts'
 
 const app = createApp(App);
 
 app.config.errorHandler = err => {
     console.error(`Unexpected Error:`, err)
 }
-// noinspection TypeScriptValidateTypes
+app.use(router)
 app.use(i18n)
 library.add(fas)
 

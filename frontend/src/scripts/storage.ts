@@ -60,3 +60,14 @@ export function submitInventory(data: InventoryCorrection[]) {
 export function stockLow(limit: number = 100): Promise<StorageSummary[]> {
     return getJson("api/storage/stock/low", new Map([["limit", limit]]))
 }
+
+export interface StockProjection {
+    ingredient: Ingredient
+    currentStock: number
+    dailyConsumption: number
+    daysRemaining: number | null
+}
+
+export function stockProjection(): Promise<StockProjection[]> {
+    return getJson("api/storage/stock/projection")
+}

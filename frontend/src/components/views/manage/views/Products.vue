@@ -1,18 +1,15 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import AccountEntry from "./accounts/AccountEntry.vue";
-import {ProductListings, products} from "../../../../scripts/product.ts";
-import ProductEntry from "./products/ProductEntry.vue";
+import {ProductListings, products} from "@/scripts/product.ts";
 import ProductGroup from "./products/ProductGroup.vue";
-import ColorContainer from "../../../styles/container/ColorContainer.vue";
-import ConfirmButton from "../../../styles/buttons/ConfirmButton.vue";
-import FreeButton from "../../../styles/buttons/FreeButton.vue";
-import Icon from "../../../styles/Icon.vue";
-import {SizeGroup} from "../../../../scripts/text.ts";
+import FreeButton from "@/components/styles/buttons/FreeButton.vue";
+import Icon from "@/components/styles/Icon.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "Products",
-  components: {Icon, FreeButton, ConfirmButton, ColorContainer, ProductGroup, ProductEntry, AccountEntry},
+  components: {ViewWrapper, Icon, FreeButton, ProductGroup},
   data() {
     return {
       productList: {categories: []} as ProductListings
@@ -25,10 +22,10 @@ export default defineComponent({
   },
   methods: {
     createProduct() {
-      window.location.href = "#manage/products/create"
+      this.$router.push({name: 'manage-products-create'})
     },
     createMultiProduct() {
-      window.location.href = "#manage/products/createmulti"
+      this.$router.push({name: 'manage-products-createmulti'})
     }
   },
   mounted() {
@@ -41,21 +38,23 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-5 p-5">
-    <FreeButton :class="SizeGroup.xl2"
-                color="bg-green-500"
-                class="flex gap-5 justify-center"
-                @click="createProduct">
-      <Icon icon="fa-square-plus"/>
-      <Icon icon="fa-bottle-water"/>
-    </FreeButton>
-    <FreeButton :class="SizeGroup.xl2" color="bg-green-500" class="flex gap-5 justify-center"
-                @click="createMultiProduct">
-      <Icon icon="fa-square-plus"/>
-      <Icon icon="fa-box"/>
-    </FreeButton>
-    <ProductGroup class="col-span-full" v-for="item in productList.categories" :group="item"/>
-  </div>
+  <ViewWrapper>
+    <div class="grid grid-cols-2 gap-5">
+      <FreeButton :class="SizeGroup.xl2"
+                  color="bg-green-500"
+                  class="flex gap-3 justify-center"
+                  @click="createProduct">
+        <Icon icon="fa-square-plus"/>
+        <Icon icon="fa-bottle-water"/>
+      </FreeButton>
+      <FreeButton :class="SizeGroup.xl2" color="bg-green-500" class="flex gap-3 justify-center"
+                  @click="createMultiProduct">
+        <Icon icon="fa-square-plus"/>
+        <Icon icon="fa-box"/>
+      </FreeButton>
+    </div>
+    <ProductGroup v-for="item in productList.categories" :group="item"/>
+  </ViewWrapper>
 
 </template>
 

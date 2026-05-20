@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import {CartPosition} from "../../../../../scripts/cart.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {CartPosition} from "@/scripts/cart.ts";
 
 export default defineComponent({
   name: "CartEntryPrice",

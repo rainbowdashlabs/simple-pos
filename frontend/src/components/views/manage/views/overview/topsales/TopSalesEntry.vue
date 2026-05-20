@@ -1,8 +1,8 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {Mapping} from "../../../../../../scripts/store.ts";
-import {SalesStat} from "../../../../../../scripts/purchase.ts";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
+import {Mapping} from "@/scripts/store.ts";
+import {SalesStat} from "@/scripts/purchase.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
 
 export default defineComponent({
   name: "TopSalesEntry",

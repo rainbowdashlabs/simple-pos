@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import Icon from "../../styles/Icon.vue";
-import IconButton from "../../styles/buttons/IconButton.vue";
-import FreeButton from "../../styles/buttons/FreeButton.vue";
+import Icon from "@/components/styles/Icon.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import FreeButton from "@/components/styles/buttons/FreeButton.vue";
 
 export default defineComponent({
   name: "BalanceAdd",

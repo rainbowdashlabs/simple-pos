@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import FreeButton from "./FreeButton.vue";
-import FormattedText from "../text/FormattedText.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
 
 export default defineComponent({
   name: "TextButton",

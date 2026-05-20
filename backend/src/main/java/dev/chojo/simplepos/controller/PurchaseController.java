@@ -14,8 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.persistence.Tuple;
+
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/purchase")
@@ -51,5 +55,28 @@ public class PurchaseController {
                 .map(t -> SalesStatDto.build(t, productRepository))
                 .toList();
         return ResponseEntity.ok(sales);
+    }
+
+    @GetMapping("stats/daily")
+    ResponseEntity<List<Map<String, Object>>> getDailyStats(@RequestParam() Instant after) {
+        return ResponseEntity.ok(purchaseRepository.getDailyStats(after).stream().map(t -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("day", t.get("day"));
+            m.put("sales", t.get("sales"));
+            m.put("revenue", t.get("revenue"));
+            m.put("profit", t.get("profit"));
+            return m;
+        }).toList());
+    }
+
+    @GetMapping("stats/categories")
+    ResponseEntity<List<Map<String, Object>>> getSalesByCategory(@RequestParam() Instant after) {
+        return ResponseEntity.ok(purchaseRepository.getSalesByCategory(after).stream().map(t -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("categoryName", t.get("category_name"));
+            m.put("sales", t.get("sales"));
+            m.put("revenue", t.get("revenue"));
+            return m;
+        }).toList());
     }
 }

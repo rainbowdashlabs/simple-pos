@@ -6,6 +6,7 @@ import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
+import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.repository.CashRepository;
@@ -28,7 +29,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.persistence.Tuple;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -99,6 +108,63 @@ public class StorageController {
     @ResponseStatus(HttpStatus.OK)
     public void updateInventory(@RequestBody List<InventoryCorrection> corrections) {
         storageService.processInventoryCorrection(corrections);
+    }
+
+    @GetMapping("/stock/projection")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<StockProjectionDto>> getStockProjection() {
+        // Get current stock for all ingredients
+        Map<Integer, StorageSummary> stockByIngredient = new HashMap<>();
+        for (Tuple tuple : storageRepository.summary()) {
+            StorageSummary summary = new StorageSummary(tuple);
+            stockByIngredient.put(summary.getIngredient().getId(), summary);
+        }
+
+        // Get daily consumption data for last 90 days
+        Instant ninetyDaysAgo = Instant.now().minus(90, ChronoUnit.DAYS);
+        List<Tuple> consumptionData = storageRepository.dailyConsumptionByIngredient(ninetyDaysAgo);
+
+        // Group consumption by ingredient_id -> list of daily consumed amounts
+        Map<Integer, List<Integer>> dailyConsumptionMap = new HashMap<>();
+        for (Tuple tuple : consumptionData) {
+            int ingredientId = (int) tuple.get("ingredient_id");
+            int consumed = (int) tuple.get("consumed");
+            dailyConsumptionMap.computeIfAbsent(ingredientId, _ -> new ArrayList<>()).add(consumed);
+        }
+
+        // Calculate number of days in the period
+        long totalDaysInPeriod = 90;
+
+        // Build projections
+        List<StockProjectionDto> projections = new ArrayList<>();
+        for (Map.Entry<Integer, List<Integer>> entry : dailyConsumptionMap.entrySet()) {
+            int ingredientId = entry.getKey();
+            List<Integer> dailyAmounts = entry.getValue();
+
+            StorageSummary summary = stockByIngredient.get(ingredientId);
+            if (summary == null) continue;
+
+            // Total consumption over the period
+            long totalConsumed = dailyAmounts.stream().mapToLong(Integer::longValue).sum();
+            double dailyConsumption = (double) totalConsumed / totalDaysInPeriod;
+
+            Integer daysRemaining = null;
+            if (dailyConsumption > 0) {
+                daysRemaining = (int) (summary.getStock() / dailyConsumption);
+            }
+
+            projections.add(new StockProjectionDto(
+                    summary.getIngredient(),
+                    summary.getStock(),
+                    Math.round(dailyConsumption * 100.0) / 100.0,
+                    daysRemaining
+            ));
+        }
+
+        // Sort by daysRemaining ASC, nulls last
+        projections.sort(Comparator.comparing(StockProjectionDto::daysRemaining, Comparator.nullsLast(Comparator.naturalOrder())));
+
+        return ResponseEntity.ok(projections);
     }
 
     @GetMapping("/stock/low")

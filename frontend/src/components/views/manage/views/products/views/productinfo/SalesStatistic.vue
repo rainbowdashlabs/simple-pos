@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import CenterText from "../../../../../../styles/text/CenterText.vue";
-import {ProductSalesStat, salesStatSummary, Timeframe} from "../../../../../../../scripts/product.ts";
+import CenterText from "@/components/styles/text/CenterText.vue";
+import {ProductSalesStat, salesStatSummary, Timeframe} from "@/scripts/product.ts";
 import InfoEntry from "./InfoEntry.vue";
-import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 
 
 export default defineComponent({

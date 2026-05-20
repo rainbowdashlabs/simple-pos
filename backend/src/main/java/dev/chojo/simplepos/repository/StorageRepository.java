@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +26,18 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
 
     @Query(value = "SELECT id FROM storage WHERE amount > sold AND ingredient_id = ?1 ORDER BY purchased LIMIT 1", nativeQuery = true)
     Optional<Integer> findNextIngredient(int ingredient);
+
+    @Query(value = """
+            SELECT
+                re.ingredient_id as ingredient_id,
+                date_trunc('day', p.purchased) as day,
+                cast(sum(p.amount * re.amount) as integer) as consumed
+            FROM purchase p
+            JOIN recipe r ON r.product_id = p.product_id
+            JOIN recipe_entry re ON re.recipe_id = r.id
+            WHERE p.purchased > ?1
+            GROUP BY re.ingredient_id, date_trunc('day', p.purchased)
+            ORDER BY re.ingredient_id, day
+            """, nativeQuery = true)
+    List<Tuple> dailyConsumptionByIngredient(Instant after);
 }

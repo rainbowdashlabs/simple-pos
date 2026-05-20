@@ -1,21 +1,23 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {store} from "../../../../scripts/store.ts";
-import SelectMenu from "../../../styles/input/select/SelectMenu.vue";
-import {account, Account, accounts, purchase} from "../../../../scripts/accounts.ts";
+import {store} from "@/scripts/store.ts";
+import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
+import {account, Account, accounts, purchase} from "@/scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
-import MoneyText from "../../../styles/text/MoneyText.vue";
-import FormattedText from "../../../styles/text/FormattedText.vue";
-import Icon from "../../../styles/Icon.vue";
-import ConfirmButton from "../../../styles/buttons/ConfirmButton.vue";
-import BackButton from "../../../styles/buttons/BackButton.vue";
-import ColorContainer from "../../../styles/container/ColorContainer.vue";
-import GridWrapper from "../../../styles/grid/GridWrapper.vue";
-import {SizeGroup} from "../../../../scripts/text.ts";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import Icon from "@/components/styles/Icon.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import BackButton from "@/components/styles/buttons/BackButton.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "Checkout",
   components: {
+    ViewWrapper,
     GridWrapper,
     ColorContainer, BackButton, ConfirmButton, Icon, FormattedText, MoneyText, CheckoutEntry, SelectMenu
   },
@@ -44,14 +46,11 @@ export default defineComponent({
       purchase(this.account.id, Array.from(this.cart.products.values()))
           .then(() => {
             this.cart.clearCart()
-            account(this.account.id).then(e => {
-              store.focusAccount = e
-              window.location.href = "#profile"
-            })
+            this.$router.push({name: 'profile', params: {id: this.account.id}, query: {from: 'checkout'}})
           })
     },
     back() {
-      window.location.href = "#pos"
+      this.$router.push({name: 'pos'})
     }
   },
   mounted() {
@@ -64,7 +63,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <GridWrapper bg="none" class="mx-5">
+  <ViewWrapper>
+  <GridWrapper bg="none">
 
     <ColorContainer bg="secondary">
       <CheckoutEntry v-for="item in cart.products.values()" :entry="item"/>
@@ -89,6 +89,7 @@ export default defineComponent({
       </GridWrapper>
     </GridWrapper>
   </GridWrapper>
+  </ViewWrapper>
 </template>
 
 <style scoped>

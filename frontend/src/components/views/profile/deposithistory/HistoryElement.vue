@@ -1,8 +1,8 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import DeleteHistoryButton from "../purchasehistory/DeleteHistoryButton.vue";
-import FormattedText from "../../../styles/text/FormattedText.vue";
-import {Balance} from "../../../../scripts/accounts.ts";
+import DeleteHistoryButton from "@/components/views/profile/purchasehistory/DeleteHistoryButton.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {Balance} from "@/scripts/accounts.ts";
 
 export default defineComponent({
   name: "HistoryElement",

@@ -1,14 +1,18 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import HistoryElement from "./purchasehistory/HistoryElement.vue";
-import {History, history} from "../../../scripts/purchase.ts";
-import {store} from "../../../scripts/store.ts";
-import ColorContainer from "../../styles/container/ColorContainer.vue";
-import {Product} from "../../../scripts/product.ts";
+import {History, history} from "@/scripts/purchase.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import {Product} from "@/scripts/product.ts";
 
 export default defineComponent({
   name: "PurchaseHistory",
-  props: [],
+  props: {
+    accountId: {
+      type: Number,
+      required: true
+    }
+  },
   components: {ColorContainer, HistoryElement},
   data() {
     return {
@@ -21,9 +25,8 @@ export default defineComponent({
       return this.purchases.products[id]
     }
   },
-  computed: {},
   mounted() {
-    history(store.focusAccount?.id!, 30).then(e => {
+    history(this.accountId, 30).then(e => {
       this.purchases = e
     })
   },
@@ -40,9 +43,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-table {
-}
-
 th, td {
   padding-left: 20px;
   padding-right: 20px;

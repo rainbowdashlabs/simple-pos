@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import StorageInventoryEntry from "./StorageInventoryEntry.vue";
-import {StorageSummary} from "../../../../../../../scripts/storage.ts";
-import FormattedText from "../../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../../scripts/text.ts";
-import {CategoryGroup} from "../../../../../../../scripts/categories.ts";
+import {StorageSummary} from "@/scripts/storage.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import {CategoryGroup} from "@/scripts/categories.ts";
 
 export default defineComponent({
   name: "StorageInventoryGroup",
@@ -18,6 +18,10 @@ export default defineComponent({
     group: {
       type: Object as PropType<CategoryGroup<StorageSummary>>,
       required: true
+    },
+    saved: {
+      type: Map as unknown as PropType<Map<number, number>>,
+      required: true
     }
   },
   emits: ["changed"]
@@ -28,7 +32,8 @@ export default defineComponent({
   <div class="pt-5">
     <FormattedText :size="SizeGroup.xl" :value="group.category.name"/>
     <div class="grid grid-cols-1 gap-5 pt-5">
-      <StorageInventoryEntry v-for="item in group.entries" :listing="item" @changed="e => {$emit('changed', e)}"/>
+      <StorageInventoryEntry v-for="item in group.entries" :listing="item" :saved="saved"
+                             @changed="e => {$emit('changed', e)}"/>
     </div>
   </div>
 

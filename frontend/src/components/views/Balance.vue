@@ -1,37 +1,45 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {store} from "../../scripts/store.ts";
+import {account, Account, addDeposit} from "@/scripts/accounts.ts";
 import BalanceAdd from "./balance/BalanceAdd.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import BalanceDisplay from "./balance/BalanceDisplay.vue";
-import {addDeposit} from "../../scripts/accounts.ts";
-import InputField from "../styles/input/InputField.vue";
-import SimpleInputField from "../styles/input/SimpleInputField.vue";
-import ColorContainer from "../styles/container/ColorContainer.vue";
-import GridWrapper from "../styles/grid/GridWrapper.vue";
-import MoneyText from "../styles/text/MoneyText.vue";
-import Icon from "../styles/Icon.vue";
-import ConfirmButton from "../styles/buttons/ConfirmButton.vue";
-import BackButton from "../styles/buttons/BackButton.vue";
+import InputField from "@/components/styles/input/InputField.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
+import Icon from "@/components/styles/Icon.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import BackButton from "@/components/styles/buttons/BackButton.vue";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "Balance",
   components: {
+    ViewWrapper,
     BackButton,
     ConfirmButton,
     Icon,
     MoneyText,
     GridWrapper, ColorContainer, SimpleInputField, InputField, BalanceDisplay, FontAwesomeIcon, BalanceAdd
   },
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      deposit: 0
+      deposit: 0,
+      account: null as Account | null
     }
   },
   mounted() {
-    if (store.focusAccount == null) {
-      window.location.href = "#accounts"
-    }
+    account(Number(this.id)).then(e => {
+      this.account = e
+    })
   },
   methods: {
     depositValue(value: number) {
@@ -41,8 +49,9 @@ export default defineComponent({
       this.deposit = 0
     },
     storeDeposit() {
-      addDeposit(store.focusAccount!, this.deposit)
-      window.location.href = "#profile"
+      if (!this.account) return
+      addDeposit(this.account, this.deposit)
+      this.$router.push({name: 'profile', params: {id: this.id}})
     }
   },
   watch:{
@@ -51,11 +60,9 @@ export default defineComponent({
     }
   },
   computed: {
-    store() {
-      return store
-    },
     currentAmount() {
-      return store.focusAccount?.balance! + this.deposit
+      if (!this.account) return 0
+      return this.account.balance + this.deposit
     }
   }
 
@@ -63,9 +70,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <GridWrapper cols="2" bg="none" class="pt-5 max-lg:mx-5">
+  <ViewWrapper v-if="account">
+  <GridWrapper cols="2" bg="none">
     <div class="col-span-full">
-      <h1>{{ store.focusAccount?.name }}</h1>
+      <h1>{{ account.name }}</h1>
     </div>
 
     <div class="col-span-full ">
@@ -73,7 +81,7 @@ export default defineComponent({
     </div>
 
     <ColorContainer class="col-span-full flex justify-evenly items-center" bg="secondary">
-      <MoneyText class="font-bold" :amount="store.focusAccount?.balance!"/>
+      <MoneyText class="font-bold" :amount="account.balance"/>
       <Icon class="text-xl" icon="fa-arrow-right"/>
       <MoneyText class="font-bold" :amount="currentAmount"/>
     </ColorContainer>
@@ -100,6 +108,7 @@ export default defineComponent({
     <BackButton @click="resetDeposit"/>
     <ConfirmButton @click="storeDeposit"/>
   </GridWrapper>
+  </ViewWrapper>
 
 </template>
 

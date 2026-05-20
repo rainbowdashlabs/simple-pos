@@ -1,55 +1,64 @@
 <script lang="ts">
 import PurchaseHistory from "./profile/PurchaseHistory.vue";
-import Balance from "./profile/Balance.vue";
-import {store} from "../../scripts/store.ts";
+import {account, Account} from "@/scripts/accounts.ts";
 import DepositHistory from "./profile/DepositHistory.vue";
-import IconButton from "../styles/buttons/IconButton.vue";
-import MoneyText from "../styles/text/MoneyText.vue";
-import ColorContainer from "../styles/container/ColorContainer.vue";
-import {SizeGroup} from "../../scripts/text.ts";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default {
   name: "Profile",
-  components: {ColorContainer, MoneyText, IconButton, DepositHistory, PurchaseHistory, Balance},
+  components: {ViewWrapper, ColorContainer, MoneyText, IconButton, DepositHistory, PurchaseHistory},
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      id: -1
+      account: null as Account | null
     }
   },
   mounted() {
-    if (store.focusAccount == null) {
-      window.location.href = "#accounts"
-    }
+    account(Number(this.id)).then(e => {
+      this.account = e
+    })
   },
   methods: {
     addBalance() {
-      window.location.href = "#balance"
+      this.$router.push({name: 'balance', params: {id: this.id}})
     }
   },
   computed: {
     SizeGroup() {
       return SizeGroup
     },
-    store() {
-      return store
+    fromCheckout() {
+      return this.$route.query.from === 'checkout'
     }
   }
 }
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-5 mx-5 my-5">
-    <div class="col-span-full">
-      <h1>{{ store.focusAccount?.name }}</h1>
-    </div>
-    <ColorContainer class="col-span-full" bg="secondary">
-      <MoneyText class="col-span-full font-bold text-center" :amount="store.focusAccount?.balance!"
-                 :size="SizeGroup.xl3"/>
+  <ViewWrapper v-if="account">
+    <h1 class="text-2xl font-bold">{{ account.name }}</h1>
+
+    <ColorContainer bg="secondary">
+      <MoneyText class="font-bold text-center" :amount="account.balance" :size="SizeGroup.xl3"/>
     </ColorContainer>
-    <IconButton @click="addBalance" class="col-span-full" icon="fa-money-bills"/>
-    <DepositHistory class="col-span-full md:col-start-1 md:col-span-2 md:row-span-3"/>
-    <PurchaseHistory class="col-span-full md:col-start-3 md:col-span-3 md:row-span-3"/>
-  </div>
+
+    <IconButton v-if="fromCheckout" @click="$router.push({name: 'pos'})" class="w-full" icon="fa-cash-register"/>
+    <IconButton @click="addBalance" class="w-full" icon="fa-money-bills"/>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <DepositHistory :account-id="Number(id)"/>
+      <PurchaseHistory :account-id="Number(id)"/>
+    </div>
+  </ViewWrapper>
 </template>
 
 <style scoped>

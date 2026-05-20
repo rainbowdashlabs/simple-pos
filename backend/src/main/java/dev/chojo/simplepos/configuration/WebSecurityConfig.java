@@ -40,10 +40,10 @@ public class WebSecurityConfig {
         return http
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
-                .authorizeHttpRequests(conf -> conf.requestMatchers("/", "/index.html", "/assets/**", "/api/auth/**", "/api/user", "/swagger-ui/**", "/api-docs/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated())
+                .authorizeHttpRequests(conf -> conf
+                        .requestMatchers("/api/auth/**", "/api/demo/**", "/api/user").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll())
                 .formLogin(form -> {
                     form.loginPage("/#login")
                             .loginProcessingUrl("/api/login")
@@ -69,8 +69,8 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider(UserService userService, PasswordEncoder encoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(encoder);
-        provider.setUserDetailsService(userService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userService);
+        provider.setPasswordEncoder(encoder);
         provider.setUserDetailsPasswordService(userService);
         return provider;
     }

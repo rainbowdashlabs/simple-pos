@@ -5,7 +5,7 @@ export default defineComponent({
   name: "Logout",
   mounted() {
     setTimeout(() =>{
-      window.location.href = "#login"
+      this.$router.push({name: 'login'})
     }, 5000)
   }
 })

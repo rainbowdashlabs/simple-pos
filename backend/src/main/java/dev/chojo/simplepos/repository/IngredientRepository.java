@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface IngredientRepository extends JpaRepository<Ingredient, Integer> {
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Ingredient SET price = ?2 where id = ?1")
     int updateByIdIs(int id, double price);
 

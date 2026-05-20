@@ -16,6 +16,8 @@ public class Account {
 
     private Instant created = Instant.now();
 
+    private boolean deleted = false;
+
     public Account() {
     }
 
@@ -47,5 +49,13 @@ public class Account {
 
     public void setCreated(Instant created) {
         this.created = created;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

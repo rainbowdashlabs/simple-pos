@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import StorageEntry from "./StorageEntry.vue";
-import {StorageSummary} from "../../../../../scripts/storage.ts";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
-import {CategoryGroup} from "../../../../../scripts/categories.ts";
+import {StorageSummary} from "@/scripts/storage.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import {CategoryGroup} from "@/scripts/categories.ts";
 
 export default defineComponent({
   name: "StorageGroup",

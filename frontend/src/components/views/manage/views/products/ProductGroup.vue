@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import ProductEntry from "./ProductEntry.vue";
-import {ProductGroup} from "../../../../../scripts/product.ts";
-import TextButton from "../../../../styles/buttons/TextButton.vue";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
+import {ProductGroup} from "@/scripts/product.ts";
+import TextButton from "@/components/styles/buttons/TextButton.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "ProductGroup",

@@ -1,14 +1,13 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {deleteProduct, Product} from "../../../../../scripts/product.ts";
-import CenterText from "../../../../styles/text/CenterText.vue";
-import {store} from "../../../../../scripts/store.ts";
-import TwoStepDeleteButton from "../../../../styles/buttons/TwoStepDeleteButton.vue";
-import IconButton from "../../../../styles/buttons/IconButton.vue";
-import Icon from "../../../../styles/Icon.vue";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
+import {deleteProduct, Product} from "@/scripts/product.ts";
+import CenterText from "@/components/styles/text/CenterText.vue";
+import TwoStepDeleteButton from "@/components/styles/buttons/TwoStepDeleteButton.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import Icon from "@/components/styles/Icon.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 
 export default defineComponent({
   name: "ProductEntry",
@@ -32,8 +31,7 @@ export default defineComponent({
     },
     openInfo() {
       if (this.deleted) return
-      store.focusProduct = this.product
-      window.location.href = "#manage/products/info"
+      this.$router.push({name: 'manage-products-info', params: {id: this.product.id}})
     },
     toggleConfirm(event: Event) {
       event.stopPropagation()
@@ -63,39 +61,10 @@ export default defineComponent({
     </div>
 
     <GridWrapper cols="2" gap="2" class="grid-cols-3 sm:max-lg::grid-cols-2 lg:grid-cols-3" bg="none">
-
-<!--      <div class="flex items-center">-->
-<!--        <Icon class="mr-2.5" icon="fa-cart-arrow-down"/>-->
-<!--        <FormattedText :value="product.purchase_price" type="currency"/>-->
-<!--      </div>-->
-
       <div class="flex items-center">
         <Icon class="mr-2.5" icon="fa-coins"/>
         <FormattedText :value="product.price" type="currency"/>
       </div>
-
-      <!--      <div v-if="product.container_size != 0" class="flex items-center">-->
-<!--        <Icon class="mr-2.5" icon="fa-box"/>-->
-<!--        <FormattedText :value="product.container_size" type="number"/>-->
-<!--      </div>-->
-
-<!--      <div v-if="product.pledge != 0" class="flex items-center">-->
-<!--        <Icon class="mr-2.5" icon="fa-bottle-water"/>-->
-<!--        <Icon class="mr-2.5" icon="fa-coins"/>-->
-<!--        <FormattedText :value="product.pledge" type="currency"/>-->
-<!--      </div>-->
-
-<!--      <div v-if="product.pledge_container != 0" class="flex items-center">-->
-<!--        <Icon class="mr-2.5" icon="fa-box"/>-->
-<!--        <Icon class="mr-2.5" icon="fa-coins"/>-->
-<!--        <FormattedText :value="product.pledge_container" type="currency"/>-->
-<!--      </div>-->
-
-<!--      <div v-if="product.pledge_container != 0" class="flex items-center">-->
-<!--        <Icon class="mr-2.5" icon="fa-triangle-exclamation"/>-->
-<!--        <Icon class="mr-2.5" icon="fa-warehouse"/>-->
-<!--        <FormattedText :value="product.min_stock" type="number"/>-->
-<!--      </div>-->
     </GridWrapper>
   </div>
 </template>

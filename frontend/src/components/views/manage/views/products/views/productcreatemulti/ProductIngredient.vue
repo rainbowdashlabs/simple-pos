@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {Ingredient} from "../../../../../../../scripts/Ingredient.ts";
-import FormattedText from "../../../../../../styles/text/FormattedText.vue";
-import IconButton from "../../../../../../styles/buttons/IconButton.vue";
-import {Recipe} from "../../../../../../../scripts/product.ts";
+import {Ingredient} from "@/scripts/Ingredient.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import {Recipe} from "@/scripts/product.ts";
 
 export default defineComponent({
   name: "ProductIngredient",

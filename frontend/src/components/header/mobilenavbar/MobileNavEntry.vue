@@ -1,11 +1,11 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Icon from "../../styles/Icon.vue";
+import Icon from "@/components/styles/Icon.vue";
 
 export default defineComponent({
   name: "MobileNavEntry",
   components: {Icon},
-  props: ["link", "label", "icon"],
+  props: ["to", "label", "icon"],
   emits: ["click"]
 
 })
@@ -14,7 +14,7 @@ export default defineComponent({
 <template>
     <div class="flex items-center text-xl py-3">
       <Icon :icon="icon"/>
-      <a @click="$emit('click')" :href="link" class="mx-3">{{ label }}</a>
+      <router-link @click="$emit('click')" :to="to" class="mx-3">{{ label }}</router-link>
     </div>
 </template>
 

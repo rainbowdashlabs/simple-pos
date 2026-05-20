@@ -3,27 +3,28 @@ import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import FieldName from "./productcreate/FieldName.vue";
 import CategorySelector from "./productcreate/CategorySelector.vue";
-import FullCol from "../../../../../styles/grid/FullCol.vue";
-import ConfigureSection from "../ConfigureSection.vue";
-import {Product, RecipeEntry, updateProduct} from "../../../../../../scripts/product.ts";
-import {store} from "../../../../../../scripts/store.ts";
-import {categories, Category, Listing} from "../../../../../../scripts/categories.ts";
-import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
-import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../scripts/text.ts";
-import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
-import TextButton from "../../../../../styles/buttons/TextButton.vue";
+import FullCol from "@/components/styles/grid/FullCol.vue";
+import ConfigureSection from "@/components/views/manage/views/products/ConfigureSection.vue";
+import {Product, product as fetchProduct, RecipeEntry, updateProduct} from "@/scripts/product.ts";
+import {categories, Category, Listing} from "@/scripts/categories.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
+import TextButton from "@/components/styles/buttons/TextButton.vue";
 import ProductIngredientInfo from "./productinfo/ProductIngredientInfo.vue";
-import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
-import {Ingredient, ingredient, ingredients} from "../../../../../../scripts/Ingredient.ts";
-import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import {roundCurrency} from "../../../../../../scripts/util.ts";
+import {Ingredient, ingredient, ingredients} from "@/scripts/Ingredient.ts";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import {roundCurrency} from "@/scripts/util.ts";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "ProductEdit",
   components: {
+    ViewWrapper,
     ConfirmButton,
     ProductIngredientGroup,
     GridWrapper,
@@ -39,11 +40,17 @@ export default defineComponent({
     ConfigureSection,
     FontAwesomeIcon
   },
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      category: store.focusProduct?.category,
-      product: Object.assign({}, store.focusProduct) as Product,
-      recipe: Object.assign({}, store.focusProduct?.recipe),
+      category: undefined as Category | undefined,
+      product: null as Product | null,
+      recipe: {entries: []} as {entries: RecipeEntry[]},
       categoryList: [] as Category[],
       ingredientList: {} as Listing<Ingredient>
     }
@@ -53,16 +60,15 @@ export default defineComponent({
       return SizeGroup
     },
     disabled() {
-      if (!this.product.name) return true
+      if (!this.product?.name) return true
       if (!this.category) return true
-      if (!this.product.price) return true
+      if (!this.product?.price) return true
       return false
     },
     buttonColor() {
       return this.disabled ? "bg-gray-600 text-gray-400" : "bg-green-500"
     },
     rawPrice() {
-      // TODO: Check with real data
       return this.recipe.entries.reduce((e: number, cur: RecipeEntry) => {
         return e + (cur.ingredient.price * cur.amount)
       }, 0)
@@ -70,18 +76,16 @@ export default defineComponent({
   },
   methods: {
     updateProd() {
+      if (!this.product) return
       this.product.recipe = this.recipe
       this.product.category = this.category!
-      console.log(this.product)
       updateProduct(this.product)
-          .then(e => {
-            console.log(e)
-            store.focusProduct = this.product // TODO: This should actually be the returned entity
-            window.location.href = "#manage/products/info"
+          .then(() => {
+            this.$router.push({name: 'manage-products-info', params: {id: this.id}})
           })
     },
     updateCategory(vk: string) {
-      this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
+      this.category = this.categoryList.find(e => e.id == Number(vk)) ?? this.category
     },
     updateIngredient(data: Array<number>) {
       let id = data[0]
@@ -98,15 +102,17 @@ export default defineComponent({
       }
     }
   },
-  beforeMount() {
-    if (store.focusProduct === undefined) window.location.href = "#manage/products"
-  },
   watch: {
     "product.price"(newValue: String) {
-      this.product.price = roundCurrency(Number(newValue))
+      if (this.product) this.product.price = roundCurrency(Number(newValue))
     }
   },
   mounted() {
+    fetchProduct(Number(this.id)).then(e => {
+      this.product = Object.assign({}, e)
+      this.category = e.category
+      this.recipe = Object.assign({}, e.recipe)
+    })
     ingredients().then(e => {
       this.ingredientList = e
     })
@@ -118,7 +124,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+  <ViewWrapper v-if="product">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
       <SimpleInputField type="text" v-model="product.name"/>
@@ -148,7 +155,8 @@ export default defineComponent({
     </ColorContainer>
 
     <ConfirmButton class="col-span-full" :disabled="disabled" @click="updateProd"/>
-  </div>
+    </div>
+  </ViewWrapper>
 </template>
 
 <style scoped>

@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {stockInfo} from "../../../../../../../scripts/storage.ts";
-import FormattedText from "../../../../../../styles/text/FormattedText.vue";
-import NumberText from "../../../../../../styles/text/NumberText.vue";
-import {RecipeEntry} from "../../../../../../../scripts/product.ts";
-import Icon from "../../../../../../styles/Icon.vue";
+import {stockInfo} from "@/scripts/storage.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import NumberText from "@/components/styles/text/NumberText.vue";
+import {RecipeEntry} from "@/scripts/product.ts";
+import Icon from "@/components/styles/Icon.vue";
 
 export default defineComponent({
   name: "ProductIngredientInfo",

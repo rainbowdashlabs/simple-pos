@@ -1,22 +1,24 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import GridWrapper from "../../../styles/grid/GridWrapper.vue";
-import {currentBalance, currentCash, currentPledge, submitCash} from "../../../../scripts/cash.ts";
-import MoneyText from "../../../styles/text/MoneyText.vue";
-import {SizeGroup} from "../../../../scripts/text.ts";
-import Container from "../../../styles/container/Container.vue";
-import InputField from "../../../styles/input/InputField.vue";
-import SimpleInputField from "../../../styles/input/SimpleInputField.vue";
-import ConfirmButton from "../../../styles/buttons/ConfirmButton.vue";
-import SelectMenu from "../../../styles/input/select/SelectMenu.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import {currentBalance, currentCash, currentPledge, submitCash} from "@/scripts/cash.ts";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import Container from "@/components/styles/container/Container.vue";
+import InputField from "@/components/styles/input/InputField.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
 import CashHistory from "./cash/CashHistory.vue";
-import ColorContainer from "../../../styles/container/ColorContainer.vue";
-import IconButton from "../../../styles/buttons/IconButton.vue";
-import FormattedText from "../../../styles/text/FormattedText.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "Cash",
   components: {
+    ViewWrapper,
     FormattedText,
     IconButton,
     ColorContainer,
@@ -100,7 +102,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex flex-col mx-5 gap-y-5">
+  <ViewWrapper>
     <ColorContainer bg="secondary">
       <FormattedText :size="SizeGroup.xl" value="cash" type="locale"/>
       <MoneyText class="text-center" :size="SizeGroup.xl" :amount="current_cash"/>
@@ -136,7 +138,7 @@ export default defineComponent({
       </GridWrapper>
     </Transition>
     <CashHistory :key="componentKey"/>
-  </div>
+  </ViewWrapper>
 </template>
 
 <style scoped>

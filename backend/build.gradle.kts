@@ -1,7 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.13"
-    id("io.spring.dependency-management") version "1.1.7"
+    alias(libs.plugins.spring.boot)
 }
 
 group = "dev.chojo"
@@ -9,7 +8,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -18,28 +17,26 @@ repositories {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
 
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.data.rest)
+    implementation(libs.spring.session.core)
+    implementation(libs.postgresql)
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.bundles.spring.security)
+    implementation(libs.springdoc.openapi)
 
-    implementation("org.springframework.boot:spring-boot-starter-data-rest")
-    implementation("org.springframework.session:spring-session-core")
-    implementation("org.postgresql:postgresql")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.security:spring-security-web")
-    implementation("org.springframework.security:spring-security-config")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16")
+    implementation(libs.jjwt.api)
+    runtimeOnly(libs.bundles.jjwt.runtime)
 
-    implementation("io.jsonwebtoken:jjwt-api:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.2") // or 'io.jsonwebtoken:jjwt-gson:0.12.6' for gson
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES))
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.boot.testcontainers)
+    testImplementation(libs.bundles.testcontainers)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.withType<Test> {

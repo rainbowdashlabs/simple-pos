@@ -1,11 +1,11 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import GridRowWrapper from "../../../../styles/grid/GridRowWrapper.vue";
-import {cashHistory, CashHistoryEntry} from "../../../../../scripts/cash.ts";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import MoneyText from "../../../../styles/text/MoneyText.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
-import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
+import GridRowWrapper from "@/components/styles/grid/GridRowWrapper.vue";
+import {cashHistory, CashHistoryEntry} from "@/scripts/cash.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 
 export default defineComponent({
   name: "CashHistory",

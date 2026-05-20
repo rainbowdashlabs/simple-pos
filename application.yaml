@@ -11,3 +11,5 @@ spring:
         enable_lazy_load_no_trans: true
         # Hibernate doesn't create sequences the right way if the default schema is set.
         # default_schema: simple_pos
+demo:
+  enabled: true

@@ -1,28 +1,38 @@
-FROM nixos/nix:latest AS frontend
+# --- Frontend ---
+FROM node:22-alpine AS frontend
 
-WORKDIR build/
-RUN nix-channel --update
-COPY shell.nix .
+WORKDIR /build
 
-COPY frontend/package*.json /build
-RUN nix-shell --run "npm ci"
-COPY ./frontend/ .
-RUN nix-shell --run "npm run build"
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
 
-FROM gradle:8.14-jdk21-alpine AS spring
+COPY frontend/ .
+RUN npm run build
 
-COPY backend/ .
-RUN rm src/main/resources/public -rf
-COPY --from=frontend /build/dist/ ./src/main/resources/public
+# --- Backend ---
+FROM eclipse-temurin:25-alpine AS backend
 
-RUN gradle bootJar -x test
+WORKDIR /build
 
-FROM eclipse-temurin:21-alpine
+COPY backend/gradlew ./
+COPY backend/gradle/ gradle/
+RUN chmod +x gradlew && ./gradlew --version
+
+COPY backend/build.gradle.kts backend/settings.gradle.kts ./
+COPY backend/gradle/libs.versions.toml gradle/libs.versions.toml
+RUN ./gradlew dependencies --no-daemon || true
+
+COPY backend/src/ src/
+RUN ./gradlew bootJar -x test --no-daemon
+
+# --- Runtime ---
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
-COPY --from=spring /home/gradle/build/libs/simple-pos*.jar app.jar
-COPY --from=spring /home/gradle/src/main/resources/application.yaml application.yaml
+COPY --from=backend /build/build/libs/simple-pos*.jar app.jar
+COPY --from=backend /build/src/main/resources/application.yaml application.yaml
+COPY --from=frontend /build/dist/ /app/public/
 
 EXPOSE 8080
 

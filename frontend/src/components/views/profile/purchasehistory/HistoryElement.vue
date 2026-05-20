@@ -1,13 +1,13 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import Profile from "../../accounts/Profile.vue";
-import {Product} from "../../../../scripts/product.ts";
+import Profile from "@/components/views/accounts/Profile.vue";
+import {Product} from "@/scripts/product.ts";
 import DeleteHistoryButton from "./DeleteHistoryButton.vue";
-import {Purchase, purchaseDelete} from "../../../../scripts/purchase.ts";
-import TwoStepDeleteButton from "../../../styles/buttons/TwoStepDeleteButton.vue";
-import IconButton from "../../../styles/buttons/IconButton.vue";
-import FormattedText from "../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../scripts/text.ts";
+import {Purchase, purchaseDelete} from "@/scripts/purchase.ts";
+import TwoStepDeleteButton from "@/components/styles/buttons/TwoStepDeleteButton.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "HistoryElement",

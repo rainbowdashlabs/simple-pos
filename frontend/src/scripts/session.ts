@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie'
 import {getHost, urlEncode} from "./http.ts";
 import {store} from "./store.ts";
+import router from "@/router.ts";
 
 interface Token {
     token: string
@@ -23,21 +24,57 @@ async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function logout() {
+function clearTokens() {
     Cookies.remove(token)
     Cookies.remove(token_expire)
     Cookies.remove(refresh_token)
     Cookies.remove(refresh_token_expire)
     store.loggedIn = false
-    window.location.href = "#login"
+}
+
+export function logout() {
+    clearTokens()
+    router.push({name: 'login'})
 }
 
 export async function isLoggedIn() {
-    let token = await getSessionToken()
-    if (!token) return false
-    console.debug(`User is logged in ${token != null}`)
-    store.loggedIn = true
-    return true;
+    const expire = Cookies.get(token_expire)
+    if (!expire) {
+        store.loggedIn = false
+        return false
+    }
+    // Token still valid
+    if (Number(expire) > Date.now()) {
+        store.loggedIn = true
+        return true
+    }
+    // Token expired — try refresh without navigation side effects
+    const refreshExpire = Cookies.get(refresh_token_expire)
+    if (!refreshExpire || Number(refreshExpire) < Date.now()) {
+        clearTokens()
+        return false
+    }
+    try {
+        const response = await fetch(getHost() + "/api/auth/refresh", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: urlEncode({token: Cookies.get(refresh_token)})
+        })
+        if (!response.ok) {
+            clearTokens()
+            return false
+        }
+        const cred: TokenResponse = await response.json()
+        storeTokens(getUsername()!, cred)
+        store.loggedIn = true
+        return true
+    } catch {
+        clearTokens()
+        return false
+    }
 }
 
 export async function getSessionToken() {
@@ -143,11 +180,40 @@ export function getUsername() {
     return Cookies.get("username")
 }
 
-export function getLocale(): string | undefined {
-    return Cookies.get("locale")
+export function setLocale(locale: string) {
+    localStorage.setItem("locale", locale)
 }
 
-export function setLocale(locale: string) {
-    console.log("Saved locale " + locale)
-    Cookies.set("locale", locale)
+export function getLocale(): string | undefined {
+    return localStorage.getItem("locale") ?? undefined
+}
+
+let _demoMode: boolean | null = null
+
+export async function isDemoMode(): Promise<boolean> {
+    if (_demoMode !== null) return _demoMode
+    try {
+        const response = await fetch(getHost() + "/api/demo")
+        if (response.ok) {
+            const data = await response.json()
+            _demoMode = data.demo === true
+        } else {
+            _demoMode = false
+        }
+    } catch {
+        _demoMode = false
+    }
+    return _demoMode
+}
+
+export async function demoLogin(): Promise<boolean> {
+    const response = await fetch(getHost() + "/api/demo/login", {
+        method: "POST",
+        headers: {"Accept": "application/json"}
+    })
+    if (!response.ok) return false
+    const cred: TokenResponse = await response.json()
+    storeTokens("demo", cred)
+    store.loggedIn = true
+    return true
 }

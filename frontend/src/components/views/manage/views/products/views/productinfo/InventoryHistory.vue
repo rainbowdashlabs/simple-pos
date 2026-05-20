@@ -1,12 +1,12 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import GridRowWrapper from "../../../../../../styles/grid/GridRowWrapper.vue";
+import GridRowWrapper from "@/components/styles/grid/GridRowWrapper.vue";
 
-import {StorageEntry} from "../../../../../../../scripts/storage.ts";
-import GridWrapper from "../../../../../../styles/grid/GridWrapper.vue";
-import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
-import FormattedText from "../../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../../scripts/text.ts";
+import {StorageEntry} from "@/scripts/storage.ts";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "InventoryHistory",

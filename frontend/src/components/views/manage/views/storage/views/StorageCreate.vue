@@ -1,26 +1,28 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {createIngredient} from "../../../../../../scripts/Ingredient.ts";
-import {categories, Category} from "../../../../../../scripts/categories.ts";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
-import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import TextButton from "../../../../../styles/buttons/TextButton.vue";
-import FreeButton from "../../../../../styles/buttons/FreeButton.vue";
-import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
-import InputField from "../../../../../styles/input/InputField.vue";
-import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
-import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
-import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
-import FullCol from "../../../../../styles/grid/FullCol.vue";
-import ConfigureSection from "../../products/ConfigureSection.vue";
-import CategorySelector from "../../products/views/productcreate/CategorySelector.vue";
-import FieldName from "../../products/views/productcreate/FieldName.vue";
-import {SizeGroup} from "../../../../../../scripts/text.ts";
+import {createIngredient} from "@/scripts/Ingredient.ts";
+import {categories, Category} from "@/scripts/categories.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import TextButton from "@/components/styles/buttons/TextButton.vue";
+import FreeButton from "@/components/styles/buttons/FreeButton.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import InputField from "@/components/styles/input/InputField.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
+import FullCol from "@/components/styles/grid/FullCol.vue";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import ConfigureSection from "@/components/views/manage/views/products/ConfigureSection.vue";
+import CategorySelector from "@/components/views/manage/views/products/views/productcreate/CategorySelector.vue";
+import FieldName from "@/components/views/manage/views/products/views/productcreate/FieldName.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "StorageCreate",
   components: {
+    ViewWrapper,
     ConfirmButton,
     TextButton,
     FreeButton,
@@ -41,7 +43,7 @@ export default defineComponent({
       name: "",
       price: 0,
       container_size: 0,
-      category: "",
+      category: null as Category | null,
       pledge: 0,
       pledge_container: 0,
       min_stock: 0,
@@ -68,31 +70,37 @@ export default defineComponent({
     }
   },
   methods: {
-    updateCategory(vk: Array<string>) {
-      this.category = vk[0]
+    updateCategory(vk: string) {
+      this.category = this.categoryList.find(e => e.id == Number(vk)) ?? null
     },
     createIngr() {
+      if (!this.category) return
       createIngredient({
         id: null,
         name: this.name,
-        category: this.categoryList[this.categoryList.findIndex((e: Category) => e.name == this.category)],
+        category: this.category,
         price: this.price,
         containerSize: this.container_size,
         pledge: this.pledge,
         pledgeContainer: this.pledge_container,
         minStock: this.min_stock
+      }).then(() => {
+        this.$router.push({name: 'manage-storage'})
       })
-      window.location.href = "#manage/products"
     }
   },
   mounted() {
-      categories().then(e => {this.categoryList = e})
+      categories().then(e => {
+        this.categoryList = e
+        if (e.length > 0) this.category = e[0]
+      })
   },
 })
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+  <ViewWrapper>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
       <SimpleInputField type="text" v-model="name"/>
@@ -101,7 +109,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
       <SelectMenu class="w-full" @select="updateCategory"
-                  :options="categoryOptions" :current="category"/>
+                  :options="categoryOptions" :current="category?.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
@@ -164,7 +172,8 @@ export default defineComponent({
     <div class="col-span-full">
       <ConfirmButton class="w-full" :disabled="disabled" @click="createIngr"/>
     </div>
-  </div>
+    </div>
+  </ViewWrapper>
 
 </template>
 

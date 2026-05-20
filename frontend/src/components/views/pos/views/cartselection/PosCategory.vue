@@ -1,16 +1,11 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {ProductGroup} from "../../../../../scripts/product.ts";
-import ProductEntry from "../../../manage/views/products/ProductEntry.vue";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
+import {ProductGroup} from "@/scripts/product.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
 import PosProduct from "./PosProduct.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
-import BackButton from "../../../../styles/buttons/BackButton.vue";
-import ColorContainer from "../../../../styles/container/ColorContainer.vue";
-import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
-import IconButton from "../../../../styles/buttons/IconButton.vue";
-import FreeButton from "../../../../styles/buttons/FreeButton.vue";
-import Icon from "../../../../styles/Icon.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import Icon from "@/components/styles/Icon.vue";
 
 export default defineComponent({
   name: "PosCategory",
@@ -26,7 +21,7 @@ export default defineComponent({
   },
   components: {
     Icon,
-    FreeButton, IconButton, GridWrapper, ColorContainer, BackButton, PosProduct, FormattedText, ProductEntry
+    ColorContainer, PosProduct, FormattedText
   },
   props: {
     group: {
@@ -45,10 +40,9 @@ export default defineComponent({
                      :size="SizeGroup.xl"/>
       <Icon :icon="active ? 'fa-chevron-up' :'fa-chevron-down'"/>
     </ColorContainer>
-    <GridWrapper v-if="active" bg="none" class="col-span-full sm:grid-cols-4 md:grid-cols-5 pt-5" cols="2"
-                 padding="0">
+    <div v-if="active" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-3">
       <PosProduct v-for="item in group.entries" :product="item"/>
-    </GridWrapper>
+    </div>
   </div>
 </template>
 

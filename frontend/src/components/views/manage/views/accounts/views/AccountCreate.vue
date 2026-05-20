@@ -1,11 +1,12 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {createAccount} from "../../../../../../scripts/accounts.ts";
+import {createAccount} from "@/scripts/accounts.ts";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "AccountCreate",
-  components: {FontAwesomeIcon},
+  components: {ViewWrapper, FontAwesomeIcon},
   data() {
     return {
       name: ""
@@ -22,7 +23,7 @@ export default defineComponent({
   methods: {
     createAccount() {
       createAccount(this.name).then(() => {
-        window.location.href = "#manage/accounts"
+        this.$router.push({name: 'manage-accounts'})
       })
     }
   }
@@ -30,7 +31,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
+  <ViewWrapper>
     <div class="grid grid-cols-1">
       <div class="">
         <p class="text-xl md:text-2xl lg:text-4xl">Name</p>
@@ -46,7 +47,7 @@ export default defineComponent({
         <font-awesome-icon class="text-4xl" icon="fa-user-plus"/>
       </button>
     </div>
-  </div>
+  </ViewWrapper>
 
 </template>
 

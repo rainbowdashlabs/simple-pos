@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import ColorContainer from "../../../../styles/container/ColorContainer.vue";
-import {stockLow, StorageSummary} from "../../../../../scripts/storage.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import {stockLow, StorageSummary} from "@/scripts/storage.ts";
 import LowStockEntry from "./lowstock/LowStockEntry.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "LowStock",

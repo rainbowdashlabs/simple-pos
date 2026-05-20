@@ -1,52 +1,61 @@
 package dev.chojo.simplepos.service;
 
+import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import dev.chojo.simplepos.repository.IngredientRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 class IngredientServiceTest {
     @Autowired
     IngredientService service;
-
     @Autowired
     CategoryService categoryService;
+    @Autowired
+    IngredientRepository ingredientRepository;
 
-    @Container
-    @ServiceConnection
-    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    private Category category;
 
-
-    @BeforeAll
-    static void beforeAll() {
-        postgresContainer.start();
-    }
-
-    @AfterEach
-    void afterEach() {
-    }
-
-    @AfterAll
-    static void afterAll() {
-        postgresContainer.stop();
+    @BeforeEach
+    void setUp() {
+        category = categoryService.create("IngredientTestCat");
     }
 
     @Test
     void createIngredient() {
-        Category test = categoryService.create("test");
-        Ingredient ingredient = service.create(new Ingredient(null, test, "Test", 0d, 0, 0, 0, 0));
-        Assertions.assertNotNull(ingredient.getId());
+        Ingredient ingredient = service.create(new Ingredient(null, category, "Cola", 1.5, 24, 0.25, 3.0, 10));
+        assertNotNull(ingredient.getId());
+    }
+
+    @Test
+    void createdIngredientRetainsFields() {
+        Ingredient ingredient = service.create(new Ingredient(null, category, "Fanta", 1.2, 12, 0.15, 2.0, 5));
+
+        Ingredient found = ingredientRepository.findById(ingredient.getId()).orElseThrow();
+        assertEquals("Fanta", found.getName());
+        assertEquals(1.2, found.getPrice(), 0.001);
+        assertEquals(12, found.getContainerSize());
+        assertEquals(0.15, found.getPledge(), 0.001);
+        assertEquals(2.0, found.getPledgeContainer(), 0.001);
+        assertEquals(5, found.getMinStock());
+    }
+
+    @Test
+    void createMultipleIngredients() {
+        Ingredient first = service.create(new Ingredient(null, category, "Sprite", 1.0, 6, 0, 0, 0));
+        Ingredient second = service.create(new Ingredient(null, category, "Water", 0.5, 6, 0, 0, 0));
+        assertNotEquals(first.getId(), second.getId());
     }
 }

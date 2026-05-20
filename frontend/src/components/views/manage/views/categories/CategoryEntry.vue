@@ -1,15 +1,15 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {Category, deleteCategory, updateCategory} from "../../../../../scripts/categories.ts";
-import ColorContainer from "../../../../styles/container/ColorContainer.vue";
-import InputField from "../../../../styles/input/InputField.vue";
-import ConfirmButton from "../../../../styles/buttons/ConfirmButton.vue";
-import BackButton from "../../../../styles/buttons/BackButton.vue";
-import SimpleInputField from "../../../../styles/input/SimpleInputField.vue";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import IconButton from "../../../../styles/buttons/IconButton.vue";
-import TwoStepDeleteButton from "../../../../styles/buttons/TwoStepDeleteButton.vue";
+import {Category, deleteCategory, updateCategory} from "@/scripts/categories.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import InputField from "@/components/styles/input/InputField.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import BackButton from "@/components/styles/buttons/BackButton.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import TwoStepDeleteButton from "@/components/styles/buttons/TwoStepDeleteButton.vue";
 
 export default defineComponent({
   name: "CategoryEntry",

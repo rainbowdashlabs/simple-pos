@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import CenterText from "../../../../../../styles/text/CenterText.vue";
-import {SizeGroup} from "../../../../../../../scripts/text.ts";
+import CenterText from "@/components/styles/text/CenterText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "InfoEntry",

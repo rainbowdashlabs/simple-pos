@@ -1,10 +1,10 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import GridRowWrapper from "../../../../../../styles/grid/GridRowWrapper.vue";
-import {ProductSalesStat} from "../../../../../../../scripts/product.ts";
-import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
-import FormattedText from "../../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../../scripts/text.ts";
+import GridRowWrapper from "@/components/styles/grid/GridRowWrapper.vue";
+import {ProductSalesStat} from "@/scripts/product.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "SalesHistory",

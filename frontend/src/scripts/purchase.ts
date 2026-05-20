@@ -29,12 +29,33 @@ export function purchaseDelete(id: number): Promise<any> {
     return deleteJson(`api/purchase/${id}`)
 }
 
-export function statsTop(type: string, after: Date, limit: 30): Promise<SalesStat[]> {
+export function statsTop(type: string, after: Date, limit: number = 30): Promise<SalesStat[]> {
     let args = new Map([
         ["sorting", type],
         ["limit", String(limit)],
         ["after", after.toISOString()]
     ]);
     return getJson("api/purchase/stats/top", args)
+}
+
+export interface DailyStat {
+    day: string
+    sales: number
+    revenue: number
+    profit: number
+}
+
+export interface CategoryStat {
+    categoryName: string
+    sales: number
+    revenue: number
+}
+
+export function dailyStats(after: Date): Promise<DailyStat[]> {
+    return getJson("api/purchase/stats/daily", new Map([["after", after.toISOString()]]))
+}
+
+export function categoryStats(after: Date): Promise<CategoryStat[]> {
+    return getJson("api/purchase/stats/categories", new Map([["after", after.toISOString()]]))
 }
 

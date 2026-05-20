@@ -115,10 +115,6 @@ export class ListingCache<T> extends Cache<T> {
 }
 
 export interface Store {
-    focusAccount: Account | null | undefined,
-    focusProduct: Product | null | undefined,
-    focusIngredient: Ingredient | null | undefined,
-    focusStorage: StorageSummary | null | undefined,
     productCache: ListingCache<Product>
     accountCache: Cache<Account>
     ingredientCache: ListingCache<Ingredient>
@@ -130,10 +126,6 @@ export interface Store {
 }
 
 export const store: Reactive<Store> = reactive({
-        focusAccount: null,
-        focusProduct: null,
-        focusStorage: null,
-        focusIngredient: null,
         theme: null,
         cart: new Cart(),
         loggedIn: false,
@@ -142,6 +134,5 @@ export const store: Reactive<Store> = reactive({
         ingredientCache: new ListingCache<Ingredient>(e => e.id!, e => e.category),
         categoryCache: new Cache<Category>(e => e.id!),
         storageSummaryCache: new Cache<StorageSummary>(e => e.ingredient.id!),
-
     }
 )

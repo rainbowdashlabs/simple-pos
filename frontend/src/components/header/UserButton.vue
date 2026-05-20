@@ -1,8 +1,7 @@
 <script lang="ts">
-import {isLoggedIn} from '../../scripts/session.ts'
 import UserContext from "./UserContext.vue";
-import Icon from "../styles/Icon.vue";
-import {store} from "../../scripts/store.ts";
+import Icon from "@/components/styles/Icon.vue";
+import {store} from "@/scripts/store.ts";
 
 export default {
   components: {Icon, UserContext},
@@ -28,14 +27,8 @@ export default {
       this.userContext = !this.userContext
     },
     login() {
-      window.location.href = "#login"
+      this.$router.push({name: 'login'})
     }
-  }, mounted() {
-    window.addEventListener('hashchange', () => {
-      isLoggedIn().then(res => {
-        store.loggedIn = res
-      })
-    })
   }
 }
 </script>

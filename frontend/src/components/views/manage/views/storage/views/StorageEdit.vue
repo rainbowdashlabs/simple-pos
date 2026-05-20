@@ -1,21 +1,22 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import FullCol from "../../../../../styles/grid/FullCol.vue";
-import {store} from "../../../../../../scripts/store.ts";
-import {categories, Category} from "../../../../../../scripts/categories.ts";
-import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
-import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../scripts/text.ts";
-import SelectMenu from "../../../../../styles/input/select/SelectMenu.vue";
-import TextButton from "../../../../../styles/buttons/TextButton.vue";
-import {Ingredient, updateIngredient} from "../../../../../../scripts/Ingredient.ts";
-import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
+import FullCol from "@/components/styles/grid/FullCol.vue";
+import {categories, Category} from "@/scripts/categories.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
+import TextButton from "@/components/styles/buttons/TextButton.vue";
+import {Ingredient, ingredient as fetchIngredient, updateIngredient} from "@/scripts/Ingredient.ts";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "StorageEdit",
   components: {
+    ViewWrapper,
     ConfirmButton,
     TextButton,
     SelectMenu,
@@ -25,11 +26,17 @@ export default defineComponent({
     FullCol,
     FontAwesomeIcon
   },
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      category: store.focusStorage?.ingredient.category as Category,
+      category: undefined as Category | undefined,
       categoryList: [] as Category[],
-      ingredient: Object.assign({}, store.focusStorage?.ingredient) as Ingredient,
+      ingredient: null as Ingredient | null,
     }
   },
   computed: {
@@ -37,9 +44,9 @@ export default defineComponent({
       return SizeGroup
     },
     disabled() {
-      if (!this.ingredient.name) return true
+      if (!this.ingredient?.name) return true
       if (!this.category) return true
-      if (!this.ingredient.price) return true
+      if (!this.ingredient?.price) return true
       return false
     },
     buttonColor() {
@@ -48,22 +55,22 @@ export default defineComponent({
   },
   methods: {
     updateIngredient() {
-      this.ingredient.category = this.category
+      if (!this.ingredient) return
+      this.ingredient.category = this.category!
       updateIngredient(this.ingredient)
           .then(() => {
-            store.focusIngredient = this.ingredient
-            store.focusStorage!.ingredient.category = this.category!
-            window.location.href = "#manage/storage"
+            this.$router.push({name: 'manage-storage'})
           })
     },
     updateCategory(vk: string) {
-      this.category = this.categoryList[this.categoryList.findIndex(e => e.id == Number(vk))]
-    },
-    beforeMount() {
-      if (store.focusProduct === undefined) window.location.href = "#manage/products"
+      this.category = this.categoryList.find(e => e.id == Number(vk)) ?? this.category
     },
   },
   mounted() {
+    fetchIngredient(Number(this.id)).then(e => {
+      this.ingredient = Object.assign({}, e)
+      this.category = e.category
+    })
     categories().then(e => {
       this.categoryList = e
     })
@@ -72,7 +79,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+  <ViewWrapper v-if="ingredient">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
       <SimpleInputField type="text" v-model="ingredient.name"/>
@@ -82,7 +90,7 @@ export default defineComponent({
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
       <SelectMenu class="w-full" @select="updateCategory"
                   :options="categoryList.map(e => {return [e.name, e.id]})"
-                  :current="category.name"/>
+                  :current="category?.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
@@ -145,7 +153,8 @@ export default defineComponent({
     <div class="col-span-full">
       <ConfirmButton @click="updateIngredient" :disabled="disabled"/>
     </div>
-  </div>
+    </div>
+  </ViewWrapper>
 </template>
 
 <style scoped>

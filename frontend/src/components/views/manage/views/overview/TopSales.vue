@@ -1,12 +1,12 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {Mapping} from "../../../../../scripts/store.ts";
-import {SalesStat, statsTop} from "../../../../../scripts/purchase.ts";
-import {Timeframe} from "../../../../../scripts/product.ts";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import ColorContainer from "../../../../styles/container/ColorContainer.vue";
+import {Mapping} from "@/scripts/store.ts";
+import {SalesStat, statsTop} from "@/scripts/purchase.ts";
+import {Timeframe} from "@/scripts/product.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import TopSalesEntry from "./topsales/TopSalesEntry.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "TopSales",

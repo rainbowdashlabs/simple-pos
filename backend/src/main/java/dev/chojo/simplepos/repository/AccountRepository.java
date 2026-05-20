@@ -41,6 +41,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
               FROM Purchase
               GROUP BY account.id
             ) p
-            ON a.id = p.id ORDER BY a.name""")
+            ON a.id = p.id
+            WHERE a.deleted = false
+            ORDER BY a.name""")
     List<AccountDto> findAllAccounts();
 }

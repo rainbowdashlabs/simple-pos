@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import app_header from './components/Header.vue'
 import app_footer from './components/Footer.vue'
-import MainView from "./components/MainView.vue";
 </script>
 
 <script lang="ts">
@@ -11,7 +10,6 @@ import {store} from "./scripts/store.ts";
 export default {
   computed:{
     darkMode(){
-      console.log("Refresh mode. Mode: " + store.theme)
       if(store.theme === "dark"){
         document.body.classList.add("dark")
       }else {
@@ -22,15 +20,12 @@ export default {
 
   },
   mounted() {
-    this.$i18n.locale = getLocale() || "en"
-    document
+    this.$i18n.locale = getLocale() || "de"
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      console.log("Enabling dark mode")
       store.theme = "dark"
       document.body.classList.add('dark')
     } else {
       store.theme = "light"
-      console.log("Dark mode not requested")
       document.documentElement.classList.remove('dark')
     }
   }
@@ -41,7 +36,9 @@ export default {
 <template>
   <div class="flex flex-col min-h-screen justify-between text-dark dark:text-primary" :class="darkMode">
     <app_header/>
-    <MainView/>
+    <div class="mx-auto mb-auto w-full max-w-screen-lg">
+      <router-view/>
+    </div>
     <app_footer/>
   </div>
 </template>

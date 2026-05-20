@@ -1,8 +1,32 @@
-@config "../tailwind.config.js";
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@source "../index.html";
+@source "./**/*.{vue,js,ts,jsx,tsx}";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-warn-d: #600202;
+  --color-warn: #ff9d9d;
+  --color-okay-d: #085200;
+  --color-okay: #b8eea1;
+  --color-bg: #e8e8e8;
+  --color-bg-d: #121417;
+  --color-dark: #121417;
+  --color-bright: #f1f1f1;
+  --color-text-d: #121417;
+  --color-text: #f1f1f1;
+  --color-primary: #e0ecf6;
+  --color-primary-d: #484848;
+  --color-primary-accent: #6bb2fc;
+  --color-primary-accent-d: #365873;
+  --color-secondary: #bad0e7;
+  --color-secondary-d: #243254;
+  --color-highlight: #6899CA;
+  --color-accent: #5193d5;
+  --color-accent-d: #2062af;
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -50,12 +74,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
 }
 button:focus,
 button:focus-visible {

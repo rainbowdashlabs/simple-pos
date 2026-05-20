@@ -1,55 +1,93 @@
 package dev.chojo.simplepos.repository;
 
+import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@Import(TestcontainersConfiguration.class)
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 public class TokenRepositoryTest {
     @Autowired
     TokenRepository tokenRepository;
     @Autowired
     UserRepository userRepository;
 
-    @Container
-    @ServiceConnection
-    private static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
+    private User testUser;
 
-
-    @BeforeAll
-    static void beforeAll() {
-        postgresContainer.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        postgresContainer.stop();
+    @BeforeEach
+    void setUp() {
+        testUser = userRepository.save(new User(null, "tokenuser", "password", true));
     }
 
     @Test
-    public void shouldCreateToken() {
-        User user = userRepository.save(new User(null, "test", "test", false));
-        Token token = tokenRepository.save(new Token("test", user));
-        Assertions.assertNotNull(tokenRepository.findById(token.getId()));
+    void shouldCreateToken() {
+        Token token = tokenRepository.save(new Token("mytoken123", testUser));
+
+        assertNotNull(token.getId());
+        assertTrue(tokenRepository.findById(token.getId()).isPresent());
     }
 
     @Test
-    @Transactional
-    public void shouldDeleteUserToken() {
-        User user = userRepository.save(new User(null, "test", "test", false));
-        Token token = tokenRepository.save(new Token("test", user));
-        long count = tokenRepository.deleteByUserAndToken(user, "test");
-        Assertions.assertTrue(tokenRepository.findById(token.getId()).isEmpty());
-        Assertions.assertEquals(1, count);
+    void shouldFindByToken() {
+        tokenRepository.save(new Token("findme", testUser));
+
+        Optional<Token> found = tokenRepository.findByToken("findme");
+        assertTrue(found.isPresent());
+        assertEquals("findme", found.get().getToken());
+    }
+
+    @Test
+    void shouldFindByUserAndToken() {
+        tokenRepository.save(new Token("usertoken", testUser));
+
+        Optional<Token> found = tokenRepository.findByUserAndToken(testUser, "usertoken");
+        assertTrue(found.isPresent());
+        assertEquals(testUser.getId(), found.get().getUser().getId());
+    }
+
+    @Test
+    void shouldNotFindNonExistentToken() {
+        Optional<Token> found = tokenRepository.findByToken("nonexistent");
+        assertTrue(found.isEmpty());
+    }
+
+    @Test
+    void shouldDeleteByUserAndToken() {
+        Token token = tokenRepository.save(new Token("deleteme", testUser));
+
+        long count = tokenRepository.deleteByUserAndToken(testUser, "deleteme");
+        assertEquals(1, count);
+        assertTrue(tokenRepository.findById(token.getId()).isEmpty());
+    }
+
+    @Test
+    void shouldNotDeleteTokenOfDifferentUser() {
+        User otherUser = userRepository.save(new User(null, "otheruser", "password", true));
+        tokenRepository.save(new Token("shared", testUser));
+
+        long count = tokenRepository.deleteByUserAndToken(otherUser, "shared");
+        assertEquals(0, count);
+    }
+
+    @Test
+    void shouldStoreMultipleTokensPerUser() {
+        tokenRepository.save(new Token("token1", testUser));
+        tokenRepository.save(new Token("token2", testUser));
+
+        assertTrue(tokenRepository.findByUserAndToken(testUser, "token1").isPresent());
+        assertTrue(tokenRepository.findByUserAndToken(testUser, "token2").isPresent());
     }
 }

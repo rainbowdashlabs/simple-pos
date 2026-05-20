@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import FieldName from "../../views/manage/views/products/views/productcreate/FieldName.vue";
+import FieldName from "@/components/views/manage/views/products/views/productcreate/FieldName.vue";
 import InputField from "./InputField.vue";
-import FormattedText from "../text/FormattedText.vue";
-import {SizeGroup} from "../../../scripts/text.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "NamedInputField",

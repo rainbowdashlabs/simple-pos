@@ -1,17 +1,16 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import CenterText from "../../../../styles/text/CenterText.vue";
-import {store} from "../../../../../scripts/store.ts";
-import {StorageSummary} from "../../../../../scripts/storage.ts";
-import ColorContainer from "../../../../styles/container/ColorContainer.vue";
-import FormattedText from "../../../../styles/text/FormattedText.vue";
-import NumberText from "../../../../styles/text/NumberText.vue";
-import {SizeGroup} from "../../../../../scripts/text.ts";
-import ConfirmButton from "../../../../styles/buttons/ConfirmButton.vue";
-import IconButton from "../../../../styles/buttons/IconButton.vue";
-import InfoEntry from "../products/views/productinfo/InfoEntry.vue";
-import Icon from "../../../../styles/Icon.vue";
-import GridWrapper from "../../../../styles/grid/GridWrapper.vue";
+import CenterText from "@/components/styles/text/CenterText.vue";
+import {StorageSummary} from "@/scripts/storage.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import NumberText from "@/components/styles/text/NumberText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import IconButton from "@/components/styles/buttons/IconButton.vue";
+import InfoEntry from "@/components/views/manage/views/products/views/productinfo/InfoEntry.vue";
+import Icon from "@/components/styles/Icon.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 
 export default defineComponent({
   name: "StorageEntry",
@@ -41,13 +40,10 @@ export default defineComponent({
   },
   methods: {
     add() {
-      store.focusStorage = this.listing
-      console.log(`Opening info of ${store.focusStorage}`)
-      window.location.href = "#manage/storage/add"
+      this.$router.push({name: 'manage-storage-add', params: {id: this.listing.ingredient.id}})
     },
     edit(){
-      store.focusStorage = this.listing
-      window.location.href = "#manage/storage/edit"
+      this.$router.push({name: 'manage-storage-edit', params: {id: this.listing.ingredient.id}})
     }
   }
 })

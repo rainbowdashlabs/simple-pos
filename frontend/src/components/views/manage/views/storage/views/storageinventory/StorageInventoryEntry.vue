@@ -1,13 +1,13 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import CenterText from "../../../../../../styles/text/CenterText.vue";
-import {StorageSummary} from "../../../../../../../scripts/storage.ts";
-import SimpleInputField from "../../../../../../styles/input/SimpleInputField.vue";
-import ColorContainer from "../../../../../../styles/container/ColorContainer.vue";
-import NumberText from "../../../../../../styles/text/NumberText.vue";
-import FormattedText from "../../../../../../styles/text/FormattedText.vue";
-import Icon from "../../../../../../styles/Icon.vue";
-import {SizeGroup} from "../../../../../../../scripts/text.ts";
+import CenterText from "@/components/styles/text/CenterText.vue";
+import {StorageSummary} from "@/scripts/storage.ts";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import NumberText from "@/components/styles/text/NumberText.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import Icon from "@/components/styles/Icon.vue";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "StorageInventoryEntry",
@@ -22,6 +22,10 @@ export default defineComponent({
   props: {
     listing: {
       type: Object as PropType<StorageSummary>,
+      required: true
+    },
+    saved: {
+      type: Map as unknown as PropType<Map<number, number>>,
       required: true
     }
   },
@@ -59,7 +63,19 @@ export default defineComponent({
     containerCount(newValue: string) {
       this.containerCount = Number(newValue)
     }
-  }, emits:["changed"]
+  }, emits:["changed"],
+  mounted() {
+    const savedTotal = this.saved?.get(this.listing.ingredient.id!) ?? 0
+    if (savedTotal > 0) {
+      const cs = this.listing.ingredient.containerSize
+      if (cs > 0) {
+        this.containerCount = Math.floor(savedTotal / cs)
+        this.pieceCount = savedTotal % cs
+      } else {
+        this.pieceCount = savedTotal
+      }
+    }
+  }
 })
 </script>
 

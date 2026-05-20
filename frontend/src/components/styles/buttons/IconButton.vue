@@ -1,9 +1,9 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import Icon from "../Icon.vue";
+import Icon from "@/components/styles/Icon.vue";
 import FreeButton from "./FreeButton.vue";
-import {buildDarkMode} from "../../../scripts/util.ts";
-import {SizeGroup} from "../../../scripts/text.ts";
+import {buildDarkMode} from "@/scripts/util.ts";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "IconButton",

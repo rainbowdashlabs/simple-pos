@@ -60,7 +60,7 @@ public class StorageService {
             optNext.ifPresent(id -> {
                 Storage storage = storageRepository.findById(id).get();
                 storage.take();
-                taken.computeIfAbsent(storage.getId(), s -> new StorageTransaction()).update(storageRepository.save(storage));
+                taken.computeIfAbsent(storage.getId(), s -> new StorageTransaction()).update(storageRepository.saveAndFlush(storage));
             });
         }
         return taken.values();

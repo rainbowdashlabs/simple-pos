@@ -1,8 +1,8 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {ProductListings, products} from "../../../../../scripts/product.ts";
+import {ProductListings, products} from "@/scripts/product.ts";
 import PosCategory from "./PosCategory.vue";
-import ProductGroup from "../../../manage/views/products/ProductGroup.vue";
+import ProductGroup from "@/components/views/manage/views/products/ProductGroup.vue";
 
 export default defineComponent({
   name: "PosProducts",

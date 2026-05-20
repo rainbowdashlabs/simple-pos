@@ -1,0 +1,45 @@
+[versions]
+spring-boot = "4.0.0"
+springdoc = "3.0.0"
+jjwt = "0.12.6"
+testcontainers = "1.20.4"
+
+[libraries]
+# Spring Boot starters
+spring-boot-starter-data-jpa = { group = "org.springframework.boot", name = "spring-boot-starter-data-jpa" }
+spring-boot-starter-web = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+spring-boot-starter-validation = { group = "org.springframework.boot", name = "spring-boot-starter-validation" }
+spring-boot-starter-data-rest = { group = "org.springframework.boot", name = "spring-boot-starter-data-rest" }
+spring-boot-starter-security = { group = "org.springframework.boot", name = "spring-boot-starter-security" }
+spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+spring-boot-testcontainers = { group = "org.springframework.boot", name = "spring-boot-testcontainers" }
+spring-session-core = { group = "org.springframework.session", name = "spring-session-core" }
+spring-security-web = { group = "org.springframework.security", name = "spring-security-web" }
+spring-security-config = { group = "org.springframework.security", name = "spring-security-config" }
+
+# Database
+postgresql = { group = "org.postgresql", name = "postgresql" }
+
+# OpenAPI
+springdoc-openapi = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+
+# JWT
+jjwt-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jjwt" }
+jjwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jjwt" }
+jjwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jjwt" }
+
+# Testcontainers
+testcontainers-core = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
+testcontainers-junit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+testcontainers-postgres = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+
+# Test
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
+
+[bundles]
+spring-security = ["spring-security-web", "spring-security-config"]
+jjwt-runtime = ["jjwt-impl", "jjwt-jackson"]
+testcontainers = ["testcontainers-core", "testcontainers-junit", "testcontainers-postgres"]
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

@@ -1,7 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {StorageSummary} from "../../../../../../scripts/storage.ts";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
+import {StorageSummary} from "@/scripts/storage.ts";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
 
 export default defineComponent({
   name: "LowStockEntry",

@@ -1,22 +1,23 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {store} from "../../../../../../scripts/store.ts";
-import FieldName from "../../products/views/productcreate/FieldName.vue";
-import NamedInputField from "../../../../../styles/input/NamedInputField.vue";
-import ConfirmButton from "../../../../../styles/buttons/ConfirmButton.vue";
-import GridRowWrapper from "../../../../../styles/grid/GridRowWrapper.vue";
-import RawGridRowWrapper from "../../../../../styles/grid/RawGridRowWrapper.vue";
-import GridWrapper from "../../../../../styles/grid/GridWrapper.vue";
-import BackButton from "../../../../../styles/buttons/BackButton.vue";
-import {addStorage, InboundStorage} from "../../../../../../scripts/storage.ts";
-import SimpleInputField from "../../../../../styles/input/SimpleInputField.vue";
-import FormattedText from "../../../../../styles/text/FormattedText.vue";
-import {SizeGroup} from "../../../../../../scripts/text.ts";
-import ColorContainer from "../../../../../styles/container/ColorContainer.vue";
+import FieldName from "@/components/views/manage/views/products/views/productcreate/FieldName.vue";
+import NamedInputField from "@/components/styles/input/NamedInputField.vue";
+import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import GridRowWrapper from "@/components/styles/grid/GridRowWrapper.vue";
+import RawGridRowWrapper from "@/components/styles/grid/RawGridRowWrapper.vue";
+import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import BackButton from "@/components/styles/buttons/BackButton.vue";
+import {addStorage, InboundStorage, stockInfo, StorageSummary} from "@/scripts/storage.ts";
+import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
+import FormattedText from "@/components/styles/text/FormattedText.vue";
+import {SizeGroup} from "@/scripts/text.ts";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default defineComponent({
   name: "StorageAdd",
   components: {
+    ViewWrapper,
     ColorContainer,
     FormattedText,
     SimpleInputField,
@@ -28,9 +29,16 @@ export default defineComponent({
     NamedInputField,
     FieldName
   },
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
   data() {
     return {
-      price: store.focusStorage!.ingredient.price,
+      summary: null as StorageSummary | null,
+      price: 0,
       pieceCount: 0,
       containerCount: 0,
       pledgePieces: 0,
@@ -45,25 +53,21 @@ export default defineComponent({
       if (this.ingredient.pledgeContainer) {
         this.pledgeContainers = value * this.ingredient.pledgeContainer
       }
-      console.log("Updating container count to value " + value)
     },
     setPieceCounts(value: number) {
       this.pieceCount = value
       if (this.ingredient.pledge) {
         this.pledgePieces = value * this.ingredient.pledge
       }
-      console.log("Updating piece count to value " + value)
     },
     nextState() {
       let curr = this.states.indexOf(this.state)
       this.state = this.states[curr + 1]
-      console.log(`Switch to state ${this.state}`)
     },
     previousState() {
       let curr = this.states.indexOf(this.state)
       if (curr == 0) return
       this.state = this.states[curr - 1]
-      console.log(`Switch to state ${this.state}`)
     },
     submit() {
       addStorage({
@@ -74,49 +78,44 @@ export default defineComponent({
         pledge: this.pledgePieces + this.pledgeContainers
       } as InboundStorage)
           .then(() => {
-            window.location.href = "#manage/storage"
+            this.$router.push({name: 'manage-storage'})
           })
     }
   }, computed: {
     SizeGroup() {
       return SizeGroup
     },
-    summary() {
-      return store.focusStorage!
-    },
     ingredient() {
-      return this.summary.ingredient
+      return this.summary!.ingredient
     },
     states() {
-      let listing = store.focusStorage
-      if (!listing) return []
+      if (!this.summary) return []
       let states: string[] = ["price"]
-      if (listing.ingredient.containerSize) {
+      if (this.summary.ingredient.containerSize) {
         states.push("container_count")
       }
       states.push("piece_count")
-      if (listing.ingredient.pledgeContainer) {
+      if (this.summary.ingredient.pledgeContainer) {
         states.push("pledge_container")
       }
-      if (listing.ingredient.pledge) {
+      if (this.summary.ingredient.pledge) {
         states.push("pledge_pieces")
       }
       states.push("overview")
-      console.log("Will go through states: " + states)
       return states
     }
   },
-  beforeCreate() {
-    if (!store.focusStorage) {
-      window.location.href = "#manage/storage"
-      return
-    }
+  mounted() {
+    stockInfo(Number(this.id)).then(e => {
+      this.summary = e
+      this.price = e.ingredient.price
+    })
   }
 })
 </script>
 
 <template>
-  <div class="grid grid-cols-1 auto-rows-max gap-5 mx-5">
+  <ViewWrapper v-if="summary">
     <h1 class="col-span-full">{{ ingredient.name }}</h1>
 
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'price'">
@@ -209,7 +208,7 @@ export default defineComponent({
         <ConfirmButton class="w-3/4" @click="submit"/>
       </div>
     </div>
-  </div>
+  </ViewWrapper>
 </template>
 
 <style scoped>

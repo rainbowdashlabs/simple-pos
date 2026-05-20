@@ -1,30 +1,30 @@
 <script lang="ts">
-import {store} from "../../../scripts/store.ts";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {PropType} from "vue";
+import {Account} from "@/scripts/accounts.ts";
 
 export default {
   components: {FontAwesomeIcon},
+  props: {
+    account: {
+      type: Object as PropType<Account>,
+      required: true
+    }
+  },
   computed: {
-    store() {
-      return store
-    },
     valueStyle() {
-      if(!store.focusAccount) return 0
-      if (this.store.focusAccount?.balance! >= 0) {
+      if (this.account.balance >= 0) {
         return "text-green-500"
       }
       return "text-red-500"
     },
     value(){
-      if(!store.focusAccount || !store.focusAccount.balance){
-        return 0
-      }
-      return store.focusAccount?.balance!
+      return this.account.balance || 0
     }
   },
   methods: {
     addBalance() {
-      window.location.href = "#balance"
+      this.$router.push({name: 'balance', params: {id: this.account.id}})
     }
   }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import ColorContainer from "../container/ColorContainer.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 
 export default defineComponent({
   name: "GridWrapper",

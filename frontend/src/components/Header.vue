@@ -1,6 +1,6 @@
 <script lang="ts">
 
-import {getUsername, isLoggedIn} from '../scripts/session.ts'
+import {getUsername, isLoggedIn} from '@/scripts/session.ts'
 import UserButton from "./header/UserButton.vue";
 import MenuEntry from "./header/MenuEntry.vue";
 import Icon from "./styles/Icon.vue";
@@ -22,9 +22,7 @@ export default {
     Icon,
     Entry: MenuEntry,
     UserButton
-  },
-  methods: {},
-  computed: {}
+  }
 }
 
 </script>
@@ -42,9 +40,9 @@ export default {
           </div>
         </div>
 
-        <Entry link="#pos" label="POS" icon="fa-money-bill"/>
-        <Entry link="#accounts" :label="$t('accounts')" icon="fa-users"/>
-        <Entry link="#manage" :label="$t('manage')" icon="fa-list-check"/>
+        <Entry to="/" label="POS" icon="fa-money-bill"/>
+        <Entry to="/accounts" :label="$t('accounts')" icon="fa-users"/>
+        <Entry to="/manage" :label="$t('manage')" icon="fa-list-check"/>
 
         <div class="flex flex-none content-center justify-items-end">
           <UserButton/>
@@ -67,13 +65,12 @@ export default {
           class="flex flex-none text-3xl px-5 text-center items-center justify-center border-l-2 border-accent dark:border-accent-d">
         <Icon icon="fa-user"/>
       </div>
-      <!--      <UserButton class="flex-none"/>-->
     </div>
     <transition>
       <MobileNavbar v-if="navBar">
-        <MobileNavEntry @click="navBar = false" link="#pos" label="POS" icon="fa-money-bill"/>
-        <MobileNavEntry @click="navBar = false" link="#accounts" :label="$t('accounts')" icon="fa-users"/>
-        <MobileNavEntry @click="navBar = false" link="#manage" :label="$t('manage')" icon="fa-list-check"/>
+        <MobileNavEntry @click="navBar = false" to="/" label="POS" icon="fa-money-bill"/>
+        <MobileNavEntry @click="navBar = false" to="/accounts" :label="$t('accounts')" icon="fa-users"/>
+        <MobileNavEntry @click="navBar = false" to="/manage" :label="$t('manage')" icon="fa-list-check"/>
       </MobileNavbar>
     </transition>
   </div>

@@ -2,9 +2,9 @@
 import Login_button from "./header/UserButton.vue";
 import LocaleChanger from "./footer/LocaleChanger.vue";
 import IconButton from "./styles/buttons/IconButton.vue";
-import {store} from "../scripts/store.ts";
+import {store} from "@/scripts/store.ts";
 import FormattedText from "./styles/text/FormattedText.vue";
-import {SizeGroup} from "../scripts/text.ts";
+import {SizeGroup} from "@/scripts/text.ts";
 
 export default {
   components: {FormattedText, IconButton, LocaleChanger, Login_button},

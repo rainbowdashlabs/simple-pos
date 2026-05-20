@@ -1,17 +1,16 @@
 <script lang="ts">
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import Icon from "../styles/Icon.vue";
+import Icon from "@/components/styles/Icon.vue";
 
 export default {
-  components: {Icon, FontAwesomeIcon},
-  props: ["link", "label", "icon"]
+  components: {Icon},
+  props: ["to", "label", "icon"]
 }
 </script>
 
 <template>
   <div class="flex justify-center items-center">
     <Icon :icon="icon"/>
-    <a :href="link" class="mx-3">{{ label }}</a>
+    <router-link :to="to" class="mx-3">{{ label }}</router-link>
   </div>
 </template>
 

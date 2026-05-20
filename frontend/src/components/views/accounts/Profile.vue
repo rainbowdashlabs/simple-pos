@@ -1,11 +1,10 @@
 <script lang="ts">
-import {store} from "../../../scripts/store.ts";
 import Balance from "./profile/Balance.vue";
 import Name from "./profile/Name.vue";
-import {account, Account} from "../../../scripts/accounts.ts";
-import MoneyText from "../../styles/text/MoneyText.vue";
+import {Account} from "@/scripts/accounts.ts";
+import MoneyText from "@/components/styles/text/MoneyText.vue";
 import {PropType} from "vue";
-import ColorContainer from "../../styles/container/ColorContainer.vue";
+import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 
 export default {
   components: {ColorContainer, MoneyText, Balance, Name},
@@ -17,15 +16,10 @@ export default {
   },
   methods: {
     openProfile() {
-      account(this.account.id).then(e => {
-        store.focusAccount = e
-        window.location.href = `#profile`
-      })
+      this.$router.push({name: 'profile', params: {id: this.account.id}})
     }
   }
 }
-
-
 </script>
 
 <template>
