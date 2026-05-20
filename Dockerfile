@@ -26,7 +26,7 @@ COPY backend/src/ src/
 RUN ./gradlew bootJar -x test --no-daemon
 
 # --- Runtime ---
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:25.0.3_9-jre-alpine
 
 WORKDIR /app
 
