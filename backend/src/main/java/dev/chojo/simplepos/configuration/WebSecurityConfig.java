@@ -41,7 +41,7 @@ public class WebSecurityConfig {
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/api/auth/**", "/api/demo/**", "/api/user").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/demo/**", "/api/user", "/api/version").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .formLogin(form -> {
