@@ -77,7 +77,7 @@ export default defineComponent({
   },
   mounted() {
     statsBottom(this.timeframe.getDate(), 10)
-        .then(e => this.stat = e)
+        .then(e => this.stat = e.filter(s => s.sales > 0))
   }
 })
 </script>

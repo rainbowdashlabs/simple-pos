@@ -61,6 +61,10 @@ export function stockLow(limit: number = 100): Promise<StorageSummary[]> {
     return getJson("api/storage/stock/low", new Map([["limit", limit]]))
 }
 
+export function stockOut(limit: number = 100): Promise<StorageSummary[]> {
+    return getJson("api/storage/stock/out", new Map([["limit", limit]]))
+}
+
 export interface StockProjection {
     ingredient: Ingredient
     currentStock: number

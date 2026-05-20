@@ -174,4 +174,12 @@ public class StorageController {
         List<StorageSummary> list = storageRepository.lowStock(PageRequest.of(page, limit)).stream().map(StorageSummary::new).toList();
         return ResponseEntity.ok(list);
     }
+
+    @GetMapping("/stock/out")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<StorageSummary>> getStockOut(@RequestParam(value = "limit", defaultValue = "100") int limit,
+                                                            @RequestParam(value = "page", defaultValue = "0") int page) {
+        List<StorageSummary> list = storageRepository.outOfStock(PageRequest.of(page, limit)).stream().map(StorageSummary::new).toList();
+        return ResponseEntity.ok(list);
+    }
 }

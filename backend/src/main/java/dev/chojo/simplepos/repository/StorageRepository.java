@@ -19,8 +19,11 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
     @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true")
     List<Tuple> summary();
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND i.minStock > stock ORDER BY stock / i.minStock ASC")
+    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND i.minStock > stock AND coalesce(s.stock, 0) > 0 ORDER BY stock / i.minStock ASC")
     List<Tuple> lowStock(PageRequest pageRequest);
+
+    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND coalesce(s.stock, 0) = 0 ORDER BY i.name ASC")
+    List<Tuple> outOfStock(PageRequest pageRequest);
 
     List<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
 

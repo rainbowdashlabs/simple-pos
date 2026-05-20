@@ -82,7 +82,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    stockLow(30).then(e => this.items = e)
+    stockLow(30).then(e => this.items = e.filter(s => s.stock > 0))
   }
 })
 </script>
