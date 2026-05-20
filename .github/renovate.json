@@ -8,8 +8,8 @@
   "packageRules": [
     {
       "groupName": "jjwt",
-      "packagePatterns": [
-        "^io\\.jsonwebtoken"
+      "matchPackageNames": [
+        "/^io\\.jsonwebtoken/"
       ]
     },
     {
