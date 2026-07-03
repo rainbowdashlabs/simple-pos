@@ -10,7 +10,7 @@ jobs:
       - build-frontend
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -37,7 +37,7 @@ jobs:
     name: Verify Npm Build Frontend
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -53,6 +53,6 @@ jobs:
     name: Verify Docker Build
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Build as Docker image
         run: docker build .
