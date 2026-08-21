@@ -31,7 +31,7 @@ COPY backend/src/ src/
 RUN GITHUB_ACTIONS=$GITHUB_ACTIONS GITHUB_REF_TYPE=$GITHUB_REF_TYPE GITHUB_REF_NAME=$GITHUB_REF_NAME GITHUB_SHA=$GITHUB_SHA ./gradlew bootJar -x test --no-daemon
 
 # --- Runtime ---
-FROM eclipse-temurin:25.0.3_9-jre-alpine
+FROM eclipse-temurin:25.0.4_7-jre-alpine
 
 WORKDIR /app
 
