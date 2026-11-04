@@ -58,6 +58,9 @@ const i18n = createI18n({
     messages: {
         en: {
             accounts: "Accounts",
+            checkout_choose_account: "Choose an account",
+            checkout_no_accounts: "There are no accounts yet. Create one first.",
+            checkout_cart_empty: "The cart is empty.",
             manage: "Manage",
             date: "Date",
             price: "Price",
@@ -168,6 +171,9 @@ const i18n = createI18n({
         },
         de: {
             accounts: "Konten",
+            checkout_choose_account: "Konto auswählen",
+            checkout_no_accounts: "Es gibt noch keine Konten. Lege zuerst eines an.",
+            checkout_cart_empty: "Der Warenkorb ist leer.",
             manage: "Verwalten",
             date: "Datum",
             price: "Preis",

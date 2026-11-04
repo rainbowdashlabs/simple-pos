@@ -14,6 +14,10 @@ import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
+/**
+ * Pays for the cart from an account. Nobody is charged by default: the account has to be chosen explicitly, and the
+ * purchase is sent at most once at a time and never with an empty cart.
+ */
 export default defineComponent({
   name: "Checkout",
   components: {
@@ -23,8 +27,12 @@ export default defineComponent({
   },
   data() {
     return {
-      account: {id: -1, name: "", balance: 0},
-      accountOptions: [] as Array<Array<string | number>>
+      account: null as Account | null,
+      accountsLoaded: false,
+      selectedId: null as number | null,
+      selectRevision: 0,
+      accountOptions: [] as Array<Array<string | number>>,
+      submitting: false
     }
   },
   computed: {
@@ -33,30 +41,57 @@ export default defineComponent({
     },
     cart() {
       return store.cart
+    },
+    cartEmpty(): boolean {
+      return this.cart.products.size === 0
+    },
+    selectOptions(): Array<Array<string | number>> {
+      return [[this.$t('checkout_choose_account'), ''], ...this.accountOptions]
     }
   },
   methods: {
     checkoutAccount(value: string) {
-      account(Number(value))!.then(e => {
-        this.account = e
-      })
+      if (value === '') {
+        this.selectedId = null
+        this.account = null
+        return
+      }
+      const id = Number(value)
+      this.selectedId = id
+      this.account = null
+      account(id)
+          .then(e => {
+            if (this.selectedId === id) this.account = e
+          })
+          .catch(error => {
+            if (this.selectedId !== id) return
+            this.selectedId = null
+            this.selectRevision++
+            throw error
+          })
     },
     purchase() {
-      console.log(Array.from(this.cart.products.values()))
-      purchase(this.account.id, Array.from(this.cart.products.values()))
+      if (this.submitting || this.cartEmpty || !this.account) return
+      this.submitting = true
+      const accountId = this.account.id
+      purchase(accountId, Array.from(this.cart.products.values()))
           .then(() => {
             this.cart.clearCart()
-            this.$router.push({name: 'profile', params: {id: this.account.id}, query: {from: 'checkout'}})
+            this.$router.push({name: 'profile', params: {id: accountId}, query: {from: 'checkout'}})
+          })
+          .finally(() => {
+            this.submitting = false
           })
     },
     back() {
+      if (this.submitting) return
       this.$router.push({name: 'pos'})
     }
   },
   mounted() {
     accounts().then(e => {
       this.accountOptions = e.map((value: Account) => [value.name, value.id])
-      this.account = e[0]
+      this.accountsLoaded = true
     })
   },
 })
@@ -67,16 +102,18 @@ export default defineComponent({
   <GridWrapper bg="none">
 
     <ColorContainer bg="secondary">
-      <CheckoutEntry v-for="item in cart.products.values()" :entry="item"/>
+      <CheckoutEntry v-for="item in cart.products.values()" :key="item.product.id!" :entry="item"/>
+      <FormattedText v-if="cartEmpty" value="checkout_cart_empty" type="locale"/>
       <div class="flex justify-between">
         <FormattedText value="total" type="locale"/>
         <FormattedText :value="cart.totalPrice()" type="currency"/>
       </div>
     </ColorContainer>
 
-    <SelectMenu :options="accountOptions" @select="checkoutAccount"/>
+    <FormattedText v-if="accountsLoaded && accountOptions.length === 0" value="checkout_no_accounts" type="locale"/>
+    <SelectMenu v-else-if="accountsLoaded" :key="selectRevision" :options="selectOptions" @select="checkoutAccount"/>
 
-    <GridWrapper v-if="account.id != -1" bg="none" padding="0">
+    <GridWrapper v-if="account" bg="none" padding="0">
       <ColorContainer :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
         <MoneyText :amount="account.balance"/>
         <Icon icon="fa-arrow-right"/>
@@ -84,10 +121,11 @@ export default defineComponent({
       </ColorContainer>
 
       <GridWrapper bg="none" cols="2" padding="0">
-        <BackButton @click="back"/>
-        <ConfirmButton @click="purchase"/>
+        <BackButton :disabled="submitting" @click="back"/>
+        <ConfirmButton :disabled="submitting || cartEmpty" @click="purchase"/>
       </GridWrapper>
     </GridWrapper>
+    <BackButton v-else @click="back"/>
   </GridWrapper>
   </ViewWrapper>
 </template>
