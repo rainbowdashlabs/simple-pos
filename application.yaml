@@ -1,9 +1,9 @@
 # default application yaml
 spring:
   datasource:
-    url: "jdbc:postgresql://postgres/"
-    username: postgres
-    password: postgres
+    url: "jdbc:postgresql://postgres/simple_pos"
+    username: simple_pos
+    password: ${SIMPLE_POS_DB_PASSWORD}
   jpa:
     properties:
       hibernate:

@@ -58,7 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      *
      * @throws UnauthorizedException if the token belongs to no user or is not a valid login token
      * @throws DisabledException     if the user is disabled
-     * @throws io.jsonwebtoken.JwtException if the token is malformed, expired or wrongly signed
+     * @throws io.jsonwebtoken.JwtException if the token is malformed, expired, wrongly signed, or issued by or for
+     *                                      another service
      */
     private void authenticate(String jwt, HttpServletRequest request) {
         if (jwt.isBlank()) throw new UnauthorizedException(INVALID_TOKEN);

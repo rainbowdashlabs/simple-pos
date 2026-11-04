@@ -7,11 +7,15 @@ services:
       - 8888:8080
     environment:
       DEMO_ENABLED: true
-      SECURITY_JWT_SECRET_KEY: dev-compose-only-secret-key-not-for-production
+      SECURITY_JWT_SECRET_KEY: ${SECURITY_JWT_SECRET_KEY:?set it in .env}
+      SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
     volumes:
       - ./application.yaml:/app/application.yaml
   spring:
     image: ghcr.io/rainbowdashlabs/simple-pos:latest
+    environment:
+      SECURITY_JWT_SECRET_KEY: ${SECURITY_JWT_SECRET_KEY:?set it in .env}
+      SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
     volumes:
       - ./application.yaml:/app/application.yaml
     profiles:
@@ -19,6 +23,9 @@ services:
   postgres:
     image: postgres:18
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in .env}
+      SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
+    volumes:
+      - ./postgres/init-app-role.sh:/docker-entrypoint-initdb.d/init-app-role.sh:ro
     ports:
       - 127.0.0.1:5434:5432

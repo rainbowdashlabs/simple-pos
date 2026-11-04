@@ -1,7 +1,10 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:18
     environment:
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in .env}
+      SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
+    volumes:
+      - ../postgres/init-app-role.sh:/docker-entrypoint-initdb.d/init-app-role.sh:ro
     ports:
       - 127.0.0.1:5433:5432
