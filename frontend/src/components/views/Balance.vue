@@ -51,7 +51,7 @@ export default defineComponent({
     storeDeposit() {
       if (!this.account) return
       addDeposit(this.account, this.deposit)
-      this.$router.push({name: 'profile', params: {id: this.id}})
+          .then(() => this.$router.push({name: 'profile', params: {id: this.id}}))
     }
   },
   watch:{

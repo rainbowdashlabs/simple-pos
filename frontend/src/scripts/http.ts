@@ -1,4 +1,5 @@
-import {getSessionToken} from "./session.ts";
+import {getSessionToken, handleUnauthorized} from "./session.ts";
+import {ApiError} from "./errors.ts";
 
 export async function postJson(url: string, body: Object) {
     return requestJson(url, "POST", new Map(), body)
@@ -23,19 +24,18 @@ export async function requestJson(url: string, method: string, params: Map<strin
     let header = await headers()
     header.append("Content-Type", "application/json")
     let requrl = constructUrl(url, params);
-    let response
-    if (body) {
-        console.log(`${method} ${requrl}: ${JSON.stringify(body)}`)
-        response = await fetch(requrl, {method: method, headers: header, body: JSON.stringify(body)})
-    } else {
-        console.log(`${method} ${requrl}`)
-        response = await fetch(requrl, {method: method, headers: header})
+    let response: Response
+    console.log(body ? `${method} ${requrl}: ${JSON.stringify(body)}` : `${method} ${requrl}`)
+    try {
+        response = await fetch(requrl, {method: method, headers: header, body: body ? JSON.stringify(body) : undefined})
+    } catch (e) {
+        throw ApiError.network(method, requrl, e)
     }
 
     if (!response.ok) {
-        console.error(response.text())
-        // todo error handling
-        return null
+        const error = await ApiError.fromResponse(method, requrl, response)
+        if (error.status === 401) handleUnauthorized()
+        throw error
     }
 
     let resBody = await response.text()
@@ -49,7 +49,8 @@ export async function requestJson(url: string, method: string, params: Map<strin
 
 async function headers() {
     let header: Headers = new Headers()
-    header.append("Authorization", `Bearer ${(await getSessionToken())!}`)
+    const token = await getSessionToken()
+    if (token) header.append("Authorization", `Bearer ${token}`)
     return header
 }
 

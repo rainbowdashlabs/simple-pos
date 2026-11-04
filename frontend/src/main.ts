@@ -131,7 +131,12 @@ const i18n = createI18n({
             worst_sellers: "Worst Sellers",
             settings: "Settings",
             color_theme: "Color Theme",
-            language: "Language"
+            language: "Language",
+            errors: {
+                unexpected: "Something went wrong. Please try again.",
+                network: "The server could not be reached. Check the connection and try again.",
+                dismiss: "Dismiss"
+            }
         },
         de: {
             accounts: "Konten",
@@ -209,7 +214,12 @@ const i18n = createI18n({
             worst_sellers: "Ladenhüter",
             settings: "Einstellungen",
             color_theme: "Farbthema",
-            language: "Sprache"
+            language: "Sprache",
+            errors: {
+                unexpected: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+                network: "Der Server ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+                dismiss: "Schließen"
+            }
         }
     },
     datetimeFormats: datetimeFormats,
@@ -217,12 +227,15 @@ const i18n = createI18n({
 })
 
 import router from '@/router.ts'
+import {notifyError} from '@/scripts/notifications.ts'
 
 const app = createApp(App);
 
-app.config.errorHandler = err => {
-    console.error(`Unexpected Error:`, err)
-}
+app.config.errorHandler = err => notifyError(err)
+window.addEventListener("unhandledrejection", event => {
+    notifyError(event.reason)
+    event.preventDefault()
+})
 app.use(router)
 app.use(i18n)
 library.add(fas)

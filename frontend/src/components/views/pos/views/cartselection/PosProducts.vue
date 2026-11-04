@@ -3,6 +3,7 @@ import {defineComponent} from 'vue'
 import {Product, ProductGroup, ProductListings, activeProducts} from "@/scripts/product.ts";
 import PosCategory from "./PosCategory.vue";
 import {statsTop} from "@/scripts/purchase.ts";
+import {notifyError} from "@/scripts/notifications.ts";
 
 export default defineComponent({
   name: "PosProducts",
@@ -28,11 +29,11 @@ export default defineComponent({
 
     activeProducts().then(e => {
       this.productList = e
-    }).catch(err => console.log(err))
+    }).catch(notifyError)
 
     statsTop('sales', thirtyDaysAgo, 5)
         .then(stats => this.topSellers = stats.map(s => s.product))
-        .catch(err => console.log(err))
+        .catch(notifyError)
   },
 })
 </script>

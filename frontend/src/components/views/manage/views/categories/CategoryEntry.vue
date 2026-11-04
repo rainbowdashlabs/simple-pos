@@ -63,8 +63,8 @@ export default defineComponent({
     },
     updateCategory() {
       this.edit = false
-      this.category.name = this.newName
-      updateCategory(this.category)
+      updateCategory({...this.category, name: this.newName})
+          .then(() => this.category.name = this.newName)
     },
     cancelEdit() {
       this.edit = false

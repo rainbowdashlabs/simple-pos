@@ -83,8 +83,7 @@ export default defineComponent({
         price: this.price,
         active: true,
         recipe: this.recipe
-      })
-      this.$router.push({name: 'manage-products'})
+      }).then(() => this.$router.push({name: 'manage-products'}))
     },
     updateIngredient(data: Array<number>) {
       let id = data[0]

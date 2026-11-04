@@ -37,6 +37,13 @@ export function logout() {
     router.push({name: 'login'})
 }
 
+/**
+ * Reacts to a request the backend rejected with 401: the session is no longer valid, so the user is logged out.
+ */
+export function handleUnauthorized() {
+    logout()
+}
+
 export async function isLoggedIn() {
     const expire = Cookies.get(token_expire)
     if (!expire) {

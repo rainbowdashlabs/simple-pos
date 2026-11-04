@@ -6,6 +6,7 @@ import FreeButton from "@/components/styles/buttons/FreeButton.vue";
 import Icon from "@/components/styles/Icon.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import {notifyError} from "@/scripts/notifications.ts";
 
 export default defineComponent({
   name: "Products",
@@ -30,7 +31,7 @@ export default defineComponent({
     loadProducts() {
       products().then(e => {
         this.productList = e
-      }).catch(err => console.log(err))
+      }).catch(notifyError)
     }
   },
   mounted() {
