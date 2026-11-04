@@ -1,6 +1,8 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
+import dev.chojo.simplepos.controller.validation.PageNumber;
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Product;
@@ -16,6 +18,7 @@ import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.AccountService;
 import dev.chojo.simplepos.service.PurchaseService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -82,14 +85,14 @@ public class AccountController {
     }
 
     @PostMapping("/{id}/balance")
-    ResponseEntity<Balance> deposit(@PathVariable int id, @RequestBody DepositDto deposit) {
+    ResponseEntity<Balance> deposit(@PathVariable int id, @Valid @RequestBody DepositDto deposit) {
         return ResponseEntity.accepted().body(accountService.deposit(id, deposit.amount()));
     }
 
     @GetMapping("/{id}/balance")
     ResponseEntity<List<Balance>> deposit(@PathVariable int id,
-                                          @RequestParam(defaultValue = "100") int limit,
-                                          @RequestParam(defaultValue = "0") int page) {
+                                          @RequestParam(defaultValue = "100") @PageSize int limit,
+                                          @RequestParam(defaultValue = "0") @PageNumber int page) {
         var balance = balanceRepository.findAllByAccount_IdOrderByAddedDesc(id, PageRequest.of(page, limit));
         return ResponseEntity.accepted().body(balance);
     }
@@ -102,8 +105,8 @@ public class AccountController {
 
     @GetMapping("/{id}/purchase")
     ResponseEntity<PurchaseHistoryDto> purchases(@PathVariable int id,
-                                                 @RequestParam(defaultValue = "100") int limit,
-                                                 @RequestParam(defaultValue = "0") int page) {
+                                                 @RequestParam(defaultValue = "100") @PageSize int limit,
+                                                 @RequestParam(defaultValue = "0") @PageNumber int page) {
         accountRepository.require(id);
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(id, PageRequest.of(page, limit));
         Map<Integer, LazyProduct> products = purchases.stream().map(Purchase::getProduct).distinct().collect(Collectors.toMap(Product::getId, Product::asLazyProduct));

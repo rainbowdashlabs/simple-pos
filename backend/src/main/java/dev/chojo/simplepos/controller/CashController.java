@@ -1,6 +1,9 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.validation.PageNumber;
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
@@ -9,6 +12,7 @@ import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,23 +44,21 @@ public class CashController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void add(@RequestBody CashDto cash) {
+    public void add(@Valid @RequestBody CashDto cash) {
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         cashRepository.save(cash.toNewEntry(current));
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Cash> all(@RequestParam(defaultValue = "100") int limit,
-                          @RequestParam(defaultValue = "0") int page) {
+    public List<Cash> all(@RequestParam(defaultValue = "100") @PageSize int limit,
+                          @RequestParam(defaultValue = "0") @PageNumber int page) {
         return cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(limit).withPage(page));
     }
 
     @GetMapping("/total")
     public CashResponse totalCash() {
-        // The sum of cash entries and exits
         Double cash = Objects.requireNonNullElse(cashRepository.totalAmount(), 0.);
-        // sum of deposit of accounts
         Double balance = Objects.requireNonNullElse(balanceRepository.totalBalance(), 0.);
         return new CashResponse(cash + balance);
     }
@@ -70,7 +72,7 @@ public class CashController {
 
     @GetMapping("/total/pledge")
     public CashResponse pledgeAmount() {
-        Double cash = Objects.requireNonNullElse(cashRepository.totalAmount("pledge"), 0.);
+        Double cash = Objects.requireNonNullElse(cashRepository.totalAmount(CashType.PLEDGE), 0.);
         return new CashResponse(cash);
     }
 }

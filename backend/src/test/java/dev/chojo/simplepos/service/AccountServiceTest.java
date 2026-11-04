@@ -5,6 +5,7 @@ import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
@@ -120,7 +121,7 @@ class AccountServiceTest {
     private List<Cash> closingEntries() {
         entityManager.flush();
         return cashRepository.findAll().stream()
-                .filter(cash -> "balance".equals(cash.getType()) && cash.getNote() != null && cash.getNote().contains("Closing"))
+                .filter(cash -> cash.getType() == CashType.BALANCE && cash.getNote() != null && cash.getNote().contains("Closing"))
                 .toList();
     }
 

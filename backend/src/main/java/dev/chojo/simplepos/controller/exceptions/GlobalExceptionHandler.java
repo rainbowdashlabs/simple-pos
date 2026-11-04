@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
@@ -113,12 +114,33 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(error -> Map.of("field", error.getField(),
                         "message", Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid")))
                 .toList();
+        return invalid(e, errors, headers, request);
+    }
+
+    private ResponseEntity<Object> invalid(Exception e, List<Map<String, String>> errors, HttpHeaders headers,
+                                           WebRequest request) {
         String detail = errors.isEmpty()
                 ? "The request is invalid."
                 : errors.stream().map(error -> error.get("field") + ": " + error.get("message")).collect(Collectors.joining("; "));
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
         problem.setProperty("errors", errors);
         return handleExceptionInternal(e, problem, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    /**
+     * Answers request parameters that failed validation, such as a page size out of range, with 400 listing each
+     * rejected parameter, like {@link #handleMethodArgumentNotValid}.
+     */
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(HandlerMethodValidationException e,
+                                                                            HttpHeaders headers, HttpStatusCode status,
+                                                                            WebRequest request) {
+        List<Map<String, String>> errors = e.getParameterValidationResults().stream()
+                .flatMap(result -> result.getResolvableErrors().stream().map(error -> Map.of(
+                        "field", Objects.requireNonNullElse(result.getMethodParameter().getParameterName(), "parameter"),
+                        "message", Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid"))))
+                .toList();
+        return invalid(e, errors, headers, request);
     }
 
     @Override

@@ -2,6 +2,7 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
@@ -53,10 +54,10 @@ public class StorageService {
 
         if (delivery.price() > 0) {
             String note = "%s x %d".formatted(ingredient.getName(), delivery.amount());
-            cashRepository.save(new Cash(receivedBy, -delivery.price() * delivery.amount(), "purchase", note));
+            cashRepository.save(new Cash(receivedBy, -delivery.price() * delivery.amount(), CashType.PURCHASE, note));
         }
         if (delivery.pledge() > 0) {
-            cashRepository.save(new Cash(receivedBy, -delivery.pledge(), "pledge", ingredient.getName()));
+            cashRepository.save(new Cash(receivedBy, -delivery.pledge(), CashType.PLEDGE, ingredient.getName()));
         }
         Instant purchased = delivery.purchased() == null ? Instant.now() : delivery.purchased();
         return addStorage(new Storage(null, ingredient, purchased, delivery.price(), delivery.amount(), 0));

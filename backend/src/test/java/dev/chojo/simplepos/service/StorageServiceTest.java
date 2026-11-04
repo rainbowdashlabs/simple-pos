@@ -4,6 +4,7 @@ import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Role;
@@ -230,7 +231,7 @@ class StorageServiceTest {
         List<Cash> entries = cashRepository.findAll().stream()
                 .filter(cash -> cash.getNote() != null && cash.getNote().startsWith(ingredient.getName()))
                 .toList();
-        assertEquals(Map.of("purchase", -24.0, "pledge", -3.0),
+        assertEquals(Map.of(CashType.PURCHASE, -24.0, CashType.PLEDGE, -3.0),
                 entries.stream().collect(Collectors.toMap(Cash::getType, Cash::getAmount)));
     }
 

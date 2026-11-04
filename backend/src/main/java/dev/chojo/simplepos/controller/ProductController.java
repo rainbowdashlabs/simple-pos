@@ -1,5 +1,7 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.validation.PageNumber;
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.ProductSalesStatDto;
@@ -50,8 +52,8 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<List<ProductSalesStatDto>> getSalesStat(@PathVariable int id,
                                                            @RequestParam(required = false) Instant after,
-                                                           @RequestParam(defaultValue = "100") int limit,
-                                                           @RequestParam(defaultValue = "0") int page) {
+                                                           @RequestParam(defaultValue = "100") @PageSize int limit,
+                                                           @RequestParam(defaultValue = "0") @PageNumber int page) {
         Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
         List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, PageRequest.of(page, limit)).stream()
                 .map(ProductSalesStatDto::new)

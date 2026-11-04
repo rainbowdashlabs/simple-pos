@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface StorageRepository extends JpaRepository<Storage, Integer> {
     boolean existsByIngredient_Id(int ingredientId);
 
+    List<Storage> findAllBy(Pageable pageable);
+
     @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) AS stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold AND ingredient.id = ?1 GROUP BY ingredient) s ON i.id = s.id WHERE i.id = ?1")
     Tuple summaryById(int id);
 
