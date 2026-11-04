@@ -1,11 +1,12 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.JwtService;
-import dev.chojo.simplepos.entity.Token;
+import dev.chojo.simplepos.configuration.security.RateLimiter;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
 import dev.chojo.simplepos.service.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -25,12 +27,14 @@ public class DemoController {
 
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
+    private final RateLimiter rateLimiter;
     @Value("${security.jwt.refresh-expiration-time}")
     private long jwtRefreshExpiration;
 
-    public DemoController(AuthenticationService authenticationService, JwtService jwtService) {
+    public DemoController(AuthenticationService authenticationService, JwtService jwtService, RateLimiter rateLimiter) {
         this.authenticationService = authenticationService;
         this.jwtService = jwtService;
+        this.rateLimiter = rateLimiter;
     }
 
     @GetMapping
@@ -39,13 +43,14 @@ public class DemoController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> demoLogin() {
+    public ResponseEntity<TokenResponse> demoLogin(HttpServletRequest request) {
+        rateLimiter.checkRequest("demo-login", request.getRemoteAddr());
         User user = authenticationService.findByUsername("demo");
         TokenResponse tokenResponse = new TokenResponse(
                 new TokenDto(jwtService.generateToken(LOGIN_CLAIM, user, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
                 new TokenDto(jwtService.generateToken(REFRESH_CLAIM, user, jwtRefreshExpiration), jwtRefreshExpiration)
         );
-        authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), user));
+        authenticationService.saveRefreshToken(tokenResponse.refresh().token(), user, Duration.ofMillis(jwtRefreshExpiration));
         return ResponseEntity.ok(tokenResponse);
     }
 }

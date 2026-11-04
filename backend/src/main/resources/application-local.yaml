@@ -5,6 +5,11 @@ spring:
     password: m2Yjve7AocF4mnpCHeZAr
 server:
   port: 8888
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
 security:
   jwt:
     secret-key: local-development-only-secret-key-not-for-production

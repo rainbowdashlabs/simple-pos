@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.controller;
 
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import dev.chojo.simplepos.service.PurchaseService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -21,29 +21,32 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/purchase")
 public class PurchaseController {
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
+    private final PurchaseService purchaseService;
 
-    public PurchaseController(PurchaseRepository purchaseRepository, ProductRepository productRepository) {
+    public PurchaseController(PurchaseRepository purchaseRepository, ProductRepository productRepository,
+                              PurchaseService purchaseService) {
         this.purchaseRepository = purchaseRepository;
         this.productRepository = productRepository;
+        this.purchaseService = purchaseService;
     }
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        if (!purchaseRepository.existsById(id)) throw new NotFoundException("Purchase", id);
-        purchaseRepository.deleteById(id);
+        purchaseService.cancel(id);
         return ResponseEntity.accepted().build();
     }
 
     @GetMapping("stats/total")
     ResponseEntity<CashResponse> getTotalPurchases(@RequestParam(required = false) Instant after) {
-        if (after == null) return ResponseEntity.ok(new CashResponse(purchaseRepository.totalPurchases()));
-        return ResponseEntity.ok(new CashResponse(purchaseRepository.totalPurchases(after)));
+        Double total = after == null ? purchaseRepository.totalPurchases() : purchaseRepository.totalPurchases(after);
+        return ResponseEntity.ok(new CashResponse(Objects.requireNonNullElse(total, 0.0)));
     }
 
     @GetMapping("stats/top")

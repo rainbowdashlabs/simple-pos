@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -92,6 +93,62 @@ class ErrorResponseTest {
     }
 
     @Test
+    void shouldAnswerTooManyFailedLoginsWithTooManyRequests() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "wrong")
+                            .with(fromAddress("10.9.0.1")))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret")
+                        .with(fromAddress("10.9.0.1")))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.retryAfter").isNumber());
+        mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret")
+                        .with(fromAddress("10.9.0.2")))
+                .andExpect(status().isAccepted());
+    }
+
+    @Test
+    void shouldNotCountADisabledAccountWithTheRightPassword() throws Exception {
+        for (int i = 0; i < 6; i++) {
+            mvc.perform(post("/api/auth/login").param("username", "disableduser").param("password", "secret")
+                            .with(fromAddress("10.9.2.1")))
+                    .andExpect(status().isForbidden());
+        }
+    }
+
+    @Test
+    void shouldRejectOverlongCredentialsAsWrongWithoutAnError() throws Exception {
+        mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "x".repeat(100))
+                        .with(fromAddress("10.9.3.1")))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/auth/login").param("username", "u".repeat(65)).param("password", "secret")
+                        .with(fromAddress("10.9.3.1")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldAnswerTooManyRefreshesWithTooManyRequests() throws Exception {
+        for (int i = 0; i < 30; i++) {
+            mvc.perform(post("/api/auth/refresh").param("token", "garbage").with(fromAddress("10.9.1.1")))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(post("/api/auth/refresh").param("token", "garbage").with(fromAddress("10.9.1.1")))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
+    void shouldReportNoPurchasesAsAZeroTotal() throws Exception {
+        mvc.perform(get("/api/purchase/stats/total").param("after", "2999-01-01T00:00:00Z")
+                        .header("Authorization", "Bearer " + login().get("token")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(0.0));
+    }
+
+    @Test
     void shouldAnswerDisabledAccountWithForbidden() throws Exception {
         mvc.perform(post("/api/auth/login").param("username", "disableduser").param("password", "secret"))
                 .andExpect(status().isForbidden())
@@ -140,6 +197,15 @@ class ErrorResponseTest {
     }
 
     @Test
+    void shouldEndTheSessionOnLogout() throws Exception {
+        String refresh = login().get("refresh");
+
+        mvc.perform(post("/api/auth/logout").param("token", refresh)).andExpect(status().isNoContent());
+        mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/auth/logout").param("token", "unknown")).andExpect(status().isNoContent());
+    }
+
+    @Test
     void shouldRejectReusedRefreshToken() throws Exception {
         String refresh = login().get("refresh");
 
@@ -164,6 +230,13 @@ class ErrorResponseTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."))
                 .andExpect(jsonPath("$.accountDisabled").value(true));
+    }
+
+    private static RequestPostProcessor fromAddress(String address) {
+        return request -> {
+            request.setRemoteAddr(address);
+            return request;
+        };
     }
 
     private Map<String, String> login() throws Exception {

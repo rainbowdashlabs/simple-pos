@@ -56,7 +56,6 @@ export default defineComponent({
       return SizeGroup
     },
     disabled() {
-      console.log(this.name, this.category, this.price, this.purchasePrice)
       if (!this.name) return true
       if (this.category.id === -1) return true
       if (!this.price) return true

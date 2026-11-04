@@ -95,13 +95,12 @@ export function toggleActive(id: number): Promise<Product> {
 }
 
 /**
- * The sales for this product since date per day
+ * The sales of this product per day since a date
  * @param id product id
- * @param date date
- * @param [limit=30] amount of entries to retrieve
+ * @param after only purchases after this date count
  */
-export function salesStat(id: number, limit: number = 30): Promise<ProductSalesStat[]> {
-    return getJson(`api/product/${id}/sales/stat`, new Map([["limit", limit]]))
+export function salesStat(id: number, after: Date): Promise<ProductSalesStat[]> {
+    return getJson(`api/product/${id}/sales/stat`, new Map([["after", after.toISOString()]]))
 }
 
 export function salesStatSummary(id: number, date: Date): Promise<ProductSalesStat> {

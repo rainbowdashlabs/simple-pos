@@ -21,13 +21,10 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['updated'],
-  data() {
-    return {
-      active: this.listing.ingredient.active ?? true
-    }
-  },
   computed: {
+    active(): boolean {
+      return this.listing.ingredient.active ?? true
+    },
     SizeGroup() {
       return SizeGroup
     },
@@ -46,11 +43,13 @@ export default defineComponent({
     edit() {
       this.$router.push({name: 'manage-storage-edit', params: {id: this.listing.ingredient.id}})
     },
+    /**
+     * Writes the new state into the listing, which the storage view owns and shares with its low-stock filter, so
+     * every view of this ingredient follows.
+     */
     toggleActive() {
       toggleIngredientActive(this.listing.ingredient.id!).then(i => {
-        this.active = i.active
         this.listing.ingredient.active = i.active
-        this.$emit('updated')
       })
     }
   }

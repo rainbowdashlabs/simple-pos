@@ -7,6 +7,7 @@ import {CanvasRenderer} from 'echarts/renderers'
 import VChart from 'vue-echarts'
 import {DailyStat, dailyStats} from "@/scripts/purchase.ts";
 import {Timeframes} from "@/scripts/util.ts";
+import {Timeframe} from "@/scripts/product.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
@@ -23,6 +24,9 @@ export default defineComponent({
     }
   },
   computed: {
+    timeframe(): Timeframe {
+      return Timeframes.month
+    },
     SizeGroup() { return SizeGroup },
     textColor() { return store.theme === 'dark' ? '#e0ecf6' : '#121417' },
     chartOption() {
@@ -85,7 +89,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    dailyStats(Timeframes.month.getDate()).then(e => this.stats = e)
+    dailyStats(this.timeframe.getDate()).then(e => this.stats = e)
   }
 })
 </script>
@@ -93,6 +97,7 @@ export default defineComponent({
 <template>
   <ColorContainer class="col-span-full">
     <FormattedText value="revenue_trend" type="locale" :size="SizeGroup.xl"/>
+    <FormattedText :value="$t('last_days', {days: timeframe.days})" :size="SizeGroup.sm"/>
     <v-chart v-if="stats.length > 0" :option="chartOption" autoresize style="height: 300px; width: 100%"/>
     <div v-else class="h-[300px] flex items-center justify-center opacity-50">
       <FormattedText value="no_data" type="locale"/>

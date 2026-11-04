@@ -52,7 +52,7 @@ export default defineComponent({
                   :bg="lowStockOnly ? 'warn' : 'secondary'"
                   @click="lowStockOnly = !lowStockOnly"/>
     </div>
-    <StorageGroup v-for="item in filteredCategories" :group="item"/>
+    <StorageGroup v-for="item in filteredCategories" :key="item.category.id" :group="item"/>
   </ViewWrapper>
 </template>
 

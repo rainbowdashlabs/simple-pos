@@ -1,15 +1,22 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
+import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
+import dev.chojo.simplepos.repository.UserRepository;
 import dev.chojo.simplepos.service.storage.StorageTransaction;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +50,10 @@ class StorageServiceTest {
     CategoryRepository categoryRepository;
     @Autowired
     EntityManager entityManager;
+    @Autowired
+    CashRepository cashRepository;
+    @Autowired
+    UserRepository userRepository;
 
     private Ingredient ingredient;
 
@@ -200,5 +213,51 @@ class StorageServiceTest {
         entityManager.flush();
         assertEquals(7, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
         assertEquals(5, new StorageSummary(storageRepository.summaryById(other.getId())).getStock());
+    }
+
+    @Test
+    void shouldBookADeliveryWithItsPayments() {
+        User receiver = userRepository.save(new User(null, "receiver", "x", true, Role.STAFF));
+        long cashBefore = cashRepository.count();
+
+        Ingredient sentWithAnotherName = new Ingredient(ingredient.getId(), null, "sent name", 0.0, 1, 0, 0, 0);
+
+        Storage stored = storageService.deliver(new InboundStorage(sentWithAnotherName, null, 2.0, 3.0, 12), receiver);
+
+        assertEquals(12, stored.getAmount());
+        assertNotNull(stored.getPurchased());
+        assertEquals(cashBefore + 2, cashRepository.count());
+        List<Cash> entries = cashRepository.findAll().stream()
+                .filter(cash -> cash.getNote() != null && cash.getNote().startsWith(ingredient.getName()))
+                .toList();
+        assertEquals(Map.of("purchase", -24.0, "pledge", -3.0),
+                entries.stream().collect(Collectors.toMap(Cash::getType, Cash::getAmount)));
+    }
+
+    @Test
+    void shouldRejectADeliveryOfAnUnknownIngredientOrWithoutAmount() {
+        User receiver = userRepository.save(new User(null, "receiver3", "x", true, Role.STAFF));
+        Ingredient unknown = new Ingredient(999999, null, "unknown", 0.0, 1, 0, 0, 0);
+
+        assertThrows(NotFoundException.class,
+                () -> storageService.deliver(new InboundStorage(unknown, null, 1.0, 0.0, 1), receiver));
+        assertThrows(BadRequestException.class,
+                () -> storageService.deliver(new InboundStorage(ingredient, null, 1.0, 0.0, null), receiver));
+    }
+
+    @Test
+    void shouldRejectDeliveriesThatWouldPutMoneyIntoTheRegister() {
+        User receiver = userRepository.save(new User(null, "receiver2", "x", true, Role.STAFF));
+        long cashBefore = cashRepository.count();
+
+        assertThrows(BadRequestException.class,
+                () -> storageService.deliver(new InboundStorage(ingredient, null, 2.0, 0.0, -5), receiver));
+        assertThrows(BadRequestException.class,
+                () -> storageService.deliver(new InboundStorage(ingredient, null, -2.0, 0.0, 5), receiver));
+        assertThrows(BadRequestException.class,
+                () -> storageService.deliver(new InboundStorage(ingredient, null, 2.0, -1.0, 5), receiver));
+        assertThrows(BadRequestException.class,
+                () -> storageService.deliver(new InboundStorage(ingredient, null, null, 0.0, 5), receiver));
+        assertEquals(cashBefore, cashRepository.count());
     }
 }

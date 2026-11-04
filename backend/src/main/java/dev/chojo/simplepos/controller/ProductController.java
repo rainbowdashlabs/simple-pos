@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("api/product")
@@ -46,9 +47,11 @@ public class ProductController {
     @GetMapping("/{id}/sales/stat")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<List<ProductSalesStatDto>> getSalesStat(@PathVariable int id,
+                                                           @RequestParam(required = false) Instant after,
                                                            @RequestParam(defaultValue = "100") int limit,
                                                            @RequestParam(defaultValue = "0") int page) {
-        List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, PageRequest.of(page, limit)).stream()
+        Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
+        List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, PageRequest.of(page, limit)).stream()
                 .map(ProductSalesStatDto::new)
                 .toList();
         return ResponseEntity.ok(list);

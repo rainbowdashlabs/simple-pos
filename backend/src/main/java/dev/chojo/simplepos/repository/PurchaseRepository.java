@@ -8,8 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
+    @Query("SELECT p.account.id FROM Purchase p WHERE p.id = ?1")
+    Optional<Integer> findAccountIdOf(int purchaseId);
+
     List<Purchase> findAllByAccount_IdOrderByPurchasedDesc(int id, Pageable pageable);
 
     @Query(value = """
@@ -31,12 +35,13 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                         GROUP BY pp.purchase_id
                       ) raw ON p.id = raw.id
                     WHERE p.product_id = ?1
+                      AND p.purchased > ?2
                   ) p
                 GROUP BY day
                 ORDER BY day DESC
             ) b
             """, nativeQuery = true)
-    List<Tuple> getSalesStatByProduct(int id, Pageable pageable);
+    List<Tuple> getSalesStatByProduct(int id, Instant after, Pageable pageable);
 
     @Query(value = """
             SELECT
@@ -138,7 +143,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
             ) raw ON p.id = raw.id
-            WHERE pr.active = true
+            WHERE pr.active = true AND pr.deleted = false
             GROUP BY pr.id
             ORDER BY sales ASC, pr.name ASC
             """, nativeQuery = true)

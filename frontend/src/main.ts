@@ -10,7 +10,7 @@ import {createI18n} from "vue-i18n";
 const numberformats = {
     en: {
         currency: {
-            style: 'currency', currency: 'USD', notation: 'standard'
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -58,6 +58,9 @@ const i18n = createI18n({
     messages: {
         en: {
             accounts: "Accounts",
+            checkout_choose_account: "Choose an account",
+            checkout_no_accounts: "There are no accounts yet. Create one first.",
+            checkout_cart_empty: "The cart is empty.",
             manage: "Manage",
             date: "Date",
             price: "Price",
@@ -86,8 +89,6 @@ const i18n = createI18n({
             cash: "Cash",
             stock: "Stock",
             sales: "Sales",
-            sales_month: "Sales Month",
-            sales_year: "Sales Year",
             prices: "Prices",
             statistic: "Statistic",
             amount: "Amount",
@@ -122,7 +123,7 @@ const i18n = createI18n({
             total_revenue: "Total Revenue",
             total_profit: "Total Profit",
             total_sales: "Total Sales",
-            this_month: "This month",
+            last_days: "Last {days} days",
             no_data: "No data",
             revenue_trend: "Revenue Trend",
             revenue_by_category: "Revenue by Category",
@@ -161,11 +162,16 @@ const i18n = createI18n({
                 network: "The server could not be reached. Check the connection and try again.",
                 dismiss: "Dismiss",
                 invalid_credentials: "Wrong username or password.",
-                account_disabled: "Your account is disabled. Ask an administrator to enable it."
+                account_disabled: "Your account is disabled. Ask an administrator to enable it.",
+                too_many_logins: "Too many failed logins. Try again in {minutes} minute. | Too many failed logins. Try again in {minutes} minutes.",
+                too_many_requests: "Too many requests. Try again in a moment."
             }
         },
         de: {
             accounts: "Konten",
+            checkout_choose_account: "Konto auswählen",
+            checkout_no_accounts: "Es gibt noch keine Konten. Lege zuerst eines an.",
+            checkout_cart_empty: "Der Warenkorb ist leer.",
             manage: "Verwalten",
             date: "Datum",
             price: "Preis",
@@ -195,8 +201,6 @@ const i18n = createI18n({
             cash: "Bargeld",
             stock: "Vorrat",
             sales: "Verkäufe",
-            sales_month: "Verkäufe Monat",
-            sales_year: "Verkäufe Jahr",
             prices: "Preise",
             statistic: "Statistik",
             amount: "Betrag",
@@ -231,7 +235,7 @@ const i18n = createI18n({
             total_revenue: "Gesamtumsatz",
             total_profit: "Gesamtgewinn",
             total_sales: "Gesamtverkäufe",
-            this_month: "Dieser Monat",
+            last_days: "Letzte {days} Tage",
             no_data: "Keine Daten",
             revenue_trend: "Umsatzverlauf",
             revenue_by_category: "Umsatz nach Kategorie",
@@ -270,7 +274,9 @@ const i18n = createI18n({
                 network: "Der Server ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
                 dismiss: "Schließen",
                 invalid_credentials: "Benutzername oder Passwort ist falsch.",
-                account_disabled: "Dein Konto ist deaktiviert. Lass es von der Administration freischalten."
+                account_disabled: "Dein Konto ist deaktiviert. Lass es von der Administration freischalten.",
+                too_many_logins: "Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minute erneut. | Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minuten erneut.",
+                too_many_requests: "Zu viele Anfragen. Versuche es gleich noch einmal."
             }
         }
     },

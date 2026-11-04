@@ -5,8 +5,9 @@ import {GaugeChart} from 'echarts/charts'
 import {TooltipComponent} from 'echarts/components'
 import {CanvasRenderer} from 'echarts/renderers'
 import VChart from 'vue-echarts'
-import {SalesStat, statsTop} from "@/scripts/purchase.ts";
+import {DailyStat, dailyStats} from "@/scripts/purchase.ts";
 import {Timeframes} from "@/scripts/util.ts";
+import {Timeframe} from "@/scripts/product.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
@@ -14,6 +15,9 @@ import {SizeGroup} from "@/scripts/text.ts";
 
 use([GaugeChart, TooltipComponent, CanvasRenderer])
 
+/**
+ * Sales, revenue and profit of the last 30 days, summed over the daily totals so every product counts.
+ */
 export default defineComponent({
   name: "SalesSummary",
   components: {MoneyText, FormattedText, ColorContainer, VChart},
@@ -27,14 +31,17 @@ export default defineComponent({
   computed: {
     SizeGroup() {
       return SizeGroup
+    },
+    timeframe(): Timeframe {
+      return Timeframes.month
     }
   },
   mounted() {
-    statsTop('sales', Timeframes.month.getDate(), 100)
-        .then((stats: SalesStat[]) => {
-          this.totalSales = stats.reduce((s, e) => s + e.sales, 0)
-          this.totalRevenue = stats.reduce((s, e) => s + e.revenue, 0)
-          this.totalProfit = stats.reduce((s, e) => s + e.profit, 0)
+    dailyStats(this.timeframe.getDate())
+        .then((stats: DailyStat[]) => {
+          this.totalSales = stats.reduce((s, e) => s + Number(e.sales), 0)
+          this.totalRevenue = stats.reduce((s, e) => s + Number(e.revenue), 0)
+          this.totalProfit = stats.reduce((s, e) => s + Number(e.profit), 0)
         })
   }
 })
@@ -42,7 +49,7 @@ export default defineComponent({
 
 <template>
   <ColorContainer class="col-span-full">
-    <FormattedText value="this_month" type="locale" :size="SizeGroup.xl"/>
+    <FormattedText :value="$t('last_days', {days: timeframe.days})" :size="SizeGroup.xl"/>
     <div class="grid grid-cols-3 gap-5 mt-3">
       <div class="text-center">
         <FormattedText value="total_sales" type="locale" :size="SizeGroup.sm"/>

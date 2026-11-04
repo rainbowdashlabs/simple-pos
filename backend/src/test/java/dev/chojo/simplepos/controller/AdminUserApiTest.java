@@ -5,6 +5,7 @@ import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.service.AuthenticationService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
@@ -134,7 +135,7 @@ class AdminUserApiTest {
                 .andExpect(status().isOk());
 
         mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isForbidden());
-        assertTrue(tokenRepository.findByUserAndToken(staff, refresh).isEmpty());
+        assertTrue(tokenRepository.findByUserAndToken(staff, AuthenticationService.fingerprint(refresh)).isEmpty());
     }
 
     @Test

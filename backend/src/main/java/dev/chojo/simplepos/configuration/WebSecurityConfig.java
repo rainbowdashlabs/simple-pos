@@ -4,6 +4,7 @@ import dev.chojo.simplepos.configuration.security.JwtAuthenticationFilter;
 import dev.chojo.simplepos.configuration.security.SecurityErrorResolver;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -38,7 +39,22 @@ import java.util.List;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-    private static final String TOKEN = "authorization";
+    /**
+     * Everything the frontend loads comes from this application. Styles allow inline code because components and
+     * the icon library set styles at runtime; scripts do not.
+     */
+    static final String CONTENT_SECURITY_POLICY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            + "img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; "
+            + "form-action 'self'; frame-ancestors 'none'";
+
+    private final List<String> allowedOrigins;
+
+    /**
+     * @param allowedOrigins {@code security.cors.allowed-origins}; blank entries are ignored
+     */
+    public WebSecurityConfig(@Value("${security.cors.allowed-origins:}") List<String> allowedOrigins) {
+        this.allowedOrigins = allowedOrigins.stream().filter(origin -> !origin.isBlank()).toList();
+    }
 
 
     /**
@@ -57,6 +73,7 @@ public class WebSecurityConfig {
                                                    SecurityErrorResolver securityErrorResolver) throws Exception {
         return http
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
+                .headers(headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY)))
                 .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
                 .authorizeHttpRequests(conf -> conf
                         .requestMatchers("/api/auth/**", "/api/demo/**", "/api/version").permitAll()
@@ -93,18 +110,20 @@ public class WebSecurityConfig {
         return provider;
     }
 
+    /**
+     * Cross-origin access only for the origins listed in {@code security.cors.allowed-origins}. The frontend is
+     * served by this application itself, so by default no other origin is allowed.
+     */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        if (allowedOrigins.isEmpty()) return source;
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.applyPermitDefaultValues();
-        configuration.setAllowedOrigins(List.of("*")); // todo
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 

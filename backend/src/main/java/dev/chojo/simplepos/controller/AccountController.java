@@ -3,7 +3,6 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
-import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.User;
@@ -14,8 +13,8 @@ import dev.chojo.simplepos.entity.dto.LazyProduct;
 import dev.chojo.simplepos.entity.dto.PurchaseHistoryDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
-import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import dev.chojo.simplepos.service.AccountService;
 import dev.chojo.simplepos.service.PurchaseService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,14 +41,14 @@ public class AccountController {
     private final BalanceRepository balanceRepository;
     private final PurchaseService purchaseService;
     private final PurchaseRepository purchaseRepository;
-    private final CashRepository cashRepository;
+    private final AccountService accountService;
 
-    public AccountController(AccountRepository accountRepository, BalanceRepository balanceRepository, PurchaseService purchaseService, PurchaseRepository purchaseRepository, CashRepository cashRepository) {
+    public AccountController(AccountRepository accountRepository, BalanceRepository balanceRepository, PurchaseService purchaseService, PurchaseRepository purchaseRepository, AccountService accountService) {
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.purchaseService = purchaseService;
         this.purchaseRepository = purchaseRepository;
-        this.cashRepository = cashRepository;
+        this.accountService = accountService;
     }
 
     @PostMapping
@@ -73,27 +71,8 @@ public class AccountController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        Account account = accountRepository.requireNotDeleted(id);
-
-        // Calculate remaining balance
-        Optional<AccountDto> accountDto = accountRepository.findAccountById(id);
-        double remainingBalance = accountDto.map(AccountDto::getBalance).orElse(0.0);
-
-        // If there is remaining balance (positive or negative), settle it via cash
-        if (remainingBalance != 0) {
-            var currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            // Positive balance: account had money left, return it from cash register
-            // Negative balance (debt): account owed money, register absorbs the loss
-            String note = "Account closed: %s".formatted(account.getName());
-            cashRepository.save(new Cash(currentUser, -remainingBalance, "balance", note));
-            // Zero out the account balance by creating an offsetting balance entry
-            balanceRepository.save(new Balance(null, account, Instant.now(), -remainingBalance));
-        }
-
-        // Anonymize and soft-delete
-        account.setName("Deleted Account #" + account.getId());
-        account.setDeleted(true);
-        accountRepository.save(account);
+        var currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        accountService.close(id, currentUser);
         return ResponseEntity.ok().build();
     }
 
@@ -104,9 +83,7 @@ public class AccountController {
 
     @PostMapping("/{id}/balance")
     ResponseEntity<Balance> deposit(@PathVariable int id, @RequestBody DepositDto deposit) {
-        Account account = accountRepository.requireNotDeleted(id);
-        var balance = balanceRepository.save(new Balance(null, account, Instant.now(), deposit.amount()));
-        return ResponseEntity.accepted().body(balance);
+        return ResponseEntity.accepted().body(accountService.deposit(id, deposit.amount()));
     }
 
     @GetMapping("/{id}/balance")
@@ -119,7 +96,7 @@ public class AccountController {
 
     @PostMapping("/{id}/purchase")
     ResponseEntity<Void> purchase(@PathVariable int id, @RequestBody List<CartPositionDto> positions) {
-        purchaseService.purchase(accountRepository.requireNotDeleted(id), positions);
+        purchaseService.purchase(id, positions);
         return ResponseEntity.accepted().build();
     }
 

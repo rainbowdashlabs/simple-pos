@@ -29,7 +29,8 @@ export default defineComponent({
 <template>
   <div class="my-1">
     <FormattedText :size="SizeGroup.xl" :value="group.category.name"/>
-    <ProductIngredient @update="(e:Array<number>) => {$emit('update', e)}" v-for="item in group.entries" :entry="item" :recipe="recipe"/>
+    <ProductIngredient @update="(ingredient: Ingredient, count: number) => $emit('update', ingredient, count)"
+                       v-for="item in group.entries" :key="item.id!" :entry="item" :recipe="recipe"/>
   </div>
 </template>
 

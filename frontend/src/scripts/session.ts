@@ -63,11 +63,27 @@ function clearTokens() {
     store.loggedIn = false
     store.role = null
     store.roleOf = null
+    store.cart.clearCart()
 }
 
+/**
+ * Ends the session here and on the server: the refresh token is forgotten by the backend, so it cannot be used
+ * again even if a copy of it exists elsewhere.
+ */
 export function logout() {
+    forgetOnServer(Cookies.get(refresh_token))
     clearTokens()
     router.push({name: 'login'})
+}
+
+function forgetOnServer(token: string | undefined) {
+    if (!token) return
+    fetch(getHost() + "/api/auth/logout", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: urlEncode({token}),
+        keepalive: true
+    }).catch(() => undefined)
 }
 
 /**

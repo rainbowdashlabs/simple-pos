@@ -47,7 +47,7 @@ export default defineComponent({
     <div class="grid gap-3" :class="timeframes.length > 1 ? 'grid-cols-2' : 'grid-cols-1'">
       <div v-for="(tf, i) in timeframes" :key="tf.locale"
            class="flex flex-col gap-2 p-3 rounded-md bg-accent/10 dark:bg-accent-d/15">
-        <span class="text-xs opacity-50 uppercase">{{ $t(tf.locale) }}</span>
+        <span class="text-xs opacity-50 uppercase">{{ $t('last_days', {days: tf.days}) }}</span>
         <div class="flex flex-col gap-1">
           <div class="flex justify-between text-sm">
             <span class="opacity-70">{{ $t('sales') }}</span>

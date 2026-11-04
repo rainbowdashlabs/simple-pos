@@ -24,11 +24,14 @@ export default {
     }
   },
   mounted() {
-    account(Number(this.id)).then(e => {
-      this.account = e
-    })
+    this.loadAccount()
   },
   methods: {
+    loadAccount() {
+      account(Number(this.id)).then(e => {
+        this.account = e
+      })
+    },
     addBalance() {
       this.$router.push({name: 'balance', params: {id: this.id}})
     }
@@ -63,7 +66,7 @@ export default {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <DepositHistory :account-id="Number(id)"/>
-      <PurchaseHistory :account-id="Number(id)"/>
+      <PurchaseHistory :account-id="Number(id)" @changed="loadAccount"/>
     </div>
   </ViewWrapper>
 </template>

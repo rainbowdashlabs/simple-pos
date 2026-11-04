@@ -16,6 +16,16 @@ in addition to the bundled defaults. Besides the datasource, one setting is requ
 Changing the secret key logs out every user. Without a key the application does not start. The `local` Spring
 profile and the `dev` profile of `compose.yml` come with a key that is only meant for development.
 
+The frontend is served by the application itself. Other origins may call the API only when listed in
+`security.cors.allowed-origins` (comma separated); by default none may.
+
+Logins are rate limited per client address. Behind a reverse proxy such as traefik the address is taken from
+`X-Forwarded-For` (`server.forward-headers-strategy: native`), but only for connections from internal addresses
+(`server.tomcat.remoteip.internal-proxies`: by default private, loopback, link-local, carrier-grade NAT and IPv6
+unique-local ranges). Make sure only the proxy can reach the application, or set
+`server.tomcat.remoteip.internal-proxies` to the proxy's address; otherwise anything on those networks can claim any
+client address.
+
 ### Resources:
 Vue.JS https://vuejs.org/guide/introduction.html
 Vue i18n https://vue-i18n.intlify.dev/guide/essentials/started

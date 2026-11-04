@@ -1,12 +1,14 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.repository.ProductRepository;
+import dev.chojo.simplepos.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,8 @@ class ProductServiceTest {
     IngredientService ingredientService;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    RecipeRepository recipeRepository;
     @Autowired
     EntityManager entityManager;
 
@@ -169,5 +173,98 @@ class ProductServiceTest {
         assertNotNull(product.getId());
         assertNotNull(product.getRecipe().getId());
         assertTrue(product.getRecipe().getEntries().isEmpty());
+    }
+
+    @Test
+    void loadsItsOwnRecipeWhenRecipeAndProductIdsDiffer() {
+        Product other = productService.create(new Product(null, category, "Other", 1.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 3)))));
+        Product product;
+        do {
+            recipeRepository.save(new Recipe(null, null, Collections.emptyList()));
+            product = productService.create(new Product(null, category, "Shifted", 2.0, true,
+                    new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        } while (product.getId().equals(product.getRecipe().getId()));
+        entityManager.flush();
+        entityManager.clear();
+
+        Product loaded = productRepository.findById(product.getId()).orElseThrow();
+
+        assertNotEquals(loaded.getId(), loaded.getRecipe().getId());
+        assertEquals(1, loaded.getRecipe().getEntries().size());
+        assertEquals(1, loaded.getRecipe().getEntries().get(0).getAmount());
+        assertEquals(3, productRepository.findById(other.getId()).orElseThrow().getRecipe().getEntries().get(0).getAmount());
+    }
+
+    @Test
+    void updateWritesToTheStoredRecipeWhateverIdIsSent() {
+        Product other = productService.create(new Product(null, category, "Bystander", 1.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 3)))));
+        Product product = productService.create(new Product(null, category, "Target", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        Integer recipeId = product.getRecipe().getId();
+        Integer otherRecipeId = other.getRecipe().getId();
+        entityManager.flush();
+        entityManager.clear();
+
+        productService.update(new Product(product.getId(), category, "Target", 2.0, true,
+                new Recipe(otherRecipeId, null, List.of(new RecipeEntry(null, ingredient, 2)))));
+        entityManager.flush();
+        entityManager.clear();
+
+        Recipe recipe = productRepository.findById(product.getId()).orElseThrow().getRecipe();
+        assertEquals(recipeId, recipe.getId());
+        assertEquals(1, recipe.getEntries().size());
+        assertEquals(2, recipe.getEntries().get(0).getAmount());
+        Recipe untouched = productRepository.findById(other.getId()).orElseThrow().getRecipe();
+        assertEquals(otherRecipeId, untouched.getId());
+        assertEquals(1, untouched.getEntries().size());
+        assertEquals(3, untouched.getEntries().get(0).getAmount());
+    }
+
+    @Test
+    void createIgnoresARecipeIdOfAnotherProduct() {
+        Product other = productService.create(new Product(null, category, "Owner", 1.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 3)))));
+        Integer otherRecipeId = other.getRecipe().getId();
+        entityManager.flush();
+        entityManager.clear();
+
+        Product created = productService.create(new Product(null, category, "Intruder", 2.0, true,
+                new Recipe(otherRecipeId, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertNotEquals(otherRecipeId, created.getRecipe().getId());
+        Recipe untouched = productRepository.findById(other.getId()).orElseThrow().getRecipe();
+        assertEquals(otherRecipeId, untouched.getId());
+        assertEquals(3, untouched.getEntries().get(0).getAmount());
+    }
+
+    @Test
+    void createWithoutRecipeIsRejected() {
+        assertThrows(BadRequestException.class,
+                () -> productService.create(new Product(null, category, "Bare", 1.0, true, null)));
+    }
+
+    @Test
+    void updateGivesAProductWithoutRecipeOne() {
+        Product product = productService.create(new Product(null, category, "NoRecipe", 2.0, true,
+                new Recipe(null, null, Collections.emptyList())));
+        entityManager.flush();
+        entityManager.clear();
+        entityManager.createNativeQuery("DELETE FROM recipe WHERE product_id = ?1")
+                .setParameter(1, product.getId())
+                .executeUpdate();
+        assertNull(productRepository.findById(product.getId()).orElseThrow().getRecipe());
+
+        productService.update(new Product(product.getId(), category, "NoRecipe", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        entityManager.flush();
+        entityManager.clear();
+
+        Product loaded = productRepository.findById(product.getId()).orElseThrow();
+        assertNotNull(loaded.getRecipe());
+        assertEquals(1, loaded.getRecipe().getEntries().size());
     }
 }

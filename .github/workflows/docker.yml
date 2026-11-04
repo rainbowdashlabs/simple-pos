@@ -5,7 +5,6 @@ on:
     types:
       - published
   push:
-    tags:
     branches:
       - main
       - dev
@@ -15,47 +14,55 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Docker Image
     permissions:
+      contents: read
+      checks: read
       packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
+      REF_NAME: ${{ github.ref_name }}
+      REF_TYPE: ${{ github.ref_type }}
+      SHA: ${{ github.sha }}
 
     steps:
       - name: Wait for checks to succeed
-        uses: lewagon/wait-on-check-action@master
+        uses: lewagon/wait-on-check-action@369769072fe522a3a8a85c03c96af1e5242a1994 # v1.9.1
         with:
           ref: ${{ github.ref }}
           check-regexp: "Verify.*"
           running-workflow-name: 'Deploy Docker Image'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allowed-conclusions: success
-      - uses: actions/checkout@v7
-      - uses: gradle/actions/wrapper-validation@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: Build Image
-        run: docker build . --build-arg GITHUB_ACTIONS=true --build-arg GITHUB_REF_TYPE=${{ github.ref_type }} --build-arg GITHUB_REF_NAME=${{ github.ref_name }} --build-arg GITHUB_SHA=${{ github.sha }} -f Dockerfile -t ghcr.io/${{ github.repository }}:${{ github.sha }}
+        run: docker build . --build-arg GITHUB_ACTIONS=true --build-arg GITHUB_REF_TYPE="$REF_TYPE" --build-arg GITHUB_REF_NAME="$REF_NAME" --build-arg GITHUB_SHA="$SHA" -f Dockerfile -t "$IMAGE:$SHA"
       - name: Login to Registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login -u $ --password-stdin ghcr.io
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$TOKEN" | docker login -u "$GITHUB_ACTOR" --password-stdin ghcr.io
       - name: Push image
         run: |
-          docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker push "$IMAGE:$SHA"
       - name: Tag & Push branch image
         run: |
-          docker image tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-          docker push ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          docker image tag "$IMAGE:$SHA" "$IMAGE:$REF_NAME"
+          docker push "$IMAGE:$REF_NAME"
       - name: Tag & Push latest image
         if: github.ref_name == 'main'
         run: |
-          docker image tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
-          docker push ghcr.io/${{ github.repository }}:latest
+          docker image tag "$IMAGE:$SHA" "$IMAGE:latest"
+          docker push "$IMAGE:latest"
       - name: Tag & Push version images
         if: github.event_name == 'release'
         run: |
-          VERSION="${{ github.ref_name }}"
+          VERSION="$REF_NAME"
           VERSION="${VERSION#v}"
           MAJOR="${VERSION%%.*}"
           MINOR="${VERSION#*.}"
           MINOR="${MINOR%%.*}"
-          IMAGE="ghcr.io/${{ github.repository }}"
-          docker image tag "$IMAGE:${{ github.sha }}" "$IMAGE:v$MAJOR"
-          docker image tag "$IMAGE:${{ github.sha }}" "$IMAGE:v$MAJOR.$MINOR"
-          docker image tag "$IMAGE:${{ github.sha }}" "$IMAGE:v$VERSION"
+          docker image tag "$IMAGE:$SHA" "$IMAGE:v$MAJOR"
+          docker image tag "$IMAGE:$SHA" "$IMAGE:v$MAJOR.$MINOR"
+          docker image tag "$IMAGE:$SHA" "$IMAGE:v$VERSION"
           docker push "$IMAGE:v$MAJOR"
           docker push "$IMAGE:v$MAJOR.$MINOR"
           docker push "$IMAGE:v$VERSION"
