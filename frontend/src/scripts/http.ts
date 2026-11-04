@@ -1,5 +1,6 @@
 import {getSessionToken, handleUnauthorized, logout} from "./session.ts";
 import {ApiError} from "./errors.ts";
+import {forgetRole} from "./roles.ts";
 
 export async function postJson(url: string, body: Object) {
     return requestJson(url, "POST", new Map(), body)
@@ -49,6 +50,7 @@ async function send(requrl: string, method: string, body: Object | null, retryUn
 
     if (!response.ok) {
         const error = await ApiError.fromResponse(method, requrl, response)
+        if (error.status === 403) forgetRole()
         if (error.isAccountDisabled) logout()
         else if (error.status === 401) {
             if (!retryUnauthorized) logout()

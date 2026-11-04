@@ -1,6 +1,8 @@
 <script lang="ts">
 
 import UserButton from "./header/UserButton.vue";
+import {hasRole} from "@/scripts/roles.ts";
+import {store} from "@/scripts/store.ts";
 import MenuEntry from "./header/MenuEntry.vue";
 import Icon from "./styles/Icon.vue";
 import MobileNavbar from "./header/MobileNavbar.vue";
@@ -10,6 +12,11 @@ export default {
   data() {
     return {
       navBar: false
+    }
+  },
+  computed: {
+    isStaff() {
+      return !store.role || hasRole(store.role, 'STAFF')
     }
   },
   components: {
@@ -36,9 +43,11 @@ export default {
           </div>
         </router-link>
 
-        <Entry to="/" label="POS" icon="fa-money-bill"/>
-        <Entry to="/accounts" :label="$t('accounts')" icon="fa-users"/>
-        <Entry to="/manage" :label="$t('manage')" icon="fa-list-check"/>
+        <template v-if="isStaff">
+          <Entry to="/" label="POS" icon="fa-money-bill"/>
+          <Entry to="/accounts" :label="$t('accounts')" icon="fa-users"/>
+          <Entry to="/manage" :label="$t('manage')" icon="fa-list-check"/>
+        </template>
 
         <div class="flex flex-none content-center justify-items-end">
           <UserButton/>
@@ -63,9 +72,11 @@ export default {
     </div>
     <transition>
       <MobileNavbar v-if="navBar">
-        <MobileNavEntry @click="navBar = false" to="/" label="POS" icon="fa-money-bill"/>
-        <MobileNavEntry @click="navBar = false" to="/accounts" :label="$t('accounts')" icon="fa-users"/>
-        <MobileNavEntry @click="navBar = false" to="/manage" :label="$t('manage')" icon="fa-list-check"/>
+        <template v-if="isStaff">
+          <MobileNavEntry @click="navBar = false" to="/" label="POS" icon="fa-money-bill"/>
+          <MobileNavEntry @click="navBar = false" to="/accounts" :label="$t('accounts')" icon="fa-users"/>
+          <MobileNavEntry @click="navBar = false" to="/manage" :label="$t('manage')" icon="fa-list-check"/>
+        </template>
       </MobileNavbar>
     </transition>
   </div>

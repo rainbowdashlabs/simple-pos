@@ -61,6 +61,8 @@ function clearTokens() {
     Cookies.remove(refresh_token_issued)
     Cookies.remove(username_cookie)
     store.loggedIn = false
+    store.role = null
+    store.roleOf = null
 }
 
 export function logout() {

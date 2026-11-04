@@ -132,6 +132,11 @@ const i18n = createI18n({
             settings: "Settings",
             color_theme: "Color Theme",
             language: "Language",
+            no_access: {
+                title: "No access",
+                text: "Your account cannot use this part of the application yet. Ask an administrator to give you access."
+            },
+            logout: "Log out",
             errors: {
                 unexpected: "Something went wrong. Please try again.",
                 network: "The server could not be reached. Check the connection and try again.",
@@ -217,6 +222,11 @@ const i18n = createI18n({
             settings: "Einstellungen",
             color_theme: "Farbthema",
             language: "Sprache",
+            no_access: {
+                title: "Kein Zugriff",
+                text: "Dein Konto kann diesen Teil der Anwendung noch nicht nutzen. Lass dir den Zugriff von der Administration freischalten."
+            },
+            logout: "Abmelden",
             errors: {
                 unexpected: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
                 network: "Der Server ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
