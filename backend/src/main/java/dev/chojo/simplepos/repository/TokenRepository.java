@@ -21,4 +21,11 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     @Query("DELETE FROM Token t WHERE t.user = ?1 AND t.token = ?2")
     int deleteByUserAndToken(User user, String token);
 
+    /**
+     * Deletes all refresh tokens of a user, which ends every session at its next refresh.
+     */
+    @Modifying(flushAutomatically = true)
+    @Query("DELETE FROM Token t WHERE t.user = ?1")
+    int deleteAllByUser(User user);
+
 }

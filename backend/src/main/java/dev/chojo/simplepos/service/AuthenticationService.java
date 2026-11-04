@@ -1,17 +1,13 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
 import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
-import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,33 +15,15 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationService(
             UserRepository userRepository, TokenRepository tokenRepository,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            AuthenticationManager authenticationManager
     ) {
         this.tokenRepository = tokenRepository;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    /**
-     * Registers a new, disabled user.
-     *
-     * @throws ConflictException if the username is already taken
-     */
-    public User signup(UserDto input) {
-        if (userRepository.findByUsername(input.username()).isPresent()) {
-            throw new ConflictException("Username %s is already taken".formatted(input.username()));
-        }
-        User user = new User(null, input.username(), passwordEncoder.encode(input.password()), false, Role.USER);
-
-        return userRepository.save(user);
     }
 
     public void saveRefreshToken(Token token) {
