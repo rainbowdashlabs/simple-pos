@@ -15,7 +15,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         enable_lazy_load_no_trans: true
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
 
@@ -31,6 +31,7 @@ spring:
 
 server:
   port: 8080
+  forward-headers-strategy: native
 
 spring.web.resources:
   static-locations: file:/app/public/,classpath:/public/
@@ -38,17 +39,20 @@ spring.web.resources:
 springdoc:
   api-docs:
     path: /api-docs
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 logging:
   level:
     root: info
+    org.springframework.web.servlet.PageNotFound: error
 
 demo:
   enabled: false
 
 security:
   jwt:
-     secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
      # 1h in millisecond
      expiration-time: 3600000
-     refresh-expiration-time: 604800000
+     refresh-expiration-time: 2592000000

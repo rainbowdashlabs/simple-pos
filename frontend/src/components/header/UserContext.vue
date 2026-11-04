@@ -22,7 +22,7 @@ export default defineComponent({
         aria-labelledby="menu-button">
       <div class="py-1" role="none">
         <UserContextEntry :text="$t('settings')" @click="openSettings"/>
-        <UserContextEntry text="Logout" @click="logout"/>
+        <UserContextEntry :text="$t('logout')" @click="logout"/>
       </div>
     </div>
   </div>

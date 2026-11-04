@@ -3,6 +3,7 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.repository.IngredientRepository;
+import dev.chojo.simplepos.service.IngredientService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,15 +17,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/ingredient")
 public class IngredientController {
     private final IngredientRepository ingredientRepository;
+    private final IngredientService ingredientService;
 
-    public IngredientController(IngredientRepository ingredientRepository) {
+    public IngredientController(IngredientRepository ingredientRepository, IngredientService ingredientService) {
         this.ingredientRepository = ingredientRepository;
+        this.ingredientService = ingredientService;
     }
 
     @PostMapping
@@ -47,24 +49,20 @@ public class IngredientController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Void> delete(@RequestBody Ingredient ingredient) {
-        // TODO check that ingredient is unused
-        ingredientRepository.deleteById(ingredient.getId());
+    ResponseEntity<Void> delete(@PathVariable int id) {
+        ingredientService.delete(id);
         return ResponseEntity.accepted().build();
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Ingredient> get(@PathVariable int id) {
-        return ingredientRepository.findById(id).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(ingredientRepository.require(id));
     }
 
     @PatchMapping("/{id}/active")
     ResponseEntity<Ingredient> toggleActive(@PathVariable int id) {
-        Optional<Ingredient> byId = ingredientRepository.findById(id);
-        if (byId.isEmpty()) return ResponseEntity.notFound().build();
-        Ingredient ingredient = byId.get();
+        Ingredient ingredient = ingredientRepository.require(id);
         ingredient.setActive(!ingredient.isActive());
         return ResponseEntity.ok(ingredientRepository.save(ingredient));
     }

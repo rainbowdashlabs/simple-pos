@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import app_header from './components/Header.vue'
 import app_footer from './components/Footer.vue'
+import Notifications from './components/Notifications.vue'
 </script>
 
 <script lang="ts">
 import {COLOR_THEMES, ColorTheme, store} from "./scripts/store.ts";
 import {getPreferences} from "./scripts/user.ts";
 
+/**
+ * The application shell. Theme and language come from local storage at once, and from the user's saved preferences
+ * whenever someone logs in, which take precedence.
+ */
 export default {
   computed:{
     darkMode(){
@@ -14,9 +19,21 @@ export default {
     },
     colorTheme() {
       return store.colorTheme
+    },
+    loggedIn() {
+      return store.loggedIn
     }
   },
   watch: {
+    '$i18n.locale': {
+      handler(locale: string) {
+        document.documentElement.lang = locale
+      },
+      immediate: true
+    },
+    loggedIn(isLoggedIn: boolean) {
+      if (isLoggedIn) this.loadPreferences()
+    },
     'darkMode.dark'(isDark: boolean) {
       if (isDark) {
         document.body.classList.add("dark")
@@ -38,7 +55,6 @@ export default {
       document.documentElement.setAttribute('data-theme', store.colorTheme)
     },
     applyDefaults() {
-      // Use localStorage as fast cache for instant rendering
       if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         store.theme = "dark"
       } else {
@@ -59,7 +75,6 @@ export default {
       getPreferences().then(prefs => {
         if (!prefs) return
 
-        // Backend is source of truth — override localStorage
         if (prefs.darkMode === 'dark' || prefs.darkMode === 'light') {
           store.theme = prefs.darkMode
           localStorage.setItem('theme', prefs.darkMode)
@@ -74,14 +89,12 @@ export default {
         }
 
         this.applyTheme()
-      }).catch(() => {
-        // Not logged in or error — keep localStorage defaults
-      })
+      }).catch(() => undefined)
     }
   },
   mounted() {
     this.applyDefaults()
-    this.loadPreferences()
+    if (store.loggedIn) this.loadPreferences()
   }
 }
 
@@ -94,6 +107,7 @@ export default {
       <router-view/>
     </div>
     <app_footer/>
+    <Notifications/>
   </div>
 </template>
 

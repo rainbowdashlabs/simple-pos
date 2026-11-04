@@ -4,10 +4,17 @@ import Entry from "@/components/header/MenuEntry.vue";
 import UserButton from "@/components/header/UserButton.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import Icon from "@/components/styles/Icon.vue";
+import {hasRole} from "@/scripts/roles.ts";
+import {store} from "@/scripts/store.ts";
 
 export default defineComponent({
   name: "Header",
-  components: {Icon, ColorContainer, UserButton, Entry}
+  components: {Icon, ColorContainer, UserButton, Entry},
+  computed: {
+    isAdmin(): boolean {
+      return hasRole(store.role, 'ADMIN')
+    }
+  }
 })
 </script>
 
@@ -21,6 +28,7 @@ export default defineComponent({
       <Entry to="/manage/categories" :label="$t('categories')" icon="fa-layer-group"/>
       <Entry to="/manage/storage" :label="$t('storage')" icon="fa-warehouse"/>
       <Entry to="/manage/cash" :label="$t('cash')" icon="fa-sack-dollar"/>
+      <Entry v-if="isAdmin" to="/manage/users" :label="$t('users.title')" icon="fa-user-gear"/>
     </div>
     <!-- Mobile: icons only -->
     <div class="flex sm:hidden justify-around p-3">
@@ -30,6 +38,7 @@ export default defineComponent({
       <router-link to="/manage/categories" class="text-xl p-2"><Icon icon="fa-layer-group"/></router-link>
       <router-link to="/manage/storage" class="text-xl p-2"><Icon icon="fa-warehouse"/></router-link>
       <router-link to="/manage/cash" class="text-xl p-2"><Icon icon="fa-sack-dollar"/></router-link>
+      <router-link v-if="isAdmin" to="/manage/users" class="text-xl p-2" :aria-label="$t('users.title')"><Icon icon="fa-user-gear"/></router-link>
     </div>
   </div>
 </template>

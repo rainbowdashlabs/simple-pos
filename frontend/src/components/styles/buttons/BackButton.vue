@@ -6,6 +6,12 @@ export default defineComponent({
   name: "BackButton",
   components: {IconButton},
   props: {
+    label: {
+      type: String
+    },
+    hint: {
+      type: String
+    },
     icon: {
       type: String,
       default: "fa-arrow-left"
@@ -24,7 +30,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <IconButton :color="color" class="text-dark" @click="(e) => {e.stopPropagation(); $emit('click', e)}" :disabled="false" :icon="icon"/>
+  <IconButton :color="color" class="text-dark" @click="(e) => {e.stopPropagation(); $emit('click', e)}" :disabled="disabled" :icon="icon" :label="label" :hint="hint"/>
 </template>
 
 <style scoped>

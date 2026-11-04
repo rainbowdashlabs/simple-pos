@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class UserServiceTest {
 
     @Test
     void shouldLoadUserByUsername() {
-        userRepository.save(new User(null, "loadable", "pass", true));
+        userRepository.save(new User(null, "loadable", "pass", true, Role.STAFF));
 
         User loaded = userService.loadUserByUsername("loadable");
         assertNotNull(loaded);
@@ -41,7 +42,7 @@ class UserServiceTest {
 
     @Test
     void shouldUpdatePassword() {
-        User user = userRepository.save(new User(null, "pwduser", "oldpassword", true));
+        User user = userRepository.save(new User(null, "pwduser", "oldpassword", true, Role.STAFF));
 
         User updated = userService.updatePassword(user, "newpassword");
         assertEquals("newpassword", updated.getPassword());
@@ -52,7 +53,7 @@ class UserServiceTest {
 
     @Test
     void shouldReturnUserWithCorrectEnabledStatus() {
-        userRepository.save(new User(null, "disabled", "pass", false));
+        userRepository.save(new User(null, "disabled", "pass", false, Role.STAFF));
 
         User loaded = userService.loadUserByUsername("disabled");
         assertFalse(loaded.isEnabled());
@@ -60,7 +61,7 @@ class UserServiceTest {
 
     @Test
     void loadedUserImplementsUserDetails() {
-        userRepository.save(new User(null, "details", "secret", true));
+        userRepository.save(new User(null, "details", "secret", true, Role.STAFF));
 
         User loaded = userService.loadUserByUsername("details");
         assertEquals("details", loaded.getUsername());

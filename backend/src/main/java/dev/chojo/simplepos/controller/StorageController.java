@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.controller;
 
-import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
@@ -9,11 +8,9 @@ import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.entity.response.Listing;
-import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.StorageService;
-import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -38,24 +35,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 @RestController
 @RequestMapping("/api/storage")
 public class StorageController {
-    private static final Logger log = getLogger(StorageController.class);
     private final StorageRepository storageRepository;
     private final IngredientRepository ingredientRepository;
     private final StorageService storageService;
-    private final CashRepository cashRepository;
 
-    public StorageController(StorageRepository storageRepository, IngredientRepository ingredientRepository, StorageService storageService, CashRepository cashRepository) {
+    public StorageController(StorageRepository storageRepository, IngredientRepository ingredientRepository, StorageService storageService) {
         this.storageRepository = storageRepository;
         this.ingredientRepository = ingredientRepository;
         this.storageService = storageService;
-        this.cashRepository = cashRepository;
     }
 
     @GetMapping
@@ -83,25 +74,16 @@ public class StorageController {
     public ResponseEntity<List<Storage>> byId(@PathVariable int id,
                                               @RequestParam(value = "limit", defaultValue = "100") int limit,
                                               @RequestParam(value = "page", defaultValue = "0") int page) {
-        Optional<Ingredient> ingredient = ingredientRepository.findById(id);
-        return ingredient.map(value -> ResponseEntity.ok(storageRepository.findAllByIngredient(value, PageRequest.of(page, limit).withSort(Sort.by("id").descending()))))
-                .orElse(ResponseEntity.notFound().build());
+        Ingredient ingredient = ingredientRepository.require(id);
+        PageRequest request = PageRequest.of(page, limit).withSort(Sort.by("id").descending());
+        return ResponseEntity.ok(storageRepository.findAllByIngredient(ingredient, request));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Storage> add(@RequestBody InboundStorage storage) {
-        log.info(storage.toString());
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Ingredient> ingredient = ingredientRepository.findById(storage.ingredient().getId());
-        if (ingredient.isEmpty()) return ResponseEntity.notFound().build();
-        if (storage.price() > 0) {
-            cashRepository.save(new Cash(current, (-storage.price()) * storage.amount() , "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
-        }
-        if (storage.pledge() > 0) {
-            cashRepository.save(new Cash(current, -storage.pledge(), "pledge", "%s".formatted(storage.ingredient().getName())));
-        }
-        return ResponseEntity.accepted().body(storageService.addStorage(new Storage(null, ingredient.get(), storage.purchased(), storage.price(), storage.amount(), 0)));
+        return ResponseEntity.accepted().body(storageService.deliver(storage, current));
     }
 
     @PutMapping

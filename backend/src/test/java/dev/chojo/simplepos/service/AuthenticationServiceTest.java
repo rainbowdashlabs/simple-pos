@@ -1,9 +1,10 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,33 +37,8 @@ class AuthenticationServiceTest {
     PasswordEncoder passwordEncoder;
 
     @Test
-    void shouldSignupUser() {
-        User user = authenticationService.signup(new UserDto("newuser", "password123"));
-
-        assertNotNull(user.getId());
-        assertEquals("newuser", user.getUsername());
-        assertTrue(passwordEncoder.matches("password123", user.getPassword()));
-    }
-
-    @Test
-    void signedUpUserIsPersisted() {
-        authenticationService.signup(new UserDto("persisted", "pass"));
-
-        Optional<User> found = userRepository.findByUsername("persisted");
-        assertTrue(found.isPresent());
-    }
-
-    @Test
-    void signedUpUserIsDisabledByDefault() {
-        User user = authenticationService.signup(new UserDto("newbie", "pass"));
-        assertFalse(user.isEnabled());
-    }
-
-    @Test
     void shouldAuthenticateValidUser() {
-        User user = authenticationService.signup(new UserDto("authuser", "secret"));
-        user.setEnabled(true);
-        userRepository.save(user);
+        User user = createUser("authuser", "secret");
 
         User authenticated = authenticationService.authenticate("authuser", "secret");
         assertNotNull(authenticated);
@@ -69,9 +47,7 @@ class AuthenticationServiceTest {
 
     @Test
     void shouldRejectInvalidPassword() {
-        User user = authenticationService.signup(new UserDto("authuser2", "correct"));
-        user.setEnabled(true);
-        userRepository.save(user);
+        User user = createUser("authuser2", "correct");
 
         assertThrows(BadCredentialsException.class, () -> {
             authenticationService.authenticate("authuser2", "wrong");
@@ -79,51 +55,48 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void shouldSaveAndRetrieveRefreshToken() {
-        User user = authenticationService.signup(new UserDto("tokenuser", "pass"));
-        user.setEnabled(true);
-        userRepository.save(user);
+    void shouldSaveRefreshToken() {
+        User user = createUser("tokenuser", "pass");
 
-        Token token = new Token("refresh_token_123", user);
-        authenticationService.saveRefreshToken(token);
+        authenticationService.saveRefreshToken("refresh_token_123", user, Duration.ofDays(1));
 
-        Optional<Token> found = authenticationService.retrieveToken(user, "refresh_token_123");
+        assertTrue(tokenRepository.findByToken("refresh_token_123").isEmpty());
+        Optional<Token> found = tokenRepository.findByUserAndToken(user, AuthenticationService.fingerprint("refresh_token_123"));
         assertTrue(found.isPresent());
-        assertEquals("refresh_token_123", found.get().getToken());
+        Instant expected = Instant.now().plus(Duration.ofDays(1));
+        assertTrue(Duration.between(found.get().getExpires(), expected).abs().toSeconds() < 60);
     }
 
     @Test
-    void shouldNotRetrieveNonExistentToken() {
-        User user = authenticationService.signup(new UserDto("notokenuser", "pass"));
-        user.setEnabled(true);
-        userRepository.save(user);
+    void shouldInvalidateRefreshTokenOnlyOnce() {
+        User user = createUser("invalidateuser", "pass");
+        authenticationService.saveRefreshToken("to_invalidate", user, Duration.ofDays(1));
 
-        Optional<Token> found = authenticationService.retrieveToken(user, "nonexistent");
-        assertTrue(found.isEmpty());
+        assertTrue(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
+        assertFalse(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
+        assertTrue(tokenRepository.findByUserAndToken(user, AuthenticationService.fingerprint("to_invalidate")).isEmpty());
     }
 
     @Test
-    void shouldInvalidateRefreshTokenByEntity() {
-        User user = authenticationService.signup(new UserDto("invalidateuser", "pass"));
-        user.setEnabled(true);
-        userRepository.save(user);
+    void shouldForgetATokenOnLogout() {
+        User user = createUser("logoutuser", "pass");
+        authenticationService.saveRefreshToken("to_forget", user, Duration.ofDays(1));
 
-        Token token = new Token("to_invalidate", user);
-        authenticationService.saveRefreshToken(token);
+        assertTrue(authenticationService.logout("to_forget"));
+        assertFalse(authenticationService.logout("to_forget"));
+        assertFalse(authenticationService.invalidateRefreshToken(user, "to_forget"));
+    }
 
-        Optional<Token> saved = authenticationService.retrieveToken(user, "to_invalidate");
-        assertTrue(saved.isPresent());
+    @Test
+    void shouldNotInvalidateUnknownRefreshToken() {
+        User user = createUser("notokenuser", "pass");
 
-        boolean result = authenticationService.invalidateRefreshToken(saved.get());
-        assertTrue(result);
-
-        Optional<Token> afterDelete = authenticationService.retrieveToken(user, "to_invalidate");
-        assertTrue(afterDelete.isEmpty());
+        assertFalse(authenticationService.invalidateRefreshToken(user, "nonexistent"));
     }
 
     @Test
     void shouldFindByUsername() {
-        authenticationService.signup(new UserDto("findable", "pass"));
+        createUser("findable", "pass");
 
         User found = authenticationService.findByUsername("findable");
         assertEquals("findable", found.getUsername());
@@ -131,8 +104,10 @@ class AuthenticationServiceTest {
 
     @Test
     void shouldThrowWhenFindingNonExistentUser() {
-        assertThrows(Exception.class, () -> {
-            authenticationService.findByUsername("ghost");
-        });
+        assertThrows(UnauthorizedException.class, () -> authenticationService.findByUsername("ghost"));
+    }
+
+    private User createUser(String username, String password) {
+        return userRepository.save(new User(null, username, passwordEncoder.encode(password), true, Role.STAFF));
     }
 }

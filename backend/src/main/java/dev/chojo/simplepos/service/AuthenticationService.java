@@ -1,50 +1,74 @@
 package dev.chojo.simplepos.service;
 
+import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HexFormat;
 
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
-    private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationService(
             UserRepository userRepository, TokenRepository tokenRepository,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
+            AuthenticationManager authenticationManager
     ) {
         this.tokenRepository = tokenRepository;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
-    public User signup(UserDto input) {
-        User user = new User(null, input.username(), passwordEncoder.encode(input.password()), false);
-
-        return userRepository.save(user);
+    /**
+     * Remembers a refresh token as usable until {@code lifetime} from now. Only its fingerprint is stored.
+     */
+    public void saveRefreshToken(String token, User user, Duration lifetime) {
+        tokenRepository.save(new Token(fingerprint(token), user, Instant.now().plus(lifetime)));
     }
 
-    public void saveRefreshToken(Token token) {
-        tokenRepository.save(token);
+    /**
+     * Forgets a refresh token, ending the session it belongs to at its next refresh.
+     *
+     * @return whether the token was known
+     */
+    @Transactional
+    public boolean logout(String token) {
+        return tokenRepository.deleteByFingerprint(fingerprint(token)) > 0;
     }
 
+    /**
+     * What is stored for a refresh token: its SHA-256, hex encoded.
+     */
+    public static String fingerprint(String token) {
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is always available", e);
+        }
+    }
+
+    /**
+     * Loads the user with this name.
+     *
+     * @throws UnauthorizedException if no user with this name exists
+     */
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow();
+        return userRepository.findByUsername(username).orElseThrow(() -> new UnauthorizedException("Unknown user"));
     }
 
     public User authenticate(String username, String password) {
@@ -55,22 +79,12 @@ public class AuthenticationService {
                 )
         );
 
-        return userRepository.findByUsername(username)
-                .orElseThrow();
+        return findByUsername(username);
     }
 
     @Transactional
     public boolean invalidateRefreshToken(User user, String token) {
-        return tokenRepository.deleteByUserAndToken(user, token) == 1;
+        return tokenRepository.deleteByUserAndToken(user, fingerprint(token)) == 1;
     }
 
-    @Transactional
-    public boolean invalidateRefreshToken(Token token) {
-        tokenRepository.delete(token);
-        return true;
-    }
-
-    public Optional<Token> retrieveToken(User user, String token) {
-        return tokenRepository.findByUserAndToken(user, token);
-    }
 }

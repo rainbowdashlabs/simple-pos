@@ -12,6 +12,10 @@ import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 const SESSION_KEY = 'inventory-check'
 
+/**
+ * Counting the stock. Only the ingredients someone actually counted are sent: the backend sets each sent ingredient
+ * to the counted amount, so sending the ones nobody touched would set them to zero.
+ */
 export default defineComponent({
   name: "StorageInventory",
   components: {BackButton, ViewWrapper, ColorContainer, SimpleInputField, ConfirmButton, GridWrapper, StorageInventoryGroup},
@@ -34,8 +38,9 @@ export default defineComponent({
             this.$router.push({name: 'manage-storage'})
           })
     },
-    changed(e: { ingredient: number, amount: number }) {
-      this.ingredients.set(e.ingredient, e.amount)
+    changed(e: { ingredient: number, amount: number | null }) {
+      if (e.amount === null) this.ingredients.delete(e.ingredient)
+      else this.ingredients.set(e.ingredient, e.amount)
       this.saveSession()
     },
     saveSession() {
@@ -49,7 +54,7 @@ export default defineComponent({
       try { return JSON.parse(raw) } catch { return {} }
     },
     clearAll() {
-      this.ingredients.forEach((_, k) => this.ingredients.set(k, 0))
+      this.ingredients.clear()
       sessionStorage.removeItem(SESSION_KEY)
       this.revision++
     }
@@ -58,10 +63,10 @@ export default defineComponent({
     const saved = this.loadSession()
     stockSummary().then(e => {
       this.summary = {categories: e.categories.map(e => Object.assign({}, e))}
-      this.summary.categories.flatMap((group: CategoryGroup<StorageSummary>) => {
-        return group.entries.forEach((entry: StorageSummary) => {
+      this.summary.categories.forEach((group: CategoryGroup<StorageSummary>) => {
+        group.entries.forEach((entry: StorageSummary) => {
           const id = entry.ingredient.id!
-          this.ingredients.set(id, saved[String(id)] ?? 0)
+          if (saved[String(id)] !== undefined) this.ingredients.set(id, saved[String(id)])
         })
       })
       this.revision++
@@ -72,11 +77,11 @@ export default defineComponent({
 
 <template>
   <ViewWrapper>
-    <StorageInventoryGroup v-for="item in summary.categories" :key="revision" :group="item"
+    <StorageInventoryGroup v-for="item in summary.categories" :key="`${item.category.id}-${revision}`" :group="item"
                            :saved="ingredients" @changed="changed"/>
     <div class="grid grid-cols-2 gap-5">
-      <BackButton icon="fa-eraser" @click="clearAll"/>
-      <ConfirmButton @click="submit"/>
+      <BackButton icon="fa-eraser" :label="$t('button.clear_counts')" @click="clearAll"/>
+      <ConfirmButton :hint="$t('button.save')" @click="submit"/>
     </div>
   </ViewWrapper>
 </template>

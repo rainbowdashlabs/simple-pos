@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import {createRouter, createWebHistory, type RouteLocationNormalized} from 'vue-router'
 import {demoLogin, isDemoMode, isLoggedIn} from '@/scripts/session.ts'
 
 import POS from '@/components/views/POS.vue'
@@ -29,7 +29,18 @@ import StorageAdd from '@/components/views/manage/views/storage/views/StorageAdd
 import StorageEdit from '@/components/views/manage/views/storage/views/StorageEdit.vue'
 import StorageInventory from '@/components/views/manage/views/storage/views/StorageInventory.vue'
 import Cash from '@/components/views/manage/views/Cash.vue'
+import Users from '@/components/views/manage/views/Users.vue'
 import Settings from '@/components/views/Settings.vue'
+import NoAccess from '@/components/views/NoAccess.vue'
+import {hasRole, loadRole, type Role} from '@/scripts/roles.ts'
+
+declare module 'vue-router' {
+    interface RouteMeta {
+        public?: boolean
+        title?: string
+        role?: Role
+    }
+}
 
 const APP_NAME = 'Simple POS'
 
@@ -96,13 +107,20 @@ const router = createRouter({
                 {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {title: 'Edit Ingredient'}},
                 {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory, meta: {title: 'Inventory Check'}},
                 {path: 'cash', name: 'manage-cash', component: Cash, meta: {title: 'Cash'}},
+                {path: 'users', name: 'manage-users', component: Users, meta: {title: 'Users', role: 'ADMIN'}},
             ]
         },
         {
             path: '/settings',
             name: 'settings',
             component: Settings,
-            meta: {title: 'Settings'}
+            meta: {title: 'Settings', role: 'USER'}
+        },
+        {
+            path: '/no-access',
+            name: 'no-access',
+            component: NoAccess,
+            meta: {title: 'No Access', role: 'USER'}
         },
         {
             path: '/theme',
@@ -114,7 +132,7 @@ const router = createRouter({
             path: '/:pathMatch(.*)*',
             name: 'not-found',
             component: NotFound,
-            meta: {title: 'Not Found'}
+            meta: {title: 'Not Found', role: 'USER'}
         }
     ]
 })
@@ -125,16 +143,25 @@ router.beforeEach(async (to) => {
         const loggedIn = await isLoggedIn()
         if (!loggedIn) await demoLogin()
         if (to.name === 'login' || to.name === 'logout') return {name: 'pos'}
-        return true
+        return allowedFor(await loadRole(), to)
     }
     if (to.meta.public) return true
     const loggedIn = await isLoggedIn()
     if (!loggedIn) return {name: 'login'}
-    return true
+    return allowedFor(await loadRole(), to)
 })
 
+/**
+ * Routes require STAFF unless their meta names another role. If the role could not be loaded, the route is allowed
+ * and the backend decides, so a failed request does not lock the user out of the interface.
+ */
+function allowedFor(role: Role | null, to: RouteLocationNormalized) {
+    if (role === null || hasRole(role, to.meta.role ?? 'STAFF')) return true
+    return to.name === 'no-access' ? true : {name: 'no-access'}
+}
+
 router.afterEach((to) => {
-    const title = to.meta.title as string | undefined
+    const title = to.meta.title
     document.title = title ? `${title} — ${APP_NAME}` : APP_NAME
 })
 

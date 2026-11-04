@@ -77,7 +77,7 @@ export default defineComponent({
   },
   mounted() {
     statsBottom(this.timeframe.getDate(), 10)
-        .then(e => this.stat = e.filter(s => s.sales > 0))
+        .then(e => this.stat = e)
   }
 })
 </script>
@@ -85,6 +85,7 @@ export default defineComponent({
 <template>
   <ColorContainer>
     <FormattedText value="worst_sellers" type="locale" :size="SizeGroup.xl"/>
+    <FormattedText :value="$t('last_days', {days: timeframe.days})" :size="SizeGroup.sm"/>
     <v-chart v-if="stat.length > 0" :option="chartOption" autoresize style="height: 300px; width: 100%"/>
     <div v-else class="h-[300px] flex items-center justify-center opacity-50">
       <FormattedText value="no_data" type="locale"/>

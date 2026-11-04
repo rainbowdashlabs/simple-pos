@@ -16,7 +16,7 @@ import TextButton from "@/components/styles/buttons/TextButton.vue";
 import ProductIngredientInfo from "./productinfo/ProductIngredientInfo.vue";
 import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
-import {Ingredient, ingredient, ingredients} from "@/scripts/Ingredient.ts";
+import {Ingredient, ingredients} from "@/scripts/Ingredient.ts";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 import {roundCurrency} from "@/scripts/util.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
@@ -61,8 +61,9 @@ export default defineComponent({
     },
     disabled() {
       if (!this.product?.name) return true
-      if (!this.category) return true
+      if (this.category?.id == null) return true
       if (!this.product?.price) return true
+      if (this.recipe.entries.length === 0) return true
       return false
     },
     buttonColor() {
@@ -87,18 +88,14 @@ export default defineComponent({
     updateCategory(vk: string) {
       this.category = this.categoryList.find(e => e.id == Number(vk)) ?? this.category
     },
-    updateIngredient(data: Array<number>) {
-      let id = data[0]
-      let count = data[1]
-      let index = this.recipe.entries.findIndex(e => e.ingredient.id == id)
-      if (count == 0 && index != -1) {
-        this.recipe.entries.splice(index, 1)
-      } else if (index != -1) {
+    updateIngredient(ingredient: Ingredient, count: number) {
+      const index = this.recipe.entries.findIndex(e => e.ingredient.id == ingredient.id)
+      if (index == -1) {
+        if (count > 0) this.recipe.entries.push({amount: count, ingredient: ingredient})
+      } else if (count > 0) {
         this.recipe.entries[index].amount = count
-      } else if (count != 0) {
-        ingredient(id).then(e => {
-          this.recipe.entries.push({amount: count, ingredient: e})
-        })
+      } else {
+        this.recipe.entries.splice(index, 1)
       }
     }
   },
@@ -111,7 +108,7 @@ export default defineComponent({
     fetchProduct(Number(this.id)).then(e => {
       this.product = Object.assign({}, e)
       this.category = e.category
-      this.recipe = Object.assign({}, e.recipe)
+      this.recipe = e.recipe ? {...e.recipe, entries: [...(e.recipe.entries ?? [])]} : {entries: []}
     })
     ingredients().then(e => {
       this.ingredientList = e
@@ -150,11 +147,11 @@ export default defineComponent({
 
     <ColorContainer class="max-h-96 overflow-y-scroll col-span-full">
       <FormattedText :size="SizeGroup.xl" class="col-span-full" type="locale" value="ingredients"/>
-      <ProductIngredientGroup @update="updateIngredient" v-for="item in ingredientList.categories" :group="item"
+      <ProductIngredientGroup @update="updateIngredient" v-for="item in ingredientList.categories" :key="item.category.id" :group="item"
                               :recipe="recipe"/>
     </ColorContainer>
 
-    <ConfirmButton class="col-span-full" :disabled="disabled" @click="updateProd"/>
+    <ConfirmButton class="col-span-full" :disabled="disabled" :hint="$t('button.save')" @click="updateProd"/>
     </div>
   </ViewWrapper>
 </template>

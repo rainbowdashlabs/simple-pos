@@ -6,7 +6,6 @@ import dev.chojo.simplepos.entity.dto.UserPreferencesDto;
 import dev.chojo.simplepos.repository.UserPreferencesRepository;
 import dev.chojo.simplepos.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,12 +28,6 @@ public class UserController {
     @GetMapping("me")
     public User me() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
-
-    @GetMapping("/admin")
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public String admin() {
-        return "U admin UwU";
     }
 
     @GetMapping("/preferences")

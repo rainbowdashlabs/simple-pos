@@ -155,4 +155,21 @@ class StorageRepositoryTest {
                 .anyMatch(s -> s.getIngredient().getId().equals(ingredient.getId()));
         assertTrue(found);
     }
+
+    @Test
+    void shouldListTheLowestStockFirst() {
+        Category category = categoryRepository.save(new Category(null, "LowStockCat"));
+        Ingredient zeta = ingredientRepository.save(new Ingredient(null, category, "Zeta", 1.0, 1, 0, 0, 10));
+        Ingredient alpha = ingredientRepository.save(new Ingredient(null, category, "Alpha", 1.0, 1, 0, 0, 10));
+        storageRepository.save(new Storage(null, zeta, Instant.now(), 1.0, 1, 0));
+        storageRepository.save(new Storage(null, alpha, Instant.now(), 1.0, 5, 0));
+        storageRepository.flush();
+
+        List<String> names = storageRepository.lowStock(PageRequest.of(0, 100)).stream()
+                .map(tuple -> ((Ingredient) tuple.get("ingredient")).getName())
+                .filter(name -> name.equals("Zeta") || name.equals("Alpha"))
+                .toList();
+
+        assertEquals(List.of("Zeta", "Alpha"), names);
+    }
 }

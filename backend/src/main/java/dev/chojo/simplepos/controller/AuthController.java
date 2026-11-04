@@ -1,28 +1,30 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.JwtService;
-import dev.chojo.simplepos.entity.Token;
+import dev.chojo.simplepos.configuration.security.RateLimiter;
+import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
 import dev.chojo.simplepos.service.AuthenticationService;
+import dev.chojo.simplepos.service.UserAdminService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponseException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,50 +34,74 @@ public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
+    private final RateLimiter rateLimiter;
     @Value("${security.jwt.refresh-expiration-time}")
     private long jwtRefreshExpiration;
 
-    public AuthController(AuthenticationService authenticationService, JwtService jwtService) {
+    public AuthController(AuthenticationService authenticationService, JwtService jwtService, RateLimiter rateLimiter) {
         this.authenticationService = authenticationService;
         this.jwtService = jwtService;
+        this.rateLimiter = rateLimiter;
     }
 
+    /**
+     * Logs in. Every attempt is counted by the {@link RateLimiter} before the password is checked and taken back
+     * once the password matched — also for a disabled account, whose password was right. Credentials longer than any
+     * that can be stored are rejected as wrong before anything is counted or hashed.
+     */
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<TokenResponse> login(@RequestParam String username, @RequestParam String password) {
-        User authenticatedUser = authenticationService.authenticate(username, password);
+    ResponseEntity<TokenResponse> login(@RequestParam String username, @RequestParam String password,
+                                        HttpServletRequest request) {
+        if (username.length() > UserAdminService.MAX_USERNAME_LENGTH
+                || password.getBytes(StandardCharsets.UTF_8).length > UserAdminService.MAX_PASSWORD_BYTES) {
+            throw new BadCredentialsException("Bad credentials");
+        }
+        RateLimiter.Attempt attempt = rateLimiter.beginLogin(username, request.getRemoteAddr());
+        User authenticatedUser;
+        try {
+            authenticatedUser = authenticationService.authenticate(username, password);
+        } catch (DisabledException e) {
+            attempt.succeeded();
+            throw e;
+        }
+        attempt.succeeded();
 
         TokenResponse tokenResponse = new TokenResponse(
                 new TokenDto(jwtService.generateToken(LOGIN_CLAIM, authenticatedUser, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
                 new TokenDto(jwtService.generateToken(REFRESH_CLAIM, authenticatedUser, jwtRefreshExpiration), jwtRefreshExpiration)
         );
-        authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), authenticatedUser));
+        authenticationService.saveRefreshToken(tokenResponse.refresh().token(), authenticatedUser, Duration.ofMillis(jwtRefreshExpiration));
 
         return ResponseEntity.accepted().body(tokenResponse);
     }
 
+    /**
+     * Ends the session a refresh token belongs to. Answers the same whether or not the token was known, so it says
+     * nothing about which tokens exist.
+     */
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void logout(@RequestParam String token, HttpServletRequest request) {
+        rateLimiter.checkRequest("logout", request.getRemoteAddr());
+        authenticationService.logout(token);
+    }
+
     @PostMapping("/refresh")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<TokenResponse> refresh(@RequestParam String token) {
+    ResponseEntity<TokenResponse> refresh(@RequestParam String token, HttpServletRequest request) {
+        rateLimiter.checkRequest("refresh", request.getRemoteAddr());
         String username = jwtService.extractUsername(token);
         User user = authenticationService.findByUsername(username);
+        if (!user.isEnabled()) {
+            throw new DisabledException("Account is disabled");
+        }
         if (!jwtService.isTokenValid(token, user, REFRESH_CLAIM)) {
-            var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid Token");
-            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, detail, null);
+            throw new UnauthorizedException("Invalid token");
         }
 
-        Optional<Token> optToken = authenticationService.retrieveToken(user, token);
-        if (optToken.isEmpty()) {
-            var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Unknown token");
-            throw new ErrorResponseException(HttpStatus.UNAUTHORIZED, detail, null);
-        }
-
-        log.info("Attempting to invalidate refresh token {}", optToken.get());
-        boolean invalidated = authenticationService.invalidateRefreshToken(optToken.get());
-
-        if (!invalidated) {
-            var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Token already used.");
-            throw new ErrorResponseException(HttpStatus.UNAUTHORIZED, detail, null);
+        if (!authenticationService.invalidateRefreshToken(user, token)) {
+            throw new UnauthorizedException("Unknown or already used token");
         }
         log.info("Valid token. Creating new login and refresh token");
 
@@ -83,13 +109,7 @@ public class AuthController {
                 new TokenDto(jwtService.generateToken(LOGIN_CLAIM, user, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
                 new TokenDto(jwtService.generateToken(REFRESH_CLAIM, user, jwtRefreshExpiration), jwtRefreshExpiration)
         );
-        authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), user));
+        authenticationService.saveRefreshToken(tokenResponse.refresh().token(), user, Duration.ofMillis(jwtRefreshExpiration));
         return ResponseEntity.accepted().body(tokenResponse);
-    }
-
-    @PostMapping("/signup")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void register(@RequestBody UserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
     }
 }

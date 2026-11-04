@@ -10,7 +10,7 @@ import {createI18n} from "vue-i18n";
 const numberformats = {
     en: {
         currency: {
-            style: 'currency', currency: 'USD', notation: 'standard'
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -58,6 +58,44 @@ const i18n = createI18n({
     messages: {
         en: {
             accounts: "Accounts",
+            button: {
+                new_product: "New product",
+                new_product_with_recipe: "New product with recipe",
+                new_ingredient: "New ingredient",
+                new_account: "New account",
+                count_stock: "Count stock",
+                low_stock_only: "Low stock only",
+                add_delivery: "Add delivery",
+                clear_counts: "Clear counts",
+                deposit: "Deposit",
+                withdraw: "Withdraw",
+                clear_cart: "Clear cart",
+                clear_cart_confirm: "Clear cart?",
+                checkout: "Checkout",
+                pay: "Pay",
+                log_in: "Log in",
+                account_menu: "User menu",
+                dark_mode: "Dark mode",
+                light_mode: "Light mode",
+                activate: "Activate",
+                deactivate: "Deactivate",
+                edit: "Edit",
+                rename: "Rename",
+                delete: "Delete",
+                cancel_purchase: "Cancel purchase",
+                save: "Save",
+                create: "Create",
+                cancel: "Cancel",
+                back: "Back",
+                next: "Next",
+                reset: "Reset",
+                remove_one: "Remove one",
+                add_one: "Add one",
+                menu: "Menu"
+            },
+            checkout_choose_account: "Choose an account",
+            checkout_no_accounts: "There are no accounts yet. Create one first.",
+            checkout_cart_empty: "The cart is empty.",
             manage: "Manage",
             date: "Date",
             price: "Price",
@@ -86,8 +124,6 @@ const i18n = createI18n({
             cash: "Cash",
             stock: "Stock",
             sales: "Sales",
-            sales_month: "Sales Month",
-            sales_year: "Sales Year",
             prices: "Prices",
             statistic: "Statistic",
             amount: "Amount",
@@ -122,7 +158,7 @@ const i18n = createI18n({
             total_revenue: "Total Revenue",
             total_profit: "Total Profit",
             total_sales: "Total Sales",
-            this_month: "This month",
+            last_days: "Last {days} days",
             no_data: "No data",
             revenue_trend: "Revenue Trend",
             revenue_by_category: "Revenue by Category",
@@ -131,10 +167,81 @@ const i18n = createI18n({
             worst_sellers: "Worst Sellers",
             settings: "Settings",
             color_theme: "Color Theme",
-            language: "Language"
+            language: "Language",
+            users: {
+                title: "Users",
+                create: "New user",
+                create_button: "Create",
+                username: "Username",
+                password: "Password",
+                new_password: "New password",
+                password_hint: "Passwords need at least {min} characters. New users are enabled right away.",
+                role: "Role",
+                roles: {ADMIN: "Administrator", STAFF: "Staff", USER: "User"},
+                enabled: "Enabled",
+                reset_password: "Set password",
+                save: "Save",
+                you: "you",
+                disabled: "disabled",
+                own_account_hint: "Another administrator has to change your own role and status.",
+                password_set: "The password was set. Existing sessions of this user end at their next refresh.",
+                own_password_hint: "Setting your own password ends all your sessions at their next refresh, this one included; then log in with the new password."
+            },
+            no_access: {
+                title: "No access",
+                text: "Your account cannot use this part of the application yet. Ask an administrator to give you access."
+            },
+            logout: "Log out",
+            errors: {
+                unexpected: "Something went wrong. Please try again.",
+                network: "The server could not be reached. Check the connection and try again.",
+                dismiss: "Dismiss",
+                invalid_credentials: "Wrong username or password.",
+                account_disabled: "Your account is disabled. Ask an administrator to enable it.",
+                too_many_logins: "Too many failed logins. Try again in {minutes} minute. | Too many failed logins. Try again in {minutes} minutes.",
+                too_many_requests: "Too many requests. Try again in a moment."
+            }
         },
         de: {
             accounts: "Konten",
+            button: {
+                new_product: "Neues Produkt",
+                new_product_with_recipe: "Neues Produkt mit Rezept",
+                new_ingredient: "Neue Zutat",
+                new_account: "Neues Konto",
+                count_stock: "Bestand zählen",
+                low_stock_only: "Nur niedriger Bestand",
+                add_delivery: "Lieferung erfassen",
+                clear_counts: "Zählung zurücksetzen",
+                deposit: "Einzahlen",
+                withdraw: "Auszahlen",
+                clear_cart: "Warenkorb leeren",
+                clear_cart_confirm: "Warenkorb wirklich leeren?",
+                checkout: "Zur Kasse",
+                pay: "Bezahlen",
+                log_in: "Anmelden",
+                account_menu: "Benutzermenü",
+                dark_mode: "Dunkles Design",
+                light_mode: "Helles Design",
+                activate: "Aktivieren",
+                deactivate: "Deaktivieren",
+                edit: "Bearbeiten",
+                rename: "Umbenennen",
+                delete: "Löschen",
+                cancel_purchase: "Einkauf stornieren",
+                save: "Speichern",
+                create: "Anlegen",
+                cancel: "Abbrechen",
+                back: "Zurück",
+                next: "Weiter",
+                reset: "Zurücksetzen",
+                remove_one: "Eins weniger",
+                add_one: "Eins mehr",
+                menu: "Menü"
+            },
+            checkout_choose_account: "Konto auswählen",
+            checkout_no_accounts: "Es gibt noch keine Konten. Lege zuerst eines an.",
+            checkout_cart_empty: "Der Warenkorb ist leer.",
             manage: "Verwalten",
             date: "Datum",
             price: "Preis",
@@ -164,8 +271,6 @@ const i18n = createI18n({
             cash: "Bargeld",
             stock: "Vorrat",
             sales: "Verkäufe",
-            sales_month: "Verkäufe Monat",
-            sales_year: "Verkäufe Jahr",
             prices: "Preise",
             statistic: "Statistik",
             amount: "Betrag",
@@ -200,7 +305,7 @@ const i18n = createI18n({
             total_revenue: "Gesamtumsatz",
             total_profit: "Gesamtgewinn",
             total_sales: "Gesamtverkäufe",
-            this_month: "Dieser Monat",
+            last_days: "Letzte {days} Tage",
             no_data: "Keine Daten",
             revenue_trend: "Umsatzverlauf",
             revenue_by_category: "Umsatz nach Kategorie",
@@ -209,7 +314,40 @@ const i18n = createI18n({
             worst_sellers: "Ladenhüter",
             settings: "Einstellungen",
             color_theme: "Farbthema",
-            language: "Sprache"
+            language: "Sprache",
+            users: {
+                title: "Konten",
+                create: "Neues Konto",
+                create_button: "Anlegen",
+                username: "Benutzername",
+                password: "Passwort",
+                new_password: "Neues Passwort",
+                password_hint: "Passwörter brauchen mindestens {min} Zeichen. Neue Konten sind sofort aktiv.",
+                role: "Rolle",
+                roles: {ADMIN: "Administration", STAFF: "Personal", USER: "Basis"},
+                enabled: "Aktiv",
+                reset_password: "Passwort setzen",
+                save: "Speichern",
+                you: "du",
+                disabled: "deaktiviert",
+                own_account_hint: "Deine eigene Rolle und deinen Status muss eine andere Person aus der Administration ändern.",
+                password_set: "Das Passwort wurde gesetzt. Bestehende Sitzungen dieses Kontos enden bei ihrer nächsten Erneuerung.",
+                own_password_hint: "Ein neues eigenes Passwort beendet alle deine Sitzungen bei ihrer nächsten Erneuerung, auch diese; melde dich dann mit dem neuen Passwort an."
+            },
+            no_access: {
+                title: "Kein Zugriff",
+                text: "Dein Konto kann diesen Teil der Anwendung noch nicht nutzen. Lass dir den Zugriff von der Administration freischalten."
+            },
+            logout: "Abmelden",
+            errors: {
+                unexpected: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+                network: "Der Server ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
+                dismiss: "Schließen",
+                invalid_credentials: "Benutzername oder Passwort ist falsch.",
+                account_disabled: "Dein Konto ist deaktiviert. Lass es von der Administration freischalten.",
+                too_many_logins: "Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minute erneut. | Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minuten erneut.",
+                too_many_requests: "Zu viele Anfragen. Versuche es gleich noch einmal."
+            }
         }
     },
     datetimeFormats: datetimeFormats,
@@ -217,12 +355,15 @@ const i18n = createI18n({
 })
 
 import router from '@/router.ts'
+import {notifyError} from '@/scripts/notifications.ts'
 
 const app = createApp(App);
 
-app.config.errorHandler = err => {
-    console.error(`Unexpected Error:`, err)
-}
+app.config.errorHandler = err => notifyError(err)
+window.addEventListener("unhandledrejection", event => {
+    notifyError(event.reason)
+    event.preventDefault()
+})
 app.use(router)
 app.use(i18n)
 library.add(fas)

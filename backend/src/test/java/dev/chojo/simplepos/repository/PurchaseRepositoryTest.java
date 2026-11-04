@@ -145,4 +145,38 @@ class PurchaseRepositoryTest {
         purchaseRepository.deleteById(purchase.getId());
         assertFalse(purchaseRepository.existsById(purchase.getId()));
     }
+
+    @Test
+    void shouldListUnsoldButNotDeletedProductsAsBottomSales() {
+        Category category = categoryRepository.save(new Category(null, "BottomCat"));
+        Product unsold = productService.create(
+                new Product(null, category, "Unsold", 1.0, true, new Recipe(null, null, Collections.emptyList())));
+        Product deleted = productService.create(
+                new Product(null, category, "Deleted", 1.0, true, new Recipe(null, null, Collections.emptyList())));
+        deleted.setDeleted(true);
+        productRepository.save(deleted);
+        purchaseRepository.save(new Purchase(null, account, product, Instant.now(), 2, 2.5, Collections.emptyList()));
+
+        List<Integer> ids = purchaseRepository.getBottomSales(Instant.now().minus(1, ChronoUnit.DAYS), PageRequest.of(0, 100))
+                .stream()
+                .map(t -> ((Number) t.get("product_id")).intValue())
+                .toList();
+
+        assertTrue(ids.contains(unsold.getId()));
+        assertTrue(ids.contains(product.getId()));
+        assertFalse(ids.contains(deleted.getId()));
+        assertTrue(ids.indexOf(unsold.getId()) < ids.indexOf(product.getId()));
+    }
+
+    @Test
+    void shouldLimitProductSalesStatToTheWindow() {
+        Instant now = Instant.now();
+        purchaseRepository.save(new Purchase(null, account, product, now.minus(40, ChronoUnit.DAYS), 4, 2.5, Collections.emptyList()));
+        purchaseRepository.save(new Purchase(null, account, product, now.minus(2, ChronoUnit.DAYS), 1, 2.5, Collections.emptyList()));
+
+        var days = purchaseRepository.getSalesStatByProduct(product.getId(), now.minus(30, ChronoUnit.DAYS), PageRequest.of(0, 100));
+
+        assertEquals(1, days.size());
+        assertEquals(1, ((Number) days.get(0).get("sales")).intValue());
+    }
 }

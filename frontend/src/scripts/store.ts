@@ -5,6 +5,7 @@ import {StorageSummary} from "./storage.ts";
 import {Cart} from "./cart.ts";
 import {Ingredient} from "./Ingredient.ts";
 import {Category, CategoryGroup, Listing} from "./categories.ts";
+import type {Role} from "./roles.ts";
 
 export type Mapping<T, V> = (object: T) => V;
 
@@ -126,7 +127,9 @@ export interface Store {
     theme: string | null | undefined,
     colorTheme: ColorTheme,
     cart: Cart,
-    loggedIn: boolean
+    loggedIn: boolean,
+    role: Role | null,
+    roleOf: string | null
 }
 
 export const store: Reactive<Store> = reactive({
@@ -134,6 +137,8 @@ export const store: Reactive<Store> = reactive({
         colorTheme: 'blue' as ColorTheme,
         cart: new Cart(),
         loggedIn: false,
+        role: null,
+        roleOf: null,
         productCache: new ListingCache<Product>(e => e.id!, e => e.category),
         accountCache: new Cache<Account>(e => e.id!),
         ingredientCache: new ListingCache<Ingredient>(e => e.id!, e => e.category),

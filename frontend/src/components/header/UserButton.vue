@@ -14,6 +14,9 @@ export default {
     buttonIcon() {
       return store.loggedIn ? "fa-user" : "fa-right-to-bracket"
     },
+    buttonHint(): string {
+      return this.$t(store.loggedIn ? 'button.account_menu' : 'button.log_in')
+    },
     buttonAction() {
       return store.loggedIn ? this.toggleContext : this.login
     },
@@ -34,7 +37,7 @@ export default {
 </script>
 
 <template>
-  <IconButton :icon="buttonIcon" @click="buttonAction"/>
+  <IconButton :icon="buttonIcon" :hint="buttonHint" @click="buttonAction"/>
   <div v-show="userContextActive">
     <UserContext/>
   </div>

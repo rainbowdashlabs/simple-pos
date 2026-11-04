@@ -53,7 +53,7 @@ export default {
 <template>
   <footer class="inset-x-0 bottom-0 flex w-screen justify-around py-4 bg-secondary dark:bg-secondary-d">
     <div class="max-w-screen-lg w-5/6 flex flex-wrap items-center justify-between gap-3">
-      <IconButton :icon="isDark ? 'fa-sun' : 'fa-moon'" @click="toggleDarkMode"/>
+      <IconButton :icon="isDark ? 'fa-sun' : 'fa-moon'" :hint="$t(isDark ? 'button.light_mode' : 'button.dark_mode')" @click="toggleDarkMode"/>
       <div class="text-center">
         <FormattedText :size="SizeGroup.sm" value="Made by RainbowDashLabs"/>
         <FormattedText :size="SizeGroup.sm" value="with ❤️ and 🏳️‍🌈"/>

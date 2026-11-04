@@ -6,6 +6,7 @@ import FreeButton from "@/components/styles/buttons/FreeButton.vue";
 import Icon from "@/components/styles/Icon.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import {notifyError} from "@/scripts/notifications.ts";
 
 export default defineComponent({
   name: "Products",
@@ -30,7 +31,7 @@ export default defineComponent({
     loadProducts() {
       products().then(e => {
         this.productList = e
-      }).catch(err => console.log(err))
+      }).catch(notifyError)
     }
   },
   mounted() {
@@ -43,17 +44,23 @@ export default defineComponent({
 <template>
   <ViewWrapper>
     <div class="grid grid-cols-2 gap-5">
-      <FreeButton :class="SizeGroup.xl2"
-                  color="bg-green-500"
-                  class="flex gap-3 justify-center"
-                  @click="createProduct">
-        <Icon icon="fa-square-plus"/>
-        <Icon icon="fa-bottle-water"/>
+      <FreeButton color="bg-green-500" @click="createProduct">
+        <span class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3">
+          <span :class="SizeGroup.xl2" class="flex items-center gap-3">
+            <Icon icon="fa-square-plus"/>
+            <Icon icon="fa-bottle-water"/>
+          </span>
+          <span class="text-base font-semibold">{{ $t('button.new_product') }}</span>
+        </span>
       </FreeButton>
-      <FreeButton :class="SizeGroup.xl2" color="bg-green-500" class="flex gap-3 justify-center"
-                  @click="createMultiProduct">
-        <Icon icon="fa-square-plus"/>
-        <Icon icon="fa-box"/>
+      <FreeButton color="bg-green-500" @click="createMultiProduct">
+        <span class="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3">
+          <span :class="SizeGroup.xl2" class="flex items-center gap-3">
+            <Icon icon="fa-square-plus"/>
+            <Icon icon="fa-box"/>
+          </span>
+          <span class="text-base font-semibold">{{ $t('button.new_product_with_recipe') }}</span>
+        </span>
       </FreeButton>
     </div>
     <ProductGroup v-for="item in productList.categories" :key="item.category.id" :group="item" @deleted="loadProducts"/>

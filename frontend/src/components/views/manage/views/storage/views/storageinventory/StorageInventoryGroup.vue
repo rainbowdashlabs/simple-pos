@@ -32,7 +32,7 @@ export default defineComponent({
   <div class="pt-5">
     <FormattedText :size="SizeGroup.xl" :value="group.category.name"/>
     <div class="grid grid-cols-1 gap-5 pt-5">
-      <StorageInventoryEntry v-for="item in group.entries" :listing="item" :saved="saved"
+      <StorageInventoryEntry v-for="item in group.entries" :key="item.ingredient.id!" :listing="item" :saved="saved"
                              @changed="e => {$emit('changed', e)}"/>
     </div>
   </div>

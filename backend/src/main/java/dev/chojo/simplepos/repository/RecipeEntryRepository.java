@@ -4,4 +4,6 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecipeEntryRepository extends JpaRepository<RecipeEntry, Integer> {
+    boolean existsByIngredient_Id(int ingredientId);
+
 }

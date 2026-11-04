@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.AccountRepository;
@@ -23,6 +24,7 @@ import dev.chojo.simplepos.service.ProductService;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +40,7 @@ import java.util.List;
 @ConditionalOnProperty(name = "demo.enabled", havingValue = "true")
 public class DemoDataSeeder implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
+    private static final String DEMO_USER = "demo";
 
     private final EntityManager entityManager;
     private final UserRepository userRepository;
@@ -50,12 +53,14 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final BalanceRepository balanceRepository;
     private final PurchaseRepository purchaseRepository;
     private final CashRepository cashRepository;
+    private final boolean resetDatabase;
 
     public DemoDataSeeder(EntityManager entityManager, UserRepository userRepository, PasswordEncoder passwordEncoder,
                           CategoryRepository categoryRepository, IngredientRepository ingredientRepository,
                           ProductService productService, StorageRepository storageRepository,
                           AccountRepository accountRepository, BalanceRepository balanceRepository,
-                          PurchaseRepository purchaseRepository, CashRepository cashRepository) {
+                          PurchaseRepository purchaseRepository, CashRepository cashRepository,
+                          @Value("${demo.reset-database:false}") boolean resetDatabase) {
         this.entityManager = entityManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -67,11 +72,29 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.balanceRepository = balanceRepository;
         this.purchaseRepository = purchaseRepository;
         this.cashRepository = cashRepository;
+        this.resetDatabase = resetDatabase;
     }
 
+    private boolean holdsRealUsers() {
+        return userRepository.findAll().stream().anyMatch(user -> !DEMO_USER.equals(user.getUsername()));
+    }
+
+    /**
+     * Wipes the database and fills it with demo data.
+     * <p>
+     * Refuses to wipe a database that holds users other than the demo user, unless {@code demo.reset-database} is
+     * set: demo mode switched on by accident against a real database would otherwise delete everything in it on
+     * startup.
+     *
+     * @throws IllegalStateException if the database holds real users and resetting was not explicitly allowed
+     */
     @Override
     @Transactional
     public void run(String... args) {
+        if (!resetDatabase && holdsRealUsers()) {
+            throw new IllegalStateException("demo.enabled is set, but the database holds users other than the demo "
+                    + "user. Refusing to wipe it. Set demo.reset-database: true if this database really is a demo.");
+        }
         log.info("Wiping database for demo mode...");
         // Ensure schema is up to date before truncating
         entityManager.createNativeQuery(
@@ -89,7 +112,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 
         // Demo user
         User demoUser = userRepository.save(
-                new User(null, "demo", passwordEncoder.encode("demo"), true));
+                new User(null, DEMO_USER, passwordEncoder.encode("demo"), true, Role.STAFF));
 
         // Categories
         Category drinks = categoryRepository.save(new Category(null, "Drinks"));

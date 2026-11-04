@@ -14,6 +14,7 @@ export default defineComponent({
     }
   },
   components: {ColorContainer, HistoryElement},
+  emits: ["changed"],
   data() {
     return {
       purchases: {purchases: [], products: new Map()} as History
@@ -26,6 +27,10 @@ export default defineComponent({
     },
     loadHistory() {
       history(this.accountId, 30).then(e => this.purchases = e)
+    },
+    deleted() {
+      this.loadHistory()
+      this.$emit("changed")
     }
   },
   mounted() {
@@ -38,7 +43,7 @@ export default defineComponent({
   <ColorContainer class="max-h-96 overflow-scroll" bg="secondary">
     <div>
       <HistoryElement v-for="item in purchases.purchases" :key="item.id" :purchase="item"
-                      :product="productFromId(item.productId)" @deleted="loadHistory"/>
+                      :product="productFromId(item.productId)" @deleted="deleted"/>
     </div>
   </ColorContainer>
 </template>

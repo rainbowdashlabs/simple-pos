@@ -18,7 +18,7 @@ import {SizeGroup} from "@/scripts/text.ts";
 import FreeButton from "@/components/styles/buttons/FreeButton.vue";
 import TextButton from "@/components/styles/buttons/TextButton.vue";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
-import {Ingredient, ingredient, ingredients} from "@/scripts/Ingredient.ts";
+import {Ingredient, ingredients} from "@/scripts/Ingredient.ts";
 import ProductIngredientGroup from "./productcreatemulti/ProductIngredientGroup.vue";
 
 export default defineComponent({
@@ -57,9 +57,9 @@ export default defineComponent({
     },
     disabled() {
       if (!this.name) return true
-      if (!this.category) return true
+      if (this.category?.id == null) return true
       if (!this.price) return true
-      if (!this.recipe.entries) return true
+      if (this.recipe.entries.length === 0) return true
       return false
     },
     buttonColor() {
@@ -76,6 +76,7 @@ export default defineComponent({
       this.category = this.categoryList.find(e => e.id == Number(vk)) ?? this.category
     },
     createProd() {
+      if (this.disabled) return
       createProduct({
         id: null,
         name: this.name,
@@ -83,27 +84,17 @@ export default defineComponent({
         price: this.price,
         active: true,
         recipe: this.recipe
-      })
-      this.$router.push({name: 'manage-products'})
+      }).then(() => this.$router.push({name: 'manage-products'}))
     },
-    updateIngredient(data: Array<number>) {
-      let id = data[0]
-      let count = data[1]
-      let index = this.recipe.entries.findIndex(e => e.ingredient.id == id)
-      if (count == 0 && index != -1) {
-        this.recipe.entries.splice(index, 1)
-      } else if (index != -1) {
+    updateIngredient(ingredient: Ingredient, count: number) {
+      const index = this.recipe.entries.findIndex(e => e.ingredient.id == ingredient.id)
+      if (index == -1) {
+        if (count > 0) this.recipe.entries.push({amount: count, ingredient: ingredient})
+      } else if (count > 0) {
         this.recipe.entries[index].amount = count
-      } else if (count != 0) {
-        ingredient(id).then(e => {
-          this.recipe.entries.push({amount: count, ingredient: e})
-        })
+      } else {
+        this.recipe.entries.splice(index, 1)
       }
-    }
-  },
-  watch: {
-    price(newVal) {
-      this.price = Number(newVal)
     }
   },
   mounted() {
@@ -143,11 +134,12 @@ export default defineComponent({
     </ColorContainer>
 
     <ColorContainer class="max-h-96 overflow-y-scroll col-span-full">
-      <ProductIngredientGroup @update="updateIngredient" v-for="item in ingredientList.categories" :group="item"/>
+      <ProductIngredientGroup @update="updateIngredient" v-for="item in ingredientList.categories"
+                              :key="item.category.id" :group="item" :recipe="recipe"/>
     </ColorContainer>
 
     <div class="col-span-full">
-      <ConfirmButton class="w-full" :disabled="disabled" @click="createProd"/>
+      <ConfirmButton class="w-full" :disabled="disabled" :hint="$t('button.create')" @click="createProd"/>
     </div>
     </div>
   </ViewWrapper>
