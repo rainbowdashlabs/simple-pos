@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
@@ -128,7 +129,7 @@ class StockConcurrencyTest {
 
     @Test
     void shouldLetOnlyOneOfTwoConcurrentRefreshesUseTheToken() throws Exception {
-        User user = userRepository.save(new User(null, "concurrentrefresh", "password", true));
+        User user = userRepository.save(new User(null, "concurrentrefresh", "password", true, Role.STAFF));
         authenticationService.saveRefreshToken(new Token("single-use", user));
 
         List<Boolean> results = new ArrayList<>();

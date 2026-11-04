@@ -2,6 +2,7 @@ package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ class CashRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = userRepository.save(new User(null, "cashier", "pass", true));
+        user = userRepository.save(new User(null, "cashier", "pass", true, Role.STAFF));
     }
 
     @Test

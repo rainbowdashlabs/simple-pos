@@ -2,6 +2,7 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Account;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.UserRepository;
@@ -57,8 +58,8 @@ class ErrorResponseTest {
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
-        userRepository.save(new User(null, "erroruser", passwordEncoder.encode("secret"), true));
-        userRepository.save(new User(null, "disableduser", passwordEncoder.encode("secret"), false));
+        userRepository.save(new User(null, "erroruser", passwordEncoder.encode("secret"), true, Role.STAFF));
+        userRepository.save(new User(null, "disableduser", passwordEncoder.encode("secret"), false, Role.STAFF));
     }
 
     @Test
@@ -136,16 +137,6 @@ class ErrorResponseTest {
                         .content("[{\"amount\": 1}]"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("Product id is missing"));
-    }
-
-    @Test
-    void shouldAnswerDuplicateSignupWithConflict() throws Exception {
-        mvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\": \"erroruser\", \"password\": \"other\"}"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value("Username erroruser is already taken"))
-                .andExpect(jsonPath("$.instance").value("/api/auth/signup"));
     }
 
     @Test

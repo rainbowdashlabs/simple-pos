@@ -2,21 +2,21 @@ package dev.chojo.simplepos.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @Entity(name = "users")
-@JsonIncludeProperties({"id", "username"})
+@JsonIncludeProperties({"id", "username", "role"})
 public class User implements UserDetails {
     @Id
     @GeneratedValue
@@ -28,22 +28,23 @@ public class User implements UserDetails {
 
     boolean enabled;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Authority> authorities = Collections.emptyList();
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return role == null ? List.of() : List.of(new SimpleGrantedAuthority(role.authority()));
     }
 
     public User() {
     }
 
-    public User(Integer id, String username, String password, boolean enabled) {
+    public User(Integer id, String username, String password, boolean enabled, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.enabled = enabled;
+        this.role = role;
     }
 
     @Override
@@ -81,7 +82,11 @@ public class User implements UserDetails {
         this.enabled = enabled;
     }
 
-    public void setAuthorities(List<Authority> authorities) {
-        this.authorities = authorities;
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

@@ -4,7 +4,6 @@ import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.dto.UserDto;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
 import dev.chojo.simplepos.service.AuthenticationService;
@@ -15,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -76,11 +74,5 @@ public class AuthController {
         );
         authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), user));
         return ResponseEntity.accepted().body(tokenResponse);
-    }
-
-    @PostMapping("/signup")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public void register(@RequestBody UserDto registerUserDto) {
-        User registeredUser = authenticationService.signup(registerUserDto);
     }
 }

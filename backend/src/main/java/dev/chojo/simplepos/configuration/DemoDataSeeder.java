@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.AccountRepository;
@@ -89,7 +90,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 
         // Demo user
         User demoUser = userRepository.save(
-                new User(null, "demo", passwordEncoder.encode("demo"), true));
+                new User(null, "demo", passwordEncoder.encode("demo"), true, Role.STAFF));
 
         // Categories
         Category drinks = categoryRepository.save(new Category(null, "Drinks"));

@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +30,7 @@ public class TokenRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        testUser = userRepository.save(new User(null, "tokenuser", "password", true));
+        testUser = userRepository.save(new User(null, "tokenuser", "password", true, Role.STAFF));
     }
 
     @Test
@@ -75,7 +76,7 @@ public class TokenRepositoryTest {
 
     @Test
     void shouldNotDeleteTokenOfDifferentUser() {
-        User otherUser = userRepository.save(new User(null, "otheruser", "password", true));
+        User otherUser = userRepository.save(new User(null, "otheruser", "password", true, Role.STAFF));
         tokenRepository.save(new Token("shared", testUser));
 
         long count = tokenRepository.deleteByUserAndToken(otherUser, "shared");

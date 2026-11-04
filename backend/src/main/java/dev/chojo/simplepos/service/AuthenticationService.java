@@ -2,6 +2,7 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.controller.exceptions.ConflictException;
 import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.UserDto;
@@ -42,7 +43,7 @@ public class AuthenticationService {
         if (userRepository.findByUsername(input.username()).isPresent()) {
             throw new ConflictException("Username %s is already taken".formatted(input.username()));
         }
-        User user = new User(null, input.username(), passwordEncoder.encode(input.password()), false);
+        User user = new User(null, input.username(), passwordEncoder.encode(input.password()), false, Role.USER);
 
         return userRepository.save(user);
     }

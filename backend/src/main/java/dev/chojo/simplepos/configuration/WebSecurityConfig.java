@@ -2,11 +2,14 @@ package dev.chojo.simplepos.configuration;
 
 import dev.chojo.simplepos.configuration.security.JwtAuthenticationFilter;
 import dev.chojo.simplepos.configuration.security.SecurityErrorResolver;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
@@ -14,6 +17,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,10 +35,22 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalAuthentication()
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     private static final String TOKEN = "authorization";
 
+
+    /**
+     * ADMIN includes STAFF, STAFF includes USER. Used by the request rules and by method security.
+     */
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role(Role.ADMIN.name()).implies(Role.STAFF.name())
+                .role(Role.STAFF.name()).implies(Role.USER.name())
+                .build();
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -43,8 +59,10 @@ public class WebSecurityConfig {
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
                 .authorizeHttpRequests(conf -> conf
-                        .requestMatchers("/api/auth/**", "/api/demo/**", "/api/user", "/api/version").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/auth/**", "/api/demo/**", "/api/version").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers("/api/user/me", "/api/user/preferences").hasRole(Role.USER.name())
+                        .requestMatchers("/api/**").hasRole(Role.STAFF.name())
                         .anyRequest().permitAll())
                 .exceptionHandling(handler -> handler
                         .authenticationEntryPoint(securityErrorResolver::resolve)

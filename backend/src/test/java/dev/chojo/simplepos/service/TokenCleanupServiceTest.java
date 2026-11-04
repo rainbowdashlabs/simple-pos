@@ -2,6 +2,7 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.configuration.security.JwtService;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.TokenRepository;
@@ -35,7 +36,7 @@ class TokenCleanupServiceTest {
 
     @Test
     void shouldDeleteOnlyExpiredAndUnverifiableTokens() {
-        User user = userRepository.save(new User(null, "cleanupuser", "password", true));
+        User user = userRepository.save(new User(null, "cleanupuser", "password", true, Role.STAFF));
         Map<String, Object> refresh = Map.of("type", "refresh");
         Token valid = tokenRepository.save(new Token(jwtService.generateToken(refresh, user, 60_000), user));
         tokenRepository.save(new Token(jwtService.generateToken(refresh, user, -60_000), user));
