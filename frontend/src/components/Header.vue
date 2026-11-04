@@ -1,6 +1,5 @@
 <script lang="ts">
 
-import {getUsername, isLoggedIn} from '@/scripts/session.ts'
 import UserButton from "./header/UserButton.vue";
 import MenuEntry from "./header/MenuEntry.vue";
 import Icon from "./styles/Icon.vue";
@@ -10,9 +9,6 @@ import MobileNavEntry from "./header/mobilenavbar/MobileNavEntry.vue";
 export default {
   data() {
     return {
-      username: getUsername(),
-      loggedIn: isLoggedIn(),
-      loggedOut: !isLoggedIn(),
       navBar: false
     }
   },
