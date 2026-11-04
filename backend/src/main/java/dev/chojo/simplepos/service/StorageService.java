@@ -1,10 +1,14 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.controller.exceptions.BadRequestException;
+import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.storage.StorageTransaction;
@@ -23,10 +27,39 @@ import java.util.Map;
 public class StorageService {
     private final StorageRepository storageRepository;
     private final IngredientRepository ingredientRepository;
+    private final CashRepository cashRepository;
 
-    public StorageService(StorageRepository storageRepository, IngredientRepository ingredientRepository) {
+    public StorageService(StorageRepository storageRepository, IngredientRepository ingredientRepository,
+                          CashRepository cashRepository) {
         this.storageRepository = storageRepository;
         this.ingredientRepository = ingredientRepository;
+        this.cashRepository = cashRepository;
+    }
+
+    /**
+     * Books a delivery: the new stock, and the money paid for it and for its pledge, in one transaction. A delivery
+     * without a purchase date counts as purchased now, so it is used up in order with the others.
+     *
+     * @throws BadRequestException if the ingredient is missing, the amount is not positive, or the price or pledge
+     *                             is missing or negative
+     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the ingredient does not exist
+     */
+    @Transactional
+    public Storage deliver(InboundStorage delivery, User receivedBy) {
+        Ingredient ingredient = ingredientRepository.require(delivery.ingredientId());
+        if (delivery.amount() == null || delivery.amount() < 1) throw new BadRequestException("The amount must be at least 1");
+        if (delivery.price() == null || delivery.price() < 0) throw new BadRequestException("The price must not be negative");
+        if (delivery.pledge() == null || delivery.pledge() < 0) throw new BadRequestException("The pledge must not be negative");
+
+        if (delivery.price() > 0) {
+            String note = "%s x %d".formatted(ingredient.getName(), delivery.amount());
+            cashRepository.save(new Cash(receivedBy, -delivery.price() * delivery.amount(), "purchase", note));
+        }
+        if (delivery.pledge() > 0) {
+            cashRepository.save(new Cash(receivedBy, -delivery.pledge(), "pledge", ingredient.getName()));
+        }
+        Instant purchased = delivery.purchased() == null ? Instant.now() : delivery.purchased();
+        return addStorage(new Storage(null, ingredient, purchased, delivery.price(), delivery.amount(), 0));
     }
 
     @Transactional

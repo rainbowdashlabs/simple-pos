@@ -4,13 +4,42 @@ import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.dto.AccountDto;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
+    /**
+     * Finds an account, including deleted ones, and locks its row until the surrounding transaction ends. Everything
+     * that changes an account's balance or closes it takes this lock first, before any ingredient lock, so closing an
+     * account cannot race a deposit, a purchase or a cancellation on it.
+     *
+     * @throws BadRequestException if the id is missing
+     * @throws NotFoundException if no account with this id exists
+     */
+    default Account requireLocked(Integer id) {
+        return findByIdForUpdate(requireId(id)).orElseThrow(() -> new NotFoundException("Account", id));
+    }
+
+    /**
+     * Like {@link #requireLocked(Integer)}, for an account that must not be deleted.
+     *
+     * @throws NotFoundException if no account with this id exists or it is deleted
+     */
+    default Account requireNotDeletedLocked(Integer id) {
+        Account account = requireLocked(id);
+        if (account.isDeleted()) throw new NotFoundException("Account", id);
+        return account;
+    }
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM Account a WHERE a.id = ?1")
+    Optional<Account> findByIdForUpdate(int id);
+
     /**
      * Finds an account, including deleted ones.
      *

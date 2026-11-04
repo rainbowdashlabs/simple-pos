@@ -67,6 +67,8 @@ class DemoDataSeederTest {
     void shouldKeepWipingADatabaseThatOnlyHoldsTheDemoUser() {
         userRepository.deleteAll();
         userRepository.save(new User(null, "demo", "x", true, Role.STAFF));
+        entityManager.flush();
+        entityManager.clear();
 
         seeder(false).run();
 

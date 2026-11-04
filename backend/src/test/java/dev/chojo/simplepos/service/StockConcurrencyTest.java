@@ -89,7 +89,7 @@ class StockConcurrencyTest {
             List<Future<?>> purchases = new ArrayList<>();
             for (int i = 0; i < BUYERS; i++) {
                 purchases.add(executor.submit(() ->
-                        purchaseService.purchase(account, List.of(new CartPositionDto(product, UNITS_PER_BUYER)))));
+                        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, UNITS_PER_BUYER)))));
             }
             for (Future<?> purchase : purchases) purchase.get(30, TimeUnit.SECONDS);
         }

@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.controller;
 
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import dev.chojo.simplepos.service.PurchaseService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -27,16 +27,18 @@ import java.util.Map;
 public class PurchaseController {
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
+    private final PurchaseService purchaseService;
 
-    public PurchaseController(PurchaseRepository purchaseRepository, ProductRepository productRepository) {
+    public PurchaseController(PurchaseRepository purchaseRepository, ProductRepository productRepository,
+                              PurchaseService purchaseService) {
         this.purchaseRepository = purchaseRepository;
         this.productRepository = productRepository;
+        this.purchaseService = purchaseService;
     }
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        if (!purchaseRepository.existsById(id)) throw new NotFoundException("Purchase", id);
-        purchaseRepository.deleteById(id);
+        purchaseService.cancel(id);
         return ResponseEntity.accepted().build();
     }
 

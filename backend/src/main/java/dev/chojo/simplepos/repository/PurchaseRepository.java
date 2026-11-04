@@ -8,8 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
+    @Query("SELECT p.account.id FROM Purchase p WHERE p.id = ?1")
+    Optional<Integer> findAccountIdOf(int purchaseId);
+
     List<Purchase> findAllByAccount_IdOrderByPurchasedDesc(int id, Pageable pageable);
 
     @Query(value = """
