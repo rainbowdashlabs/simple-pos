@@ -20,6 +20,10 @@ export default defineComponent({
     stats: {
       type: Array as PropType<ProductSalesStat[]>,
       required: true
+    },
+    days: {
+      type: Number,
+      required: true
     }
   },
   computed: {
@@ -70,6 +74,7 @@ export default defineComponent({
 <template>
   <ColorContainer bg="secondary" class="flex flex-col gap-3">
     <FormattedText value="sales" type="locale" :size="SizeGroup.lg"/>
+    <FormattedText :value="$t('last_days', {days: days})" :size="SizeGroup.sm"/>
     <v-chart v-if="stats.length > 0" :option="chartOption" autoresize style="height: 250px; width: 100%"/>
     <div v-else class="h-[250px] flex items-center justify-center opacity-50">
       <FormattedText value="no_data" type="locale"/>

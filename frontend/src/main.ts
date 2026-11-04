@@ -10,7 +10,7 @@ import {createI18n} from "vue-i18n";
 const numberformats = {
     en: {
         currency: {
-            style: 'currency', currency: 'USD', notation: 'standard'
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -89,8 +89,6 @@ const i18n = createI18n({
             cash: "Cash",
             stock: "Stock",
             sales: "Sales",
-            sales_month: "Sales Month",
-            sales_year: "Sales Year",
             prices: "Prices",
             statistic: "Statistic",
             amount: "Amount",
@@ -125,7 +123,7 @@ const i18n = createI18n({
             total_revenue: "Total Revenue",
             total_profit: "Total Profit",
             total_sales: "Total Sales",
-            this_month: "This month",
+            last_days: "Last {days} days",
             no_data: "No data",
             revenue_trend: "Revenue Trend",
             revenue_by_category: "Revenue by Category",
@@ -203,8 +201,6 @@ const i18n = createI18n({
             cash: "Bargeld",
             stock: "Vorrat",
             sales: "Verkäufe",
-            sales_month: "Verkäufe Monat",
-            sales_year: "Verkäufe Jahr",
             prices: "Preise",
             statistic: "Statistik",
             amount: "Betrag",
@@ -239,7 +235,7 @@ const i18n = createI18n({
             total_revenue: "Gesamtumsatz",
             total_profit: "Gesamtgewinn",
             total_sales: "Gesamtverkäufe",
-            this_month: "Dieser Monat",
+            last_days: "Letzte {days} Tage",
             no_data: "Keine Daten",
             revenue_trend: "Umsatzverlauf",
             revenue_by_category: "Umsatz nach Kategorie",
