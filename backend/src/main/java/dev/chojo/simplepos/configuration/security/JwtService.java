@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
@@ -66,7 +67,7 @@ public class JwtService {
         if (isTokenExpired(token)) return false;
         Claims allClaims = extractAllClaims(token);
         for (var entry : claims.entrySet()) {
-            if (!allClaims.get(entry.getKey()).equals(entry.getValue())) return false;
+            if (!Objects.equals(allClaims.get(entry.getKey()), entry.getValue())) return false;
         }
         return true;
     }

@@ -2,13 +2,12 @@ package dev.chojo.simplepos.configuration;
 
 import dev.chojo.simplepos.configuration.security.JwtAuthenticationFilter;
 import dev.chojo.simplepos.configuration.security.LoginService;
+import dev.chojo.simplepos.configuration.security.SecurityErrorResolver;
 import dev.chojo.simplepos.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
@@ -19,7 +18,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -36,7 +34,8 @@ public class WebSecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter, LoginService loginService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter, LoginService loginService,
+                                                   SecurityErrorResolver securityErrorResolver) throws Exception {
         return http
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
@@ -44,23 +43,14 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/demo/**", "/api/user", "/api/version").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
-                .formLogin(form -> {
-                    form.loginPage("/#login")
-                            .loginProcessingUrl("/api/login")
-                            .permitAll()
-                            .successHandler(loginService)
-                            .failureHandler(((request, response, exception) -> {
-                                if (exception instanceof DisabledException) {
-                                    response.getOutputStream().print("Account is disabled. Ask an administrator to enable it.");
-                                } else {
-                                    response.getOutputStream().print("Invalid credentials");
-                                }
-                                response.setStatus(HttpStatus.FORBIDDEN.value());
-                            }));
-                })
-                .exceptionHandling(handler -> {
-                    handler.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.FORBIDDEN));
-                })
+                .formLogin(form -> form.loginPage("/#login")
+                        .loginProcessingUrl("/api/login")
+                        .permitAll()
+                        .successHandler(loginService)
+                        .failureHandler(securityErrorResolver::resolve))
+                .exceptionHandling(handler -> handler
+                        .authenticationEntryPoint(securityErrorResolver::resolve)
+                        .accessDeniedHandler(securityErrorResolver::resolve))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
