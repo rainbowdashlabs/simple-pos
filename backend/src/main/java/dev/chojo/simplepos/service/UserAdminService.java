@@ -27,9 +27,9 @@ import java.util.List;
  */
 @Service
 public class UserAdminService {
-    static final int MIN_PASSWORD_LENGTH = 8;
-    static final int MAX_PASSWORD_BYTES = 72;
-    static final int MAX_USERNAME_LENGTH = 64;
+    public static final int MIN_PASSWORD_LENGTH = 8;
+    public static final int MAX_PASSWORD_BYTES = 72;
+    public static final int MAX_USERNAME_LENGTH = 64;
 
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;

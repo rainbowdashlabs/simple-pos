@@ -161,7 +161,9 @@ const i18n = createI18n({
                 network: "The server could not be reached. Check the connection and try again.",
                 dismiss: "Dismiss",
                 invalid_credentials: "Wrong username or password.",
-                account_disabled: "Your account is disabled. Ask an administrator to enable it."
+                account_disabled: "Your account is disabled. Ask an administrator to enable it.",
+                too_many_logins: "Too many failed logins. Try again in {minutes} minute. | Too many failed logins. Try again in {minutes} minutes.",
+                too_many_requests: "Too many requests. Try again in a moment."
             }
         },
         de: {
@@ -270,7 +272,9 @@ const i18n = createI18n({
                 network: "Der Server ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
                 dismiss: "Schließen",
                 invalid_credentials: "Benutzername oder Passwort ist falsch.",
-                account_disabled: "Dein Konto ist deaktiviert. Lass es von der Administration freischalten."
+                account_disabled: "Dein Konto ist deaktiviert. Lass es von der Administration freischalten.",
+                too_many_logins: "Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minute erneut. | Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minuten erneut.",
+                too_many_requests: "Zu viele Anfragen. Versuche es gleich noch einmal."
             }
         }
     },

@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -89,6 +90,54 @@ class ErrorResponseTest {
         mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "wrong"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.instance").value("/api/auth/login"));
+    }
+
+    @Test
+    void shouldAnswerTooManyFailedLoginsWithTooManyRequests() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "wrong")
+                            .with(fromAddress("10.9.0.1")))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret")
+                        .with(fromAddress("10.9.0.1")))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.retryAfter").isNumber());
+        mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret")
+                        .with(fromAddress("10.9.0.2")))
+                .andExpect(status().isAccepted());
+    }
+
+    @Test
+    void shouldNotCountADisabledAccountWithTheRightPassword() throws Exception {
+        for (int i = 0; i < 6; i++) {
+            mvc.perform(post("/api/auth/login").param("username", "disableduser").param("password", "secret")
+                            .with(fromAddress("10.9.2.1")))
+                    .andExpect(status().isForbidden());
+        }
+    }
+
+    @Test
+    void shouldRejectOverlongCredentialsAsWrongWithoutAnError() throws Exception {
+        mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "x".repeat(100))
+                        .with(fromAddress("10.9.3.1")))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/auth/login").param("username", "u".repeat(65)).param("password", "secret")
+                        .with(fromAddress("10.9.3.1")))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldAnswerTooManyRefreshesWithTooManyRequests() throws Exception {
+        for (int i = 0; i < 30; i++) {
+            mvc.perform(post("/api/auth/refresh").param("token", "garbage").with(fromAddress("10.9.1.1")))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mvc.perform(post("/api/auth/refresh").param("token", "garbage").with(fromAddress("10.9.1.1")))
+                .andExpect(status().isTooManyRequests());
     }
 
     @Test
@@ -164,6 +213,13 @@ class ErrorResponseTest {
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."))
                 .andExpect(jsonPath("$.accountDisabled").value(true));
+    }
+
+    private static RequestPostProcessor fromAddress(String address) {
+        return request -> {
+            request.setRemoteAddr(address);
+            return request;
+        };
     }
 
     private Map<String, String> login() throws Exception {

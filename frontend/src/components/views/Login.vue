@@ -36,6 +36,10 @@ export default defineComponent({
       if (error.isNetworkError) return this.$t('errors.network')
       if (error.status === 401) return this.$t('errors.invalid_credentials')
       if (error.isAccountDisabled) return this.$t('errors.account_disabled')
+      if (error.status === 429) {
+        const minutes = Math.ceil((error.retryAfter ?? 60) / 60)
+        return this.$t('errors.too_many_logins', {minutes}, minutes)
+      }
       return error.status >= 500 ? this.$t('errors.unexpected') : error.message
     }
   }, watch: {

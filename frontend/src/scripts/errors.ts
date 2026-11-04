@@ -30,6 +30,13 @@ export class ApiError extends Error {
     }
 
     /**
+     * Seconds to wait before trying again, for a 429.
+     */
+    get retryAfter(): number | null {
+        return this.status === 429 && typeof this.problem?.retryAfter === "number" ? this.problem.retryAfter : null
+    }
+
+    /**
      * True for the 403 the backend sends when the user's account is disabled.
      */
     get isAccountDisabled(): boolean {
