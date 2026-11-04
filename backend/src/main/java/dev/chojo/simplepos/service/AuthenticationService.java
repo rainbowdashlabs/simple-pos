@@ -13,8 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -78,13 +76,4 @@ public class AuthenticationService {
         return tokenRepository.deleteByUserAndToken(user, token) == 1;
     }
 
-    @Transactional
-    public boolean invalidateRefreshToken(Token token) {
-        tokenRepository.delete(token);
-        return true;
-    }
-
-    public Optional<Token> retrieveToken(User user, String token) {
-        return tokenRepository.findByUserAndToken(user, token);
-    }
 }

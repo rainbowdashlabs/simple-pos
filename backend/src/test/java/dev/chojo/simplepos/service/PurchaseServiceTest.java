@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
@@ -10,6 +11,7 @@ import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
+import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -192,6 +194,38 @@ class PurchaseServiceTest {
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
+    }
+
+    @Test
+    void shouldRejectPurchaseWithUnknownProductWithoutBookingAnything() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        Product unknown = new Product(999999, product.getCategory(), "Unknown", 1.0, true, product.getRecipe());
+
+        entityManager.flush();
+        assertThrows(NotFoundException.class, () -> purchaseService.purchase(account, List.of(
+                new CartPositionDto(product, 1),
+                new CartPositionDto(unknown, 1))));
+
+        entityManager.clear();
+        assertTrue(purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 10)).isEmpty());
+        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+    }
+
+    @Test
+    void shouldTakeAvailableStockWhenStockIsInsufficient() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 2, 0));
+
+        entityManager.flush();
+        purchaseService.purchase(account, List.of(new CartPositionDto(product, 5)));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertEquals(0, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
+                account.getId(), PageRequest.of(0, 10));
+        assertEquals(1, purchases.size());
+        assertEquals(5, purchases.get(0).getAmount());
+        assertEquals(2, purchases.get(0).getParts().size());
     }
 
     @Test

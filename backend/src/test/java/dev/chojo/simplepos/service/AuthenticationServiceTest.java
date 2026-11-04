@@ -1,6 +1,8 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.ConflictException;
+import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.UserDto;
@@ -79,46 +81,37 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void shouldSaveAndRetrieveRefreshToken() {
+    void shouldSaveRefreshToken() {
         User user = authenticationService.signup(new UserDto("tokenuser", "pass"));
-        user.setEnabled(true);
-        userRepository.save(user);
 
-        Token token = new Token("refresh_token_123", user);
-        authenticationService.saveRefreshToken(token);
+        authenticationService.saveRefreshToken(new Token("refresh_token_123", user));
 
-        Optional<Token> found = authenticationService.retrieveToken(user, "refresh_token_123");
+        Optional<Token> found = tokenRepository.findByUserAndToken(user, "refresh_token_123");
         assertTrue(found.isPresent());
-        assertEquals("refresh_token_123", found.get().getToken());
     }
 
     @Test
-    void shouldNotRetrieveNonExistentToken() {
-        User user = authenticationService.signup(new UserDto("notokenuser", "pass"));
-        user.setEnabled(true);
-        userRepository.save(user);
-
-        Optional<Token> found = authenticationService.retrieveToken(user, "nonexistent");
-        assertTrue(found.isEmpty());
-    }
-
-    @Test
-    void shouldInvalidateRefreshTokenByEntity() {
+    void shouldInvalidateRefreshTokenOnlyOnce() {
         User user = authenticationService.signup(new UserDto("invalidateuser", "pass"));
-        user.setEnabled(true);
-        userRepository.save(user);
+        authenticationService.saveRefreshToken(new Token("to_invalidate", user));
 
-        Token token = new Token("to_invalidate", user);
-        authenticationService.saveRefreshToken(token);
+        assertTrue(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
+        assertFalse(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
+        assertTrue(tokenRepository.findByUserAndToken(user, "to_invalidate").isEmpty());
+    }
 
-        Optional<Token> saved = authenticationService.retrieveToken(user, "to_invalidate");
-        assertTrue(saved.isPresent());
+    @Test
+    void shouldNotInvalidateUnknownRefreshToken() {
+        User user = authenticationService.signup(new UserDto("notokenuser", "pass"));
 
-        boolean result = authenticationService.invalidateRefreshToken(saved.get());
-        assertTrue(result);
+        assertFalse(authenticationService.invalidateRefreshToken(user, "nonexistent"));
+    }
 
-        Optional<Token> afterDelete = authenticationService.retrieveToken(user, "to_invalidate");
-        assertTrue(afterDelete.isEmpty());
+    @Test
+    void shouldRejectDuplicateSignup() {
+        authenticationService.signup(new UserDto("duplicate", "pass"));
+
+        assertThrows(ConflictException.class, () -> authenticationService.signup(new UserDto("duplicate", "other")));
     }
 
     @Test
@@ -131,8 +124,6 @@ class AuthenticationServiceTest {
 
     @Test
     void shouldThrowWhenFindingNonExistentUser() {
-        assertThrows(Exception.class, () -> {
-            authenticationService.findByUsername("ghost");
-        });
+        assertThrows(UnauthorizedException.class, () -> authenticationService.findByUsername("ghost"));
     }
 }

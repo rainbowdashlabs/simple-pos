@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
@@ -163,9 +164,22 @@ class StorageServiceTest {
     }
 
     @Test
-    void shouldSkipCorrectionForNonExistentIngredient() {
-        storageService.processInventoryCorrection(
-                List.of(new InventoryCorrection(999999, 10)));
+    void shouldRejectCorrectionForNonExistentIngredient() {
+        assertThrows(NotFoundException.class, () -> storageService.processInventoryCorrection(
+                List.of(new InventoryCorrection(999999, 10))));
+    }
+
+    @Test
+    void shouldNotApplyAnyCorrectionWhenOneIngredientIsUnknown() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 1.0, 10, 0));
+        entityManager.flush();
+
+        assertThrows(NotFoundException.class, () -> storageService.processInventoryCorrection(List.of(
+                new InventoryCorrection(ingredient.getId(), 7),
+                new InventoryCorrection(999999, 1))));
+
+        entityManager.clear();
+        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
     }
 
     @Test
