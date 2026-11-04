@@ -16,12 +16,18 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -94,6 +100,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         problem.setTitle(e.getClass().getSimpleName());
         return handleExceptionInternal(e, problem, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
+    }
+
+    /**
+     * Answers a request body that failed validation with 400. The detail lists each rejected field with its reason,
+     * and {@code errors} carries the same as {@code field}/{@code message} pairs.
+     */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers,
+                                                                  HttpStatusCode status, WebRequest request) {
+        List<Map<String, String>> errors = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> Map.of("field", error.getField(),
+                        "message", Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid")))
+                .toList();
+        String detail = errors.isEmpty()
+                ? "The request is invalid."
+                : errors.stream().map(error -> error.get("field") + ": " + error.get("message")).collect(Collectors.joining("; "));
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        problem.setProperty("errors", errors);
+        return handleExceptionInternal(e, problem, headers, HttpStatus.BAD_REQUEST, request);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.dto.IngredientRequest;
 import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.service.IngredientService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,8 +33,8 @@ public class IngredientController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Ingredient> create(@RequestBody Ingredient ingredient) {
-        return ResponseEntity.accepted().body(ingredientRepository.save(ingredient));
+    ResponseEntity<Ingredient> create(@Valid @RequestBody IngredientRequest ingredient) {
+        return ResponseEntity.accepted().body(ingredientService.create(ingredient));
     }
 
     @GetMapping
@@ -41,10 +43,10 @@ public class IngredientController {
         return ResponseEntity.ok(Listing.map(ingredientRepository.findAll(), Ingredient::getCategory));
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Ingredient> update(@RequestBody Ingredient ingredient) {
-        return ResponseEntity.accepted().body(ingredientRepository.save(ingredient));
+    ResponseEntity<Ingredient> update(@PathVariable int id, @Valid @RequestBody IngredientRequest ingredient) {
+        return ResponseEntity.accepted().body(ingredientService.update(id, ingredient));
     }
 
     @DeleteMapping("/{id}")

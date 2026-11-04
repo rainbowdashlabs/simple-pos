@@ -2,11 +2,15 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.controller.exceptions.BadRequestException;
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.dto.IngredientRequest;
+import dev.chojo.simplepos.entity.dto.ProductRequest;
+import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;
@@ -98,22 +102,21 @@ class ProductServiceTest {
         Recipe recipe = new Recipe(null, null, List.of(recipeEntry));
         Product product = productService.create(new Product(null, category, "OldName", 1.0, true, recipe));
 
-        product.setName("NewName");
-        product.setPrice(2.0);
-        Product updated = productService.update(product);
+        Product updated = productService.update(product.getId(), request("NewName", 2.0, entry(1)));
 
         assertEquals("NewName", updated.getName());
         assertEquals(2.0, updated.getPrice(), 0.001);
     }
 
     @Test
-    void updateProductDeactivate() {
+    void updateKeepsTheActiveState() {
         RecipeEntry recipeEntry = new RecipeEntry(null, ingredient, 1);
         Recipe recipe = new Recipe(null, null, List.of(recipeEntry));
-        Product product = productService.create(new Product(null, category, "Active", 1.0, true, recipe));
-
+        Product product = productService.create(new Product(null, category, "Inactive", 1.0, true, recipe));
         product.setActive(false);
-        Product updated = productService.update(product);
+        productRepository.save(product);
+
+        Product updated = productService.update(product.getId(), request("Inactive", 1.5, entry(1)));
 
         assertFalse(updated.isActive());
     }
@@ -197,7 +200,7 @@ class ProductServiceTest {
     }
 
     @Test
-    void updateWritesToTheStoredRecipeWhateverIdIsSent() {
+    void updateReplacesTheEntriesOfTheStoredRecipe() {
         Product other = productService.create(new Product(null, category, "Bystander", 1.0, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 3)))));
         Product product = productService.create(new Product(null, category, "Target", 2.0, true,
@@ -207,8 +210,7 @@ class ProductServiceTest {
         entityManager.flush();
         entityManager.clear();
 
-        productService.update(new Product(product.getId(), category, "Target", 2.0, true,
-                new Recipe(otherRecipeId, null, List.of(new RecipeEntry(null, ingredient, 2)))));
+        productService.update(product.getId(), request("Target", 2.0, entry(2)));
         entityManager.flush();
         entityManager.clear();
 
@@ -258,13 +260,73 @@ class ProductServiceTest {
                 .executeUpdate();
         assertNull(productRepository.findById(product.getId()).orElseThrow().getRecipe());
 
-        productService.update(new Product(product.getId(), category, "NoRecipe", 2.0, true,
-                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        productService.update(product.getId(), request("NoRecipe", 2.0, entry(1)));
         entityManager.flush();
         entityManager.clear();
 
         Product loaded = productRepository.findById(product.getId()).orElseThrow();
         assertNotNull(loaded.getRecipe());
         assertEquals(1, loaded.getRecipe().getEntries().size());
+    }
+
+    @Test
+    void updateLeavesNoOrphanedRecipeEntries() {
+        Product product = productService.create(new Product(null, category, "Orphans", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        entityManager.flush();
+        entityManager.clear();
+
+        productService.update(product.getId(), request("Orphans", 2.0, entry(4)));
+        entityManager.flush();
+
+        Number orphans = (Number) entityManager.createNativeQuery("SELECT count(*) FROM recipe_entry WHERE recipe_id IS NULL")
+                .getSingleResult();
+        assertEquals(0, orphans.intValue());
+    }
+
+    @Test
+    void updateDoesNotReviveADeletedProduct() {
+        Product product = productService.create(new Product(null, category, "Gone", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+        product.setDeleted(true);
+        productRepository.save(product);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThrows(NotFoundException.class, () -> productService.update(product.getId(), request("Gone", 2.0, entry(1))));
+        assertTrue(productRepository.findById(product.getId()).orElseThrow().isDeleted());
+    }
+
+    @Test
+    void createFromRequestWithNewIngredient() {
+        Product created = productService.create(new ProductRequest("Lemonade", category.getId(), 2.0,
+                List.of(new RecipeEntryRequest(null, new IngredientRequest("Lemon", category.getId(), 0.4, 6, 0.0, 0.0, 2), 1))));
+
+        assertTrue(created.isActive());
+        assertEquals("Lemon", created.getRecipe().getEntries().get(0).getIngredient().getName());
+        assertNotNull(created.getRecipe().getEntries().get(0).getIngredient().getId());
+    }
+
+    @Test
+    void recipeEntryNeedsExactlyOneIngredient() {
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Both", category.getId(), 1.0,
+                List.of(new RecipeEntryRequest(ingredient.getId(), new IngredientRequest("X", category.getId(), 0.1, 0, 0.0, 0.0, 0), 1)))));
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Neither", category.getId(), 1.0,
+                List.of(new RecipeEntryRequest(null, null, 1)))));
+    }
+
+    @Test
+    void unknownCategoryOrIngredientIsABadRequest() {
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("NoCat", 999_999, 1.0, List.of(entry(1)))));
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("NoIngr", category.getId(), 1.0,
+                List.of(new RecipeEntryRequest(999_999, null, 1)))));
+    }
+
+    private ProductRequest request(String name, double price, RecipeEntryRequest... entries) {
+        return new ProductRequest(name, category.getId(), price, List.of(entries));
+    }
+
+    private RecipeEntryRequest entry(int amount) {
+        return new RecipeEntryRequest(ingredient.getId(), null, amount);
     }
 }

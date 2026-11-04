@@ -2,9 +2,12 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Category;
+import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.dto.ProductRequest;
+import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -77,30 +80,62 @@ public class ProductService {
     }
 
     /**
-     * Saves the changes to an existing product and its recipe, in one transaction. The changes always go to the
-     * recipe stored for the product, whatever recipe id the request carries; a product without a stored recipe gets
-     * one.
+     * Creates a product from a request, with a recipe of existing ingredients and of new ones created with it.
      *
-     * @throws BadRequestException if the id or the recipe is missing
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the product does not exist
+     * @throws BadRequestException if the category or an ingredient does not exist, or a recipe entry names neither or
+     *                             both an existing and a new ingredient
      */
     @Transactional
-    public Product update(Product product) {
-        Product stored = productRepository.require(product.getId());
-        if (product.getRecipe() == null || product.getRecipe().getEntries() == null) {
-            throw new BadRequestException("Recipe is missing");
-        }
-        Recipe target = stored.getRecipe() != null
+    public Product create(ProductRequest request) {
+        Category category = categoryRepository.requireReferenced(request.categoryId());
+        List<RecipeEntry> entries = request.recipe().stream().map(this::toEntry).toList();
+        return create(new Product(null, category, request.name(), request.price(), true,
+                new Recipe(null, null, new ArrayList<>(entries))));
+    }
+
+    /**
+     * Changes an existing product and replaces its recipe, in one transaction. Only the fields of the request are
+     * taken; whether the product is deleted or active never changes here, and the changes always go to the recipe
+     * stored for the product. A product without a stored recipe gets one.
+     *
+     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the product does not exist or is deleted
+     * @throws BadRequestException if the category or an ingredient does not exist, or a recipe entry names neither or
+     *                             both an existing and a new ingredient
+     */
+    @Transactional
+    public Product update(int id, ProductRequest request) {
+        Product stored = productRepository.requireNotDeleted(id);
+        stored.setName(request.name());
+        stored.setCategory(categoryRepository.requireReferenced(request.categoryId()));
+        stored.setPrice(request.price());
+
+        Recipe recipe = stored.getRecipe() != null
                 ? stored.getRecipe()
                 : recipeRepository.save(new Recipe(null, stored, new ArrayList<>()));
-        product.getRecipe().setId(target.getId());
-        product.getRecipe().setProduct(product);
-        for (RecipeEntry entry : product.getRecipe().getEntries()) {
-            entry.setRecipe(product.getRecipe());
+        stored.setRecipe(recipe);
+        List<RecipeEntry> replaced = new ArrayList<>(recipe.getEntries());
+        List<RecipeEntry> entries = new ArrayList<>();
+        for (RecipeEntryRequest entryRequest : request.recipe()) {
+            RecipeEntry entry = toEntry(entryRequest);
+            if (entry.getIngredient().getId() == null) {
+                entry.setIngredient(ingredientRepository.save(entry.getIngredient()));
+            }
+            entry.setRecipe(recipe);
+            entries.add(entry);
         }
-        List<RecipeEntry> entries = new ArrayList<>(product.getRecipe().getEntries().stream().map(recipeEntryRepository::save).toList());
-        product.getRecipe().setEntries(entries);
-        productRepository.save(product);
-        return productRepository.require(product.getId());
+        recipe.getEntries().clear();
+        recipeEntryRepository.deleteAll(replaced);
+        recipe.getEntries().addAll(recipeEntryRepository.saveAll(entries));
+        return productRepository.save(stored);
+    }
+
+    private RecipeEntry toEntry(RecipeEntryRequest request) {
+        if ((request.ingredientId() == null) == (request.ingredient() == null)) {
+            throw new BadRequestException("Each recipe entry needs either an existing ingredient or a new one");
+        }
+        Ingredient ingredient = request.ingredientId() != null
+                ? ingredientRepository.requireReferenced(request.ingredientId())
+                : request.ingredient().toIngredient(categoryRepository.requireReferenced(request.ingredient().categoryId()));
+        return new RecipeEntry(null, ingredient, request.amount());
     }
 }

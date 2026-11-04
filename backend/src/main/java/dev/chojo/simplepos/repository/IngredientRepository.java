@@ -57,6 +57,16 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
     @Query("SELECT Ingredient ")
     List<Ingredient> findBy(double price);
 
+    /**
+     * Finds an ingredient that a request refers to by id. A missing one is the request's fault, so it is reported as
+     * a bad request rather than as a missing resource.
+     *
+     * @throws BadRequestException if the id is missing or no ingredient with this id exists
+     */
+    default Ingredient requireReferenced(Integer id) {
+        return findById(requireId(id)).orElseThrow(() -> new BadRequestException("Ingredient %d does not exist".formatted(id)));
+    }
+
     private Integer requireId(Integer id) {
         if (id == null) throw new BadRequestException("Ingredient id is missing");
         return id;

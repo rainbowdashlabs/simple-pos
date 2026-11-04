@@ -1,11 +1,13 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.ProductSalesStatDto;
 import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +78,7 @@ public class ProductController {
     }
 
     @PostMapping
-    ResponseEntity<Product> create(@RequestBody Product product) {
+    ResponseEntity<Product> create(@Valid @RequestBody ProductRequest product) {
         return ResponseEntity.accepted().body(productService.create(product));
     }
 
@@ -96,8 +98,8 @@ public class ProductController {
         return ResponseEntity.ok(productRepository.save(product));
     }
 
-    @PutMapping
-    ResponseEntity<Product> update(@RequestBody Product product) {
-        return ResponseEntity.accepted().body(productService.update(product));
+    @PutMapping("/{id}")
+    ResponseEntity<Product> update(@PathVariable int id, @Valid @RequestBody ProductRequest product) {
+        return ResponseEntity.accepted().body(productService.update(id, product));
     }
 }

@@ -15,9 +15,33 @@ export interface Ingredient {
 }
 
 
+export interface IngredientRequest {
+    name: string,
+    categoryId: number,
+    price: number,
+    containerSize: number,
+    pledge: number,
+    pledgeContainer: number,
+    minStock: number
+}
+
+/**
+ * The fields of an ingredient the backend accepts in a request.
+ */
+export function ingredientRequest(ingredient: Ingredient): IngredientRequest {
+    return {
+        name: ingredient.name,
+        categoryId: ingredient.category.id,
+        price: ingredient.price,
+        containerSize: ingredient.containerSize,
+        pledge: ingredient.pledge,
+        pledgeContainer: ingredient.pledgeContainer,
+        minStock: ingredient.minStock
+    }
+}
+
 export function createIngredient(ingredient: Ingredient): Promise<Ingredient> {
-    return postJson("api/ingredient", ingredient)
-    return store.ingredientCache.cachePromise(postJson("api/ingredient", ingredient))
+    return postJson("api/ingredient", ingredientRequest(ingredient))
 }
 
 export function ingredients(): Promise<Listing<Ingredient>> {
@@ -26,8 +50,7 @@ export function ingredients(): Promise<Listing<Ingredient>> {
 }
 
 export function updateIngredient(data: Ingredient): Promise<Ingredient> {
-    return patchJson("api/ingredient", data)
-    return store.ingredientCache.cachePromise(patchJson("api/ingredient", data))
+    return patchJson("api/ingredient/" + data.id, ingredientRequest(data))
 }
 
 export function ingredient(id: number): Promise<Ingredient> {

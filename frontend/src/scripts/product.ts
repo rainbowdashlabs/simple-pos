@@ -1,5 +1,5 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
-import {Ingredient} from "./Ingredient.ts";
+import {Ingredient, ingredientRequest} from "./Ingredient.ts";
 import {deleteJson, getJson, patchJson, postJson, putJson} from "./http.ts";
 import {store} from "./store.ts";
 
@@ -67,13 +67,26 @@ export function product(id: number): Promise<Product> {
  * @param product
  */
 export function createProduct(product: Product): Promise<Product> {
-    return postJson("api/product", product)
-    return store.productCache.cachePromise(postJson("api/product", product))
+    return postJson("api/product", productRequest(product))
 }
 
 export function updateProduct(product: Product): Promise<Product> {
-    return putJson("api/product", product)
-    return store.productCache.cachePromise(putJson("api/product", product))
+    return putJson("api/product/" + product.id, productRequest(product))
+}
+
+/**
+ * The fields of a product the backend accepts in a request. Recipe entries refer to existing ingredients by id; an
+ * ingredient without id is sent whole, to be created with the product.
+ */
+function productRequest(product: Product) {
+    return {
+        name: product.name,
+        categoryId: product.category.id,
+        price: product.price,
+        recipe: (product.recipe?.entries ?? []).map(entry => entry.ingredient.id != null
+            ? {ingredientId: entry.ingredient.id, amount: entry.amount}
+            : {ingredient: ingredientRequest(entry.ingredient), amount: entry.amount})
+    }
 }
 
 export function products(): Promise<Listing<Product>> {

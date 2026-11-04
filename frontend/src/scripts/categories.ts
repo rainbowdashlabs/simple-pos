@@ -21,7 +21,7 @@ export function category(id: number): Promise<Category> {
 
 export function updateCategory(category: Category): Promise<Category> {
     store.productCache.invalidate()
-    return patchJson("api/category", category)
+    return patchJson("api/category/" + category.id, {name: category.name})
 }
 
 export function categories(): Promise<Category[]> {
@@ -29,7 +29,7 @@ export function categories(): Promise<Category[]> {
 }
 
 export function createCategory(name: string): Promise<Category> {
-    return postJson("api/category", {name: name, id: null})
+    return postJson("api/category", {name: name})
 }
 
 export function deleteCategory(id: number): Promise<Category> {
