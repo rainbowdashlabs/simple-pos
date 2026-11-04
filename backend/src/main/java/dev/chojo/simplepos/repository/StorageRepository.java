@@ -34,17 +34,17 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
     @Query(value = "SELECT id FROM storage WHERE amount > sold AND ingredient_id = ?1 ORDER BY purchased LIMIT 1", nativeQuery = true)
     Optional<Integer> findNextIngredient(int ingredient);
 
-    @Query(value = """
-            SELECT
-                re.ingredient_id as ingredient_id,
-                date_trunc('day', p.purchased) as day,
-                cast(sum(p.amount * re.amount) as integer) as consumed
-            FROM purchase p
-            JOIN recipe r ON r.product_id = p.product_id
-            JOIN recipe_entry re ON re.recipe_id = r.id
-            WHERE p.purchased > ?1
-            GROUP BY re.ingredient_id, date_trunc('day', p.purchased)
-            ORDER BY re.ingredient_id, day
-            """, nativeQuery = true)
-    List<Tuple> dailyConsumptionByIngredient(Instant after);
+    /**
+     * Per ingredient used for a sale between {@code after} and {@code until}, how many units were taken from storage
+     * in that time, and when a unit of it was first taken for a sale at all.
+     */
+    @Query("""
+            SELECT pp.storage.ingredient.id AS ingredient_id,
+                   count(pp) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) AS taken,
+                   min(pp.purchase.purchased) AS first_taken
+            FROM PurchasePart pp
+            GROUP BY pp.storage.ingredient.id
+            HAVING count(pp) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) > 0
+            """)
+    List<Tuple> usageByIngredient(Instant after, Instant until);
 }
