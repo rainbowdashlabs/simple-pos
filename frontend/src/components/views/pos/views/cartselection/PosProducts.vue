@@ -36,6 +36,11 @@ export default defineComponent({
       }
     }
   },
+  methods: {
+    skipToCart() {
+      document.getElementById('pos-cart')?.focus()
+    }
+  },
   mounted() {
     const thirtyDaysAgo = new Date()
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -53,6 +58,7 @@ export default defineComponent({
 
 <template>
   <div class="grid grid-cols-1 gap-5 content-center items-center">
+    <button type="button" class="sr-only focus:not-sr-only" @click="skipToCart">{{ $t('skip_to_cart') }}</button>
     <PosCategory v-if="topSellerGroup" :group="topSellerGroup" :initially-active="true"/>
     <PosCategory v-for="item in productList.categories" :key="item.category.id" :group="item"/>
   </div>

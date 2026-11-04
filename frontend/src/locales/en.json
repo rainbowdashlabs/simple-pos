@@ -184,5 +184,9 @@
     "no_access": "No access",
     "theme": "Theme",
     "not_found": "Not found"
-  }
+  },
+  "cart_added": "{name} added, cart {total}",
+  "cart_removed": "1 × {name} removed, cart {total}",
+  "cart_cleared": "Cart cleared",
+  "skip_to_cart": "Skip to cart"
 }

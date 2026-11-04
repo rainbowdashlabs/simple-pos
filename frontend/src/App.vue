@@ -2,6 +2,7 @@
 import app_header from './components/Header.vue'
 import app_footer from './components/Footer.vue'
 import Notifications from './components/Notifications.vue'
+import LiveRegion from './components/LiveRegion.vue'
 </script>
 
 <script lang="ts">
@@ -110,6 +111,7 @@ export default {
     </div>
     <app_footer/>
     <Notifications/>
+    <LiveRegion/>
   </div>
 </template>
 
