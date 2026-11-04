@@ -18,8 +18,8 @@ export default defineComponent({
   components: {Icon, FormattedText, NumberText, ColorContainer, SimpleInputField, CenterText},
   data() {
     return {
-      containerCount: '' as number | string,
-      pieceCount: '' as number | string
+      containerCount: null as number | null,
+      pieceCount: null as number | null
     }
   },
   props: {
@@ -37,13 +37,13 @@ export default defineComponent({
       return SizeGroup
     },
     counted(): boolean {
-      return this.containerCount !== '' || this.pieceCount !== ''
+      return this.containerCount !== null || this.pieceCount !== null
     },
     diff(): number {
       return this.count - this.listing.stock
     },
     count(): number {
-      return asNumber(this.containerCount) * this.listing.ingredient.containerSize + asNumber(this.pieceCount)
+      return (this.containerCount ?? 0) * this.listing.ingredient.containerSize + (this.pieceCount ?? 0)
     },
     bgColor(): string {
       if (!this.counted || this.diff == 0) return "secondary"
@@ -52,11 +52,11 @@ export default defineComponent({
     }
   },
   methods: {
-    updatePieces(value: number | string) {
+    updatePieces(value: number | null) {
       this.pieceCount = value
       this.updateAmount()
     },
-    updateContainer(value: number | string) {
+    updateContainer(value: number | null) {
       this.containerCount = value
       this.updateAmount()
     },
@@ -72,21 +72,13 @@ export default defineComponent({
     if (cs > 0 && savedTotal > 0) {
       const containers = Math.floor(savedTotal / cs)
       const pieces = savedTotal % cs
-      this.containerCount = containers > 0 ? containers : ''
-      this.pieceCount = pieces > 0 ? pieces : ''
+      this.containerCount = containers > 0 ? containers : null
+      this.pieceCount = pieces > 0 ? pieces : null
     } else {
       this.pieceCount = savedTotal
     }
   }
 })
-
-/**
- * The number an input field holds, treating an empty or unfinished entry such as "-" as zero.
- */
-function asNumber(value: number | string): number {
-  const number = Number(value)
-  return Number.isFinite(number) ? number : 0
-}
 </script>
 
 <template>
@@ -104,11 +96,11 @@ function asNumber(value: number | string): number {
     </div>
     <div class="flex w-1/6 items-center">
       <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-bottle-water"/>
-      <SimpleInputField class="w-5/6" @update:modelValue="updatePieces" type="number" :model-value="pieceCount" placeholder="0"/>
+      <SimpleInputField class="w-5/6" @update:modelValue="updatePieces" type="number" nullable :model-value="pieceCount" placeholder="0"/>
     </div>
     <div :class="{invisible: listing.ingredient.containerSize <= 0}" class="flex w-1/6 items-center">
       <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-box"/>
-      <SimpleInputField class="w-5/6" @update:modelValue="updateContainer" type="number" :model-value="containerCount" placeholder="0"/>
+      <SimpleInputField class="w-5/6" @update:modelValue="updateContainer" type="number" nullable :model-value="containerCount" placeholder="0"/>
     </div>
   </ColorContainer>
 
