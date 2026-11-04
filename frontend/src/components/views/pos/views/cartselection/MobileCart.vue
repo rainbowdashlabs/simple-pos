@@ -40,7 +40,7 @@ export default defineComponent({
   <div class="sticky bottom-0 w-full bg-secondary dark:bg-secondary-d rounded-t-2xl border-t-2 border-accent-d dark:border-accent">
     <div class="px-3 py-2">
       <div class="flex items-center justify-between gap-3 pb-2">
-        <FormattedText class="content-center" :size="SizeGroup.lg" value="Cart"/>
+        <FormattedText class="content-center" :size="SizeGroup.lg" value="cart" type="locale"/>
         <FormattedText class="content-center font-bold" :size="SizeGroup.lg" :value="content.total" type="currency"/>
         <div class="flex gap-2 shrink-0">
           <TwoStepDeleteButton v-if="!empty" :hint="$t('button.clear_cart')" :confirm-hint="$t('button.clear_cart_confirm')" @click="clearCart"/>

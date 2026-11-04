@@ -87,7 +87,7 @@ export default defineComponent({
     </ColorContainer>
 
     <GridWrapper bg="none" class="col-span-full" padding="0">
-      <GridWrapper v-if="$i18n.locale === 'de'" cols="2" bg="none" padding="0">
+      <GridWrapper cols="2" bg="none" padding="0">
         <GridWrapper bg="none" cols="2" padding="0">
           <BalanceAdd @add-value="depositValue" class="col-span-2" value="50" icon="fa-money-bill-wave"/>
           <BalanceAdd @add-value="depositValue" class="col-span-2" value="20" icon="fa-money-bill-wave"/>

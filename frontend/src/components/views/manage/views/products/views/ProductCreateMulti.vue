@@ -129,7 +129,7 @@ export default defineComponent({
     </ColorContainer>
 
     <ColorContainer>
-      <FormattedText value="Raw Price"/>
+      <FormattedText value="raw_price" type="locale"/>
       <FormattedText :value="rawPrice" type="currency"/>
     </ColorContainer>
 

@@ -7,7 +7,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <h1>404 Not found</h1>
+  <h1>404 · {{ $t('not_found') }}</h1>
 </template>
 
 <style scoped>

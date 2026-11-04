@@ -14,7 +14,7 @@ export default defineComponent({
 </script>
 
 <template>
-<h1>Logged out</h1>
+<h1>{{ $t('logged_out') }}</h1>
 </template>
 
 <style scoped>

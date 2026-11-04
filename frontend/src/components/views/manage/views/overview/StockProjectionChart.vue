@@ -100,7 +100,7 @@ export default defineComponent({
     <v-chart v-if="projections.filter(p => p.daysRemaining !== null).length > 0"
              :option="chartOption" autoresize style="height: 350px; width: 100%"/>
     <div v-else class="h-[200px] flex items-center justify-center opacity-50">
-      <FormattedText value="No data"/>
+      <FormattedText value="no_data" type="locale"/>
     </div>
   </ColorContainer>
 </template>

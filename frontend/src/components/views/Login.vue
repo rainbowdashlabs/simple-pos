@@ -63,13 +63,13 @@ export default defineComponent({
       <form @submit.prevent="submit" class="w-full max-w-sm">
         <div class="grid grid-cols-1 gap-4">
           <div>
-            <FormLabel label="Username" html-for="username"/>
-            <SimpleInputField type="text" v-model="username" placeholder="username"
+            <FormLabel :label="$t('username')" html-for="username"/>
+            <SimpleInputField type="text" v-model="username" :placeholder="$t('username')"
                               :aria-invalid="error !== null" :aria-describedby="error ? 'login-error' : undefined"/>
           </div>
           <div>
-            <FormLabel label="Password" html-for="password"/>
-            <SimpleInputField type="password" v-model="password" placeholder="password"
+            <FormLabel :label="$t('password')" html-for="password"/>
+            <SimpleInputField type="password" v-model="password" :placeholder="$t('password')"
                               :aria-invalid="error !== null" :aria-describedby="error ? 'login-error' : undefined"/>
           </div>
           <p v-if="error" id="login-error" role="alert" class="rounded-lg p-3 bg-warn dark:bg-warn-d text-dark dark:text-bright">{{ error }}</p>

@@ -28,7 +28,7 @@ export default defineComponent({
 
 <template>
   <ColorContainer>
-    <FormattedText value="Low Stock" :size="SizeGroup.xl"/>
+    <FormattedText value="low_stock" type="locale" :size="SizeGroup.xl"/>
     <LowStockEntry v-for="item in items" :data="item" />
   </ColorContainer>
 </template>
