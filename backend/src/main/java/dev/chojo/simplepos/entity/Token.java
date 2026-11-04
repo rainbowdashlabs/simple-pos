@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import org.springframework.context.annotation.Lazy;
 
 @Entity
 public class Token {
@@ -12,8 +12,7 @@ public class Token {
     @GeneratedValue
     private Integer id;
 
-    @ManyToOne
-    @Lazy
+    @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     private String token;

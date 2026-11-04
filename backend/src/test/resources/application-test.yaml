@@ -13,3 +13,5 @@ security:
     secret-key: test-only-secret-key-never-use-in-production
     expiration-time: 3600000
     refresh-expiration-time: 2592000000
+    cleanup:
+      initial-delay: PT10000H
