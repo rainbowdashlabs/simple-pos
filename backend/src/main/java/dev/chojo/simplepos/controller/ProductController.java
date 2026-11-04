@@ -1,11 +1,15 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.validation.PageNumber;
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.ProductSalesStatDto;
 import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +52,8 @@ public class ProductController {
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<List<ProductSalesStatDto>> getSalesStat(@PathVariable int id,
                                                            @RequestParam(required = false) Instant after,
-                                                           @RequestParam(defaultValue = "100") int limit,
-                                                           @RequestParam(defaultValue = "0") int page) {
+                                                           @RequestParam(defaultValue = "100") @PageSize int limit,
+                                                           @RequestParam(defaultValue = "0") @PageNumber int page) {
         Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
         List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, PageRequest.of(page, limit)).stream()
                 .map(ProductSalesStatDto::new)
@@ -76,7 +80,7 @@ public class ProductController {
     }
 
     @PostMapping
-    ResponseEntity<Product> create(@RequestBody Product product) {
+    ResponseEntity<Product> create(@Valid @RequestBody ProductRequest product) {
         return ResponseEntity.accepted().body(productService.create(product));
     }
 
@@ -96,8 +100,8 @@ public class ProductController {
         return ResponseEntity.ok(productRepository.save(product));
     }
 
-    @PutMapping
-    ResponseEntity<Product> update(@RequestBody Product product) {
-        return ResponseEntity.accepted().body(productService.update(product));
+    @PutMapping("/{id}")
+    ResponseEntity<Product> update(@PathVariable int id, @Valid @RequestBody ProductRequest product) {
+        return ResponseEntity.accepted().body(productService.update(id, product));
     }
 }

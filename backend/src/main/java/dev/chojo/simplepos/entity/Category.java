@@ -9,6 +9,16 @@ import java.util.Comparator;
 
 @Entity
 public class Category implements Comparable<Category>, Comparator<Category> {
+    /**
+     * The id of {@link #UNCATEGORISED}. Stored categories never get it, because their ids start at 1.
+     */
+    public static final int UNCATEGORISED_ID = 0;
+    /**
+     * Stands in for a missing category in listings. It is shared by every listing, so it must never be changed or
+     * saved.
+     */
+    public static final Category UNCATEGORISED = new Category(UNCATEGORISED_ID, "");
+
     @Id
     @GeneratedValue
     private Integer id;

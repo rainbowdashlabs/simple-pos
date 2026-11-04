@@ -115,17 +115,16 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query(value = """
             SELECT
-                p.product_id as product_id,
-                pr.name as product_name,
-                pr.category_id as category_id,
+                coalesce(c.id, 0) as category_id,
                 c.name as category_name,
                 cast(coalesce(sum(p.amount), 0) as integer) as sales,
                 coalesce(sum(p.price * p.amount), 0) as revenue
             FROM purchase p
             JOIN product pr ON p.product_id = pr.id
-            JOIN category c ON pr.category_id = c.id
+            LEFT JOIN category c ON pr.category_id = c.id
             WHERE p.purchased > ?1
-            GROUP BY p.product_id, pr.name, pr.category_id, c.name
+            GROUP BY c.id, c.name
+            ORDER BY revenue DESC
             """, nativeQuery = true)
     List<Tuple> getSalesByCategory(Instant after);
 

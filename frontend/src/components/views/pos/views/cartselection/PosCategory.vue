@@ -1,4 +1,5 @@
 <script lang="ts">
+import {Category, categoryLabel} from "@/scripts/categories.ts";
 import {defineComponent, PropType} from 'vue'
 import {ProductGroup} from "@/scripts/product.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -8,6 +9,11 @@ import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import Icon from "@/components/styles/Icon.vue";
 
 export default defineComponent({
+  methods: {
+    categoryName(category: Category | null | undefined): string {
+      return categoryLabel(category, key => this.$t(key))
+    }
+  },
   name: "PosCategory",
   data() {
     return {
@@ -40,7 +46,7 @@ export default defineComponent({
   <div class="flex-col w-full">
     <ColorContainer @click="active = !active" bg="accent"
                     class="flex justify-between items-center px-5 py-2 w-full hover:cursor-pointer gap-5" padding="0">
-      <FormattedText :value="group.category.name"
+      <FormattedText :value="categoryName(group.category)"
                      :size="SizeGroup.xl"/>
       <Icon :icon="active ? 'fa-chevron-up' :'fa-chevron-down'"/>
     </ColorContainer>

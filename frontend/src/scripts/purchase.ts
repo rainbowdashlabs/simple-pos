@@ -54,6 +54,7 @@ export interface DailyStat {
 }
 
 export interface CategoryStat {
+    categoryId: number
     categoryName: string
     sales: number
     revenue: number

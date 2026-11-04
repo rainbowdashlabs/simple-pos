@@ -3,6 +3,7 @@ package dev.chojo.simplepos.configuration;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
@@ -350,10 +351,9 @@ public class DemoDataSeeder implements CommandLineRunner {
         addPurchase(judy, pWhiskey, 1, now.minus(2, ChronoUnit.DAYS));
         addPurchase(judy, pCoffee, 2, now.minus(1, ChronoUnit.DAYS));
 
-        // Cash register entries
-        cashRepository.save(new Cash(demoUser, 200.0, "deposit", "Initial cash register"));
-        cashRepository.save(new Cash(demoUser, -15.50, "purchase", "Cola x 24 + Fanta x 24"));
-        cashRepository.save(new Cash(demoUser, -3.50, "pledge", "Cola case pledge"));
+        cashRepository.save(new Cash(demoUser, 200.0, CashType.DEPOSIT, "Initial cash register"));
+        cashRepository.save(new Cash(demoUser, -15.50, CashType.PURCHASE, "Cola x 24 + Fanta x 24"));
+        cashRepository.save(new Cash(demoUser, -3.50, CashType.PLEDGE, "Cola case pledge"));
 
         log.info("Demo data seeded successfully. Login with demo/demo");
     }

@@ -3,6 +3,7 @@ package dev.chojo.simplepos.service;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.AccountDto;
 import dev.chojo.simplepos.repository.AccountRepository;
@@ -63,7 +64,7 @@ public class AccountService {
         }
         if (balance < 0) {
             String note = "Debt written off, account closed: %s".formatted(account.getName());
-            cashRepository.save(new Cash(closedBy, balance, "balance", note));
+            cashRepository.save(new Cash(closedBy, balance, CashType.BALANCE, note));
         }
 
         account.setName("Deleted Account #" + account.getId());

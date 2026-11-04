@@ -1,7 +1,10 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.entity.Category;
+import dev.chojo.simplepos.entity.dto.CategoryRequest;
 import dev.chojo.simplepos.repository.CategoryRepository;
+import dev.chojo.simplepos.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +24,17 @@ import java.util.List;
 @RequestMapping("/api/category")
 public class CategoryController {
     private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
-    public CategoryController(CategoryRepository categoryRepository) {
+    public CategoryController(CategoryRepository categoryRepository, CategoryService categoryService) {
         this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Category> create(@RequestBody Category category) {
-        return ResponseEntity.accepted().body(categoryRepository.save(category));
+    ResponseEntity<Category> create(@Valid @RequestBody CategoryRequest category) {
+        return ResponseEntity.accepted().body(categoryService.create(category));
     }
 
     @GetMapping
@@ -42,17 +47,16 @@ public class CategoryController {
         return ResponseEntity.ok(categoryRepository.require(id));
     }
 
-    @PatchMapping
+    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Category> update(@RequestBody Category category) {
-        return ResponseEntity.accepted().body(categoryRepository.save(category));
+    ResponseEntity<Category> update(@PathVariable int id, @Valid @RequestBody CategoryRequest category) {
+        return ResponseEntity.accepted().body(categoryService.update(id, category));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Void> delete(@PathVariable int id) {
-        // TODO check that no entity is associated
-        categoryRepository.deleteById(id);
+        categoryService.delete(id);
         return ResponseEntity.accepted().build();
     }
 }

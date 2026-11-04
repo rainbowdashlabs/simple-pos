@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -14,19 +13,18 @@ public class Cash {
     @GeneratedValue
     private int id;
     @ManyToOne
-    //Todo find something to not serialize the full user but a sparse representation
+    // TODO serialise a sparse representation of the user instead of the full user
     private User user;
 
-    //@JsonFormat(shape = JsonFormat.Shape.NUMBER_INT, without = JsonFormat.Feature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS)
     private Instant created = Instant.now();
     private double amount;
-    private String type;
+    private CashType type;
     private String note;
 
     public Cash() {
     }
 
-    public Cash(User user, double amount, String type, String note) {
+    public Cash(User user, double amount, CashType type, String note) {
         this.user = user;
         this.amount = amount;
         this.type = type;
@@ -65,11 +63,11 @@ public class Cash {
         this.amount = amount;
     }
 
-    public String getType() {
+    public CashType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(CashType type) {
         this.type = type;
     }
 

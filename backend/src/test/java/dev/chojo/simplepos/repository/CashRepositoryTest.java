@@ -2,8 +2,10 @@ package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ class CashRepositoryTest {
     @Autowired
     CashRepository cashRepository;
     @Autowired
+    EntityManager entityManager;
+    @Autowired
     UserRepository userRepository;
 
     private User user;
@@ -36,16 +40,16 @@ class CashRepositoryTest {
 
     @Test
     void shouldSaveCashEntry() {
-        Cash cash = cashRepository.save(new Cash(user, 50.0, "deposit", "Initial deposit"));
+        Cash cash = cashRepository.save(new Cash(user, 50.0, CashType.DEPOSIT, "Initial deposit"));
         assertNotNull(cash.getId());
         assertEquals(50.0, cash.getAmount(), 0.001);
     }
 
     @Test
     void shouldFindByOrderCreatedDesc() {
-        cashRepository.save(new Cash(user, 10.0, "deposit", "first"));
-        cashRepository.save(new Cash(user, 20.0, "deposit", "second"));
-        cashRepository.save(new Cash(user, 30.0, "deposit", "third"));
+        cashRepository.save(new Cash(user, 10.0, CashType.DEPOSIT, "first"));
+        cashRepository.save(new Cash(user, 20.0, CashType.DEPOSIT, "second"));
+        cashRepository.save(new Cash(user, 30.0, CashType.DEPOSIT, "third"));
 
         List<Cash> results = cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(10));
         assertEquals(3, results.size());
@@ -55,7 +59,7 @@ class CashRepositoryTest {
     @Test
     void shouldPaginateResults() {
         for (int i = 0; i < 5; i++) {
-            cashRepository.save(new Cash(user, i * 10.0, "deposit", "entry " + i));
+            cashRepository.save(new Cash(user, i * 10.0, CashType.DEPOSIT, "entry " + i));
         }
         List<Cash> page = cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(2).withPage(0));
         assertEquals(2, page.size());
@@ -63,8 +67,8 @@ class CashRepositoryTest {
 
     @Test
     void shouldCalculateTotalAmount() {
-        cashRepository.save(new Cash(user, 100.0, "deposit", ""));
-        cashRepository.save(new Cash(user, -30.0, "purchase", ""));
+        cashRepository.save(new Cash(user, 100.0, CashType.DEPOSIT, ""));
+        cashRepository.save(new Cash(user, -30.0, CashType.PURCHASE, ""));
 
         Double total = cashRepository.totalAmount();
         assertEquals(70.0, total, 0.001);
@@ -72,15 +76,15 @@ class CashRepositoryTest {
 
     @Test
     void shouldCalculateTotalAmountByType() {
-        cashRepository.save(new Cash(user, 100.0, "deposit", ""));
-        cashRepository.save(new Cash(user, -30.0, "purchase", ""));
-        cashRepository.save(new Cash(user, -10.0, "pledge", ""));
-        cashRepository.save(new Cash(user, -5.0, "pledge", ""));
+        cashRepository.save(new Cash(user, 100.0, CashType.DEPOSIT, ""));
+        cashRepository.save(new Cash(user, -30.0, CashType.PURCHASE, ""));
+        cashRepository.save(new Cash(user, -10.0, CashType.PLEDGE, ""));
+        cashRepository.save(new Cash(user, -5.0, CashType.PLEDGE, ""));
 
-        Double pledgeTotal = cashRepository.totalAmount("pledge");
+        Double pledgeTotal = cashRepository.totalAmount(CashType.PLEDGE);
         assertEquals(-15.0, pledgeTotal, 0.001);
 
-        Double depositTotal = cashRepository.totalAmount("deposit");
+        Double depositTotal = cashRepository.totalAmount(CashType.DEPOSIT);
         assertEquals(100.0, depositTotal, 0.001);
     }
 
@@ -92,18 +96,27 @@ class CashRepositoryTest {
 
     @Test
     void shouldReturnNullTotalByTypeWhenEmpty() {
-        Double total = cashRepository.totalAmount("nonexistent");
+        Double total = cashRepository.totalAmount(CashType.OTHER);
         assertNull(total);
     }
 
     @Test
     void shouldPersistAllFields() {
-        Cash cash = cashRepository.save(new Cash(user, 42.0, "custom_type", "A note"));
+        Cash cash = cashRepository.save(new Cash(user, 42.0, CashType.OTHER, "A note"));
         Cash found = cashRepository.findById(cash.getId()).orElseThrow();
         assertEquals(42.0, found.getAmount(), 0.001);
-        assertEquals("custom_type", found.getType());
+        assertEquals(CashType.OTHER, found.getType());
         assertEquals("A note", found.getNote());
         assertNotNull(found.getUser());
         assertNotNull(found.getCreated());
+    }
+
+    @Test
+    void typeIsStoredAsItsLowerCaseName() {
+        Cash cash = cashRepository.saveAndFlush(new Cash(user, 5.0, CashType.PLEDGE, "stored"));
+        Object stored = entityManager.createNativeQuery("SELECT type FROM cash WHERE id = ?1")
+                .setParameter(1, cash.getId())
+                .getSingleResult();
+        assertEquals("pledge", stored);
     }
 }

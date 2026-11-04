@@ -1,4 +1,5 @@
 <script lang="ts">
+import {Category, categoryLabel} from "@/scripts/categories.ts";
 import {defineComponent, PropType} from 'vue'
 import {deleteProduct, Product, toggleActive} from "@/scripts/product.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -36,6 +37,9 @@ export default defineComponent({
     }
   },
   methods: {
+    categoryName(category: Category | null | undefined): string {
+      return categoryLabel(category, key => this.$t(key))
+    },
     toggleActive() {
       toggleActive(this.product.id!).then(p => {
         this.active = p.active
@@ -59,7 +63,7 @@ export default defineComponent({
         <FormattedText :value="product.name" :size="SizeGroup.xl2"/>
         <div class="flex items-center gap-3">
           <span class="px-2 py-0.5 rounded-md text-xs bg-accent/20 dark:bg-accent-d/30">
-            {{ product.category.name }}
+            {{ categoryName(product.category) }}
           </span>
           <span v-if="!active" class="px-2 py-0.5 rounded-md text-xs bg-red-500/20 text-red-500">
             {{ $t('inactive') }}

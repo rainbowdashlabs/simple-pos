@@ -2,7 +2,7 @@ spring:
   datasource:
     url: "jdbc:postgresql://localhost/simple_pos"
     username: simple_pos
-    password: m2Yjve7AocF4mnpCHeZAr
+    password: ${SIMPLE_POS_DB_PASSWORD}
 server:
   port: 8888
 springdoc:

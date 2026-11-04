@@ -12,9 +12,10 @@ in addition to the bundled defaults. Besides the datasource, one setting is requ
 | `security.jwt.secret-key` (`SECURITY_JWT_SECRET_KEY`) | none, required     | Signs all login tokens. Use a random value of at least 32 bytes, e.g. `openssl rand -hex 32`. Keep it secret. |
 | `security.jwt.expiration-time` (`SECURITY_JWT_EXPIRATION_TIME`) | `3600000` (1 h)    | Lifetime of a login token in milliseconds.                                                                |
 | `security.jwt.refresh-expiration-time` (`SECURITY_JWT_REFRESH_EXPIRATION_TIME`) | `2592000000` (30 d) | Lifetime of a refresh token in milliseconds. Every refresh issues a new one, so a session stays alive as long as it is used within this time.                              |
+| `security.jwt.issuer` / `security.jwt.audience` (`SECURITY_JWT_ISSUER` / `SECURITY_JWT_AUDIENCE`) | `simple-pos` | Written into every token and checked on every request, so a token signed with the same key for another service is not accepted. |
 
 Changing the secret key logs out every user. Without a key the application does not start. The `local` Spring
-profile and the `dev` profile of `compose.yml` come with a key that is only meant for development.
+profile comes with a key that is only meant for development; compose reads the key from `.env` (see below).
 
 The frontend is served by the application itself. Other origins may call the API only when listed in
 `security.cors.allowed-origins` (comma separated); by default none may.
@@ -25,6 +26,27 @@ Logins are rate limited per client address. Behind a reverse proxy such as traef
 unique-local ranges). Make sure only the proxy can reach the application, or set
 `server.tomcat.remoteip.internal-proxies` to the proxy's address; otherwise anything on those networks can claim any
 client address.
+
+### Running with compose
+
+`compose.yml` (and `backend/compose.yaml` for a database only) reads its secrets from a `.env` file next to it,
+which is not committed; copy `.env.example` and fill in random values:
+
+| Variable                  | Meaning                                                                                                   |
+|---------------------------|-----------------------------------------------------------------------------------------------------------|
+| `POSTGRES_PASSWORD`       | Password of the `postgres` superuser. Only used to set the database up.                                   |
+| `SIMPLE_POS_DB_PASSWORD`  | Password of the `simple_pos` role the application connects as. It owns the `simple_pos` database and nothing else. |
+| `SECURITY_JWT_SECRET_KEY` | See above.                                                                                                |
+
+The role and database are created when the Postgres volume is initialised for the first time. A volume that
+already exists keeps its old setup: either recreate it (`docker compose down -v`, which deletes the data) or create
+the role once by hand with
+`docker compose exec postgres sh /docker-entrypoint-initdb.d/init-app-role.sh` after `docker compose up` has
+recreated the container with the new configuration.
+
+`backend/compose.yaml` reads `backend/.env`, not the one at the repository root; pass `--env-file ../.env` to use the
+same file for both. The `local` Spring profile expects its own Postgres on `localhost:5432` with a `simple_pos`
+database and reads `SIMPLE_POS_DB_PASSWORD` from the environment; `direnv` loads the root `.env` automatically.
 
 ### Resources:
 Vue.JS https://vuejs.org/guide/introduction.html

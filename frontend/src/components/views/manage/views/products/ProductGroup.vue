@@ -1,4 +1,5 @@
 <script lang="ts">
+import {Category, categoryLabel} from "@/scripts/categories.ts";
 import {defineComponent, PropType} from 'vue'
 import ProductEntry from "./ProductEntry.vue";
 import {ProductGroup} from "@/scripts/product.ts";
@@ -7,6 +8,11 @@ import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
+  methods: {
+    categoryName(category: Category | null | undefined): string {
+      return categoryLabel(category, key => this.$t(key))
+    }
+  },
   name: "ProductGroup",
   computed: {
     SizeGroup() {
@@ -26,7 +32,7 @@ export default defineComponent({
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-    <FormattedText class="col-span-full" :value="group.category.name" :size="SizeGroup.xl"/>
+    <FormattedText class="col-span-full" :value="categoryName(group.category)" :size="SizeGroup.xl"/>
     <ProductEntry v-for="item in group.entries" :key="item.id!" :product="item" @deleted="$emit('deleted')"/>
   </div>
 </template>

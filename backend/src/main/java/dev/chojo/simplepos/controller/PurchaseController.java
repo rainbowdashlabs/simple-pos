@@ -1,10 +1,13 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.validation.PageNumber;
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.PurchaseService;
+import jakarta.persistence.Tuple;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.persistence.Tuple;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -51,10 +52,10 @@ public class PurchaseController {
 
     @GetMapping("stats/top")
     ResponseEntity<List<SalesStatDto>> getTopSales(@RequestParam() Instant after,
-                                                   @RequestParam(defaultValue = "sales") String sorting,
-                                                   @RequestParam(defaultValue = "100") int limit,
-                                                   @RequestParam(defaultValue = "0") int page) {
-        var sales = purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting)))
+                                                   @RequestParam(defaultValue = "sales") SalesSorting sorting,
+                                                   @RequestParam(defaultValue = "100") @PageSize int limit,
+                                                   @RequestParam(defaultValue = "0") @PageNumber int page) {
+        var sales = purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting.name())))
                 .stream()
                 .map(t -> SalesStatDto.build(t, productRepository))
                 .toList();
@@ -63,8 +64,8 @@ public class PurchaseController {
 
     @GetMapping("stats/bottom")
     ResponseEntity<List<SalesStatDto>> getBottomSales(@RequestParam() Instant after,
-                                                      @RequestParam(defaultValue = "10") int limit,
-                                                      @RequestParam(defaultValue = "0") int page) {
+                                                      @RequestParam(defaultValue = "10") @PageSize int limit,
+                                                      @RequestParam(defaultValue = "0") @PageNumber int page) {
         var sales = purchaseRepository.getBottomSales(after, PageRequest.of(page, limit))
                 .stream()
                 .map(t -> SalesStatDto.build(t, productRepository))
@@ -88,10 +89,18 @@ public class PurchaseController {
     ResponseEntity<List<Map<String, Object>>> getSalesByCategory(@RequestParam() Instant after) {
         return ResponseEntity.ok(purchaseRepository.getSalesByCategory(after).stream().map(t -> {
             Map<String, Object> m = new LinkedHashMap<>();
+            m.put("categoryId", t.get("category_id"));
             m.put("categoryName", t.get("category_name"));
             m.put("sales", t.get("sales"));
             m.put("revenue", t.get("revenue"));
             return m;
         }).toList());
+    }
+
+    /**
+     * What the top sales can be ordered by. The names are the columns of the sales statistics query.
+     */
+    enum SalesSorting {
+        sales, revenue, profit
     }
 }
