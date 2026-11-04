@@ -20,12 +20,27 @@ export async function deleteJson(url: string, params: Map<string, string | numbe
     return requestJson(url, "DELETE", params, null)
 }
 
+/**
+ * Sends a request with the session's login token and returns the parsed JSON body, or null for an empty body.
+ * A 401 refreshes the session and retries the request once.
+ *
+ * @throws ApiError for every failed request: status 0 if the server is unreachable, otherwise the response status
+ */
 export async function requestJson(url: string, method: string, params: Map<string, string | number> = new Map(), body: Object | null = null) {
-    let header = await headers()
+    return send(constructUrl(url, params), method, body, true)
+}
+
+async function send(requrl: string, method: string, body: Object | null, retryUnauthorized: boolean): Promise<any> {
+    const token = await getSessionToken()
+    if (!token) {
+        logout()
+        throw new ApiError(401, "Not logged in")
+    }
+    let header = new Headers()
+    header.append("Authorization", `Bearer ${token}`)
     header.append("Content-Type", "application/json")
-    let requrl = constructUrl(url, params);
-    let response: Response
     console.log(body ? `${method} ${requrl}: ${JSON.stringify(body)}` : `${method} ${requrl}`)
+    let response: Response
     try {
         response = await fetch(requrl, {method: method, headers: header, body: body ? JSON.stringify(body) : undefined})
     } catch (e) {
@@ -35,7 +50,10 @@ export async function requestJson(url: string, method: string, params: Map<strin
     if (!response.ok) {
         const error = await ApiError.fromResponse(method, requrl, response)
         if (error.isAccountDisabled) logout()
-        else if (error.status === 401) handleUnauthorized()
+        else if (error.status === 401) {
+            if (!retryUnauthorized) logout()
+            else if (await handleUnauthorized(token)) return send(requrl, method, body, false)
+        }
         throw error
     }
 
@@ -46,13 +64,6 @@ export async function requestJson(url: string, method: string, params: Map<strin
 
     return null
 
-}
-
-async function headers() {
-    let header: Headers = new Headers()
-    const token = await getSessionToken()
-    if (token) header.append("Authorization", `Bearer ${token}`)
-    return header
 }
 
 function constructUrl(url: string, params: Map<string, string | number> = new Map()) {
