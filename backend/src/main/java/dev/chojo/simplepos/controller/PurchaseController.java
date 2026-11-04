@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/purchase")
@@ -44,8 +45,8 @@ public class PurchaseController {
 
     @GetMapping("stats/total")
     ResponseEntity<CashResponse> getTotalPurchases(@RequestParam(required = false) Instant after) {
-        if (after == null) return ResponseEntity.ok(new CashResponse(purchaseRepository.totalPurchases()));
-        return ResponseEntity.ok(new CashResponse(purchaseRepository.totalPurchases(after)));
+        Double total = after == null ? purchaseRepository.totalPurchases() : purchaseRepository.totalPurchases(after);
+        return ResponseEntity.ok(new CashResponse(Objects.requireNonNullElse(total, 0.0)));
     }
 
     @GetMapping("stats/top")

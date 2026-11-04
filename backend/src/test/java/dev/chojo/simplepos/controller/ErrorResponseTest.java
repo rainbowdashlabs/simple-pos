@@ -141,6 +141,14 @@ class ErrorResponseTest {
     }
 
     @Test
+    void shouldReportNoPurchasesAsAZeroTotal() throws Exception {
+        mvc.perform(get("/api/purchase/stats/total").param("after", "2999-01-01T00:00:00Z")
+                        .header("Authorization", "Bearer " + login().get("token")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(0.0));
+    }
+
+    @Test
     void shouldAnswerDisabledAccountWithForbidden() throws Exception {
         mvc.perform(post("/api/auth/login").param("username", "disableduser").param("password", "secret"))
                 .andExpect(status().isForbidden())

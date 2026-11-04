@@ -1,9 +1,18 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.controller.exceptions.ConflictException;
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.Recipe;
+import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.repository.IngredientRepository;
+import dev.chojo.simplepos.repository.StorageRepository;
+import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +34,10 @@ class IngredientServiceTest {
     CategoryService categoryService;
     @Autowired
     IngredientRepository ingredientRepository;
+    @Autowired
+    StorageRepository storageRepository;
+    @Autowired
+    ProductService productService;
 
     private Category category;
 
@@ -57,5 +70,37 @@ class IngredientServiceTest {
         Ingredient first = service.create(new Ingredient(null, category, "Sprite", 1.0, 6, 0, 0, 0));
         Ingredient second = service.create(new Ingredient(null, category, "Water", 0.5, 6, 0, 0, 0));
         assertNotEquals(first.getId(), second.getId());
+    }
+
+    @Test
+    void deletesAnUnusedIngredient() {
+        Ingredient ingredient = service.create(new Ingredient(null, category, "Unused", 1.0, 1, 0, 0, 0));
+
+        service.delete(ingredient.getId());
+
+        assertTrue(ingredientRepository.findById(ingredient.getId()).isEmpty());
+    }
+
+    @Test
+    void refusesToDeleteAnIngredientWithStock() {
+        Ingredient ingredient = service.create(new Ingredient(null, category, "Stocked", 1.0, 1, 0, 0, 0));
+        storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 5, 0));
+
+        assertThrows(ConflictException.class, () -> service.delete(ingredient.getId()));
+        assertTrue(ingredientRepository.findById(ingredient.getId()).isPresent());
+    }
+
+    @Test
+    void refusesToDeleteAnUnknownIngredient() {
+        assertThrows(NotFoundException.class, () -> service.delete(999999));
+    }
+
+    @Test
+    void refusesToDeleteAnIngredientInARecipe() {
+        Ingredient ingredient = service.create(new Ingredient(null, category, "InRecipe", 1.0, 1, 0, 0, 0));
+        productService.create(new Product(null, category, "WithRecipe", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
+
+        assertThrows(ConflictException.class, () -> service.delete(ingredient.getId()));
     }
 }
