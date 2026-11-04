@@ -11,13 +11,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+/**
+ * The application version, without the branch, commit or build time the version file also records: those say
+ * more about the deployment than a public endpoint needs to.
+ */
 @RestController
 @RequestMapping("/api/version")
 public class VersionController {
     private final String version;
 
     public VersionController(@Value("classpath:version") Resource versionResource) throws IOException {
-        this.version = versionResource.getContentAsString(StandardCharsets.UTF_8).trim();
+        this.version = versionResource.getContentAsString(StandardCharsets.UTF_8).trim().split("\\s+")[0];
     }
 
     @GetMapping

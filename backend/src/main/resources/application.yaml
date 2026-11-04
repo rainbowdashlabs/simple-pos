@@ -15,7 +15,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         enable_lazy_load_no_trans: true
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
 
@@ -38,6 +38,9 @@ spring.web.resources:
 springdoc:
   api-docs:
     path: /api-docs
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 logging:
   level:

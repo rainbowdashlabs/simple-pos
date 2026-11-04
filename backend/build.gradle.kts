@@ -44,6 +44,14 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
+tasks.bootJar {
+    exclude("application-local.yaml", "application-test.yaml")
+}
+
+tasks.jar {
+    enabled = false
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }

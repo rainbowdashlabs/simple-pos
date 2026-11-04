@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService, UserDetailsPasswordServi
 
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("Retrieved user data");
+        log.debug("Retrieved user data");
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username %s not known".formatted(username)));
     }
