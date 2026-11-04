@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -42,9 +40,7 @@ public class ProductController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Product> get(@PathVariable int id) {
-        return productRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(productRepository.require(id));
     }
 
     @GetMapping("/{id}/sales/stat")
@@ -83,10 +79,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        Optional<Product> byId = productRepository.findById(id);
-        if (byId.isEmpty()) return ResponseEntity.notFound().build();
-        Product product = byId.get();
-        if (product.isDeleted()) return ResponseEntity.notFound().build();
+        Product product = productRepository.requireNotDeleted(id);
         product.setDeleted(true);
         product.setActive(false);
         productRepository.save(product);
@@ -95,10 +88,7 @@ public class ProductController {
 
     @PatchMapping("/{id}/active")
     ResponseEntity<Product> toggleActive(@PathVariable int id) {
-        Optional<Product> byId = productRepository.findById(id);
-        if (byId.isEmpty()) return ResponseEntity.notFound().build();
-        Product product = byId.get();
-        if (product.isDeleted()) return ResponseEntity.notFound().build();
+        Product product = productRepository.requireNotDeleted(id);
         product.setActive(!product.isActive());
         return ResponseEntity.ok(productRepository.save(product));
     }

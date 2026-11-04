@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/category")
@@ -40,8 +39,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     ResponseEntity<Category> getById(@PathVariable Integer id) {
-        Optional<Category> category = categoryRepository.findById(id);
-        return category.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(categoryRepository.require(id));
     }
 
     @PatchMapping

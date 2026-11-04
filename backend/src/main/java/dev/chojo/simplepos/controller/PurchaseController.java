@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -34,7 +35,7 @@ public class PurchaseController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        if (!purchaseRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if (!purchaseRepository.existsById(id)) throw new NotFoundException("Purchase", id);
         purchaseRepository.deleteById(id);
         return ResponseEntity.accepted().build();
     }

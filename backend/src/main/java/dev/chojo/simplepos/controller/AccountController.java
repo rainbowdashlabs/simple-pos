@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
@@ -59,26 +60,20 @@ public class AccountController {
 
     @GetMapping("/{id}")
     ResponseEntity<AccountDto> get(@PathVariable int id) {
-        return accountRepository.findAccountById(id).map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(accountRepository.findAccountById(id)
+                .orElseThrow(() -> new NotFoundException("Account", id)));
     }
 
     @PatchMapping("/{id}")
     ResponseEntity<Account> rename(@PathVariable int id, @RequestBody AccountDto account) {
-        Optional<Account> byId = accountRepository.findById(id);
-        if (byId.isEmpty()) return ResponseEntity.notFound().build();
-        Account existing = byId.get();
-        if (existing.isDeleted()) return ResponseEntity.notFound().build();
+        Account existing = accountRepository.requireNotDeleted(id);
         existing.setName(account.getName());
         return ResponseEntity.ok(accountRepository.save(existing));
     }
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        Optional<Account> byId = accountRepository.findById(id);
-        if (byId.isEmpty()) return ResponseEntity.notFound().build();
-        Account account = byId.get();
-        if (account.isDeleted()) return ResponseEntity.notFound().build();
+        Account account = accountRepository.requireNotDeleted(id);
 
         // Calculate remaining balance
         Optional<AccountDto> accountDto = accountRepository.findAccountById(id);
@@ -109,9 +104,8 @@ public class AccountController {
 
     @PostMapping("/{id}/balance")
     ResponseEntity<Balance> deposit(@PathVariable int id, @RequestBody DepositDto deposit) {
-        Optional<Account> byId = accountRepository.findById(id);
-        if (byId.isEmpty() || byId.get().isDeleted()) return ResponseEntity.notFound().build();
-        var balance = balanceRepository.save(new Balance(null, byId.get(), Instant.now(), deposit.amount()));
+        Account account = accountRepository.requireNotDeleted(id);
+        var balance = balanceRepository.save(new Balance(null, account, Instant.now(), deposit.amount()));
         return ResponseEntity.accepted().body(balance);
     }
 
@@ -125,9 +119,7 @@ public class AccountController {
 
     @PostMapping("/{id}/purchase")
     ResponseEntity<Void> purchase(@PathVariable int id, @RequestBody List<CartPositionDto> positions) {
-        Optional<Account> byId = accountRepository.findById(id);
-        if (byId.isEmpty() || byId.get().isDeleted()) return ResponseEntity.notFound().build();
-        purchaseService.purchase(byId.get(), positions);
+        purchaseService.purchase(accountRepository.requireNotDeleted(id), positions);
         return ResponseEntity.accepted().build();
     }
 
@@ -135,8 +127,7 @@ public class AccountController {
     ResponseEntity<PurchaseHistoryDto> purchases(@PathVariable int id,
                                                  @RequestParam(defaultValue = "100") int limit,
                                                  @RequestParam(defaultValue = "0") int page) {
-        Optional<Account> byId = accountRepository.findById(id);
-        if (byId.isEmpty()) return ResponseEntity.notFound().build();
+        accountRepository.require(id);
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(id, PageRequest.of(page, limit));
         Map<Integer, LazyProduct> products = purchases.stream().map(Purchase::getProduct).distinct().collect(Collectors.toMap(Product::getId, Product::asLazyProduct));
         return ResponseEntity.ok(new PurchaseHistoryDto(products, purchases.stream().map(Purchase::toDto).toList()));

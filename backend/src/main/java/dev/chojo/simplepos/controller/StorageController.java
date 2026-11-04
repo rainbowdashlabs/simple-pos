@@ -38,7 +38,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -83,9 +82,9 @@ public class StorageController {
     public ResponseEntity<List<Storage>> byId(@PathVariable int id,
                                               @RequestParam(value = "limit", defaultValue = "100") int limit,
                                               @RequestParam(value = "page", defaultValue = "0") int page) {
-        Optional<Ingredient> ingredient = ingredientRepository.findById(id);
-        return ingredient.map(value -> ResponseEntity.ok(storageRepository.findAllByIngredient(value, PageRequest.of(page, limit).withSort(Sort.by("id").descending()))))
-                .orElse(ResponseEntity.notFound().build());
+        Ingredient ingredient = ingredientRepository.require(id);
+        PageRequest request = PageRequest.of(page, limit).withSort(Sort.by("id").descending());
+        return ResponseEntity.ok(storageRepository.findAllByIngredient(ingredient, request));
     }
 
     @PostMapping
@@ -93,15 +92,14 @@ public class StorageController {
     ResponseEntity<Storage> add(@RequestBody InboundStorage storage) {
         log.info(storage.toString());
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Ingredient> ingredient = ingredientRepository.findById(storage.ingredient().getId());
-        if (ingredient.isEmpty()) return ResponseEntity.notFound().build();
+        Ingredient ingredient = ingredientRepository.require(storage.ingredient().getId());
         if (storage.price() > 0) {
             cashRepository.save(new Cash(current, (-storage.price()) * storage.amount() , "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
         }
         if (storage.pledge() > 0) {
             cashRepository.save(new Cash(current, -storage.pledge(), "pledge", "%s".formatted(storage.ingredient().getName())));
         }
-        return ResponseEntity.accepted().body(storageService.addStorage(new Storage(null, ingredient.get(), storage.purchased(), storage.price(), storage.amount(), 0)));
+        return ResponseEntity.accepted().body(storageService.addStorage(new Storage(null, ingredient, storage.purchased(), storage.price(), storage.amount(), 0)));
     }
 
     @PutMapping

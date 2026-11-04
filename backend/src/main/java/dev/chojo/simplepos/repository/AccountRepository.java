@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.repository;
 
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.dto.AccountDto;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,25 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
+    /**
+     * Finds an account, including deleted ones.
+     *
+     * @throws NotFoundException if no account with this id exists
+     */
+    default Account require(int id) {
+        return findById(id).orElseThrow(() -> new NotFoundException("Account", id));
+    }
+
+    /**
+     * Finds an account that is not deleted.
+     *
+     * @throws NotFoundException if no account with this id exists or it is deleted
+     */
+    default Account requireNotDeleted(int id) {
+        return findById(id).filter(account -> !account.isDeleted())
+                .orElseThrow(() -> new NotFoundException("Account", id));
+    }
+
     @Query("""
             SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0))
             FROM Account a
