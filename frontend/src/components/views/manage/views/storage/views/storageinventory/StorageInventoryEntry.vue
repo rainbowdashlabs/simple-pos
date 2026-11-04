@@ -9,14 +9,17 @@ import FormattedText from "@/components/styles/text/FormattedText.vue";
 import Icon from "@/components/styles/Icon.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 
+/**
+ * One ingredient of the stock count. A row counts as counted once either field holds a value; emptying both fields
+ * takes the count back, so the ingredient is left as it is instead of being set to zero.
+ */
 export default defineComponent({
   name: "StorageInventoryEntry",
   components: {Icon, FormattedText, NumberText, ColorContainer, SimpleInputField, CenterText},
   data() {
     return {
-      containerCount: 0,
-      pieceCount: 0,
-      init_stock: this.listing.stock
+      containerCount: '' as number | string,
+      pieceCount: '' as number | string
     }
   },
   props: {
@@ -33,69 +36,79 @@ export default defineComponent({
     SizeGroup() {
       return SizeGroup
     },
-    diff() {
+    counted(): boolean {
+      return this.containerCount !== '' || this.pieceCount !== ''
+    },
+    diff(): number {
       return this.count - this.listing.stock
     },
-    count() {
-      return this.containerCount * this.listing.ingredient.containerSize + this.pieceCount
+    count(): number {
+      return asNumber(this.containerCount) * this.listing.ingredient.containerSize + asNumber(this.pieceCount)
     },
-    bgColor() {
+    bgColor(): string {
+      if (!this.counted || this.diff == 0) return "secondary"
       if (this.diff > 0) return "okay"
-      if (this.diff == 0) return "secondary"
       return "warn"
-
     }
   },
   methods: {
-    updatePieces(value: number) {
-      this.pieceCount = Number(value)
+    updatePieces(value: number | string) {
+      this.pieceCount = value
       this.updateAmount()
     },
-    updateContainer(value: number) {
-      this.containerCount = Number(value)
+    updateContainer(value: number | string) {
+      this.containerCount = value
       this.updateAmount()
     },
     updateAmount() {
-      this.$emit("changed", {ingredient: this.listing.ingredient.id, amount: this.count})
+      this.$emit("changed", {ingredient: this.listing.ingredient.id, amount: this.counted ? this.count : null})
     }
   },
-  watch: {
-    containerCount(newValue: string) {
-      this.containerCount = Number(newValue)
-    }
-  }, emits:["changed"],
+  emits: ["changed"],
   mounted() {
-    const savedTotal = this.saved?.get(this.listing.ingredient.id!) ?? 0
-    if (savedTotal > 0) {
-      const cs = this.listing.ingredient.containerSize
-      if (cs > 0) {
-        this.containerCount = Math.floor(savedTotal / cs)
-        this.pieceCount = savedTotal % cs
-      } else {
-        this.pieceCount = savedTotal
-      }
+    const savedTotal = this.saved?.get(this.listing.ingredient.id!)
+    if (savedTotal === undefined) return
+    const cs = this.listing.ingredient.containerSize
+    if (cs > 0 && savedTotal > 0) {
+      const containers = Math.floor(savedTotal / cs)
+      const pieces = savedTotal % cs
+      this.containerCount = containers > 0 ? containers : ''
+      this.pieceCount = pieces > 0 ? pieces : ''
+    } else {
+      this.pieceCount = savedTotal
     }
   }
 })
+
+/**
+ * The number an input field holds, treating an empty or unfinished entry such as "-" as zero.
+ */
+function asNumber(value: number | string): number {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
 </script>
 
 <template>
   <ColorContainer :bg="bgColor" class="flex rounded-md items-center min-h-14 gap-5 px-5 py-2 justify-evenly max-w-full">
     <FormattedText class="w-1/3" :size="SizeGroup.md" :value="listing?.ingredient.name"/>
-    <div class="flex w-1/3 justify-evenly items-center">
+    <div v-if="counted" class="flex w-1/3 justify-evenly items-center">
       <FormattedText :size="SizeGroup.md" :value="count" type="number"/>
       <FormattedText :size="SizeGroup.md" value="of" type="locale"/>
       <FormattedText :size="SizeGroup.md" :value="listing.stock" type="number"/>
       <Icon :size="SizeGroup.md" icon="fa-equals"/>
       <NumberText :size="SizeGroup.md" :amount="diff"/>
     </div>
-    <div class="flex w-1/6 items-center">
-      <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-bottle-water"/>
-      <SimpleInputField class="w-5/6" @update:modelValue="updatePieces" type="number" :model-value="pieceCount"/>
+    <div v-else class="flex w-1/3 justify-evenly items-center opacity-60">
+      <FormattedText :size="SizeGroup.md" :value="listing.stock" type="number"/>
     </div>
     <div class="flex w-1/6 items-center">
+      <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-bottle-water"/>
+      <SimpleInputField class="w-5/6" @update:modelValue="updatePieces" type="number" :model-value="pieceCount" placeholder="0"/>
+    </div>
+    <div :class="{invisible: listing.ingredient.containerSize <= 0}" class="flex w-1/6 items-center">
       <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-box"/>
-      <SimpleInputField class="w-5/6" @update:modelValue="updateContainer" type="number" :model-value="containerCount"/>
+      <SimpleInputField class="w-5/6" @update:modelValue="updateContainer" type="number" :model-value="containerCount" placeholder="0"/>
     </div>
   </ColorContainer>
 

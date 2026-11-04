@@ -104,7 +104,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="ingredient.containerSize"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]" :key="String(item)"
                     @click="ingredient.containerSize = item"
                     :value="item"
                     type="number"/>
@@ -117,7 +117,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="ingredient.pledge"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]" :key="String(item)"
                     @click="ingredient.pledge = item"
                     :value="item"
                     type="currency"/>
@@ -130,7 +130,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="ingredient.pledgeContainer"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]" :key="String(item)"
                     @click="ingredient.pledgeContainer = item"
                     :value="item"
                     type="currency"/>
@@ -143,7 +143,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="ingredient.minStock"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]" :key="String(item)"
                     @click="ingredient.minStock = ingredient.containerSize * item[0] || item[1]"
                     :value="ingredient.containerSize * item[0] || item[1]"
                     type="number"/>

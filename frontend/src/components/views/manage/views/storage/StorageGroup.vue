@@ -27,7 +27,7 @@ export default defineComponent({
   <div class="pt-5">
     <FormattedText :value="group.category.name" :size="SizeGroup.xl2"/>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-5">
-      <StorageEntry v-for="item in group.entries" :listing="item"/>
+      <StorageEntry v-for="item in group.entries" :key="item.ingredient.id!" :listing="item"/>
     </div>
   </div>
 

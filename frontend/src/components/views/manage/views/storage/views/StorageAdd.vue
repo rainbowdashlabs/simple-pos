@@ -122,7 +122,7 @@ export default defineComponent({
       <FormattedText :size="SizeGroup.xl"
                      :value="$t('price') + ' ' + $t('piece')"/>
       <SimpleInputField type="number"
-                        :model-value="price"
+                        v-model="price"
                         :name="$t('price') + ' ' + $t('piece')"/>
       <ConfirmButton class="" @click="nextState"/>
     </ColorContainer>
@@ -165,7 +165,7 @@ export default defineComponent({
                      :value="$t('pledge') + ' ' + $t('container') + ' (' + containerCount + ' x ' + $n(ingredient.pledgeContainer, 'currency') + ')'"/>
       <SimpleInputField class="col-span-full"
                         type="number"
-                        :model-value="pledgeContainers"
+                        v-model="pledgeContainers"
                         :name="$t('piece')"/>
 
       <div class="flex gap-5">
@@ -180,7 +180,7 @@ export default defineComponent({
                      :value="$t('pledge') + ' ' + $t('piece') + ' (' + pieceCount + ' x ' + $n(ingredient.pledge, 'currency') + ')'"/>
       <SimpleInputField class="col-span-full"
                         type="number"
-                        :model-value="pledgePieces"
+                        v-model="pledgePieces"
                         :name="$t('piece')"/>
 
       <div class="flex gap-5">

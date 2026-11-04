@@ -124,7 +124,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="container_size"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]" :key="String(item)"
                     @click="container_size = item"
                     :value="item"
                     type="number"/>
@@ -137,7 +137,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="pledge"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]" :key="String(item)"
                     @click="pledge = item"
                     :value="item"
                     type="currency"/>
@@ -150,7 +150,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="pledge_container"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]" :key="String(item)"
                     @click="pledge_container = item"
                     :value="item"
                     type="currency"/>
@@ -163,7 +163,7 @@ export default defineComponent({
         <SimpleInputField type="number" v-model="min_stock"/>
       </div>
       <div class="flex justify-evenly w-full">
-        <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]"
+        <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]" :key="String(item)"
                     @click="min_stock = container_size * item[0] || item[1]"
                     :value="container_size * item[0] || item[1]"
                     type="number"/>
