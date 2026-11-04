@@ -33,12 +33,16 @@ RUN GITHUB_ACTIONS=$GITHUB_ACTIONS GITHUB_REF_TYPE=$GITHUB_REF_TYPE GITHUB_REF_N
 # --- Runtime ---
 FROM eclipse-temurin:25.0.5_8-jre-alpine
 
+RUN addgroup -S app && adduser -S -G app -u 10001 app
+
 WORKDIR /app
 
 COPY --from=backend /build/build/libs/simple-pos*.jar app.jar
 COPY --from=backend /build/src/main/resources/application.yaml application.yaml
 COPY --from=frontend /build/dist/ /app/public/
 
+USER app
+
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
