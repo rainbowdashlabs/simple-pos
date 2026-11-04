@@ -123,7 +123,7 @@ export default defineComponent({
                      :value="$t('price') + ' ' + $t('piece')"/>
       <SimpleInputField type="number"
                         v-model="price"
-                        :name="$t('price') + ' ' + $t('piece')"/>
+                        :label="$t('price') + ' ' + $t('piece')"/>
       <ConfirmButton :hint="$t('button.next')" @click="nextState"/>
     </ColorContainer>
 
@@ -135,7 +135,7 @@ export default defineComponent({
                         @update:modelValue="setContainerCounts"
                         type="number"
                         :model-value="containerCount"
-                        :name="$t('price') + ' ' + $t('piece')"/>
+                        :label="$t('container')"/>
 
       <div class="flex gap-5">
         <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
@@ -151,7 +151,7 @@ export default defineComponent({
                         type="number"
                         :model-value="pieceCount"
                         @update:modelValue="setPieceCounts"
-                        :name="$t('piece')"/>
+                        :label="$t('piece')"/>
 
       <div class="flex gap-5">
         <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
@@ -166,7 +166,7 @@ export default defineComponent({
       <SimpleInputField class="col-span-full"
                         type="number"
                         v-model="pledgeContainers"
-                        :name="$t('piece')"/>
+                        :label="$t('pledge') + ' ' + $t('container')"/>
 
       <div class="flex gap-5">
         <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
@@ -181,7 +181,7 @@ export default defineComponent({
       <SimpleInputField class="col-span-full"
                         type="number"
                         v-model="pledgePieces"
-                        :name="$t('piece')"/>
+                        :label="$t('pledge') + ' ' + $t('piece')"/>
 
       <div class="flex gap-5">
         <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>

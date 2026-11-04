@@ -62,6 +62,7 @@ export default defineComponent({
         <FormattedText :value="product.name" type="text"/>
         <FormattedText class="opacity-60" :value="product.price" type="currency"/>
       </div>
+      <span v-if="!active" class="px-2 py-0.5 rounded-md text-xs bg-red-500/20 text-red-500">{{ $t('inactive') }}</span>
     </div>
     <div class="flex items-center gap-2 shrink-0">
       <IconButton :icon="activeIcon" @click="toggleActive"

@@ -1,4 +1,5 @@
 <script lang="ts">
+import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
 import {login} from "@/scripts/session.ts";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
@@ -22,14 +23,16 @@ export default defineComponent({
       if (this.submitting) return
       this.submitting = true
       this.error = null
-      try {
-        await login(this.username, this.password)
-        this.$router.push({name: 'pos'})
-      } catch (e) {
-        this.error = this.describe(e)
-      } finally {
-        this.submitting = false
-      }
+      await keepingFocus(async () => {
+        try {
+          await login(this.username, this.password)
+          this.$router.push({name: 'pos'})
+        } catch (e) {
+          this.error = this.describe(e)
+        } finally {
+          this.submitting = false
+        }
+      })
     },
     describe(error: unknown): string {
       if (!(error instanceof ApiError)) return this.$t('errors.unexpected')
@@ -64,12 +67,12 @@ export default defineComponent({
         <div class="grid grid-cols-1 gap-4">
           <div>
             <FormLabel :label="$t('username')" html-for="username"/>
-            <SimpleInputField type="text" v-model="username" :placeholder="$t('username')"
+            <SimpleInputField id="username" type="text" v-model="username" :placeholder="$t('username')"
                               :aria-invalid="error !== null" :aria-describedby="error ? 'login-error' : undefined"/>
           </div>
           <div>
             <FormLabel :label="$t('password')" html-for="password"/>
-            <SimpleInputField type="password" v-model="password" :placeholder="$t('password')"
+            <SimpleInputField id="password" type="password" v-model="password" :placeholder="$t('password')"
                               :aria-invalid="error !== null" :aria-describedby="error ? 'login-error' : undefined"/>
           </div>
           <p v-if="error" id="login-error" role="alert" class="rounded-lg p-3 bg-warn dark:bg-warn-d text-dark dark:text-bright">{{ error }}</p>

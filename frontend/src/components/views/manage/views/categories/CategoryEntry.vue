@@ -78,7 +78,7 @@ export default defineComponent({
   <ColorContainer bg="secondary" class="flex flex-col gap-3">
     <!-- Header: name + actions -->
     <div v-if="edit" class="flex gap-2">
-      <SimpleInputField class="flex-1" type="text" v-model="newName"/>
+      <SimpleInputField class="flex-1" :label="$t('name')" type="text" v-model="newName"/>
       <ConfirmButton :hint="$t('button.save')" @click="updateCategory"/>
       <BackButton :hint="$t('button.cancel')" @click="cancelEdit"/>
     </div>

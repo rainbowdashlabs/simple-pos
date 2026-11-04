@@ -61,7 +61,7 @@ export default defineComponent({
 <template>
   <ViewWrapper>
     <div class="flex gap-3">
-      <SimpleInputField class="flex-1" type="text" v-model="name" :placeholder="$t('name')"/>
+      <SimpleInputField :label="$t('name')" class="flex-1" type="text" v-model="name" :placeholder="$t('name')"/>
       <ConfirmButton :disabled="name == ''" :hint="$t('button.create')" @click="submit"/>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

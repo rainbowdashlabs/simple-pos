@@ -77,7 +77,7 @@ export default defineComponent({
     </div>
 
     <div class="col-span-full ">
-      <SimpleInputField type="number" v-model="deposit"/>
+      <SimpleInputField :label="$t('deposit')" type="number" v-model="deposit"/>
     </div>
 
     <ColorContainer class="col-span-full flex justify-evenly items-center" bg="secondary">

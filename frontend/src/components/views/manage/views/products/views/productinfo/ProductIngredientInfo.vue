@@ -36,7 +36,7 @@ export default defineComponent({
 
     <div class="flex gap-2 items-center">
       <Icon class="mr-2.5" icon="fa-warehouse"/>
-      <NumberText :min="entry.ingredient.minStock" :amount="stock"/>
+      <NumberText v-if="stock >= 0" :min="entry.ingredient.minStock" :amount="stock"/>
     </div>
 
     <div class="flex gap-2 items-center">

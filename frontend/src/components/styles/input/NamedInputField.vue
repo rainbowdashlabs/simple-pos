@@ -38,11 +38,10 @@ export default defineComponent({
 })
 </script>
 
-<!-- @ts-expect-error -->
 <template>
   <div class="rounded-md p-5">
-    <FormattedText :size="SizeGroup.xl" :name="name"/>
-    <InputField @input="$emit('update', extract($event))" :type="type" :modelValue="modelValue"/>
+    <FormattedText :size="SizeGroup.xl" :value="name"/>
+    <InputField @input="$emit('update', extract($event))" :type="type" :modelValue="modelValue" :label="name"/>
   </div>
 </template>
 

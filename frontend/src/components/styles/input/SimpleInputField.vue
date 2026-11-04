@@ -41,6 +41,9 @@ export default defineComponent({
     nullable: {
       type: Boolean,
       default: false
+    },
+    label: {
+      type: String
     }
   }, emits: ["update:modelValue"],
   data() {
@@ -138,6 +141,7 @@ function parseNumber(text: string): number | null {
       :inputmode="inputMode"
       :value="displayValue"
       :placeholder="placeholder"
+      :aria-label="label"
       @input="onInput">
 </template>
 

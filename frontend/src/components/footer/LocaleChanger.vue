@@ -23,7 +23,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <SelectMenu :options="$i18n.availableLocales" :current="$i18n.locale" @select="saveLocale"/>
+  <SelectMenu :label="$t('language')" :options="$i18n.availableLocales" :current="$i18n.locale" @select="saveLocale"/>
 </template>
 
 <style scoped>
