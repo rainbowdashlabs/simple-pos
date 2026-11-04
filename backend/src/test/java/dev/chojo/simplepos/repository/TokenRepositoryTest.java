@@ -35,7 +35,7 @@ public class TokenRepositoryTest {
 
     @Test
     void shouldCreateToken() {
-        Token token = tokenRepository.save(new Token("mytoken123", testUser));
+        Token token = tokenRepository.save(new Token("mytoken123", testUser, null));
 
         assertNotNull(token.getId());
         assertTrue(tokenRepository.findById(token.getId()).isPresent());
@@ -43,7 +43,7 @@ public class TokenRepositoryTest {
 
     @Test
     void shouldFindByToken() {
-        tokenRepository.save(new Token("findme", testUser));
+        tokenRepository.save(new Token("findme", testUser, null));
 
         Optional<Token> found = tokenRepository.findByToken("findme");
         assertTrue(found.isPresent());
@@ -52,7 +52,7 @@ public class TokenRepositoryTest {
 
     @Test
     void shouldFindByUserAndToken() {
-        tokenRepository.save(new Token("usertoken", testUser));
+        tokenRepository.save(new Token("usertoken", testUser, null));
 
         Optional<Token> found = tokenRepository.findByUserAndToken(testUser, "usertoken");
         assertTrue(found.isPresent());
@@ -67,7 +67,7 @@ public class TokenRepositoryTest {
 
     @Test
     void shouldDeleteByUserAndToken() {
-        Token token = tokenRepository.save(new Token("deleteme", testUser));
+        Token token = tokenRepository.save(new Token("deleteme", testUser, null));
 
         long count = tokenRepository.deleteByUserAndToken(testUser, "deleteme");
         assertEquals(1, count);
@@ -77,7 +77,7 @@ public class TokenRepositoryTest {
     @Test
     void shouldNotDeleteTokenOfDifferentUser() {
         User otherUser = userRepository.save(new User(null, "otheruser", "password", true, Role.STAFF));
-        tokenRepository.save(new Token("shared", testUser));
+        tokenRepository.save(new Token("shared", testUser, null));
 
         long count = tokenRepository.deleteByUserAndToken(otherUser, "shared");
         assertEquals(0, count);
@@ -85,8 +85,8 @@ public class TokenRepositoryTest {
 
     @Test
     void shouldStoreMultipleTokensPerUser() {
-        tokenRepository.save(new Token("token1", testUser));
-        tokenRepository.save(new Token("token2", testUser));
+        tokenRepository.save(new Token("token1", testUser, null));
+        tokenRepository.save(new Token("token2", testUser, null));
 
         assertTrue(tokenRepository.findByUserAndToken(testUser, "token1").isPresent());
         assertTrue(tokenRepository.findByUserAndToken(testUser, "token2").isPresent());

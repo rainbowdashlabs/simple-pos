@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
@@ -14,8 +13,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,16 +31,13 @@ class TokenCleanupServiceTest {
     TokenRepository tokenRepository;
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    JwtService jwtService;
 
     @Test
-    void shouldDeleteOnlyExpiredAndUnverifiableTokens() {
+    void shouldDeleteExpiredTokensAndTokensWithoutExpiry() {
         User user = userRepository.save(new User(null, "cleanupuser", "password", true, Role.STAFF));
-        Map<String, Object> refresh = Map.of("type", "refresh");
-        Token valid = tokenRepository.save(new Token(jwtService.generateToken(refresh, user, 60_000), user));
-        tokenRepository.save(new Token(jwtService.generateToken(refresh, user, -60_000), user));
-        tokenRepository.save(new Token("not-a-jwt", user));
+        Token valid = tokenRepository.save(new Token("valid", user, Instant.now().plus(1, ChronoUnit.DAYS)));
+        tokenRepository.save(new Token("expired", user, Instant.now().minus(1, ChronoUnit.MINUTES)));
+        tokenRepository.save(new Token("legacy-plain-text", user, null));
 
         int deleted = tokenCleanupService.deleteUnusableTokens();
 

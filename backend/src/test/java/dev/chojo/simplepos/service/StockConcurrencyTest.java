@@ -9,7 +9,6 @@ import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
-import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
@@ -26,6 +25,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +130,7 @@ class StockConcurrencyTest {
     @Test
     void shouldLetOnlyOneOfTwoConcurrentRefreshesUseTheToken() throws Exception {
         User user = userRepository.save(new User(null, "concurrentrefresh", "password", true, Role.STAFF));
-        authenticationService.saveRefreshToken(new Token("single-use", user));
+        authenticationService.saveRefreshToken("single-use", user, Duration.ofDays(1));
 
         List<Boolean> results = new ArrayList<>();
         try (ExecutorService executor = Executors.newFixedThreadPool(2)) {

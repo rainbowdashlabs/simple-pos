@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,20 +58,33 @@ class AuthenticationServiceTest {
     void shouldSaveRefreshToken() {
         User user = createUser("tokenuser", "pass");
 
-        authenticationService.saveRefreshToken(new Token("refresh_token_123", user));
+        authenticationService.saveRefreshToken("refresh_token_123", user, Duration.ofDays(1));
 
-        Optional<Token> found = tokenRepository.findByUserAndToken(user, "refresh_token_123");
+        assertTrue(tokenRepository.findByToken("refresh_token_123").isEmpty());
+        Optional<Token> found = tokenRepository.findByUserAndToken(user, AuthenticationService.fingerprint("refresh_token_123"));
         assertTrue(found.isPresent());
+        Instant expected = Instant.now().plus(Duration.ofDays(1));
+        assertTrue(Duration.between(found.get().getExpires(), expected).abs().toSeconds() < 60);
     }
 
     @Test
     void shouldInvalidateRefreshTokenOnlyOnce() {
         User user = createUser("invalidateuser", "pass");
-        authenticationService.saveRefreshToken(new Token("to_invalidate", user));
+        authenticationService.saveRefreshToken("to_invalidate", user, Duration.ofDays(1));
 
         assertTrue(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
         assertFalse(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
-        assertTrue(tokenRepository.findByUserAndToken(user, "to_invalidate").isEmpty());
+        assertTrue(tokenRepository.findByUserAndToken(user, AuthenticationService.fingerprint("to_invalidate")).isEmpty());
+    }
+
+    @Test
+    void shouldForgetATokenOnLogout() {
+        User user = createUser("logoutuser", "pass");
+        authenticationService.saveRefreshToken("to_forget", user, Duration.ofDays(1));
+
+        assertTrue(authenticationService.logout("to_forget"));
+        assertFalse(authenticationService.logout("to_forget"));
+        assertFalse(authenticationService.invalidateRefreshToken(user, "to_forget"));
     }
 
     @Test

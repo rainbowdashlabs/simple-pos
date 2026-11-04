@@ -10,6 +10,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HexFormat;
+
 @Service
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -26,8 +33,33 @@ public class AuthenticationService {
         this.userRepository = userRepository;
     }
 
-    public void saveRefreshToken(Token token) {
-        tokenRepository.save(token);
+    /**
+     * Remembers a refresh token as usable until {@code lifetime} from now. Only its fingerprint is stored.
+     */
+    public void saveRefreshToken(String token, User user, Duration lifetime) {
+        tokenRepository.save(new Token(fingerprint(token), user, Instant.now().plus(lifetime)));
+    }
+
+    /**
+     * Forgets a refresh token, ending the session it belongs to at its next refresh.
+     *
+     * @return whether the token was known
+     */
+    @Transactional
+    public boolean logout(String token) {
+        return tokenRepository.deleteByFingerprint(fingerprint(token)) > 0;
+    }
+
+    /**
+     * What is stored for a refresh token: its SHA-256, hex encoded.
+     */
+    public static String fingerprint(String token) {
+        try {
+            byte[] hash = MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is always available", e);
+        }
     }
 
     /**
@@ -52,7 +84,7 @@ public class AuthenticationService {
 
     @Transactional
     public boolean invalidateRefreshToken(User user, String token) {
-        return tokenRepository.deleteByUserAndToken(user, token) == 1;
+        return tokenRepository.deleteByUserAndToken(user, fingerprint(token)) == 1;
     }
 
 }

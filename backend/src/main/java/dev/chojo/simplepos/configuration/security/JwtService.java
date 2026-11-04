@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.configuration.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -15,7 +14,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -74,7 +73,7 @@ public class JwtService {
         return Jwts
                 .builder()
                 .claims(extraClaims)
-                .claim("nonce", ThreadLocalRandom.current().nextLong(1000000000))
+                .id(UUID.randomUUID().toString())
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -90,18 +89,6 @@ public class JwtService {
             if (!Objects.equals(allClaims.get(entry.getKey()), entry.getValue())) return false;
         }
         return true;
-    }
-
-    /**
-     * Whether the token still verifies with the current key and has not expired. Never throws.
-     */
-    public boolean isUnexpiredAndVerifiable(String token) {
-        try {
-            extractAllClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
     }
 
     private boolean isTokenExpired(String token) {

@@ -3,7 +3,6 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.configuration.security.RateLimiter;
 import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
-import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -71,9 +71,20 @@ public class AuthController {
                 new TokenDto(jwtService.generateToken(LOGIN_CLAIM, authenticatedUser, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
                 new TokenDto(jwtService.generateToken(REFRESH_CLAIM, authenticatedUser, jwtRefreshExpiration), jwtRefreshExpiration)
         );
-        authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), authenticatedUser));
+        authenticationService.saveRefreshToken(tokenResponse.refresh().token(), authenticatedUser, Duration.ofMillis(jwtRefreshExpiration));
 
         return ResponseEntity.accepted().body(tokenResponse);
+    }
+
+    /**
+     * Ends the session a refresh token belongs to. Answers the same whether or not the token was known, so it says
+     * nothing about which tokens exist.
+     */
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void logout(@RequestParam String token, HttpServletRequest request) {
+        rateLimiter.checkRequest("logout", request.getRemoteAddr());
+        authenticationService.logout(token);
     }
 
     @PostMapping("/refresh")
@@ -98,7 +109,7 @@ public class AuthController {
                 new TokenDto(jwtService.generateToken(LOGIN_CLAIM, user, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
                 new TokenDto(jwtService.generateToken(REFRESH_CLAIM, user, jwtRefreshExpiration), jwtRefreshExpiration)
         );
-        authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), user));
+        authenticationService.saveRefreshToken(tokenResponse.refresh().token(), user, Duration.ofMillis(jwtRefreshExpiration));
         return ResponseEntity.accepted().body(tokenResponse);
     }
 }

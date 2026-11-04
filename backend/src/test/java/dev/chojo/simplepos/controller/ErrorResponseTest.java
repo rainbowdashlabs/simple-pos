@@ -189,6 +189,15 @@ class ErrorResponseTest {
     }
 
     @Test
+    void shouldEndTheSessionOnLogout() throws Exception {
+        String refresh = login().get("refresh");
+
+        mvc.perform(post("/api/auth/logout").param("token", refresh)).andExpect(status().isNoContent());
+        mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/auth/logout").param("token", "unknown")).andExpect(status().isNoContent());
+    }
+
+    @Test
     void shouldRejectReusedRefreshToken() throws Exception {
         String refresh = login().get("refresh");
 

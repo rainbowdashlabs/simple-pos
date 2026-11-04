@@ -2,7 +2,6 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.configuration.security.RateLimiter;
-import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.util.Map;
 
 @RestController
@@ -50,7 +50,7 @@ public class DemoController {
                 new TokenDto(jwtService.generateToken(LOGIN_CLAIM, user, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
                 new TokenDto(jwtService.generateToken(REFRESH_CLAIM, user, jwtRefreshExpiration), jwtRefreshExpiration)
         );
-        authenticationService.saveRefreshToken(new Token(tokenResponse.refresh().token(), user));
+        authenticationService.saveRefreshToken(tokenResponse.refresh().token(), user, Duration.ofMillis(jwtRefreshExpiration));
         return ResponseEntity.ok(tokenResponse);
     }
 }

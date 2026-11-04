@@ -6,6 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import java.time.Instant;
+
+/**
+ * A refresh token that may still be used, stored as its SHA-256 fingerprint so that read access to the database is
+ * not enough to take over a session. {@code expires} lets expired ones be deleted without reading them.
+ */
 @Entity
 public class Token {
     @Id
@@ -17,9 +23,16 @@ public class Token {
 
     private String token;
 
-    public Token(String token, User user) {
+    private Instant expires;
+
+    public Token(String token, User user, Instant expires) {
         this.token = token;
         this.user = user;
+        this.expires = expires;
+    }
+
+    public Instant getExpires() {
+        return expires;
     }
 
     public Token() {
