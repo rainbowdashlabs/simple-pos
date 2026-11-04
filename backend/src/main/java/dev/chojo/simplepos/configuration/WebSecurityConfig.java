@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.configuration;
 
 import dev.chojo.simplepos.configuration.security.JwtAuthenticationFilter;
-import dev.chojo.simplepos.configuration.security.LoginService;
 import dev.chojo.simplepos.configuration.security.SecurityErrorResolver;
 import dev.chojo.simplepos.service.UserService;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +37,7 @@ public class WebSecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter, LoginService loginService,
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter,
                                                    SecurityErrorResolver securityErrorResolver) throws Exception {
         return http
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
@@ -47,11 +46,6 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**", "/api/demo/**", "/api/user", "/api/version").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
-                .formLogin(form -> form.loginPage("/#login")
-                        .loginProcessingUrl("/api/login")
-                        .permitAll()
-                        .successHandler(loginService)
-                        .failureHandler(securityErrorResolver::resolve))
                 .exceptionHandling(handler -> handler
                         .authenticationEntryPoint(securityErrorResolver::resolve)
                         .accessDeniedHandler(securityErrorResolver::resolve))

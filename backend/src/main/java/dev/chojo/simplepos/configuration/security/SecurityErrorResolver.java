@@ -14,8 +14,7 @@ import java.io.IOException;
 
 /**
  * Hands exceptions raised in the security filter chain to the MVC {@link HandlerExceptionResolver}, so they are
- * rendered and logged like controller exceptions. Usable as entry point, access denied handler and authentication
- * failure handler.
+ * rendered and logged like controller exceptions. Used as entry point and access denied handler.
  * <p>
  * Should no resolver handle the exception, the response still gets a status matching the exception instead of an
  * empty 200.
