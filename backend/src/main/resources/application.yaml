@@ -51,4 +51,4 @@ security:
   jwt:
      # 1h in millisecond
      expiration-time: 3600000
-     refresh-expiration-time: 604800000
+     refresh-expiration-time: 2592000000

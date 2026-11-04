@@ -12,4 +12,4 @@ security:
   jwt:
     secret-key: test-only-secret-key-never-use-in-production
     expiration-time: 3600000
-    refresh-expiration-time: 604800000
+    refresh-expiration-time: 2592000000
