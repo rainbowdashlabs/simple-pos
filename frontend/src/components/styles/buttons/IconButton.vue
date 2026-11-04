@@ -5,6 +5,10 @@ import FreeButton from "./FreeButton.vue";
 import {buildDarkMode} from "@/scripts/util.ts";
 import {SizeGroup} from "@/scripts/text.ts";
 
+/**
+ * A button showing an icon, optionally followed by a text `label`, both centred. Without a label, `hint` should say
+ * what the button does; it becomes the tooltip and the accessible name.
+ */
 export default defineComponent({
   name: "IconButton",
   components: {FreeButton, Icon},
@@ -12,6 +16,12 @@ export default defineComponent({
     icon: {
       type: String,
       default: "fa-check"
+    },
+    label: {
+      type: String
+    },
+    hint: {
+      type: String
     },
     disabled: {
       type: Boolean,
@@ -41,8 +51,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <FreeButton @click="$emit('click', $event)" :disabled="disabled" :color="currentColor">
-    <Icon :class="size" :icon="icon"/>
+  <FreeButton @click="$emit('click', $event)" :disabled="disabled" :color="currentColor" :hint="hint ?? label">
+    <span class="flex items-center justify-center gap-2">
+      <Icon :class="size" :icon="icon"/>
+      <span v-if="label" class="text-base font-semibold">{{ label }}</span>
+    </span>
   </FreeButton>
 </template>
 

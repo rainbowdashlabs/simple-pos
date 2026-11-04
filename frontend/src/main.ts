@@ -58,6 +58,10 @@ const i18n = createI18n({
     messages: {
         en: {
             accounts: "Accounts",
+            button: {
+                new_product: "New product",
+                new_product_with_recipe: "New product with recipe"
+            },
             checkout_choose_account: "Choose an account",
             checkout_no_accounts: "There are no accounts yet. Create one first.",
             checkout_cart_empty: "The cart is empty.",
@@ -169,6 +173,10 @@ const i18n = createI18n({
         },
         de: {
             accounts: "Konten",
+            button: {
+                new_product: "Neues Produkt",
+                new_product_with_recipe: "Neues Produkt mit Rezept"
+            },
             checkout_choose_account: "Konto auswählen",
             checkout_no_accounts: "Es gibt noch keine Konten. Lege zuerst eines an.",
             checkout_cart_empty: "Der Warenkorb ist leer.",

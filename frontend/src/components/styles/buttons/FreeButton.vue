@@ -2,6 +2,10 @@
 import {defineComponent} from 'vue'
 import Icon from "@/components/styles/Icon.vue";
 
+/**
+ * The base button. `hint` names what the button does, as tooltip and accessible name, for buttons whose content
+ * does not say it in words.
+ */
 export default defineComponent({
   name: "FreeButton",
   components: {Icon},
@@ -9,6 +13,9 @@ export default defineComponent({
     disabled: {
       type: Boolean,
       default: false
+    },
+    hint: {
+      type: String
     },
     color: {
       type: String,
@@ -26,7 +33,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <button :class="currentColor" @click="(e) => {if(!disabled) $emit('click', e)}">
+  <button :class="currentColor" :title="hint" :aria-label="hint" @click="(e) => {if(!disabled) $emit('click', e)}">
     <slot/>
   </button>
 

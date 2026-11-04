@@ -65,7 +65,7 @@ export default defineComponent({
       <span v-else class="px-2 py-0.5 rounded-md text-xs bg-red-500/20 text-red-500">{{ $t('inactive') }}</span>
       <div class="flex justify-end gap-2">
         <IconButton :icon="active ? 'fa-eye' : 'fa-eye-slash'" @click="toggleActive"
-                    :bg="active ? 'accent' : 'primary'" size="text-lg"/>
+                    :bg="active ? 'accent' : 'primary'"/>
         <IconButton icon="fa-pen" @click="edit"/>
         <IconButton icon="fa-square-plus" @click="add"/>
       </div>

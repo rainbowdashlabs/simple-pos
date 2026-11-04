@@ -63,9 +63,9 @@ export default defineComponent({
         <FormattedText class="opacity-60" :value="product.price" type="currency"/>
       </div>
     </div>
-    <div class="flex gap-2 shrink-0">
+    <div class="flex items-center gap-2 shrink-0">
       <IconButton :icon="activeIcon" @click="toggleActive"
-                  :bg="active ? 'accent' : 'primary'" size="text-lg"/>
+                  :bg="active ? 'accent' : 'primary'"/>
       <IconButton icon="fa-trash-can" @click="confirmDelete"/>
     </div>
   </div>

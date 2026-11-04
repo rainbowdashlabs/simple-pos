@@ -6,6 +6,12 @@ export default defineComponent({
   name: "ConfirmButton",
   components: {IconButton},
   props: {
+    label: {
+      type: String
+    },
+    hint: {
+      type: String
+    },
     icon: {
       type: String,
       default: "fa-check"
@@ -25,7 +31,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <IconButton color="bg-green-400" @click="$emit('click', $event)" :disabled="disabled" :class="color" :icon="icon"/>
+  <IconButton color="bg-green-400" @click="$emit('click', $event)" :disabled="disabled" :class="color" :icon="icon" :label="label" :hint="hint"/>
 </template>
 
 <style scoped>
