@@ -65,7 +65,13 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+    /**
+     * Saves the changes to an existing product and its recipe.
+     *
+     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the product does not exist
+     */
     public Product update(Product product) {
+        productRepository.require(product.getId());
         product.getRecipe().setProduct(product);
         for (RecipeEntry entry : product.getRecipe().getEntries()) {
             entry.setRecipe(product.getRecipe());
@@ -73,6 +79,6 @@ public class ProductService {
         List<RecipeEntry> entries = new ArrayList<>(product.getRecipe().getEntries().stream().map(recipeEntryRepository::save).toList());
         product.getRecipe().setEntries(entries);
         productRepository.save(product);
-        return productRepository.findById(product.getId()).get();
+        return productRepository.require(product.getId());
     }
 }

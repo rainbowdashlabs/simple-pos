@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -30,7 +31,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * <p>
  * Spring MVC exceptions (missing parameters, unreadable bodies, validation) and {@code ErrorResponseException}s such
  * as {@link NotFoundException} keep their own status through {@link ResponseEntityExceptionHandler}. Security, JWT and
- * database constraint failures are mapped to 401, 403 and 409. Anything else becomes a 500.
+ * database constraint and lock failures are mapped to 401, 403 and 409. Anything else becomes a 500.
  * <p>
  * Every response is logged once together with the request line (method and path, never the query, which may carry
  * credentials): client errors as a one-line warning, server errors as an error with the full stack trace.
@@ -64,6 +65,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<Object> handleJwt(JwtException e, WebRequest request) {
         return respond(e, HttpStatus.UNAUTHORIZED, "Invalid or expired token", request);
+    }
+
+    @ExceptionHandler(PessimisticLockingFailureException.class)
+    public ResponseEntity<Object> handleLockFailure(PessimisticLockingFailureException e, WebRequest request) {
+        return respond(e, HttpStatus.CONFLICT, "The data was changed concurrently. Please retry.", request);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

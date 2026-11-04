@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.JwtService;
+import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.UserDto;
@@ -11,9 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponseException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -59,23 +58,15 @@ public class AuthController {
     ResponseEntity<TokenResponse> refresh(@RequestParam String token) {
         String username = jwtService.extractUsername(token);
         User user = authenticationService.findByUsername(username);
+        if (!user.isEnabled()) {
+            throw new DisabledException("Account is disabled");
+        }
         if (!jwtService.isTokenValid(token, user, REFRESH_CLAIM)) {
-            var detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Invalid Token");
-            throw new ErrorResponseException(HttpStatus.BAD_REQUEST, detail, null);
+            throw new UnauthorizedException("Invalid token");
         }
 
-        Optional<Token> optToken = authenticationService.retrieveToken(user, token);
-        if (optToken.isEmpty()) {
-            var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Unknown token");
-            throw new ErrorResponseException(HttpStatus.UNAUTHORIZED, detail, null);
-        }
-
-        log.info("Attempting to invalidate refresh token {}", optToken.get());
-        boolean invalidated = authenticationService.invalidateRefreshToken(optToken.get());
-
-        if (!invalidated) {
-            var detail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Token already used.");
-            throw new ErrorResponseException(HttpStatus.UNAUTHORIZED, detail, null);
+        if (!authenticationService.invalidateRefreshToken(user, token)) {
+            throw new UnauthorizedException("Unknown or already used token");
         }
         log.info("Valid token. Creating new login and refresh token");
 

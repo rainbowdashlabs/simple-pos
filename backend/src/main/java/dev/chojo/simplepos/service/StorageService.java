@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class StorageService {
@@ -38,27 +37,46 @@ public class StorageService {
         return created;
     }
 
+    /**
+     * Brings the stock of each ingredient to the counted amount, taking from or adding to storage as needed.
+     * Runs in one transaction: if any correction names an unknown ingredient, nothing is changed.
+     *
+     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a correction names an unknown ingredient
+     */
+    @Transactional
     public void processInventoryCorrection(List<InventoryCorrection> corrections) {
+        ingredientRepository.requireLockedInOrder(corrections.stream().map(InventoryCorrection::ingredient).toList());
         for (InventoryCorrection correction : corrections) {
-            Optional<Ingredient> optIngredient = ingredientRepository.findById(correction.ingredient());
-            if (optIngredient.isEmpty()) continue;
+            Ingredient ingredient = ingredientRepository.require(correction.ingredient());
             StorageSummary summary = new StorageSummary(storageRepository.summaryById(correction.ingredient()));
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;
             if (delta > 0) {
-                takeStorage(optIngredient.get(), delta);
+                takeStorage(ingredient, delta);
             } else {
                 addStorage(new Storage(null, summary.getIngredient(), Instant.now(), 0, Math.abs(delta), 0));
             }
         }
     }
 
-    public synchronized Collection<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
+    /**
+     * Takes up to {@code amount} units of the ingredient from storage, oldest batch first. Takes less when the stock
+     * runs out.
+     * <p>
+     * The ingredient row stays locked until the surrounding transaction commits, so concurrent purchases and
+     * inventory corrections of the same ingredient cannot overwrite each other's stock changes.
+     *
+     * @return one transaction per storage batch that units were taken from
+     */
+    @Transactional
+    public Collection<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
+        ingredientRepository.requireLocked(ingredient.getId());
         Map<Integer, StorageTransaction> taken = new HashMap<>();
         for (int i = 0; i < amount; i++) {
             var optNext = storageRepository.findNextIngredient(ingredient.getId());
             optNext.ifPresent(id -> {
-                Storage storage = storageRepository.findById(id).get();
+                Storage storage = storageRepository.findById(id)
+                        .orElseThrow(() -> new IllegalStateException("Storage %d vanished while taking stock".formatted(id)));
                 storage.take();
                 taken.computeIfAbsent(storage.getId(), s -> new StorageTransaction()).update(storageRepository.saveAndFlush(storage));
             });

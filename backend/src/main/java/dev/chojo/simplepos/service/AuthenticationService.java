@@ -1,5 +1,7 @@
 package dev.chojo.simplepos.service;
 
+import dev.chojo.simplepos.controller.exceptions.ConflictException;
+import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.UserDto;
@@ -33,7 +35,15 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a new, disabled user.
+     *
+     * @throws ConflictException if the username is already taken
+     */
     public User signup(UserDto input) {
+        if (userRepository.findByUsername(input.username()).isPresent()) {
+            throw new ConflictException("Username %s is already taken".formatted(input.username()));
+        }
         User user = new User(null, input.username(), passwordEncoder.encode(input.password()), false);
 
         return userRepository.save(user);
@@ -43,8 +53,13 @@ public class AuthenticationService {
         tokenRepository.save(token);
     }
 
+    /**
+     * Loads the user with this name.
+     *
+     * @throws UnauthorizedException if no user with this name exists
+     */
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow();
+        return userRepository.findByUsername(username).orElseThrow(() -> new UnauthorizedException("Unknown user"));
     }
 
     public User authenticate(String username, String password) {
@@ -55,8 +70,7 @@ public class AuthenticationService {
                 )
         );
 
-        return userRepository.findByUsername(username)
-                .orElseThrow();
+        return findByUsername(username);
     }
 
     @Transactional

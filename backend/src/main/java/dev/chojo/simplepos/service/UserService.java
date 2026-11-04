@@ -23,7 +23,7 @@ public class UserService implements UserDetailsService, UserDetailsPasswordServi
     @Override
     public User updatePassword(UserDetails details, String newPassword) {
         User byName = userRepository.findByUsername(details.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("Username %s not known"));
+                .orElseThrow(() -> new UsernameNotFoundException("Username %s not known".formatted(details.getUsername())));
         byName.setPassword(newPassword);
         userRepository.save(byName);
         return byName;
@@ -33,6 +33,6 @@ public class UserService implements UserDetailsService, UserDetailsPasswordServi
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Retrieved user data");
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username %s not known"));
+                .orElseThrow(() -> new UsernameNotFoundException("Username %s not known".formatted(username)));
     }
 }
