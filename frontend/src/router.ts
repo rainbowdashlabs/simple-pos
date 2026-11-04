@@ -29,6 +29,7 @@ import StorageAdd from '@/components/views/manage/views/storage/views/StorageAdd
 import StorageEdit from '@/components/views/manage/views/storage/views/StorageEdit.vue'
 import StorageInventory from '@/components/views/manage/views/storage/views/StorageInventory.vue'
 import Cash from '@/components/views/manage/views/Cash.vue'
+import Users from '@/components/views/manage/views/Users.vue'
 import Settings from '@/components/views/Settings.vue'
 import NoAccess from '@/components/views/NoAccess.vue'
 import {hasRole, loadRole, type Role} from '@/scripts/roles.ts'
@@ -106,6 +107,7 @@ const router = createRouter({
                 {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {title: 'Edit Ingredient'}},
                 {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory, meta: {title: 'Inventory Check'}},
                 {path: 'cash', name: 'manage-cash', component: Cash, meta: {title: 'Cash'}},
+                {path: 'users', name: 'manage-users', component: Users, meta: {title: 'Users', role: 'ADMIN'}},
             ]
         },
         {

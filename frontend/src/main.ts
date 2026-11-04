@@ -132,6 +132,25 @@ const i18n = createI18n({
             settings: "Settings",
             color_theme: "Color Theme",
             language: "Language",
+            users: {
+                title: "Users",
+                create: "New user",
+                create_button: "Create",
+                username: "Username",
+                password: "Password",
+                new_password: "New password",
+                password_hint: "Passwords need at least {min} characters. New users are enabled right away.",
+                role: "Role",
+                roles: {ADMIN: "Administrator", STAFF: "Staff", USER: "User"},
+                enabled: "Enabled",
+                reset_password: "Set password",
+                save: "Save",
+                you: "you",
+                disabled: "disabled",
+                own_account_hint: "Another administrator has to change your own role and status.",
+                password_set: "The password was set. Existing sessions of this user end at their next refresh.",
+                own_password_hint: "Setting your own password ends all your sessions at their next refresh, this one included; then log in with the new password."
+            },
             no_access: {
                 title: "No access",
                 text: "Your account cannot use this part of the application yet. Ask an administrator to give you access."
@@ -222,6 +241,25 @@ const i18n = createI18n({
             settings: "Einstellungen",
             color_theme: "Farbthema",
             language: "Sprache",
+            users: {
+                title: "Konten",
+                create: "Neues Konto",
+                create_button: "Anlegen",
+                username: "Benutzername",
+                password: "Passwort",
+                new_password: "Neues Passwort",
+                password_hint: "Passwörter brauchen mindestens {min} Zeichen. Neue Konten sind sofort aktiv.",
+                role: "Rolle",
+                roles: {ADMIN: "Administration", STAFF: "Personal", USER: "Basis"},
+                enabled: "Aktiv",
+                reset_password: "Passwort setzen",
+                save: "Speichern",
+                you: "du",
+                disabled: "deaktiviert",
+                own_account_hint: "Deine eigene Rolle und deinen Status muss eine andere Person aus der Administration ändern.",
+                password_set: "Das Passwort wurde gesetzt. Bestehende Sitzungen dieses Kontos enden bei ihrer nächsten Erneuerung.",
+                own_password_hint: "Ein neues eigenes Passwort beendet alle deine Sitzungen bei ihrer nächsten Erneuerung, auch diese; melde dich dann mit dem neuen Passwort an."
+            },
             no_access: {
                 title: "Kein Zugriff",
                 text: "Dein Konto kann diesen Teil der Anwendung noch nicht nutzen. Lass dir den Zugriff von der Administration freischalten."
