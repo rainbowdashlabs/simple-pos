@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.repository;
 
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.dto.AccountDto;
@@ -13,19 +14,21 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     /**
      * Finds an account, including deleted ones.
      *
+     * @throws BadRequestException if the id is missing
      * @throws NotFoundException if no account with this id exists
      */
-    default Account require(int id) {
-        return findById(id).orElseThrow(() -> new NotFoundException("Account", id));
+    default Account require(Integer id) {
+        return findById(requireId(id)).orElseThrow(() -> new NotFoundException("Account", id));
     }
 
     /**
      * Finds an account that is not deleted.
      *
+     * @throws BadRequestException if the id is missing
      * @throws NotFoundException if no account with this id exists or it is deleted
      */
-    default Account requireNotDeleted(int id) {
-        return findById(id).filter(account -> !account.isDeleted())
+    default Account requireNotDeleted(Integer id) {
+        return findById(requireId(id)).filter(account -> !account.isDeleted())
                 .orElseThrow(() -> new NotFoundException("Account", id));
     }
 
@@ -65,4 +68,9 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             WHERE a.deleted = false
             ORDER BY a.name""")
     List<AccountDto> findAllAccounts();
+
+    private Integer requireId(Integer id) {
+        if (id == null) throw new BadRequestException("Account id is missing");
+        return id;
+    }
 }

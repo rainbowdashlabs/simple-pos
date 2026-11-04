@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.service;
 
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
@@ -39,8 +40,9 @@ public class StorageService {
 
     /**
      * Brings the stock of each ingredient to the counted amount, taking from or adding to storage as needed.
-     * Runs in one transaction: if any correction names an unknown ingredient, nothing is changed.
+     * Runs in one transaction: if any correction is invalid, nothing is changed.
      *
+     * @throws BadRequestException if a correction lacks its ingredient or amount
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a correction names an unknown ingredient
      */
     @Transactional
@@ -48,7 +50,8 @@ public class StorageService {
         ingredientRepository.requireLockedInOrder(corrections.stream().map(InventoryCorrection::ingredient).toList());
         for (InventoryCorrection correction : corrections) {
             Ingredient ingredient = ingredientRepository.require(correction.ingredient());
-            StorageSummary summary = new StorageSummary(storageRepository.summaryById(correction.ingredient()));
+            if (correction.amount() == null) throw new BadRequestException("Amount is missing");
+            StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;
             if (delta > 0) {

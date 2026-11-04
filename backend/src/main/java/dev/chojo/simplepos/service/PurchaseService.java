@@ -51,7 +51,7 @@ public class PurchaseService {
     @Transactional
     public synchronized void purchase(Account account, List<CartPositionDto> positions) {
         List<Product> products = positions.stream()
-                .map(position -> productRepository.require(position.product().getId()))
+                .map(position -> productRepository.require(position.productId()))
                 .toList();
         ingredientRepository.requireLockedInOrder(products.stream()
                 .flatMap(product -> product.getRecipe().getEntries().stream())

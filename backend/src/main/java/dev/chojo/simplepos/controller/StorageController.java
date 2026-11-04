@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
@@ -92,12 +93,15 @@ public class StorageController {
     ResponseEntity<Storage> add(@RequestBody InboundStorage storage) {
         log.info(storage.toString());
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Ingredient ingredient = ingredientRepository.require(storage.ingredient().getId());
+        Ingredient ingredient = ingredientRepository.require(storage.ingredientId());
+        if (storage.price() == null || storage.pledge() == null || storage.amount() == null) {
+            throw new BadRequestException("Price, pledge and amount are required");
+        }
         if (storage.price() > 0) {
-            cashRepository.save(new Cash(current, (-storage.price()) * storage.amount() , "purchase", "%s x %d".formatted(storage.ingredient().getName(), storage.amount())));
+            cashRepository.save(new Cash(current, (-storage.price()) * storage.amount() , "purchase", "%s x %d".formatted(ingredient.getName(), storage.amount())));
         }
         if (storage.pledge() > 0) {
-            cashRepository.save(new Cash(current, -storage.pledge(), "pledge", "%s".formatted(storage.ingredient().getName())));
+            cashRepository.save(new Cash(current, -storage.pledge(), "pledge", "%s".formatted(ingredient.getName())));
         }
         return ResponseEntity.accepted().body(storageService.addStorage(new Storage(null, ingredient, storage.purchased(), storage.price(), storage.amount(), 0)));
     }

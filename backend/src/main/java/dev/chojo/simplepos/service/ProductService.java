@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.service;
 
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
@@ -68,10 +69,14 @@ public class ProductService {
     /**
      * Saves the changes to an existing product and its recipe.
      *
+     * @throws BadRequestException if the id or the recipe is missing
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the product does not exist
      */
     public Product update(Product product) {
         productRepository.require(product.getId());
+        if (product.getRecipe() == null || product.getRecipe().getEntries() == null) {
+            throw new BadRequestException("Recipe is missing");
+        }
         product.getRecipe().setProduct(product);
         for (RecipeEntry entry : product.getRecipe().getEntries()) {
             entry.setRecipe(product.getRecipe());

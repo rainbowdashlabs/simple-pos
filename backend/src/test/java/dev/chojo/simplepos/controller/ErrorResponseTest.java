@@ -1,7 +1,9 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.time.Instant;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,6 +49,8 @@ class ErrorResponseTest {
     UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    AccountRepository accountRepository;
 
     private MockMvc mvc;
 
@@ -119,6 +124,18 @@ class ErrorResponseTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void shouldAnswerPurchaseWithoutProductWithBadRequest() throws Exception {
+        Account account = accountRepository.save(new Account(null, "BadRequestAccount", Instant.now()));
+
+        mvc.perform(post("/api/account/" + account.getId() + "/purchase")
+                        .header("Authorization", "Bearer " + login().get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"amount\": 1}]"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("Product id is missing"));
     }
 
     @Test
