@@ -7,7 +7,11 @@ import dev.chojo.simplepos.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
@@ -57,10 +61,22 @@ public class WebSecurityConfig {
                 .build();
     }
 
+    /**
+     * Authenticates against the stored users. Whether an account is disabled is only checked after the password
+     * matched, so a wrong password never reveals that a user exists or is disabled.
+     */
     @Bean
     public AuthenticationProvider authenticationProvider(UserService userService, PasswordEncoder encoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userService);
         provider.setPasswordEncoder(encoder);
+        provider.setPreAuthenticationChecks(user -> {
+            if (!user.isAccountNonLocked()) throw new LockedException("Account is locked");
+            if (!user.isAccountNonExpired()) throw new AccountExpiredException("Account is expired");
+        });
+        provider.setPostAuthenticationChecks(user -> {
+            if (!user.isEnabled()) throw new DisabledException("Account is disabled");
+            if (!user.isCredentialsNonExpired()) throw new CredentialsExpiredException("Credentials are expired");
+        });
         provider.setUserDetailsPasswordService(userService);
         return provider;
     }

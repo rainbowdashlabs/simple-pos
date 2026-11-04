@@ -30,6 +30,13 @@ export class ApiError extends Error {
     }
 
     /**
+     * True for the 403 the backend sends when the user's account is disabled.
+     */
+    get isAccountDisabled(): boolean {
+        return this.status === 403 && this.problem?.accountDisabled === true
+    }
+
+    /**
      * Reads the ProblemDetail body of a failed response, falling back to the status text when the body is not one.
      */
     static async fromResponse(method: string, url: string, response: Response): Promise<ApiError> {

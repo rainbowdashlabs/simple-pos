@@ -89,7 +89,15 @@ class ErrorResponseTest {
     void shouldAnswerDisabledAccountWithForbidden() throws Exception {
         mvc.perform(post("/api/auth/login").param("username", "disableduser").param("password", "secret"))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."));
+                .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."))
+                .andExpect(jsonPath("$.accountDisabled").value(true));
+    }
+
+    @Test
+    void shouldNotRevealDisabledAccountWithoutCorrectPassword() throws Exception {
+        mvc.perform(post("/api/auth/login").param("username", "disableduser").param("password", "wrong"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.accountDisabled").doesNotExist());
     }
 
     @Test
@@ -142,10 +150,12 @@ class ErrorResponseTest {
 
         mvc.perform(post("/api/auth/refresh").param("token", tokens.get("refresh")))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."));
+                .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."))
+                .andExpect(jsonPath("$.accountDisabled").value(true));
         mvc.perform(get("/api/account").header("Authorization", "Bearer " + tokens.get("token")))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."));
+                .andExpect(jsonPath("$.detail").value("Account is disabled. Ask an administrator to enable it."))
+                .andExpect(jsonPath("$.accountDisabled").value(true));
     }
 
     private Map<String, String> login() throws Exception {

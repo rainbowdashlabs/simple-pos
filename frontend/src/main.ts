@@ -135,7 +135,9 @@ const i18n = createI18n({
             errors: {
                 unexpected: "Something went wrong. Please try again.",
                 network: "The server could not be reached. Check the connection and try again.",
-                dismiss: "Dismiss"
+                dismiss: "Dismiss",
+                invalid_credentials: "Wrong username or password.",
+                account_disabled: "Your account is disabled. Ask an administrator to enable it."
             }
         },
         de: {
@@ -218,7 +220,9 @@ const i18n = createI18n({
             errors: {
                 unexpected: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
                 network: "Der Server ist nicht erreichbar. Prüfe die Verbindung und versuche es erneut.",
-                dismiss: "Schließen"
+                dismiss: "Schließen",
+                invalid_credentials: "Benutzername oder Passwort ist falsch.",
+                account_disabled: "Dein Konto ist deaktiviert. Lass es von der Administration freischalten."
             }
         }
     },

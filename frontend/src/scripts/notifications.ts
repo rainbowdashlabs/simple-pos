@@ -24,6 +24,7 @@ export function notifyError(error: unknown) {
     if (error instanceof ApiError) {
         if (error.status === 401) return
         if (error.isNetworkError) return push(null, "errors.network")
+        if (error.isAccountDisabled) return push(null, "errors.account_disabled")
         if (error.status >= 500) return push(null, "errors.unexpected")
         return push(error.message, null)
     }

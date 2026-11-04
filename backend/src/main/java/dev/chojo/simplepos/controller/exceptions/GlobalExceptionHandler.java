@@ -40,11 +40,18 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    /**
+     * ProblemDetail property set on the 403 of a disabled account, so clients can tell it from other 403s.
+     */
+    public static final String ACCOUNT_DISABLED = "accountDisabled";
     private static final Logger log = getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<Object> handleDisabled(DisabledException e, WebRequest request) {
-        return respond(e, HttpStatus.FORBIDDEN, "Account is disabled. Ask an administrator to enable it.", request);
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN,
+                "Account is disabled. Ask an administrator to enable it.");
+        problem.setProperty(ACCOUNT_DISABLED, true);
+        return handleExceptionInternal(e, problem, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
     @ExceptionHandler(AuthenticationServiceException.class)

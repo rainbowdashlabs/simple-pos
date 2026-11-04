@@ -2,6 +2,7 @@ import Cookies from 'js-cookie'
 import {getHost, urlEncode} from "./http.ts";
 import {store} from "./store.ts";
 import router from "@/router.ts";
+import {ApiError} from "./errors.ts";
 
 interface Token {
     token: string
@@ -107,25 +108,34 @@ export async function getSessionToken() {
     return await getSessionToken()
 }
 
-export async function login(username: string, password: string) {
-    let response = await fetch(getHost() + "/api/auth/login", {
-        method: "POST",
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: urlEncode({username: username, password: password})
-    });
+/**
+ * Logs in and stores the tokens.
+ *
+ * @throws ApiError if the credentials are wrong (401), the account is disabled (403) or the server is unreachable (0)
+ */
+export async function login(username: string, password: string): Promise<void> {
+    const url = getHost() + "/api/auth/login"
+    let response: Response
+    try {
+        response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: urlEncode({username: username, password: password})
+        });
+    } catch (e) {
+        throw ApiError.network("POST", url, e)
+    }
 
-    if (response.status != 202) {
-        return false
+    if (!response.ok) {
+        throw await ApiError.fromResponse("POST", url, response)
     }
 
     let cred: TokenResponse = await response.json()
     console.log(cred)
     storeTokens(username, cred)
-
-    return true
 }
 
 function storeTokens(username: string, cred: TokenResponse) {

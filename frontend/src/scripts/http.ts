@@ -1,4 +1,4 @@
-import {getSessionToken, handleUnauthorized} from "./session.ts";
+import {getSessionToken, handleUnauthorized, logout} from "./session.ts";
 import {ApiError} from "./errors.ts";
 
 export async function postJson(url: string, body: Object) {
@@ -34,7 +34,8 @@ export async function requestJson(url: string, method: string, params: Map<strin
 
     if (!response.ok) {
         const error = await ApiError.fromResponse(method, requrl, response)
-        if (error.status === 401) handleUnauthorized()
+        if (error.isAccountDisabled) logout()
+        else if (error.status === 401) handleUnauthorized()
         throw error
     }
 
