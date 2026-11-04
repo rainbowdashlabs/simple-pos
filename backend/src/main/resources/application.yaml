@@ -42,6 +42,7 @@ springdoc:
 logging:
   level:
     root: info
+    org.springframework.web.servlet.PageNotFound: error
 
 demo:
   enabled: false
