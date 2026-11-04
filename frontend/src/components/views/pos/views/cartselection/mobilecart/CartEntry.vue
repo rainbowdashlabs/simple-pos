@@ -37,7 +37,10 @@ export default defineComponent({
       <div class="flex mr-2 w-5/6">
         <CartEntryPrice :entry="entry"/>
       </div>
-      <Icon @click="decrease" :size="SizeGroup.xl2" class="text-red-400 p-0 w-1/6" icon="fa-square-minus"/>
+      <button type="button" class="w-1/6 min-w-0 min-h-0 p-0 border-0 bg-transparent text-red-400"
+              :title="$t('button.remove_one')" :aria-label="$t('button.remove_one')" @click="decrease">
+        <Icon :size="SizeGroup.xl2" icon="fa-square-minus"/>
+      </button>
     </div>
   </div>
 </template>

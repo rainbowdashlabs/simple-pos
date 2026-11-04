@@ -35,6 +35,6 @@ export default {
     <ColorContainer bg="secondary">
       <MoneyText class="font-bold text-center" :amount="value" :size="SizeGroup.xl3"/>
     </ColorContainer>
-    <IconButton icon="fa-sack-dollar" class="w-full" @click="addBalance"/>
+    <IconButton icon="fa-sack-dollar" class="w-full" :label="$t('button.deposit')" @click="addBalance"/>
   </div>
 </template>

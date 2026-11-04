@@ -80,8 +80,8 @@ export default defineComponent({
     <StorageInventoryGroup v-for="item in summary.categories" :key="`${item.category.id}-${revision}`" :group="item"
                            :saved="ingredients" @changed="changed"/>
     <div class="grid grid-cols-2 gap-5">
-      <BackButton icon="fa-eraser" @click="clearAll"/>
-      <ConfirmButton @click="submit"/>
+      <BackButton icon="fa-eraser" :label="$t('button.clear_counts')" @click="clearAll"/>
+      <ConfirmButton :hint="$t('button.save')" @click="submit"/>
     </div>
   </ViewWrapper>
 </template>

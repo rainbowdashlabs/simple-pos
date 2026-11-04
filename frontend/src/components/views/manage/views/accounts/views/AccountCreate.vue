@@ -40,7 +40,7 @@ export default defineComponent({
         <FormLabel :label="$t('name')"/>
         <SimpleInputField type="text" v-model="name" :placeholder="$t('name')" :size="SizeGroup.xl"/>
       </div>
-      <ConfirmButton icon="fa-user-plus" :disabled="disabled" @click="createAccount"/>
+      <ConfirmButton icon="fa-user-plus" :disabled="disabled" :hint="$t('button.create')" @click="createAccount"/>
     </div>
   </ViewWrapper>
 </template>

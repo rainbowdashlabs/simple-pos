@@ -105,8 +105,8 @@ export default defineComponent({
       </GridWrapper>
     </GridWrapper>
 
-    <BackButton @click="resetDeposit"/>
-    <ConfirmButton @click="storeDeposit"/>
+    <BackButton :hint="$t('button.reset')" @click="resetDeposit"/>
+    <ConfirmButton :hint="$t('button.deposit')" @click="storeDeposit"/>
   </GridWrapper>
   </ViewWrapper>
 

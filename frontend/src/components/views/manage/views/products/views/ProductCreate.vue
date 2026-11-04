@@ -183,7 +183,7 @@ export default defineComponent({
     </ColorContainer>
 
     <div class="col-span-full">
-      <ConfirmButton class="w-full" :disabled="disabled" @click="createProd"/>
+      <ConfirmButton class="w-full" :disabled="disabled" :hint="$t('button.create')" @click="createProd"/>
     </div>
     </div>
   </ViewWrapper>

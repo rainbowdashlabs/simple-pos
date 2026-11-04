@@ -43,8 +43,8 @@ export default defineComponent({
         <FormattedText class="content-center" :size="SizeGroup.lg" value="Cart"/>
         <FormattedText class="content-center font-bold" :size="SizeGroup.lg" :value="content.total" type="currency"/>
         <div class="flex gap-2 shrink-0">
-          <TwoStepDeleteButton v-if="!empty" @click="clearCart"/>
-          <ConfirmButton :disabled="empty" @click="checkout"/>
+          <TwoStepDeleteButton v-if="!empty" :hint="$t('button.clear_cart')" :confirm-hint="$t('button.clear_cart_confirm')" @click="clearCart"/>
+          <ConfirmButton :disabled="empty" :hint="$t('button.checkout')" @click="checkout"/>
         </div>
       </div>
       <div class="max-h-[20vh] overflow-y-auto">

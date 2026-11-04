@@ -39,8 +39,8 @@ export default defineComponent({
     <FormattedText value="x"/>
     <FormattedText :value="entry.price" type="currency"/>
     <div class="flex gap-2">
-      <IconButton @click="e =>{e.stopPropagation(); updateValue(-1)}" icon="fa-square-minus"/>
-      <IconButton @click="e =>{e.stopPropagation(); updateValue(1)}" icon="fa-square-plus"/>
+      <IconButton @click="e =>{e.stopPropagation(); updateValue(-1)}" icon="fa-square-minus" :hint="$t('button.remove_one')"/>
+      <IconButton @click="e =>{e.stopPropagation(); updateValue(1)}" icon="fa-square-plus" :hint="$t('button.add_one')"/>
     </div>
   </div>
 </template>

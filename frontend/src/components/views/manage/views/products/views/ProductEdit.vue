@@ -151,7 +151,7 @@ export default defineComponent({
                               :recipe="recipe"/>
     </ColorContainer>
 
-    <ConfirmButton class="col-span-full" :disabled="disabled" @click="updateProd"/>
+    <ConfirmButton class="col-span-full" :disabled="disabled" :hint="$t('button.save')" @click="updateProd"/>
     </div>
   </ViewWrapper>
 </template>

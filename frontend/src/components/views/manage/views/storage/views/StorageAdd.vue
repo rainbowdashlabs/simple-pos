@@ -124,7 +124,7 @@ export default defineComponent({
       <SimpleInputField type="number"
                         v-model="price"
                         :name="$t('price') + ' ' + $t('piece')"/>
-      <ConfirmButton class="" @click="nextState"/>
+      <ConfirmButton :hint="$t('button.next')" @click="nextState"/>
     </ColorContainer>
 
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'container_count'">
@@ -138,8 +138,8 @@ export default defineComponent({
                         :name="$t('price') + ' ' + $t('piece')"/>
 
       <div class="flex gap-5">
-        <BackButton class="w-1/4" @click="previousState"/>
-        <ConfirmButton class="w-3/4" @click="nextState"/>
+        <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
+        <ConfirmButton class="w-3/4" :hint="$t('button.next')" @click="nextState"/>
       </div>
     </ColorContainer>
 
@@ -154,8 +154,8 @@ export default defineComponent({
                         :name="$t('piece')"/>
 
       <div class="flex gap-5">
-        <BackButton class="w-1/4" @click="previousState"/>
-        <ConfirmButton class="w-3/4" @click="nextState"/>
+        <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
+        <ConfirmButton class="w-3/4" :hint="$t('button.next')" @click="nextState"/>
       </div>
     </ColorContainer>
 
@@ -169,8 +169,8 @@ export default defineComponent({
                         :name="$t('piece')"/>
 
       <div class="flex gap-5">
-        <BackButton class="w-1/4" @click="previousState"/>
-        <ConfirmButton class="w-3/4" @click="nextState"/>
+        <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
+        <ConfirmButton class="w-3/4" :hint="$t('button.next')" @click="nextState"/>
       </div>
     </ColorContainer>
 
@@ -184,8 +184,8 @@ export default defineComponent({
                         :name="$t('piece')"/>
 
       <div class="flex gap-5">
-        <BackButton class="w-1/4" @click="previousState"/>
-        <ConfirmButton class="w-3/4" @click="nextState"/>
+        <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
+        <ConfirmButton class="w-3/4" :hint="$t('button.next')" @click="nextState"/>
       </div>
     </ColorContainer>
 
@@ -204,8 +204,8 @@ export default defineComponent({
                            :entries="[$t('total'), '', $n(pledgeContainers + pledgePieces + price * pieceCount, 'currency')]"/>
       </GridWrapper>
       <div class="flex gap-5 pt-5">
-        <BackButton class="w-1/4" @click="previousState"/>
-        <ConfirmButton class="w-3/4" @click="submit"/>
+        <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>
+        <ConfirmButton class="w-3/4" :hint="$t('button.save')" @click="submit"/>
       </div>
     </div>
   </ViewWrapper>

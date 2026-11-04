@@ -73,7 +73,7 @@ export default defineComponent({
                               :aria-invalid="error !== null" :aria-describedby="error ? 'login-error' : undefined"/>
           </div>
           <p v-if="error" id="login-error" role="alert" class="rounded-lg p-3 bg-warn dark:bg-warn-d text-dark dark:text-bright">{{ error }}</p>
-          <ConfirmButton type="submit" :disabled="disabled"/>
+          <ConfirmButton type="submit" :disabled="disabled" :hint="$t('button.log_in')"/>
         </div>
       </form>
     </div>

@@ -121,11 +121,11 @@ export default defineComponent({
       </ColorContainer>
 
       <GridWrapper bg="none" cols="2" padding="0">
-        <BackButton :disabled="submitting" @click="back"/>
-        <ConfirmButton :disabled="submitting || cartEmpty" @click="purchase"/>
+        <BackButton :disabled="submitting" :hint="$t('button.back')" @click="back"/>
+        <ConfirmButton :disabled="submitting || cartEmpty" :hint="$t('button.pay')" @click="purchase"/>
       </GridWrapper>
     </GridWrapper>
-    <BackButton v-else @click="back"/>
+    <BackButton v-else :hint="$t('button.back')" @click="back"/>
   </GridWrapper>
   </ViewWrapper>
 </template>

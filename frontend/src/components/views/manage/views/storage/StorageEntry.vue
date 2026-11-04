@@ -58,16 +58,17 @@ export default defineComponent({
 
 <template>
   <div :class="panelColor" class="p-5 rounded-md">
-    <div class="flex w-full justify-between items-center pb-5 gap-5">
+    <div class="flex flex-wrap w-full justify-between items-center pb-5 gap-5">
       <FormattedText :size="SizeGroup.xl" class="items-center" :value="listing?.ingredient.name"/>
       <NumberText v-if="active" class="content-center" :amount="listing.stock" :size="SizeGroup.xl"
                   :min="listing.ingredient.minStock"/>
       <span v-else class="px-2 py-0.5 rounded-md text-xs bg-red-500/20 text-red-500">{{ $t('inactive') }}</span>
       <div class="flex justify-end gap-2">
         <IconButton :icon="active ? 'fa-eye' : 'fa-eye-slash'" @click="toggleActive"
+                    :hint="$t(active ? 'button.deactivate' : 'button.activate')"
                     :bg="active ? 'accent' : 'primary'"/>
-        <IconButton icon="fa-pen" @click="edit"/>
-        <IconButton icon="fa-square-plus" @click="add"/>
+        <IconButton icon="fa-pen" :hint="$t('button.edit')" @click="edit"/>
+        <IconButton icon="fa-square-plus" :label="$t('button.add_delivery')" @click="add"/>
       </div>
     </div>
 

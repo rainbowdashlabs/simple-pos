@@ -25,6 +25,12 @@ export default {
     }
   },
   watch: {
+    '$i18n.locale': {
+      handler(locale: string) {
+        document.documentElement.lang = locale
+      },
+      immediate: true
+    },
     loggedIn(isLoggedIn: boolean) {
       if (isLoggedIn) this.loadPreferences()
     },

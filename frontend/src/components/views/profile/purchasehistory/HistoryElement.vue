@@ -58,7 +58,7 @@ export default defineComponent({
       </div>
     </div>
     <div class="w-1/6 flex justify-end">
-      <IconButton icon="fa-trash-can" @click="showDeleteModal = true"/>
+      <IconButton icon="fa-trash-can" :hint="$t('button.cancel_purchase')" @click="showDeleteModal = true"/>
     </div>
   </div>
 

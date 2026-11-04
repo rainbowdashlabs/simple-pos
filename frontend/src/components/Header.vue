@@ -32,7 +32,6 @@ export default {
 
 <template>
   <div class="py-4 bg-secondary dark:bg-secondary-d">
-    <!-- Desktop -->
     <div class="max-w-screen-xl mx-auto">
 
       <div class="flex flex-none max-md:hidden justify-around">
@@ -55,9 +54,9 @@ export default {
       </div>
     </div>
 
-    <!-- Mobile -->
     <div class="flex md:hidden">
-      <div @click="navBar = !navBar"
+      <div @click="navBar = !navBar" role="button" tabindex="0" @keydown.enter="navBar = !navBar" @keydown.space.prevent="navBar = !navBar"
+           :title="$t('button.menu')" :aria-label="$t('button.menu')" :aria-expanded="navBar"
            class="flex flex-none text-3xl px-5 text-center items-center justify-center border-r-2 border-accent dark:border-accent-d hover:cursor-pointer">
         <Icon icon="fa-bars"/>
       </div>

@@ -120,8 +120,8 @@ export default defineComponent({
     </ColorContainer>
 
     <div class="flex justify-evenly gap-5">
-      <IconButton class="w-full" bg="okay" icon="fa-download" @click="toggleDeposit"/>
-      <IconButton class="w-full" bg="warn" icon="fa-upload" @click="toggleWithdraw"/>
+      <IconButton class="w-full" bg="okay" icon="fa-download" :label="$t('button.deposit')" @click="toggleDeposit"/>
+      <IconButton class="w-full" bg="warn" icon="fa-upload" :label="$t('button.withdraw')" @click="toggleWithdraw"/>
     </div>
 
     <Transition>
@@ -134,7 +134,7 @@ export default defineComponent({
         <SelectMenu class="col-span-full" @select="typeChange"
                     :options="[[$t('pledge'), 'pledge'], [$t('purchase'), 'purchase'], [$t('other'), 'other']]"
                     :current="type"/>
-        <ConfirmButton @click="() => submit()" :disabled="disabled" class="col-span-full"/>
+        <ConfirmButton @click="() => submit()" :disabled="disabled" :hint="$t('button.save')" class="col-span-full"/>
       </GridWrapper>
     </Transition>
     <CashHistory :key="componentKey"/>

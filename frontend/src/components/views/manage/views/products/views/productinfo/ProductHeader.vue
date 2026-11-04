@@ -68,9 +68,10 @@ export default defineComponent({
       </div>
       <div class="flex gap-2">
         <IconButton :icon="active ? 'fa-eye' : 'fa-eye-slash'" @click="toggleActive"
+                    :hint="$t(active ? 'button.deactivate' : 'button.activate')"
                     :bg="active ? 'accent' : 'primary'"/>
-        <IconButton icon="fa-pen" @click="$emit('edit')"/>
-        <IconButton icon="fa-trash-can" @click="showDeleteModal = true"/>
+        <IconButton icon="fa-pen" :hint="$t('button.edit')" @click="$emit('edit')"/>
+        <IconButton icon="fa-trash-can" :hint="$t('button.delete')" @click="showDeleteModal = true"/>
       </div>
     </div>
 

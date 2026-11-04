@@ -6,8 +6,9 @@ import {buildDarkMode} from "@/scripts/util.ts";
 import {SizeGroup} from "@/scripts/text.ts";
 
 /**
- * A button showing an icon, optionally followed by a text `label`, both centred. Without a label, `hint` should say
- * what the button does; it becomes the tooltip and the accessible name.
+ * A button showing an icon, optionally followed by a text `label`, both centred; on narrow screens the label goes
+ * below the icon. Without a label, `hint` should say what the button does; it becomes the tooltip and the
+ * accessible name.
  */
 export default defineComponent({
   name: "IconButton",
@@ -52,9 +53,9 @@ export default defineComponent({
 
 <template>
   <FreeButton @click="$emit('click', $event)" :disabled="disabled" :color="currentColor" :hint="hint ?? label">
-    <span class="flex items-center justify-center gap-2">
+    <span :class="label ? 'flex-col sm:flex-row gap-1 sm:gap-2' : 'gap-2'" class="flex items-center justify-center">
       <Icon :class="size" :icon="icon"/>
-      <span v-if="label" class="text-base font-semibold">{{ label }}</span>
+      <span v-if="label" class="text-sm sm:text-base font-semibold leading-tight text-center break-words hyphens-auto">{{ label }}</span>
     </span>
   </FreeButton>
 </template>

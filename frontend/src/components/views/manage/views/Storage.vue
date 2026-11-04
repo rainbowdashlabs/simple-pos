@@ -46,9 +46,9 @@ export default defineComponent({
 <template>
   <ViewWrapper>
     <div class="grid grid-cols-3 gap-5">
-      <ConfirmButton icon="fa-square-plus" @click="createIngredient"/>
-      <ConfirmButton icon="fa-check-double" @click="inventory"/>
-      <IconButton :icon="'fa-triangle-exclamation'"
+      <ConfirmButton icon="fa-square-plus" :label="$t('button.new_ingredient')" @click="createIngredient"/>
+      <ConfirmButton icon="fa-check-double" :label="$t('button.count_stock')" @click="inventory"/>
+      <IconButton :icon="'fa-triangle-exclamation'" :label="$t('button.low_stock_only')"
                   :bg="lowStockOnly ? 'warn' : 'secondary'"
                   @click="lowStockOnly = !lowStockOnly"/>
     </div>

@@ -63,14 +63,14 @@ export default defineComponent({
     <!-- Header: name + actions -->
     <div v-if="edit" class="flex gap-2">
       <SimpleInputField class="flex-1" type="text" v-model="newName"/>
-      <ConfirmButton @click="saveRename"/>
-      <BackButton @click="cancelEdit"/>
+      <ConfirmButton :hint="$t('button.save')" @click="saveRename"/>
+      <BackButton :hint="$t('button.cancel')" @click="cancelEdit"/>
     </div>
     <div v-else class="flex items-center justify-between">
       <FormattedText :value="user.name" :size="SizeGroup.lg"/>
       <div class="flex gap-2">
-        <IconButton icon="fa-pen" @click="edit = true"/>
-        <IconButton icon="fa-trash-can" @click="showDeleteModal = true"/>
+        <IconButton icon="fa-pen" :hint="$t('button.rename')" @click="edit = true"/>
+        <IconButton icon="fa-trash-can" :hint="$t('button.delete')" @click="showDeleteModal = true"/>
       </div>
     </div>
 
