@@ -31,7 +31,7 @@ export default defineComponent({
     },
     rawPrice(): number {
       if (!this.focusProduct) return 0
-      return this.focusProduct.recipe.entries.reduce((p, c) => p + c.ingredient.price * c.amount, 0)
+      return (this.focusProduct.recipe?.entries ?? []).reduce((p, c) => p + c.ingredient.price * c.amount, 0)
     }
   },
   methods: {
@@ -52,7 +52,7 @@ export default defineComponent({
     <ProductHeader :product="focusProduct" :raw-price="rawPrice" @edit="editProduct"/>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <ProductIngredients :entries="focusProduct.recipe.entries"/>
+      <ProductIngredients :entries="focusProduct.recipe?.entries ?? []"/>
       <ProductSalesSummary :product-id="focusProduct.id!" :timeframes="timeframes"/>
       <ProductSalesChart :stats="dailyStats" :days="chartDays"/>
       <ProductRevenueChart :stats="dailyStats" :days="chartDays"/>

@@ -108,7 +108,7 @@ export default defineComponent({
     fetchProduct(Number(this.id)).then(e => {
       this.product = Object.assign({}, e)
       this.category = e.category
-      this.recipe = Object.assign({}, e.recipe)
+      this.recipe = e.recipe ? {...e.recipe, entries: [...(e.recipe.entries ?? [])]} : {entries: []}
     })
     ingredients().then(e => {
       this.ingredientList = e

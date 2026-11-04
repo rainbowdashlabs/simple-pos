@@ -33,8 +33,7 @@ public class Product implements Comparable<Product> {
     @Column(columnDefinition = "boolean default false")
     private boolean deleted = false;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "id")
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Recipe recipe;
 
     public Product(Integer id, Category category, String name, double price, boolean active, Recipe recipe) {
