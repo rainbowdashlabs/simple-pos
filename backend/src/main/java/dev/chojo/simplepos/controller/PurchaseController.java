@@ -88,6 +88,7 @@ public class PurchaseController {
     ResponseEntity<List<Map<String, Object>>> getSalesByCategory(@RequestParam() Instant after) {
         return ResponseEntity.ok(purchaseRepository.getSalesByCategory(after).stream().map(t -> {
             Map<String, Object> m = new LinkedHashMap<>();
+            m.put("categoryId", t.get("category_id"));
             m.put("categoryName", t.get("category_name"));
             m.put("sales", t.get("sales"));
             m.put("revenue", t.get("revenue"));

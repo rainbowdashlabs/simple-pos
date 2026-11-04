@@ -56,8 +56,7 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Void> delete(@PathVariable int id) {
-        // TODO check that no entity is associated
-        categoryRepository.deleteById(id);
+        categoryService.delete(id);
         return ResponseEntity.accepted().build();
     }
 }

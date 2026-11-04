@@ -4,6 +4,8 @@ import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.List;
 
@@ -37,4 +39,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
         if (id == null) throw new BadRequestException("Product id is missing");
         return id;
     }
+
+    long countByCategory_IdAndDeletedFalse(int categoryId);
+
+    /**
+     * Detaches deleted products from a category, so the category can be deleted. Deleted products are never listed.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Product p SET p.category = null WHERE p.category.id = ?1 AND p.deleted = true")
+    int detachDeletedFromCategory(int categoryId);
 }

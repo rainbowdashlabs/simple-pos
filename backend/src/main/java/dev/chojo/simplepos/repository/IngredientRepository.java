@@ -71,4 +71,6 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
         if (id == null) throw new BadRequestException("Ingredient id is missing");
         return id;
     }
+
+    long countByCategory_Id(int categoryId);
 }

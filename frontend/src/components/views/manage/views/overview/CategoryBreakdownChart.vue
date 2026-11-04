@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import {UNCATEGORISED_ID} from "@/scripts/categories.ts";
 import {use} from 'echarts/core'
 import {PieChart} from 'echarts/charts'
 import {TooltipComponent, LegendComponent} from 'echarts/components'
@@ -33,12 +34,11 @@ export default defineComponent({
     textColor() { return store.theme === 'dark' ? '#e0ecf6' : '#121417' },
     chartOption() {
       const locale = this.$i18n.locale
-      const grouped = new Map<string, number>()
-      for (const s of this.stats) {
-        grouped.set(s.categoryName, (grouped.get(s.categoryName) ?? 0) + s.revenue)
-      }
-      const data = Array.from(grouped.entries())
-          .map(([name, value]) => ({name, value: Math.round(value * 100) / 100}))
+      const data = this.stats
+          .map(s => ({
+            name: s.categoryId === UNCATEGORISED_ID ? this.$t('uncategorised') : s.categoryName,
+            value: Math.round(s.revenue * 100) / 100
+          }))
           .sort((a, b) => b.value - a.value)
 
       return {

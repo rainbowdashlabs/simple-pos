@@ -35,3 +35,16 @@ export function createCategory(name: string): Promise<Category> {
 export function deleteCategory(id: number): Promise<Category> {
     return deleteJson("api/category/" + id)
 }
+
+/**
+ * The id the backend gives the group of entries without a category.
+ */
+export const UNCATEGORISED_ID = 0
+
+/**
+ * The name to show for a category, translating the group of entries without one.
+ */
+export function categoryLabel(category: Category | null | undefined, translate: (key: string) => string): string {
+    if (!category || category.id === UNCATEGORISED_ID) return translate('uncategorised')
+    return category.name
+}

@@ -1,6 +1,5 @@
 import {Category, Listing} from "./categories.ts";
 import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
-import {store} from "./store.ts";
 
 export interface Ingredient {
     id: number | null | undefined,
@@ -46,7 +45,6 @@ export function createIngredient(ingredient: Ingredient): Promise<Ingredient> {
 
 export function ingredients(): Promise<Listing<Ingredient>> {
     return getJson("api/ingredient")
-    return store.ingredientCache.allAsListingPromise() ?? store.ingredientCache.cacheListingPromise(getJson("api/ingredient"))
 }
 
 export function updateIngredient(data: Ingredient): Promise<Ingredient> {
@@ -55,12 +53,9 @@ export function updateIngredient(data: Ingredient): Promise<Ingredient> {
 
 export function ingredient(id: number): Promise<Ingredient> {
     return getJson("api/ingredient/" + id)
-    return store.ingredientCache.promiseById(id) ?? store.ingredientCache.cachePromise(getJson("api/ingredient/" + id))
 }
 
 export function deleteIngredient(id: number): Promise<any> {
-    return deleteJson("api/ingredient/" + id)
-    store.ingredientCache.delete(id)
     return deleteJson("api/ingredient/" + id)
 }
 

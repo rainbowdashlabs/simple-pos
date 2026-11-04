@@ -179,4 +179,24 @@ class PurchaseRepositoryTest {
         assertEquals(1, days.size());
         assertEquals(1, ((Number) days.get(0).get("sales")).intValue());
     }
+
+    @Test
+    void salesByCategoryAreGroupedPerCategory() {
+        Category category = categoryRepository.save(new Category(null, "GroupedCat"));
+        Product second = productService.create(new Product(null, category, "Second", 1.0, true, new Recipe(null, null, Collections.emptyList())));
+        Product third = productService.create(new Product(null, category, "Third", 1.0, true, new Recipe(null, null, Collections.emptyList())));
+        Product loose = productService.create(new Product(null, null, "Loose", 1.0, true, new Recipe(null, null, Collections.emptyList())));
+        Instant now = Instant.now();
+        purchaseRepository.save(new Purchase(null, account, second, now, 2, 1.0, Collections.emptyList()));
+        purchaseRepository.save(new Purchase(null, account, third, now, 3, 1.0, Collections.emptyList()));
+        purchaseRepository.save(new Purchase(null, account, loose, now, 1, 1.0, Collections.emptyList()));
+
+        var rows = purchaseRepository.getSalesByCategory(now.minus(1, ChronoUnit.HOURS));
+
+        var grouped = rows.stream().filter(t -> ((Number) t.get("category_id")).intValue() == category.getId()).toList();
+        assertEquals(1, grouped.size());
+        assertEquals(5, ((Number) grouped.get(0).get("sales")).intValue());
+        assertTrue(rows.stream().anyMatch(t -> ((Number) t.get("category_id")).intValue() == Category.UNCATEGORISED_ID
+                && ((Number) t.get("sales")).intValue() == 1));
+    }
 }

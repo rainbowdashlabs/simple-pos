@@ -1,4 +1,5 @@
 <script lang="ts">
+import {Category, categoryLabel} from "@/scripts/categories.ts";
 import {defineComponent, PropType} from 'vue'
 import StorageInventoryEntry from "./StorageInventoryEntry.vue";
 import {StorageSummary} from "@/scripts/storage.ts";
@@ -7,6 +8,11 @@ import {SizeGroup} from "@/scripts/text.ts";
 import {CategoryGroup} from "@/scripts/categories.ts";
 
 export default defineComponent({
+  methods: {
+    categoryName(category: Category | null | undefined): string {
+      return categoryLabel(category, key => this.$t(key))
+    }
+  },
   name: "StorageInventoryGroup",
   computed: {
     SizeGroup() {
@@ -30,7 +36,7 @@ export default defineComponent({
 
 <template>
   <div class="pt-5">
-    <FormattedText :size="SizeGroup.xl" :value="group.category.name"/>
+    <FormattedText :size="SizeGroup.xl" :value="categoryName(group.category)"/>
     <div class="grid grid-cols-1 gap-5 pt-5">
       <StorageInventoryEntry v-for="item in group.entries" :key="item.ingredient.id!" :listing="item" :saved="saved"
                              @changed="e => {$emit('changed', e)}"/>
