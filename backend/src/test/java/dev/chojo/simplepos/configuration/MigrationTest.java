@@ -36,12 +36,15 @@ class MigrationTest {
                 VALUES (1, 20, 0, 'Bottle', 0.08, 1.5, 0.877, 1)""");
         jdbc.update("INSERT INTO storage (id, amount, price, purchased, sold, ingredient_id) VALUES (1, 12, 0.877, now(), 0, 1)");
         jdbc.update("INSERT INTO users (id, enabled, username, role) VALUES (1, true, 'staff', 'STAFF')");
+        jdbc.update("INSERT INTO users (id, enabled, username, role) VALUES (2, true, 'legacy', NULL)");
+        jdbc.update("INSERT INTO users (id, enabled, username, role) VALUES (3, false, 'legacysignup', NULL)");
         jdbc.update("INSERT INTO cash (id, amount, type, user_id) VALUES (1, -10.524000000000001, 'purchase', 1)");
         jdbc.update("INSERT INTO cash (id, amount, type, user_id) VALUES (2, 0.30000000000000004, 'other', 1)");
         jdbc.update("INSERT INTO account (id, name, deleted) VALUES (1, 'Guest', false)");
         jdbc.update("INSERT INTO balance (id, amount, account_id) VALUES (1, 0.8000000000000398, 1)");
         jdbc.update("INSERT INTO product (id, active, name, price, category_id) VALUES (1, true, 'Lemonade', 2.0, 1)");
         jdbc.update("INSERT INTO purchase (id, amount, price, purchased, account_id, product_id) VALUES (1, 5, 2.0, now(), 1, 1)");
+        jdbc.update("INSERT INTO purchase (id, amount, price, purchased, account_id, product_id) VALUES (8, 1, 2.0, now(), 1, 1)");
         jdbc.update("INSERT INTO purchase (id, amount, price, purchased, account_id, product_id) VALUES (2, 7, 2.0, now(), 1, 1)");
         for (int id = 1; id <= 5; id++) {
             jdbc.update("INSERT INTO purchase_part (id, purchase_id, storage_id) VALUES (?, 1, 1)", id);
@@ -117,6 +120,23 @@ class MigrationTest {
         assertEquals(new BigDecimal("0.34"), part(5, 3, "cost", BigDecimal.class));
         assertEquals(new BigDecimal("0.33"), part(6, 3, "cost", BigDecimal.class));
         assertEquals(new BigDecimal("1.00"), jdbc.queryForObject("SELECT sum(cost) FROM purchase_part WHERE storage_id = 3", BigDecimal.class));
+    }
+
+    @Test
+    void eachPurchaseCarriesTheCostOfItsParts() {
+        assertEquals(new BigDecimal("6.28"), jdbc.queryForObject("SELECT cost FROM purchase WHERE id = 2", BigDecimal.class));
+        assertEquals(new BigDecimal("0.00"), jdbc.queryForObject("SELECT cost FROM purchase WHERE id = 8", BigDecimal.class));
+        assertEquals(0, jdbc.queryForObject("""
+                SELECT count(*) FROM purchase p
+                WHERE p.cost <> coalesce((SELECT sum(pp.cost) FROM purchase_part pp WHERE pp.purchase_id = p.id), 0)""",
+                Integer.class));
+    }
+
+    @Test
+    void usersWithoutARoleGetOneByWhetherTheyWereEnabled() {
+        assertEquals("ADMIN", jdbc.queryForObject("SELECT role FROM users WHERE id = 2", String.class));
+        assertEquals("USER", jdbc.queryForObject("SELECT role FROM users WHERE id = 3", String.class));
+        assertEquals("STAFF", jdbc.queryForObject("SELECT role FROM users WHERE id = 1", String.class));
     }
 
     private static <T> T part(int purchase, int storage, String column, Class<T> type) {

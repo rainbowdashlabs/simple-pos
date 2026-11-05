@@ -1,4 +1,5 @@
-import {CategoryGroup, Listing} from "./categories.ts";
+import {Page} from "./page.ts";
+import {CategoryGroup} from "./categories.ts";
 import {Ingredient} from "./Ingredient.ts";
 import {getJson, postJson, putJson} from "./http.ts";
 
@@ -43,12 +44,8 @@ export function stockInfo(id: number): Promise<StorageSummary> {
     return getJson("api/storage/stock/" + id)
 }
 
-export function stockSummary(): Promise<Listing<StorageSummary>> {
-    return getJson("api/storage/stock")
-}
-
-export function storageHistory(id: number, limit: number = 30): Promise<StorageEntry[]> {
-    return getJson("api/storage/" + id, new Map([["limit", limit]]))
+export function stockSummary(page: number = 0, limit: number = 100): Promise<Page<StorageSummary>> {
+    return getJson("api/storage/stock", new Map([["page", page], ["limit", limit]]))
 }
 
 export function addStorage(data: InboundStorage): Promise<StorageEntry> {
@@ -59,12 +56,12 @@ export function submitInventory(data: InventoryCorrection[]) {
     return putJson("api/storage", data)
 }
 
-export function stockLow(limit: number = 100): Promise<StorageSummary[]> {
-    return getJson("api/storage/stock/low", new Map([["limit", limit]]))
+export function stockLow(page: number = 0, limit: number = 100): Promise<Page<StorageSummary>> {
+    return getJson("api/storage/stock/low", new Map([["page", page], ["limit", limit]]))
 }
 
-export function stockOut(limit: number = 100): Promise<StorageSummary[]> {
-    return getJson("api/storage/stock/out", new Map([["limit", limit]]))
+export function stockOut(page: number = 0, limit: number = 100): Promise<Page<StorageSummary>> {
+    return getJson("api/storage/stock/out", new Map([["page", page], ["limit", limit]]))
 }
 
 export interface StockProjection {
@@ -76,4 +73,17 @@ export interface StockProjection {
 
 export function stockProjection(): Promise<StockProjection[]> {
     return getJson("api/storage/stock/projection")
+}
+
+export interface ShoppingListEntry {
+    ingredient: Ingredient
+    stock: number
+    dailyUsage: number
+    amount: number
+    containers: number
+    estimatedCost: number
+}
+
+export function shoppingList(days: number): Promise<ShoppingListEntry[]> {
+    return getJson("api/storage/shopping-list", new Map([["days", days]]))
 }

@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
+import {allPages, groupByCategory} from "@/scripts/page.ts";
 import {Product, ProductDraft, Recipe, RecipeEntry} from "@/scripts/product.ts";
 import {categories, Category, Listing} from "@/scripts/categories.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
@@ -75,8 +76,8 @@ export default defineComponent({
     }
   },
   mounted() {
-    ingredients().then(e => this.ingredientList = e)
-    categories().then(e => {
+    allPages(page => ingredients(page)).then(e => this.ingredientList = groupByCategory(e, ingredient => ingredient.category))
+    allPages(page => categories(page)).then(e => {
       this.categoryList = e
       if (!this.category && e.length > 0) this.category = e[0]
     })

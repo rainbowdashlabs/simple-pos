@@ -9,12 +9,14 @@ import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import BackButton from "@/components/styles/buttons/BackButton.vue";
 import {CategoryGroup, Listing} from "@/scripts/categories.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import {allPages, groupByCategory} from "@/scripts/page.ts";
 
 const SESSION_KEY = 'inventory-check'
 
 /**
- * Counting the stock. Only the ingredients someone actually counted are sent: the backend sets each sent ingredient
- * to the counted amount, so sending the ones nobody touched would set them to zero.
+ * Counting the stock of every active ingredient, with all pages loaded. Only the ingredients someone actually counted
+ * are sent: the backend sets each sent ingredient to the counted amount, so sending the ones nobody touched would set
+ * them to zero.
  */
 export default defineComponent({
   name: "StorageInventory",
@@ -61,8 +63,8 @@ export default defineComponent({
   },
   mounted() {
     const saved = this.loadSession()
-    stockSummary().then(e => {
-      this.summary = {categories: e.categories.map(e => Object.assign({}, e))}
+    allPages(page => stockSummary(page)).then(items => {
+      this.summary = groupByCategory(items, entry => entry.ingredient.category)
       this.summary.categories.forEach((group: CategoryGroup<StorageSummary>) => {
         group.entries.forEach((entry: StorageSummary) => {
           const id = entry.ingredient.id!

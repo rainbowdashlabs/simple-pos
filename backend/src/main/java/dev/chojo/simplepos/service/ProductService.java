@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
@@ -8,17 +7,26 @@ import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
+import dev.chojo.simplepos.entity.response.PageResponse;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeEntryRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -51,7 +59,7 @@ public class ProductService {
 
         Recipe recipe = product.getRecipe();
         if (recipe == null || recipe.getEntries() == null) {
-            throw new BadRequestException("Recipe is missing");
+            throw new BadRequestException(ErrorCode.RECIPE_MISSING);
         }
         recipe.setId(null);
         recipe.getEntries().forEach(entry -> entry.setId(null));
@@ -98,7 +106,7 @@ public class ProductService {
      * taken; whether the product is deleted or active never changes here, and the changes always go to the recipe
      * stored for the product. A product without a stored recipe gets one.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the product does not exist or is deleted
+     * @throws NotFoundException if the product does not exist or is deleted
      * @throws BadRequestException if the category or an ingredient does not exist, or a recipe entry names neither or
      *                             both an existing and a new ingredient
      */
@@ -131,11 +139,47 @@ public class ProductService {
 
     private RecipeEntry toEntry(RecipeEntryRequest request) {
         if ((request.ingredientId() == null) == (request.ingredient() == null)) {
-            throw new BadRequestException("Each recipe entry needs either an existing ingredient or a new one");
+            throw new BadRequestException(ErrorCode.RECIPE_ENTRY_AMBIGUOUS);
         }
         Ingredient ingredient = request.ingredientId() != null
                 ? ingredientRepository.requireReferenced(request.ingredientId())
                 : request.ingredient().toIngredient(categoryRepository.requireReferenced(request.ingredient().categoryId()));
         return new RecipeEntry(null, ingredient, request.amount());
+    }
+
+    /**
+     * Takes a product off the till for good: it is marked deleted and inactive, and its sales stay in the history.
+     *
+     * @throws NotFoundException if the product does not exist or is deleted
+     */
+    @Transactional
+    public void delete(int id) {
+        Product product = productRepository.requireNotDeleted(id);
+        product.setDeleted(true);
+        product.setActive(false);
+    }
+
+    /**
+     * Puts a product on sale or takes it off.
+     *
+     * @throws NotFoundException if the product does not exist or is deleted
+     */
+    @Transactional
+    public Product toggleActive(int id) {
+        Product product = productRepository.requireNotDeleted(id);
+        product.setActive(!product.isActive());
+        return product;
+    }
+
+    /**
+     * A page of the products that are not deleted, optionally only those on sale and of one category, by category name
+     * (products without one last), then name, each with its recipe.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<Product> page(boolean activeOnly, Integer categoryId, Pageable pageable) {
+        Page<Integer> ids = productRepository.findIdPage(activeOnly, categoryId, pageable);
+        Map<Integer, Product> products = productRepository.findAllByIdIn(ids.getContent()).stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+        return PageResponse.of(ids, products::get);
     }
 }

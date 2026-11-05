@@ -22,8 +22,8 @@ import dev.chojo.simplepos.repository.PurchasePartRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.repository.projection.TotalsRow;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -87,12 +87,12 @@ class ProfitTest {
         Storage batch = storageService.deliver(new InboundStorage(bottle, null, null, money(10.52), money(0.0), 12), staff);
         assertUnitPrice(0.8767, batch.getPrice());
 
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 12)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 12)), null);
         entityManager.flush();
 
-        Tuple summary = purchaseRepository.getSalesStatSummary(product.getId(), Instant.now().minus(1, ChronoUnit.HOURS));
-        assertMoney(24.0, Money.fromQuery((Number) summary.get("revenue")));
-        assertMoney(13.48, Money.fromQuery((Number) summary.get("profit")));
+        TotalsRow summary = purchaseRepository.getSalesStatSummary(product.getId(), Instant.now().minus(1, ChronoUnit.HOURS));
+        assertMoney(24.0, Money.orZero(summary.getRevenue()));
+        assertMoney(13.48, Money.orZero(summary.getProfit()));
     }
 
     @Test
@@ -107,7 +107,7 @@ class ProfitTest {
         Storage second = storageRepository.save(new Storage(null, can, delivered, 0.3, 2, 0));
         entityManager.flush();
 
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 7)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 7)), null);
         entityManager.flush();
 
         List<PurchasePart> parts = purchasePartRepository.findAll(Sort.by("id")).stream()

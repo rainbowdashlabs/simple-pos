@@ -81,8 +81,8 @@ class AdminUserApiTest {
         login("newstaff", "password123");
         mvc.perform(get("/api/admin/users").header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.username == 'newstaff')].role").value("STAFF"))
-                .andExpect(jsonPath("$[*].password").isEmpty());
+                .andExpect(jsonPath("$.items[?(@.username == 'newstaff')].role").value("STAFF"))
+                .andExpect(jsonPath("$.items[*].password").isEmpty());
     }
 
     @Test
@@ -208,7 +208,7 @@ class AdminUserApiTest {
 
     private Map<String, String> login(String username, String password) throws Exception {
         String body = mvc.perform(post("/api/auth/login").param("username", username).param("password", password))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
         return Map.of("token", tokenOf(tokens.get("token")), "refresh", tokenOf(tokens.get("refresh")));

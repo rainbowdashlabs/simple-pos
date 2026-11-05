@@ -1,9 +1,10 @@
 <script lang="ts">
 import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
-import {store} from "@/scripts/store.ts";
-import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
-import {account, Account, accounts, purchase} from "@/scripts/accounts.ts";
+import {store, UNDO_MILLIS} from "@/scripts/store.ts";
+import {notifyError} from "@/scripts/notifications.ts";
+import AccountPicker from "./checkout/AccountPicker.vue";
+import {account, Account, accounts, GUEST_ACCOUNT_ID, purchase, purchaseAsGuest} from "@/scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -16,23 +17,24 @@ import {SizeGroup} from "@/scripts/text.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 /**
- * Pays for the cart from an account. Nobody is charged by default: the account has to be chosen explicitly, and the
- * purchase is sent at most once at a time and never with an empty cart.
+ * Pays for the cart from an account, or as a guest who pays cash: then the total to collect is shown, the money goes
+ * into the till and the POS opens again with the undo notice. Nobody is charged by default: the account or the guest
+ * has to be chosen explicitly, and the purchase is sent at most once at a time and never with an empty cart.
  */
 export default defineComponent({
   name: "Checkout",
   components: {
     ViewWrapper,
     GridWrapper,
-    ColorContainer, BackButton, ConfirmButton, Icon, FormattedText, MoneyText, CheckoutEntry, SelectMenu
+    ColorContainer, BackButton, ConfirmButton, Icon, FormattedText, MoneyText, CheckoutEntry, AccountPicker
   },
   data() {
     return {
       account: null as Account | null,
       accountsLoaded: false,
       selectedId: null as number | null,
-      selectRevision: 0,
-      accountOptions: [] as Array<Array<string | number>>,
+      pickerRevision: 0,
+      noAccounts: false,
       submitting: false
     }
   },
@@ -46,18 +48,26 @@ export default defineComponent({
     cartEmpty(): boolean {
       return this.cart.products.size === 0
     },
-    selectOptions(): Array<Array<string | number>> {
-      return [[this.$t('checkout_choose_account'), ''], ...this.accountOptions]
+    guest(): Account {
+      return {id: GUEST_ACCOUNT_ID, name: this.$t('guest_cash'), created: 0, balance: 0}
+    },
+    isGuest(): boolean {
+      return this.account?.id === GUEST_ACCOUNT_ID
     }
   },
   methods: {
-    checkoutAccount(value: string) {
-      if (value === '') {
+    checkoutAccount(chosen: Account | null) {
+      if (!chosen) {
         this.selectedId = null
         this.account = null
         return
       }
-      const id = Number(value)
+      const id = chosen.id
+      if (id === GUEST_ACCOUNT_ID) {
+        this.selectedId = id
+        this.account = chosen
+        return
+      }
       this.selectedId = id
       this.account = null
       account(id)
@@ -67,7 +77,7 @@ export default defineComponent({
           .catch(error => {
             if (this.selectedId !== id) return
             this.selectedId = null
-            this.selectRevision++
+            this.pickerRevision++
             throw error
           })
     },
@@ -75,8 +85,22 @@ export default defineComponent({
       if (this.submitting || this.cartEmpty || !this.account) return
       this.submitting = true
       const accountId = this.account.id
-      keepingFocus(() => purchase(accountId, Array.from(this.cart.products.values()))
-          .then(() => {
+      const positions = Array.from(this.cart.products.values())
+      if (this.isGuest) {
+        keepingFocus(() => purchaseAsGuest(positions)
+            .then(receipt => {
+              store.lastSale = {accountId: null, purchaseIds: receipt.purchaseIds, until: Date.now() + UNDO_MILLIS}
+              this.cart.clearCart()
+              this.$router.push({name: 'pos'})
+            })
+            .finally(() => {
+              this.submitting = false
+            }))
+        return
+      }
+      keepingFocus(() => purchase(accountId, positions)
+          .then(receipt => {
+            store.lastSale = {accountId: accountId, purchaseIds: receipt.purchaseIds, until: Date.now() + UNDO_MILLIS}
             this.cart.clearCart()
             this.$router.push({name: 'profile', params: {id: accountId}, query: {from: 'checkout'}})
           })
@@ -90,10 +114,10 @@ export default defineComponent({
     }
   },
   mounted() {
-    accounts().then(e => {
-      this.accountOptions = e.map((value: Account) => [value.name, value.id])
-      this.accountsLoaded = true
-    })
+    accounts("", 0, 1)
+        .then(page => this.noAccounts = page.totalItems === 0)
+        .catch(notifyError)
+        .finally(() => this.accountsLoaded = true)
   },
 })
 </script>
@@ -111,11 +135,16 @@ export default defineComponent({
       </div>
     </ColorContainer>
 
-    <FormattedText v-if="accountsLoaded && accountOptions.length === 0" value="checkout_no_accounts" type="locale"/>
-    <SelectMenu :label="$t('checkout_choose_account')" v-else-if="accountsLoaded" :key="selectRevision" :options="selectOptions" @select="checkoutAccount"/>
+    <FormattedText v-if="accountsLoaded && noAccounts" value="checkout_no_accounts" type="locale"/>
+    <AccountPicker v-if="accountsLoaded" :key="pickerRevision" :label="$t('checkout_choose_account')"
+                   :guest="guest" :autofocus="pickerRevision > 0" @select="checkoutAccount"/>
 
     <GridWrapper v-if="account" bg="none" padding="0">
-      <ColorContainer :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
+      <ColorContainer v-if="isGuest" :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
+        <span>{{ $t('checkout_collect') }}</span>
+        <FormattedText :value="cart.totalPrice()" type="currency"/>
+      </ColorContainer>
+      <ColorContainer v-else :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
         <MoneyText :amount="account.balance"/>
         <Icon icon="fa-arrow-right"/>
         <MoneyText :amount="account.balance - cart.totalPrice()"/>

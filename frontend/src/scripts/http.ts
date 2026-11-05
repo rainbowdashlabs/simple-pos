@@ -1,3 +1,4 @@
+import {i18n} from "@/i18n.ts";
 import {getSessionToken, handleUnauthorized, logout} from "./session.ts";
 import {ApiError} from "./errors.ts";
 import {forgetRole} from "./roles.ts";
@@ -31,7 +32,24 @@ export async function requestJson(url: string, method: string, params: Map<strin
     return send(constructUrl(url, params), method, body, true)
 }
 
-async function send(requrl: string, method: string, body: Object | null, retryUnauthorized: boolean): Promise<any> {
+/**
+ * Downloads a file the backend sends, such as an export, and hands it to the browser to save under its file name.
+ */
+export async function downloadFile(url: string, params: Map<string, string | number>, fallbackName: string) {
+    const response: Response = await send(constructUrl(url, params), "GET", null, true, true)
+    const disposition = response.headers.get("Content-Disposition") ?? ""
+    const name = /filename="([^"]+)"/.exec(disposition)?.[1] ?? fallbackName
+    const href = URL.createObjectURL(await response.blob())
+    const link = document.createElement("a")
+    link.href = href
+    link.download = name
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(href), 10_000)
+}
+
+async function send(requrl: string, method: string, body: Object | null, retryUnauthorized: boolean, raw: boolean = false): Promise<any> {
     const token = await getSessionToken()
     if (!token) {
         logout()
@@ -40,7 +58,8 @@ async function send(requrl: string, method: string, body: Object | null, retryUn
     let header = new Headers()
     header.append("Authorization", `Bearer ${token}`)
     header.append("Content-Type", "application/json")
-    if (import.meta.env.DEV) console.log(body ? `${method} ${requrl}: ${JSON.stringify(body)}` : `${method} ${requrl}`)
+    header.append("Accept-Language", String(i18n.global.locale))
+    if (import.meta.env.DEV) console.log(`${method} ${requrl}`)
     let response: Response
     try {
         response = await fetch(requrl, {method: method, headers: header, body: body ? JSON.stringify(body) : undefined})
@@ -54,10 +73,12 @@ async function send(requrl: string, method: string, body: Object | null, retryUn
         if (error.isAccountDisabled) logout()
         else if (error.status === 401) {
             if (!retryUnauthorized) logout()
-            else if (await handleUnauthorized(token)) return send(requrl, method, body, false)
+            else if (await handleUnauthorized(token)) return send(requrl, method, body, false, raw)
         }
         throw error
     }
+
+    if (raw) return response
 
     let resBody = await response.text()
     if (resBody) {
@@ -74,10 +95,11 @@ function constructUrl(url: string, params: Map<string, string | number> = new Ma
     return req.toString()
 }
 
+/**
+ * A form body of the given fields.
+ */
 export function urlEncode(data: Record<string, string | number | boolean>) {
-    return Object.keys(data)
-        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-        .join('&');
+    return new URLSearchParams(Object.entries(data).map(([key, value]) => [key, String(value)])).toString()
 }
 
 export function getHost() {

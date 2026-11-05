@@ -10,12 +10,21 @@ public class AccountDto {
     private  String name;
     private  Instant created;
     private  BigDecimal balance;
+    private Instant lastPurchase;
 
     public AccountDto(Integer id, String name, Instant created, BigDecimal balance) {
         this.id = id;
         this.name = name;
         this.created = created;
         this.balance = Money.of(balance);
+    }
+
+    /**
+     * An account with the time of its latest purchase, or null if it never bought anything.
+     */
+    public AccountDto(Integer id, String name, Instant created, BigDecimal balance, Instant lastPurchase) {
+        this(id, name, created, balance);
+        this.lastPurchase = lastPurchase;
     }
 
     public AccountDto() {
@@ -43,6 +52,10 @@ public class AccountDto {
 
     public void setCreated(Instant created) {
         this.created = created;
+    }
+
+    public Instant getLastPurchase() {
+        return lastPurchase;
     }
 
     public BigDecimal getBalance() {

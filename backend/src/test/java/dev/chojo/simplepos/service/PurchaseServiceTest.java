@@ -1,20 +1,22 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.PurchasePart;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
-import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
+import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -22,6 +24,7 @@ import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchasePartRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
+import dev.chojo.simplepos.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +35,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -67,6 +72,12 @@ class PurchaseServiceTest {
     IngredientRepository ingredientRepository;
     @Autowired
     EntityManager entityManager;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    CashService cashService;
+    @Autowired
+    AccountBalanceRepository accountBalanceRepository;
 
     private Account account;
     private Product product;
@@ -89,7 +100,7 @@ class PurchaseServiceTest {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
 
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)), null);
 
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
@@ -99,11 +110,23 @@ class PurchaseServiceTest {
     }
 
     @Test
+    void shouldRecordWhoSold() {
+        User cashier = userRepository.save(new User(null, "soldbycashier", "x", true, Role.STAFF));
+
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)), cashier);
+        entityManager.flush();
+        entityManager.clear();
+
+        Purchase sold = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
+        assertEquals("soldbycashier", sold.toDto().soldBy());
+    }
+
+    @Test
     void shouldCreatePurchaseWithMultipleQuantity() {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
 
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 3)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 3)), null);
 
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
@@ -119,14 +142,11 @@ class PurchaseServiceTest {
         entityManager.clear();
         Product freshProduct = productRepository.findById(product.getId()).orElseThrow();
         Account freshAccount = accountRepository.findById(account.getId()).orElseThrow();
-        purchaseService.purchase(freshAccount.getId(), List.of(new CartPositionDto(freshProduct, 3)));
+        purchaseService.purchase(freshAccount.getId(), List.of(new CartPositionDto(freshProduct, 3)), null);
 
-        // Recipe requires 1 ingredient per product, 3 products = 3 taken
         entityManager.flush();
         entityManager.clear();
-        var summary = new dev.chojo.simplepos.entity.dto.StorageSummary(
-                storageRepository.summaryById(ingredient.getId()));
-        assertEquals(7, summary.getStock());
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -137,7 +157,7 @@ class PurchaseServiceTest {
         entityManager.clear();
         Product freshProduct = productRepository.findById(product.getId()).orElseThrow();
         Account freshAccount = accountRepository.findById(account.getId()).orElseThrow();
-        purchaseService.purchase(freshAccount.getId(), List.of(new CartPositionDto(freshProduct, 2)));
+        purchaseService.purchase(freshAccount.getId(), List.of(new CartPositionDto(freshProduct, 2)), null);
 
         entityManager.flush();
         entityManager.clear();
@@ -165,7 +185,7 @@ class PurchaseServiceTest {
         purchaseService.purchase(account.getId(), List.of(
                 new CartPositionDto(product, 2),
                 new CartPositionDto(product2, 1)
-        ));
+        ), null);
 
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
@@ -180,7 +200,7 @@ class PurchaseServiceTest {
                 new Product(null, cat, "NoIngrProduct", 1.0, true, emptyRecipe));
 
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(noIngredientProduct, 2)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(noIngredientProduct, 2)), null);
 
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
@@ -193,7 +213,7 @@ class PurchaseServiceTest {
 
         // Product recipe requires 1 ingredient each, ordering 5 but only 2 in stock
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 5)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 5)), null);
 
         // Purchase should still be created
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
@@ -209,11 +229,11 @@ class PurchaseServiceTest {
         entityManager.flush();
         assertThrows(NotFoundException.class, () -> purchaseService.purchase(account.getId(), List.of(
                 new CartPositionDto(product, 1),
-                new CartPositionDto(unknown, 1))));
+                new CartPositionDto(unknown, 1)), null));
 
         entityManager.clear();
         assertTrue(purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 10)).isEmpty());
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -221,11 +241,11 @@ class PurchaseServiceTest {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 2, 0));
 
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 5)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 5)), null);
 
         entityManager.flush();
         entityManager.clear();
-        assertEquals(0, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(0, storageRepository.summaryById(ingredient.getId()).getStock());
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
@@ -245,24 +265,11 @@ class PurchaseServiceTest {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
 
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)), null);
 
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 1)).get(0);
         assertMoney(product.getPrice(), purchase.getPrice());
-    }
-
-    @Test
-    void shouldRejectAnEmptyCart() {
-        assertThrows(BadRequestException.class, () -> purchaseService.purchase(account.getId(), List.of()));
-    }
-
-    @Test
-    void shouldRejectAPositionBelowOne() {
-        assertThrows(BadRequestException.class,
-                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 0))));
-        assertThrows(BadRequestException.class,
-                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, -10))));
     }
 
     @Test
@@ -271,7 +278,7 @@ class PurchaseServiceTest {
         productRepository.save(product);
 
         assertThrows(ConflictException.class,
-                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1))));
+                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)), null));
     }
 
     @Test
@@ -280,26 +287,102 @@ class PurchaseServiceTest {
         productRepository.save(product);
 
         assertThrows(NotFoundException.class,
-                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1))));
+                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)), null));
     }
 
     @Test
     void shouldGiveTheStockBackWhenAPurchaseIsCancelled() {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 3)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 3)), null);
         entityManager.flush();
         entityManager.clear();
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
 
-        purchaseService.cancel(purchase.getId());
+        purchaseService.cancel(purchase.getId(), null);
 
         entityManager.flush();
         entityManager.clear();
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
         assertTrue(purchaseRepository.findById(purchase.getId()).isEmpty());
         assertEquals(0, purchasePartRepository.count());
         assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
+    }
+
+    @Test
+    void shouldUndoAWholeSale() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        Product second = productService.create(new Product(null, product.getCategory(), "PurchaseServiceSecond", 1.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 2)))));
+        entityManager.flush();
+        List<Integer> sale = purchaseService.purchase(account.getId(),
+                List.of(new CartPositionDto(product, 3), new CartPositionDto(second, 1)), null);
+        entityManager.flush();
+        entityManager.clear();
+
+        purchaseService.cancelAll(sale, null);
+
+        entityManager.flush();
+        entityManager.clear();
+        assertEquals(2, sale.size());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
+        assertTrue(purchaseRepository.findAllById(sale).isEmpty());
+        assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
+    }
+
+    @Test
+    void aGuestSalePaysIntoTheTillAndLeavesAccountsAlone() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        entityManager.flush();
+        BigDecimal tillBefore = cashService.tillTotal();
+        BigDecimal accountsBefore = Money.orZero(accountBalanceRepository.totalBalance());
+        BigDecimal salesBefore = Money.orZero(purchaseRepository.totalPurchases());
+
+        List<Integer> sale = purchaseService.purchaseAsGuest(List.of(new CartPositionDto(product, 3)), null);
+        entityManager.flush();
+
+        assertMoney(tillBefore.add(new BigDecimal("6.00")), cashService.tillTotal());
+        assertMoney(accountsBefore, Money.orZero(accountBalanceRepository.totalBalance()));
+        assertMoney(salesBefore.add(new BigDecimal("6.00")), Money.orZero(purchaseRepository.totalPurchases()));
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
+
+        purchaseService.cancelAll(sale, null);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertMoney(tillBefore, cashService.tillTotal());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
+        assertTrue(purchaseRepository.findAllById(sale).isEmpty());
+    }
+
+    @Test
+    void guestAndAccountPurchasesCanBeCancelledTogether() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        entityManager.flush();
+        BigDecimal tillBefore = cashService.tillTotal();
+        List<Integer> ids = new ArrayList<>(purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 2)), null));
+        ids.addAll(purchaseService.purchaseAsGuest(List.of(new CartPositionDto(product, 1)), null));
+        entityManager.flush();
+
+        purchaseService.cancelAll(ids, null);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertMoney(tillBefore, cashService.tillTotal());
+        assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
+    }
+
+    @Test
+    void shouldCancelNothingWhenOneOfTheSaleIsGone() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        entityManager.flush();
+        List<Integer> sale = purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 2)), null);
+        entityManager.flush();
+
+        assertThrows(NotFoundException.class, () -> purchaseService.cancelAll(List.of(sale.get(0), -1), null));
+        entityManager.clear();
+        assertTrue(purchaseRepository.findById(sale.get(0)).isPresent());
     }
 
     @Test
@@ -307,16 +390,16 @@ class PurchaseServiceTest {
         storageService.addStorage(new Storage(null, ingredient, Instant.now().minusSeconds(60), 0.5, 2, 0));
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 5, 0));
         entityManager.flush();
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 4)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 4)), null);
         entityManager.flush();
         entityManager.clear();
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
 
-        purchaseService.cancel(purchase.getId());
+        purchaseService.cancel(purchase.getId(), null);
 
         entityManager.flush();
         entityManager.clear();
-        assertEquals(7, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
         assertTrue(storageRepository.findAll().stream()
                 .filter(storage -> storage.getIngredient().getId().equals(ingredient.getId()))
                 .allMatch(storage -> storage.getSold() == 0));
@@ -324,11 +407,11 @@ class PurchaseServiceTest {
 
     @Test
     void shouldCancelAPurchaseSoldWhileOutOfStock() {
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 2)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 2)), null);
         entityManager.flush();
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
 
-        purchaseService.cancel(purchase.getId());
+        purchaseService.cancel(purchase.getId(), null);
 
         entityManager.flush();
         assertTrue(purchaseRepository.findById(purchase.getId()).isEmpty());
@@ -337,11 +420,11 @@ class PurchaseServiceTest {
     @Test
     void shouldNotCancelAPurchaseOfAClosedAccount() {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 1)), null);
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
         account.setDeleted(true);
         accountRepository.save(account);
 
-        assertThrows(ConflictException.class, () -> purchaseService.cancel(purchase.getId()));
+        assertThrows(ConflictException.class, () -> purchaseService.cancel(purchase.getId(), null));
     }
 }

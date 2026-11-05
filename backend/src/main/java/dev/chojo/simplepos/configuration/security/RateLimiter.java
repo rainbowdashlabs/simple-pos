@@ -1,15 +1,12 @@
 package dev.chojo.simplepos.configuration.security;
 
-import dev.chojo.simplepos.controller.exceptions.TooManyRequestsException;
+import dev.chojo.simplepos.exceptions.TooManyRequestsException;
 import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -209,13 +206,7 @@ public class RateLimiter {
     }
 
     private static String digest(String username) {
-        String normalised = username == null ? "" : username.strip().toLowerCase(Locale.ROOT);
-        try {
-            byte[] hash = MessageDigest.getInstance("SHA-256").digest(normalised.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is always available", e);
-        }
+        return Sha256.hex(username == null ? "" : username.strip().toLowerCase(Locale.ROOT));
     }
 
     private enum Kind {

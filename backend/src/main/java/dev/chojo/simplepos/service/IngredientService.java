@@ -1,14 +1,17 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.dto.IngredientRequest;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.RecipeEntryRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class IngredientService {
@@ -29,26 +32,22 @@ public class IngredientService {
      * Deletes an ingredient nothing refers to. One that is part of a recipe or has stock history is kept, because
      * deleting it would take the recipes and the cost of past sales with it; deactivate it instead.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the ingredient does not exist
+     * @throws NotFoundException if the ingredient does not exist
      * @throws ConflictException if a recipe or a storage batch refers to it
      */
     @Transactional
     public void delete(int id) {
         Ingredient ingredient = repository.require(id);
         if (recipeEntryRepository.existsByIngredient_IdAndRecipeIsNotNull(id) || storageRepository.existsByIngredient_Id(id)) {
-            throw new ConflictException("%s is used in recipes or storage. Deactivate it instead.".formatted(ingredient.getName()));
+            throw new ConflictException(ErrorCode.INGREDIENT_IN_USE, ingredient.getName());
         }
         repository.delete(ingredient);
-    }
-
-    public Ingredient create(Ingredient ingredient) {
-        return repository.save(ingredient);
     }
 
     /**
      * Creates an active ingredient.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.BadRequestException if the category does not exist
+     * @throws BadRequestException if the category does not exist
      */
     @Transactional
     public Ingredient create(IngredientRequest request) {
@@ -58,13 +57,25 @@ public class IngredientService {
     /**
      * Changes an ingredient's values. Whether it is active is not changed here.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the ingredient does not exist
-     * @throws dev.chojo.simplepos.controller.exceptions.BadRequestException if the category does not exist
+     * @throws NotFoundException if the ingredient does not exist
+     * @throws BadRequestException if the category does not exist
      */
     @Transactional
     public Ingredient update(int id, IngredientRequest request) {
         Ingredient ingredient = repository.require(id);
         request.applyTo(ingredient, categoryRepository.requireReferenced(request.categoryId()));
         return repository.save(ingredient);
+    }
+
+    /**
+     * Makes an ingredient available or unavailable for new recipes and stock lists.
+     *
+     * @throws NotFoundException if the ingredient does not exist
+     */
+    @Transactional
+    public Ingredient toggleActive(int id) {
+        Ingredient ingredient = repository.require(id);
+        ingredient.setActive(!ingredient.isActive());
+        return ingredient;
     }
 }

@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 public @interface PageSize {
     int MAX = 500;
 
-    String message() default "must be between 1 and " + MAX;
+    String message() default "{simplepos.validation.page_size}";
 
     Class<?>[] groups() default {};
 

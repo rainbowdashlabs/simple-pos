@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -107,7 +108,7 @@ class ErrorResponseTest {
                 .andExpect(jsonPath("$.retryAfter").isNumber());
         mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret")
                         .with(fromAddress("10.9.0.2")))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -193,7 +194,7 @@ class ErrorResponseTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[{\"amount\": 1}]"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value("Product id is missing"));
+                .andExpect(jsonPath("$.errors[0].field").value("positions[0].product"));
     }
 
     @Test
@@ -206,11 +207,60 @@ class ErrorResponseTest {
     }
 
     @Test
+    void shouldChangeTheOwnPasswordAndEndOtherSessions() throws Exception {
+        userRepository.save(new User(null, "pwchanger", passwordEncoder.encode("old-secret"), true, Role.USER));
+        Map<String, String> other = login("pwchanger", "old-secret");
+        Map<String, String> mine = login("pwchanger", "old-secret");
+
+        mvc.perform(put("/api/user/me/password").header("Authorization", "Bearer " + mine.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"current\": \"wrong\", \"password\": \"new-secret\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(put("/api/user/me/password").header("Authorization", "Bearer " + mine.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"current\": \"old-secret\", \"password\": \"short\"}"))
+                .andExpect(status().isBadRequest());
+        String body = mvc.perform(put("/api/user/me/password").header("Authorization", "Bearer " + mine.get("token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"current\": \"old-secret\", \"password\": \"new-secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String newRefresh = tokenOf(JsonParserFactory.getJsonParser().parseMap(body).get("refresh"));
+
+        mvc.perform(post("/api/auth/refresh").param("token", other.get("refresh"))).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/auth/refresh").param("token", newRefresh)).andExpect(status().isOk());
+        login("pwchanger", "new-secret");
+    }
+
+    @Test
+    void shouldCountAWrongCurrentPasswordAsAFailedLogin() throws Exception {
+        userRepository.save(new User(null, "pwguesser", passwordEncoder.encode("old-secret"), true, Role.USER));
+        String token = login("pwguesser", "old-secret").get("token");
+        for (int attempt = 0; attempt < 6; attempt++) {
+            mvc.perform(put("/api/user/me/password").header("Authorization", "Bearer " + token).with(fromAddress("10.7.1.1"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"current\": \"old-secret\", \"password\": \"short\"}"))
+                    .andExpect(status().isBadRequest());
+        }
+        for (int attempt = 0; attempt < 5; attempt++) {
+            mvc.perform(put("/api/user/me/password").header("Authorization", "Bearer " + token).with(fromAddress("10.7.1.2"))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"current\": \"wrong\", \"password\": \"new-secret\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.field").value("current"));
+        }
+        mvc.perform(put("/api/user/me/password").header("Authorization", "Bearer " + token).with(fromAddress("10.7.1.2"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"current\": \"old-secret\", \"password\": \"new-secret\"}"))
+                .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void shouldRejectReusedRefreshToken() throws Exception {
         String refresh = login().get("refresh");
 
         mvc.perform(post("/api/auth/refresh").param("token", refresh))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
         mvc.perform(post("/api/auth/refresh").param("token", refresh))
                 .andExpect(status().isUnauthorized());
     }
@@ -240,8 +290,12 @@ class ErrorResponseTest {
     }
 
     private Map<String, String> login() throws Exception {
-        String body = mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret"))
-                .andExpect(status().isAccepted())
+        return login("erroruser", "secret");
+    }
+
+    private Map<String, String> login(String username, String password) throws Exception {
+        String body = mvc.perform(post("/api/auth/login").param("username", username).param("password", password))
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
         return Map.of("token", tokenOf(tokens.get("token")), "refresh", tokenOf(tokens.get("refresh")));

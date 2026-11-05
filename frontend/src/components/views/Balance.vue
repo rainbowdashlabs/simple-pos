@@ -3,8 +3,6 @@ import {defineComponent} from 'vue'
 import {account, Account, addDeposit} from "@/scripts/accounts.ts";
 import BalanceAdd from "./balance/BalanceAdd.vue";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import BalanceDisplay from "./balance/BalanceDisplay.vue";
-import InputField from "@/components/styles/input/InputField.vue";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
@@ -22,7 +20,7 @@ export default defineComponent({
     ConfirmButton,
     Icon,
     MoneyText,
-    GridWrapper, ColorContainer, SimpleInputField, InputField, BalanceDisplay, FontAwesomeIcon, BalanceAdd
+    GridWrapper, ColorContainer, SimpleInputField, FontAwesomeIcon, BalanceAdd
   },
   props: {
     id: {

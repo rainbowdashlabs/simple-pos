@@ -6,7 +6,7 @@ import {BarChart} from 'echarts/charts'
 import {GridComponent, TooltipComponent} from 'echarts/components'
 import {CanvasRenderer} from 'echarts/renderers'
 import VChart from 'vue-echarts'
-import {ProductSalesStat} from "@/scripts/product.ts";
+import {DailyStat} from "@/scripts/purchase.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
@@ -19,7 +19,7 @@ export default defineComponent({
   components: {ColorContainer, FormattedText, VChart},
   props: {
     stats: {
-      type: Array as PropType<ProductSalesStat[]>,
+      type: Array as PropType<DailyStat[]>,
       required: true
     },
     days: {
@@ -37,7 +37,7 @@ export default defineComponent({
     chartOption() {
       const locale = this.$i18n.locale
       const filled = everyDay(this.stats, this.days, s => s.day,
-          day => ({day: localDateKey(day), product_id: null, sales: 0, revenue: 0, profit: 0}))
+          day => ({day: localDateKey(day), sales: 0, revenue: 0, profit: 0}))
       const days = filled.map(f => f.day.toLocaleDateString(locale, {month: 'short', day: 'numeric'}))
       const sales = filled.map(f => f.row.sales)
 

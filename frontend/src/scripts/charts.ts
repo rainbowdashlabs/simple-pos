@@ -1,4 +1,5 @@
 import {store} from "./store.ts";
+import {i18n, Language} from "@/i18n.ts";
 
 /**
  * One entry of what echarts passes to a tooltip formatter.
@@ -21,17 +22,16 @@ export function chartTextColor(): string {
 }
 
 /**
- * Formats euro amounts in the given locale, with cents.
+ * Formats money in the given language, with cents, through the same currency format as the rest of the interface.
+ * Charts pass the locale they read, so they render again when the language changes.
  */
 export function euro(locale: string): (value: number) => string {
-    const format = new Intl.NumberFormat(locale, {style: "currency", currency: "EUR"})
-    return value => format.format(value)
+    return value => i18n.global.n(value, 'currency', locale as Language)
 }
 
 /**
- * Formats euro amounts in the given locale without cents, for axis labels.
+ * Formats money in the given language without cents, for axis labels.
  */
 export function wholeEuro(locale: string): (value: number) => string {
-    const format = new Intl.NumberFormat(locale, {style: "currency", currency: "EUR", maximumFractionDigits: 0})
-    return value => format.format(value)
+    return value => i18n.global.n(value, 'whole_currency', locale as Language)
 }

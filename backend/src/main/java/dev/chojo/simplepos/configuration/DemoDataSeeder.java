@@ -7,21 +7,21 @@ import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
-import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
-import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import dev.chojo.simplepos.service.ProductService;
+import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +52,16 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final StorageRepository storageRepository;
     private final AccountRepository accountRepository;
     private final BalanceRepository balanceRepository;
-    private final PurchaseRepository purchaseRepository;
+    private final PurchaseService purchaseService;
     private final CashRepository cashRepository;
     private final boolean resetDatabase;
+    private User seller;
 
     public DemoDataSeeder(EntityManager entityManager, UserRepository userRepository, PasswordEncoder passwordEncoder,
                           CategoryRepository categoryRepository, IngredientRepository ingredientRepository,
                           ProductService productService, StorageRepository storageRepository,
                           AccountRepository accountRepository, BalanceRepository balanceRepository,
-                          PurchaseRepository purchaseRepository, CashRepository cashRepository,
+                          PurchaseService purchaseService, CashRepository cashRepository,
                           @Value("${demo.reset-database:false}") boolean resetDatabase) {
         this.entityManager = entityManager;
         this.userRepository = userRepository;
@@ -71,7 +72,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.storageRepository = storageRepository;
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
-        this.purchaseRepository = purchaseRepository;
+        this.purchaseService = purchaseService;
         this.cashRepository = cashRepository;
         this.resetDatabase = resetDatabase;
     }
@@ -105,11 +106,10 @@ public class DemoDataSeeder implements CommandLineRunner {
 
         log.info("Seeding demo data...");
 
-        // Demo user
         User demoUser = userRepository.save(
                 new User(null, DEMO_USER, passwordEncoder.encode("demo"), true, Role.STAFF));
+        seller = demoUser;
 
-        // Categories
         Category drinks = categoryRepository.save(new Category(null, "Drinks"));
         Category softDrinks = categoryRepository.save(new Category(null, "Soft Drinks"));
         Category snacks = categoryRepository.save(new Category(null, "Snacks"));
@@ -117,7 +117,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         Category cocktails = categoryRepository.save(new Category(null, "Cocktails"));
         Category hotDrinks = categoryRepository.save(new Category(null, "Hot Drinks"));
 
-        // Ingredients
         Ingredient cola = ingredientRepository.save(
                 new Ingredient(null, softDrinks, "Cola", 0.45, 24, 0.25, 3.50, 24));
         Ingredient fanta = ingredientRepository.save(
@@ -161,7 +160,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         Ingredient hotChocolate = ingredientRepository.save(
                 new Ingredient(null, hotDrinks, "Hot Chocolate", 0.40, 0, 0, 0, 30));
 
-        // Products (single ingredient)
         Product pCola = productService.create(new Product(null, softDrinks, "Cola", 1.50, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, cola, 1)))));
         Product pFanta = productService.create(new Product(null, softDrinks, "Fanta", 1.50, true,
@@ -179,7 +177,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         Product pPeanuts = productService.create(new Product(null, snacks, "Peanuts", 1.50, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, peanuts, 1)))));
 
-        // More single-ingredient products
         Product pTonic = productService.create(new Product(null, softDrinks, "Tonic Water", 1.50, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, tonic, 1)))));
         Product pOJ = productService.create(new Product(null, softDrinks, "Orange Juice", 2.00, true,
@@ -201,7 +198,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         Product pWhiskey = productService.create(new Product(null, spirits, "Whiskey", 4.50, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, whiskey, 1)))));
 
-        // Multi-ingredient products
         Product pCubaLibre = productService.create(new Product(null, cocktails, "Cuba Libre", 4.00, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, rum, 1), new RecipeEntry(null, cola, 1)))));
         Product pVodkaSprite = productService.create(new Product(null, cocktails, "Vodka Sprite", 4.00, true,
@@ -215,40 +211,34 @@ public class DemoDataSeeder implements CommandLineRunner {
         Product pWhiskeyCola = productService.create(new Product(null, cocktails, "Whiskey Cola", 5.00, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, whiskey, 1), new RecipeEntry(null, cola, 1)))));
 
-        // Inactive product
         productService.create(new Product(null, drinks, "Old Lemonade", 1.00, false,
                 new Recipe(null, null, Collections.emptyList())));
 
-        // Storage (inventory)
         Instant now = Instant.now();
         Instant weekAgo = now.minus(7, ChronoUnit.DAYS);
-        addStock(cola, 48, 0.45, weekAgo);
-        addStock(fanta, 48, 0.45, weekAgo);
-        addStock(sprite, 48, 0.45, weekAgo);
-        addStock(water, 24, 0.20, weekAgo);
-        addStock(beer, 40, 0.80, weekAgo);
-        addStock(beerSmall, 48, 0.65, weekAgo);
-        addStock(chips, 10, 1.20, weekAgo);
-        addStock(peanuts, 8, 0.90, weekAgo);
-        addStock(vodka, 5, 0.50, weekAgo);
-        addStock(rum, 5, 0.60, weekAgo);
-        addStock(gin, 4, 0.70, weekAgo);
-        addStock(whiskey, 4, 0.80, weekAgo);
-        addStock(tonic, 48, 0.40, weekAgo);
-        addStock(orangeJuice, 24, 0.50, weekAgo);
-        addStock(appleJuice, 24, 0.50, weekAgo);
-        addStock(energyDrink, 24, 0.90, weekAgo);
-        addStock(icedTea, 48, 0.40, weekAgo);
-        addStock(pretzel, 20, 0.60, weekAgo);
-        addStock(nachos, 10, 1.00, weekAgo);
-        addStock(coffee, 100, 0.30, weekAgo);
-        addStock(hotChocolate, 50, 0.40, weekAgo);
+        Instant delivered = now.minus(30, ChronoUnit.DAYS);
+        addStock(cola, 48, 0.45, delivered);
+        addStock(fanta, 48, 0.45, delivered);
+        addStock(sprite, 48, 0.45, delivered);
+        addStock(water, 24, 0.20, delivered);
+        addStock(beer, 40, 0.80, delivered);
+        addStock(beerSmall, 48, 0.65, delivered);
+        addStock(chips, 10, 1.20, delivered);
+        addStock(peanuts, 8, 0.90, delivered);
+        addStock(vodka, 15, 0.50, delivered);
+        addStock(rum, 10, 0.60, delivered);
+        addStock(gin, 8, 0.70, delivered);
+        addStock(whiskey, 8, 0.80, delivered);
+        addStock(tonic, 48, 0.40, delivered);
+        addStock(orangeJuice, 24, 0.50, delivered);
+        addStock(appleJuice, 24, 0.50, delivered);
+        addStock(energyDrink, 24, 0.90, delivered);
+        addStock(icedTea, 48, 0.40, delivered);
+        addStock(pretzel, 20, 0.60, delivered);
+        addStock(nachos, 10, 1.00, delivered);
+        addStock(coffee, 100, 0.30, delivered);
+        addStock(hotChocolate, 50, 0.40, delivered);
 
-        // Low stock item to show in overview
-        addStock(chips, 2, 1.20, now);
-        addStock(nachos, 1, 1.00, now);
-
-        // Accounts
         Account alice = accountRepository.save(new Account(null, "Alice", now.minus(30, ChronoUnit.DAYS)));
         Account bob = accountRepository.save(new Account(null, "Bob", now.minus(20, ChronoUnit.DAYS)));
         Account charlie = accountRepository.save(new Account(null, "Charlie", now.minus(10, ChronoUnit.DAYS)));
@@ -260,7 +250,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         Account ivan = accountRepository.save(new Account(null, "Ivan", now.minus(12, ChronoUnit.DAYS)));
         Account judy = accountRepository.save(new Account(null, "Judy", now.minus(7, ChronoUnit.DAYS)));
 
-        // Deposits
         balanceRepository.save(new Balance(null, alice, now.minus(25, ChronoUnit.DAYS), 50.0));
         balanceRepository.save(new Balance(null, alice, now.minus(10, ChronoUnit.DAYS), 30.0));
         balanceRepository.save(new Balance(null, bob, now.minus(15, ChronoUnit.DAYS), 20.0));
@@ -275,7 +264,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         balanceRepository.save(new Balance(null, ivan, now.minus(10, ChronoUnit.DAYS), 50.0));
         balanceRepository.save(new Balance(null, judy, now.minus(6, ChronoUnit.DAYS), 25.0));
 
-        // Purchases (spread over the past weeks for sales stats)
         addPurchase(alice, pCola, 2, weekAgo.minus(1, ChronoUnit.DAYS));
         addPurchase(alice, pBeer, 3, weekAgo);
         addPurchase(alice, pChips, 1, weekAgo);
@@ -313,7 +301,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         addPurchase(judy, pCola, 2, now.minus(3, ChronoUnit.DAYS));
         addPurchase(judy, pChips, 2, now.minus(1, ChronoUnit.DAYS));
 
-        // Purchases for new products
         addPurchase(alice, pGinTonic, 2, now.minus(6, ChronoUnit.DAYS));
         addPurchase(alice, pCoffee, 3, now.minus(2, ChronoUnit.DAYS));
         addPurchase(alice, pNachos, 1, now.minus(1, ChronoUnit.DAYS));
@@ -357,6 +344,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void addPurchase(Account account, Product product, int amount, Instant purchased) {
-        purchaseRepository.save(new Purchase(null, account, product, purchased, amount, product.getPrice(), Collections.emptyList()));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, amount)), seller, purchased);
     }
 }

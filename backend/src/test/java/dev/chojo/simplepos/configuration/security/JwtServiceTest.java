@@ -14,8 +14,8 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JwtServiceTest {
     private static final String KEY = "k".repeat(JwtService.MIN_KEY_BYTES);
@@ -39,7 +39,7 @@ class JwtServiceTest {
     @Test
     void tokensCarryAndRequireTheOwnIssuerAndAudience() {
         JwtService service = configured("simple-pos", "simple-pos");
-        String token = service.generateToken(USER);
+        String token = service.generateToken(JwtService.LOGIN_CLAIM, USER, 60_000);
 
         assertEquals("simple-pos", service.extractClaim(token, Claims::getIssuer));
         assertTrue(service.extractClaim(token, Claims::getAudience).contains("simple-pos"));

@@ -7,7 +7,8 @@ import {SizeGroup} from "@/scripts/text.ts";
  * in the field, and anything that cannot become a number is not taken. It emits only numbers: the number the text
  * reads as, or 0 (null with `nullable`) while the field is empty or unfinished, so what is submitted is always what
  * the field means. Both "." and "," are accepted as the decimal separator. When the parent rewrites the value, for
- * example by rounding it, the field shows the rewritten value.
+ * example by rounding it, the field shows the rewritten value. With `integer`, phones offer a keypad without a decimal
+ * separator.
  */
 export default defineComponent({
   name: "SimpleInputField",
@@ -42,6 +43,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    integer: {
+      type: Boolean,
+      default: false
+    },
     label: {
       type: String
     }
@@ -60,7 +65,8 @@ export default defineComponent({
       return this.isNumeric ? 'text' : this.type
     },
     inputMode() {
-      return this.isNumeric ? 'decimal' : undefined
+      if (!this.isNumeric) return undefined
+      return this.integer ? 'numeric' : 'decimal'
     },
     displayValue() {
       return this.isNumeric ? this.text : this.modelValue

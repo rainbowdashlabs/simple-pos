@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
+import {allPages} from "@/scripts/page.ts";
 import {categories, Category} from "@/scripts/categories.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
@@ -12,7 +13,9 @@ import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 
 /**
  * The fields of an ingredient, shared by creating and editing one. Works on its own copy of `initial` and emits
- * `submit` with the edited ingredient; the page decides what to do with it.
+ * `submit` with the edited ingredient; the page decides what to do with it. A page that needs more fields, such as
+ * the selling price when an ingredient is sold as a product of its own, puts them in the `extra` slot and holds the
+ * submit back with `blocked` until they are filled in.
  */
 export default defineComponent({
   name: "IngredientForm",
@@ -25,6 +28,10 @@ export default defineComponent({
     submitHint: {
       type: String,
       required: true
+    },
+    blocked: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ['submit'],
@@ -40,7 +47,7 @@ export default defineComponent({
       return SizeGroup
     },
     disabled(): boolean {
-      return !this.ingredient.name || !this.category || !this.ingredient.price
+      return this.blocked || !this.ingredient.name || !this.category || !this.ingredient.price
     }
   },
   methods: {
@@ -53,7 +60,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    categories().then(e => {
+    allPages(page => categories(page)).then(e => {
       this.categoryList = e
       if (!this.category && e.length > 0) this.category = e[0]
     })
@@ -74,6 +81,8 @@ export default defineComponent({
                   :options="categoryList.map(e => {return [e.name, e.id]})"
                   :current="category?.name"/>
     </ColorContainer>
+
+    <slot name="extra"/>
 
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="purchase_price" type="locale"/>

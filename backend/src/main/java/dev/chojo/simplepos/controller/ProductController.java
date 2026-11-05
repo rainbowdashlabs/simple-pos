@@ -4,9 +4,9 @@ import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.dto.DayStat;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
-import dev.chojo.simplepos.entity.dto.ProductSalesStatDto;
-import dev.chojo.simplepos.entity.response.Listing;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.ProductService;
@@ -23,11 +23,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -46,65 +44,57 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Product> get(@PathVariable int id) {
         return ResponseEntity.ok(productRepository.require(id));
     }
 
     @GetMapping("/{id}/sales/stat")
-    @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<List<ProductSalesStatDto>> getSalesStat(@PathVariable int id,
-                                                           @RequestParam(required = false) Instant after,
-                                                           @RequestParam(defaultValue = "100") @PageSize int limit,
-                                                           @RequestParam(defaultValue = "0") @PageNumber int page) {
+    PageResponse<DayStat> getSalesStat(@PathVariable int id,
+                                       @RequestParam(required = false) Instant after,
+                                       @RequestParam(defaultValue = "100") @PageSize int limit,
+                                       @RequestParam(defaultValue = "0") @PageNumber int page) {
         Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
-        List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(), PageRequest.of(page, limit)).stream()
-                .map(ProductSalesStatDto::new)
-                .toList();
-        return ResponseEntity.ok(list);
+        return PageResponse.of(purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(),
+                PageRequest.of(page, limit)), DayStat::of);
     }
 
     @GetMapping("/{id}/sales/stat/summary")
-    ResponseEntity<ProductSalesStatDto> getSalesStatSummary(@PathVariable int id, @RequestParam Instant after) {
-        ProductSalesStatDto dto = ProductSalesStatDto.summary(purchaseRepository.getSalesStatSummary(id, after));
-        return ResponseEntity.ok(dto);
+    ResponseEntity<DayStat> getSalesStatSummary(@PathVariable int id, @RequestParam Instant after) {
+        return ResponseEntity.ok(DayStat.of(purchaseRepository.getSalesStatSummary(id, after)));
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Listing<Product>> get() {
-        return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalse(), Product::getCategory));
+    PageResponse<Product> get(@RequestParam(required = false) Integer categoryId,
+                              @RequestParam(defaultValue = "100") @PageSize int limit,
+                              @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return productService.page(false, categoryId, PageRequest.of(page, limit));
     }
 
     @GetMapping("/active")
-    @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Listing<Product>> getActive() {
-        return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalseAndActiveTrue(), Product::getCategory));
+    PageResponse<Product> getActive(@RequestParam(required = false) Integer categoryId,
+                                    @RequestParam(defaultValue = "100") @PageSize int limit,
+                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return productService.page(true, categoryId, PageRequest.of(page, limit));
     }
 
     @PostMapping
     ResponseEntity<Product> create(@Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.accepted().body(productService.create(product));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(product));
     }
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        Product product = productRepository.requireNotDeleted(id);
-        product.setDeleted(true);
-        product.setActive(false);
-        productRepository.save(product);
-        return ResponseEntity.ok().build();
+        productService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/active")
     ResponseEntity<Product> toggleActive(@PathVariable int id) {
-        Product product = productRepository.requireNotDeleted(id);
-        product.setActive(!product.isActive());
-        return ResponseEntity.ok(productRepository.save(product));
+        return ResponseEntity.ok(productService.toggleActive(id));
     }
 
     @PutMapping("/{id}")
     ResponseEntity<Product> update(@PathVariable int id, @Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.accepted().body(productService.update(id, product));
+        return ResponseEntity.ok(productService.update(id, product));
     }
 }

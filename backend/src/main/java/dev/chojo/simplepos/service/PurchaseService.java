@@ -1,47 +1,65 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
+import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.PurchasePart;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
+import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchasePartRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.storage.StorageTransaction;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * The shape of carts (present fields, positive amounts, limits) is checked by the request validation at the API,
+ * not here again; a new caller has to pass validated requests.
+ */
 @Service
 public class PurchaseService {
     private static final Logger log = getLogger(PurchaseService.class);
+    private static final int NOTE_LENGTH = 255;
     private final StorageService storageService;
     private final ProductRepository productRepository;
     private final IngredientRepository ingredientRepository;
     private final AccountRepository accountRepository;
     private final PurchaseRepository purchaseRepository;
     private final PurchasePartRepository purchasePartRepository;
+    private final CashRepository cashRepository;
 
     public PurchaseService(StorageService storageService, ProductRepository productRepository, IngredientRepository ingredientRepository, PurchaseRepository purchaseRepository, PurchasePartRepository purchasePartRepository,
-                           AccountRepository accountRepository) {
+                           AccountRepository accountRepository, CashRepository cashRepository) {
         this.accountRepository = accountRepository;
+        this.cashRepository = cashRepository;
         this.storageService = storageService;
         this.productRepository = productRepository;
         this.ingredientRepository = ingredientRepository;
@@ -52,40 +70,75 @@ public class PurchaseService {
     /**
      * Books a purchase for every cart position and takes the ingredients of each product's recipe from storage.
      * <p>
-     * Runs in one transaction: if any position names an unknown product, nothing is booked. A product whose
-     * ingredients are out of stock is still sold; the shortfall is logged as a warning and recorded as units sold
-     * without stock, costed at the ingredient's current price.
+     * Every purchase records {@code soldBy}, the user at the till. Runs in one transaction: if any position names an
+     * unknown product, nothing is booked. A product whose ingredients are out of stock is still sold; the shortfall
+     * is logged as a warning and recorded as units sold without stock, costed at the ingredient's current price.
      *
      * <p>
      * The account is loaded only here, under its row lock, so an account closed meanwhile is seen as closed.
      *
-     * @throws BadRequestException if the cart is empty or a position's amount is below 1
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a position names an unknown or deleted
-     *                                                                     product, or the account does not exist or
-     *                                                                     is closed
+     * @return the ids of the purchases booked, one per position, in the order of the positions
+     * @throws BadRequestException if a position names no product; the cart's shape (not empty, amounts of at least 1)
+     *                             is checked by the request validation
+     * @throws NotFoundException if a position names an unknown or deleted product, or the account does not exist or is
+     *                           closed
      * @throws ConflictException if a product is not active
      */
     @Transactional
-    public synchronized void purchase(int accountId, List<CartPositionDto> positions) {
-        if (positions == null || positions.isEmpty()) throw new BadRequestException("The cart is empty");
-        for (CartPositionDto position : positions) {
-            if (position.amount() < 1) throw new BadRequestException("Every position needs an amount of at least 1");
-        }
+    public List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy) {
+        return purchase(accountId, positions, soldBy, Instant.now());
+    }
+
+    /**
+     * Books a sale like {@link #purchase(int, List, User)}, but as made at {@code purchased}. For demo data, which
+     * fills a history of past sales; the API always books at the current time.
+     *
+     * @return the ids of the purchases booked, one per position, in the order of the positions
+     * @throws NotFoundException if a position names an unknown or deleted product, or the account does not exist or
+     *                           is closed
+     * @throws ConflictException if a product is not active
+     */
+    @Transactional
+    public List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy, Instant purchased) {
         Account account = accountRepository.requireNotDeletedLocked(accountId);
+        return book(account, positions, soldBy, purchased).stream().map(Purchase::getId).toList();
+    }
+
+    /**
+     * Sells the cart to a guest who pays cash: the purchases are booked like {@link #purchase} but without an account,
+     * and their total goes into the till as one {@code sale} cash entry, all in one transaction.
+     *
+     * @return the ids of the purchases booked, one per position, in the order of the positions
+     * @throws BadRequestException if a position names no product; the cart's shape (not empty, amounts of at least 1)
+     *                             is checked by the request validation
+     * @throws NotFoundException if a position names an unknown or deleted product
+     * @throws ConflictException if a product is not active
+     */
+    @Transactional
+    public List<Integer> purchaseAsGuest(List<CartPositionDto> positions, User soldBy) {
+        List<Purchase> purchases = book(null, positions, soldBy, Instant.now());
+        BigDecimal total = purchases.stream().map(PurchaseService::totalOf).reduce(Money.ZERO, BigDecimal::add);
+        cashRepository.save(new Cash(soldBy, total, CashType.SALE, note("Guest sale", purchases)));
+        return purchases.stream().map(Purchase::getId).toList();
+    }
+
+    private List<Purchase> book(Account account, List<CartPositionDto> positions, User soldBy, Instant purchased) {
         List<Product> products = positions.stream()
                 .map(position -> productRepository.requireNotDeleted(position.productId()))
                 .toList();
         for (Product product : products) {
-            if (!product.isActive()) throw new ConflictException("%s is not on sale".formatted(product.getName()));
+            if (!product.isActive()) throw new ConflictException(ErrorCode.PRODUCT_NOT_ON_SALE, product.getName());
         }
         ingredientRepository.requireLockedInOrder(products.stream()
                 .flatMap(product -> product.getRecipe().getEntries().stream())
                 .map(entry -> entry.getIngredient().getId())
                 .toList());
+        List<Purchase> booked = new ArrayList<>();
         for (int index = 0; index < positions.size(); index++) {
             CartPositionDto position = positions.get(index);
             Product prod = products.get(index);
-            Purchase purchase = new Purchase(null, account, prod, Instant.now(), position.amount(), prod.getPrice(), Collections.emptyList());
+            Purchase purchase = new Purchase(null, account, prod, purchased, position.amount(), prod.getPrice(), Collections.emptyList());
+            purchase.setSoldBy(soldBy);
             purchase = purchaseRepository.save(purchase);
             ArrayList<PurchasePart> parts = new ArrayList<>();
             for (RecipeEntry recipe : prod.getRecipe().getEntries()) {
@@ -104,25 +157,63 @@ public class PurchaseService {
                 }
             }
             purchase.setParts(parts);
-            purchaseRepository.save(purchase);
+            purchase.setCost(parts.stream().map(PurchasePart::getCost).reduce(Money.ZERO, BigDecimal::add));
+            booked.add(purchaseRepository.save(purchase));
         }
+        return booked;
     }
 
     /**
      * Cancels a purchase: the account gets its money back, because its balance counts purchases, and the stock gets
-     * its units back. Runs in one transaction under the same ingredient locks a purchase takes.
+     * its units back. A guest purchase is paid back out of the till instead, booked by {@code cancelledBy}. Runs in one
+     * transaction under the same ingredient locks a purchase takes.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the purchase does not exist
+     * @throws NotFoundException if the purchase does not exist
      * @throws ConflictException if the purchase belongs to a closed account, whose balance was already settled
      */
     @Transactional
-    public synchronized void cancel(int id) {
-        Integer accountId = purchaseRepository.findAccountIdOf(id).orElseThrow(() -> new NotFoundException("Purchase", id));
-        if (accountRepository.requireLocked(accountId).isDeleted()) {
-            throw new ConflictException("The purchase belongs to a closed account and cannot be cancelled");
+    public void cancel(int id, User cancelledBy) {
+        cancelAll(List.of(id), cancelledBy);
+    }
+
+    /**
+     * Cancels several purchases, such as all positions of one sale, in one transaction: either all of them are
+     * cancelled or none. The accounts are locked first, then all ingredients involved in ascending order, as a
+     * purchase does, so a cancellation cannot deadlock with a sale.
+     *
+     * @throws BadRequestException if no purchase is named
+     * @throws NotFoundException if a purchase does not exist
+     * @throws ConflictException if a purchase belongs to a closed account, whose balance was already settled
+     */
+    @Transactional
+    public void cancelAll(Collection<Integer> ids, User cancelledBy) {
+        List<Integer> distinct = ids.stream().distinct().sorted().toList();
+        if (distinct.isEmpty()) throw new BadRequestException(ErrorCode.NO_PURCHASE_TO_CANCEL);
+        Map<Integer, Integer> accountOf = new HashMap<>();
+        for (Object[] row : purchaseRepository.findAccountIdsOf(distinct)) {
+            accountOf.put((Integer) row[0], (Integer) row[1]);
         }
-        ingredientRepository.requireLockedInOrder(purchasePartRepository.findIngredientIdsOf(id));
+        for (int id : distinct) {
+            if (!accountOf.containsKey(id)) throw new NotFoundException("Purchase", id);
+        }
+        List<Integer> accountIds = accountOf.values().stream().filter(Objects::nonNull).distinct().sorted().toList();
+        for (int accountId : accountIds) {
+            if (accountRepository.requireLocked(accountId).isDeleted()) {
+                throw new ConflictException(ErrorCode.PURCHASE_OF_CLOSED_ACCOUNT);
+            }
+        }
+        ingredientRepository.requireLockedInOrder(distinct.stream()
+                .flatMap(id -> purchasePartRepository.findIngredientIdsOf(id).stream())
+                .toList());
+        distinct.forEach(id -> cancelLocked(id, cancelledBy));
+    }
+
+    private void cancelLocked(int id, User cancelledBy) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new NotFoundException("Purchase", id));
+        if (purchase.getAccount() == null) {
+            cashRepository.save(new Cash(cancelledBy, totalOf(purchase).negate(), CashType.SALE,
+                    note("Guest sale cancelled", List.of(purchase))));
+        }
         List<PurchasePart> parts = purchasePartRepository.findAllByPurchase(purchase);
         for (PurchasePart part : parts) {
             Storage storage = part.getStorage();
@@ -132,10 +223,23 @@ public class PurchaseService {
         purchaseRepository.delete(purchase);
     }
 
+    private static BigDecimal totalOf(Purchase purchase) {
+        return Money.of(purchase.getPrice().multiply(BigDecimal.valueOf(purchase.getAmount())));
+    }
+
+    private static String note(String prefix, List<Purchase> purchases) {
+        String note = prefix + ": " + purchases.stream()
+                .map(purchase -> "%d× %s".formatted(purchase.getAmount(), purchase.getProduct().getName()))
+                .collect(Collectors.joining(", "));
+        if (note.codePointCount(0, note.length()) <= NOTE_LENGTH) return note;
+        return note.substring(0, note.offsetByCodePoints(0, NOTE_LENGTH - 1)) + "…";
+    }
+
     private static void logShortfall(Purchase purchase, RecipeEntry recipe, int requested, int taken) {
         Product product = purchase.getProduct();
+        Object buyer = purchase.getAccount() == null ? "guest" : purchase.getAccount().getId();
         log.warn("Purchase {} by account {} sold product {} ({}) with insufficient stock of ingredient {} ({}): took {} of {}",
-                purchase.getId(), purchase.getAccount().getId(), product.getId(), product.getName(),
+                purchase.getId(), buyer, product.getId(), product.getName(),
                 recipe.getIngredient().getId(), recipe.getIngredient().getName(), taken, requested);
     }
 }

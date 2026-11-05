@@ -10,10 +10,10 @@ import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
-import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import dev.chojo.simplepos.service.ProductService;
+import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.servlet.Filter;
@@ -77,7 +77,7 @@ class QueryCountTest {
     @Autowired
     BalanceRepository balanceRepository;
     @Autowired
-    PurchaseRepository purchaseRepository;
+    PurchaseService purchaseService;
     @Autowired
     CashRepository cashRepository;
     @Autowired
@@ -94,7 +94,7 @@ class QueryCountTest {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
         statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
         new DemoDataSeeder(entityManager, userRepository, passwordEncoder, categoryRepository, ingredientRepository,
-                productService, storageRepository, accountRepository, balanceRepository, purchaseRepository,
+                productService, storageRepository, accountRepository, balanceRepository, purchaseService,
                 cashRepository, true).run();
         userRepository.save(new User(null, "countadmin", passwordEncoder.encode("secret"), true, Role.ADMIN));
         entityManager.flush();

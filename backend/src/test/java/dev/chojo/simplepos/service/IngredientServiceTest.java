@@ -1,14 +1,14 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,13 +50,13 @@ class IngredientServiceTest {
 
     @Test
     void createIngredient() {
-        Ingredient ingredient = service.create(new Ingredient(null, category, "Cola", 1.5, 24, 0.25, 3.0, 10));
+        Ingredient ingredient = ingredientRepository.save(new Ingredient(null, category, "Cola", 1.5, 24, 0.25, 3.0, 10));
         assertNotNull(ingredient.getId());
     }
 
     @Test
     void createdIngredientRetainsFields() {
-        Ingredient ingredient = service.create(new Ingredient(null, category, "Fanta", 1.2, 12, 0.15, 2.0, 5));
+        Ingredient ingredient = ingredientRepository.save(new Ingredient(null, category, "Fanta", 1.2, 12, 0.15, 2.0, 5));
 
         Ingredient found = ingredientRepository.findById(ingredient.getId()).orElseThrow();
         assertEquals("Fanta", found.getName());
@@ -69,14 +69,14 @@ class IngredientServiceTest {
 
     @Test
     void createMultipleIngredients() {
-        Ingredient first = service.create(new Ingredient(null, category, "Sprite", 1.0, 6, 0, 0, 0));
-        Ingredient second = service.create(new Ingredient(null, category, "Water", 0.5, 6, 0, 0, 0));
+        Ingredient first = ingredientRepository.save(new Ingredient(null, category, "Sprite", 1.0, 6, 0, 0, 0));
+        Ingredient second = ingredientRepository.save(new Ingredient(null, category, "Water", 0.5, 6, 0, 0, 0));
         assertNotEquals(first.getId(), second.getId());
     }
 
     @Test
     void deletesAnUnusedIngredient() {
-        Ingredient ingredient = service.create(new Ingredient(null, category, "Unused", 1.0, 1, 0, 0, 0));
+        Ingredient ingredient = ingredientRepository.save(new Ingredient(null, category, "Unused", 1.0, 1, 0, 0, 0));
 
         service.delete(ingredient.getId());
 
@@ -85,7 +85,7 @@ class IngredientServiceTest {
 
     @Test
     void refusesToDeleteAnIngredientWithStock() {
-        Ingredient ingredient = service.create(new Ingredient(null, category, "Stocked", 1.0, 1, 0, 0, 0));
+        Ingredient ingredient = ingredientRepository.save(new Ingredient(null, category, "Stocked", 1.0, 1, 0, 0, 0));
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 5, 0));
 
         assertThrows(ConflictException.class, () -> service.delete(ingredient.getId()));
@@ -99,7 +99,7 @@ class IngredientServiceTest {
 
     @Test
     void refusesToDeleteAnIngredientInARecipe() {
-        Ingredient ingredient = service.create(new Ingredient(null, category, "InRecipe", 1.0, 1, 0, 0, 0));
+        Ingredient ingredient = ingredientRepository.save(new Ingredient(null, category, "InRecipe", 1.0, 1, 0, 0, 0));
         productService.create(new Product(null, category, "WithRecipe", 2.0, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
 

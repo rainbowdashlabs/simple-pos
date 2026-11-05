@@ -1,10 +1,14 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.validation.PageNumber;
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.dto.CategoryRequest;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.service.CategoryService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +19,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/category")
@@ -32,14 +34,14 @@ public class CategoryController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Category> create(@Valid @RequestBody CategoryRequest category) {
-        return ResponseEntity.accepted().body(categoryService.create(category));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(category));
     }
 
     @GetMapping
-    ResponseEntity<List<Category>> all() {
-        return ResponseEntity.ok(categoryRepository.findAll(Sort.by("name").ascending()));
+    PageResponse<Category> all(@RequestParam(defaultValue = "100") @PageSize int limit,
+                               @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(categoryRepository.findAll(PageRequest.of(page, limit, Sort.by("name", "id"))));
     }
 
     @GetMapping("/{id}")
@@ -48,15 +50,13 @@ public class CategoryController {
     }
 
     @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Category> update(@PathVariable int id, @Valid @RequestBody CategoryRequest category) {
-        return ResponseEntity.accepted().body(categoryService.update(id, category));
+        return ResponseEntity.ok(categoryService.update(id, category));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Void> delete(@PathVariable int id) {
         categoryService.delete(id);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.noContent().build();
     }
 }

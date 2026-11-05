@@ -2,34 +2,51 @@ package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
-import jakarta.persistence.Tuple;
-import org.springframework.data.domain.PageRequest;
+import dev.chojo.simplepos.entity.dto.IngredientUsage;
+import dev.chojo.simplepos.entity.dto.StorageSummary;
+import jakarta.persistence.QueryHint;
+import org.hibernate.jpa.HibernateHints;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface StorageRepository extends JpaRepository<Storage, Integer> {
     boolean existsByIngredient_Id(int ingredientId);
 
-    List<Storage> findAllBy(Pageable pageable);
+    Page<Storage> findAllBy(Pageable pageable);
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) AS stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold AND ingredient.id = ?1 GROUP BY ingredient) s ON i.id = s.id WHERE i.id = ?1")
-    Tuple summaryById(int id);
+    /**
+     * The stock of one ingredient, or null if there is no ingredient with this id.
+     */
+    @Query("SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.id = ?1")
+    StorageSummary summaryById(int id);
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true")
-    List<Tuple> summary();
+    @Query("SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true")
+    List<StorageSummary> summary();
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND i.minStock > stock AND coalesce(s.stock, 0) > 0 ORDER BY cast(coalesce(s.stock, 0) as double) / i.minStock ASC, i.name ASC")
-    List<Tuple> lowStock(PageRequest pageRequest);
+    /**
+     * A page of the active ingredients' stock, by category name (ingredients without one last), then name.
+     */
+    @Query(value = "SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category c JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true ORDER BY c.name ASC NULLS LAST, c.id, i.name, i.id",
+            countQuery = "SELECT count(i) FROM Ingredient i WHERE i.active = true")
+    Page<StorageSummary> summaryPage(Pageable pageable);
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND coalesce(s.stock, 0) = 0 ORDER BY i.name ASC")
-    List<Tuple> outOfStock(PageRequest pageRequest);
+    @Query(value = "SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND i.minStock > s.stock AND s.stock > 0 ORDER BY cast(s.stock as double) / i.minStock ASC, i.name ASC, i.id",
+            countQuery = "SELECT count(i) FROM Ingredient i JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND i.minStock > s.stock AND s.stock > 0")
+    Page<StorageSummary> lowStock(Pageable pageable);
 
-    List<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
+    @Query(value = "SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND s.stock = 0 ORDER BY i.name ASC, i.id",
+            countQuery = "SELECT count(i) FROM Ingredient i JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND s.stock = 0")
+    Page<StorageSummary> outOfStock(Pageable pageable);
+
+    Page<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
 
     /**
      * The oldest batch of the ingredient that still holds units: by delivery time, then by id.
@@ -42,12 +59,19 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
      * from storage or sold without stock, and when a unit of it was first used for a sale at all.
      */
     @Query("""
-            SELECT pp.ingredient.id AS ingredient_id,
-                   sum(pp.amount) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) AS taken,
-                   min(pp.purchase.purchased) AS first_taken
+            SELECT NEW dev.chojo.simplepos.entity.dto.IngredientUsage(pp.ingredient.id,
+                   sum(pp.amount) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2),
+                   min(pp.purchase.purchased))
             FROM PurchasePart pp
             GROUP BY pp.ingredient.id
             HAVING sum(pp.amount) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) > 0
             """)
-    List<Tuple> usageByIngredient(Instant after, Instant until);
+    List<IngredientUsage> usageByIngredient(Instant after, Instant until);
+
+    /**
+     * The stock batches bought in {@code [from, to)}, oldest first, with their ingredients, read as a stream.
+     */
+    @QueryHints({@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "500"), @QueryHint(name = HibernateHints.HINT_READ_ONLY, value = "true")})
+    @Query("SELECT s FROM Storage s JOIN FETCH s.ingredient WHERE s.purchased >= ?1 AND s.purchased < ?2 ORDER BY s.purchased, s.id")
+    Stream<Storage> streamBetween(Instant from, Instant to);
 }

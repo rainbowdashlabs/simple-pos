@@ -26,6 +26,9 @@ public class Balance {
     public Balance() {
     }
 
+    /**
+     * The same with the amounts as {@code double}, for test fixtures and demo data.
+     */
     public Balance(Integer id, Account account, Instant added, double amount) {
         this(id, account, added, Money.of(amount));
     }

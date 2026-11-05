@@ -1,6 +1,6 @@
 package dev.chojo.simplepos.configuration.security;
 
-import dev.chojo.simplepos.controller.exceptions.TooManyRequestsException;
+import dev.chojo.simplepos.exceptions.TooManyRequestsException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 

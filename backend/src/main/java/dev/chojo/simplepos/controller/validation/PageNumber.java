@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PageNumber {
-    String message() default "must be between 0 and " + Integer.MAX_VALUE / PageSize.MAX;
+    String message() default "{simplepos.validation.page_number}";
 
     Class<?>[] groups() default {};
 

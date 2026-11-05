@@ -2,6 +2,7 @@
 import PurchaseHistory from "./profile/PurchaseHistory.vue";
 import {account, Account} from "@/scripts/accounts.ts";
 import DepositHistory from "./profile/DepositHistory.vue";
+import UndoSale from "./profile/UndoSale.vue";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FreeButton from "@/components/styles/buttons/FreeButton.vue";
@@ -11,7 +12,7 @@ import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 export default {
   name: "Profile",
-  components: {Icon, FreeButton, ViewWrapper, ColorContainer, MoneyText, DepositHistory, PurchaseHistory},
+  components: {UndoSale, Icon, FreeButton, ViewWrapper, ColorContainer, MoneyText, DepositHistory, PurchaseHistory},
   props: {
     id: {
       type: String,
@@ -20,7 +21,8 @@ export default {
   },
   data() {
     return {
-      account: null as Account | null
+      account: null as Account | null,
+      historyKey: 0
     }
   },
   mounted() {
@@ -31,6 +33,10 @@ export default {
       account(Number(this.id)).then(e => {
         this.account = e
       })
+    },
+    undone() {
+      this.historyKey++
+      this.loadAccount()
     },
     addBalance() {
       this.$router.push({name: 'balance', params: {id: this.id}})
@@ -55,6 +61,8 @@ export default {
       <MoneyText class="font-bold text-center" :amount="account.balance" :size="SizeGroup.xl3"/>
     </ColorContainer>
 
+    <UndoSale :key="id" :account-id="Number(id)" @undone="undone"/>
+
     <FreeButton v-if="fromCheckout" @click="$router.push({name: 'pos'})" class="w-full flex items-center justify-center gap-3 text-xl">
       <Icon icon="fa-cash-register"/>
       <span>{{ $t('back_to_pos') }}</span>
@@ -66,7 +74,7 @@ export default {
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <DepositHistory :account-id="Number(id)"/>
-      <PurchaseHistory :account-id="Number(id)" @changed="loadAccount"/>
+      <PurchaseHistory :key="historyKey" :account-id="Number(id)" @changed="loadAccount"/>
     </div>
   </ViewWrapper>
 </template>

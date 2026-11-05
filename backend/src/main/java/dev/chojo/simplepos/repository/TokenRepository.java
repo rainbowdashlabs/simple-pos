@@ -10,7 +10,14 @@ import java.time.Instant;
 import java.util.Optional;
 
 public interface TokenRepository extends JpaRepository<Token, Integer> {
+    /**
+     * The stored token with this fingerprint; for tests that check what a login stored.
+     */
     Optional<Token> findByToken(String token);
+
+    /**
+     * The user's stored token with this fingerprint; for tests that check what a login stored.
+     */
     Optional<Token> findByUserAndToken(User user, String token);
     /**
      * Deletes the refresh token in a single statement, so of two concurrent calls with the same token only one sees

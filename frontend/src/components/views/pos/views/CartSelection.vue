@@ -4,16 +4,18 @@ import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
 import MobileCart from "./cartselection/MobileCart.vue";
 import PosProducts from "./cartselection/PosProducts.vue";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import UndoSale from "@/components/views/profile/UndoSale.vue";
 
 export default defineComponent({
   name: "CartSelection",
-  components: {ViewWrapper, PosProducts, MobileCart, GridWrapper}
+  components: {UndoSale, ViewWrapper, PosProducts, MobileCart, GridWrapper}
 })
 </script>
 
 <template>
   <div class="flex flex-col justify-between w-full min-h-[90vh]">
     <ViewWrapper>
+      <UndoSale/>
       <PosProducts/>
     </ViewWrapper>
     <MobileCart/>

@@ -4,29 +4,37 @@ import {Account, accounts} from "@/scripts/accounts.ts";
 import AccountEntry from "./accounts/AccountEntry.vue";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
+import {loadNext, pagedList, reload} from "@/scripts/page.ts";
 
+/**
+ * Managing the open accounts, by name, a page at a time.
+ */
 export default defineComponent({
   name: "Accounts",
-  components: {ConfirmButton, ViewWrapper, AccountEntry},
+  components: {LoadMore, ConfirmButton, ViewWrapper, AccountEntry},
   data() {
     return {
-      accounts: [] as Account[]
+      accounts: pagedList<Account>()
     }
   },
   methods: {
     accountChanged(account: Account) {
-      const index = this.accounts.findIndex(entry => entry.id === account.id)
-      if (index >= 0) this.accounts[index] = account
+      const index = this.accounts.items.findIndex(entry => entry.id === account.id)
+      if (index >= 0) this.accounts.items[index] = account
     },
     createAccount() {
       this.$router.push({name: 'manage-accounts-create'})
     },
+    more() {
+      loadNext(this.accounts, page => accounts("", page))
+    },
     loadAccounts() {
-      accounts().then(e => this.accounts = e)
+      reload(this.accounts, page => accounts("", page))
     }
   },
   mounted() {
-    this.loadAccounts()
+    this.more()
   },
 })
 </script>
@@ -35,7 +43,8 @@ export default defineComponent({
   <ViewWrapper>
     <ConfirmButton icon="fa-user-plus" :label="$t('button.new_account')" @click="createAccount"/>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <AccountEntry v-for="item in accounts" :key="item.id" :user="item" @deleted="loadAccounts" @changed="accountChanged"/>
+      <AccountEntry v-for="item in accounts.items" :key="item.id" :user="item" @deleted="loadAccounts" @changed="accountChanged"/>
     </div>
+    <LoadMore :page="accounts.page" :shown="accounts.items.length" :loading="accounts.loading" @more="more"/>
   </ViewWrapper>
 </template>

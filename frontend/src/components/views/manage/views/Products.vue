@@ -1,32 +1,37 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {ProductListings, products, Product} from "@/scripts/product.ts";
+import {groupByCategory, loadNext, pagedList, reload} from "@/scripts/page.ts";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
 import ProductGroup from "./products/ProductGroup.vue";
 import FreeButton from "@/components/styles/buttons/FreeButton.vue";
 import Icon from "@/components/styles/Icon.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
-import {notifyError} from "@/scripts/notifications.ts";
 
+/**
+ * Managing the products, grouped by category, a page at a time.
+ */
 export default defineComponent({
   name: "Products",
-  components: {ViewWrapper, Icon, FreeButton, ProductGroup},
+  components: {LoadMore, ViewWrapper, Icon, FreeButton, ProductGroup},
   data() {
     return {
-      productList: {categories: []} as ProductListings
+      products: pagedList<Product>()
     }
   },
   computed: {
     SizeGroup() {
       return SizeGroup
     },
+    productList(): ProductListings {
+      return groupByCategory(this.products.items, product => product.category)
+    }
   },
   methods: {
     productChanged(product: Product) {
-      for (const group of this.productList.categories) {
-        const index = group.entries.findIndex(entry => entry.id === product.id)
-        if (index >= 0) group.entries[index] = product
-      }
+      const index = this.products.items.findIndex(entry => entry.id === product.id)
+      if (index >= 0) this.products.items[index] = product
     },
     createProduct() {
       this.$router.push({name: 'manage-products-create'})
@@ -34,14 +39,15 @@ export default defineComponent({
     createMultiProduct() {
       this.$router.push({name: 'manage-products-createmulti'})
     },
+    more() {
+      loadNext(this.products, page => products(page))
+    },
     loadProducts() {
-      products().then(e => {
-        this.productList = e
-      }).catch(notifyError)
+      reload(this.products, page => products(page))
     }
   },
   mounted() {
-    this.loadProducts()
+    this.more()
   },
 
 })
@@ -70,6 +76,7 @@ export default defineComponent({
       </FreeButton>
     </div>
     <ProductGroup v-for="item in productList.categories" :key="item.category.id" :group="item" @deleted="loadProducts" @changed="productChanged"/>
+    <LoadMore :page="products.page" :shown="products.items.length" :loading="products.loading" @more="more"/>
   </ViewWrapper>
 
 </template>

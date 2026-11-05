@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.PurchasePart;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
@@ -28,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -104,6 +107,48 @@ class StockProjectionServiceTest {
     }
 
     @Test
+    void theShoppingListCoversTheDaysAndTheMinimumInFullContainers() {
+        take(10, now.minus(Duration.ofDays(10)));
+        take(10, now.minus(Duration.ofDays(1)));
+
+        assertEquals(23, shoppingEntryOf(ingredient, 14).amount());
+
+        ingredient.setContainerSize(6);
+        ingredient.setMinStock(4);
+        ingredientRepository.save(ingredient);
+        entityManager.flush();
+        ShoppingListEntry entry = shoppingEntryOf(ingredient, 14);
+
+        assertEquals(5, entry.containers());
+        assertEquals(30, entry.amount());
+        assertMoney(30.0, entry.estimatedCost());
+    }
+
+    @Test
+    void theShoppingListHasUnusedIngredientsBelowTheirMinimumOnly() {
+        Ingredient unusedLow = ingredientRepository.save(new Ingredient(null, ingredient.getCategory(), "UnusedLow", 2.0, 0, 0, 0, 3));
+        Ingredient unusedEnough = ingredientRepository.save(new Ingredient(null, ingredient.getCategory(), "UnusedEnough", 2.0, 0, 0, 0, 3));
+        storageRepository.save(new Storage(null, unusedEnough, now.minus(Duration.ofDays(3)), 2.0, 5, 0));
+        entityManager.flush();
+
+        List<ShoppingListEntry> list = projectionService.shoppingList(14, now);
+
+        assertEquals(3, list.stream().filter(e -> e.ingredient().getId().equals(unusedLow.getId())).findFirst().orElseThrow().amount());
+        assertTrue(list.stream().noneMatch(e -> e.ingredient().getId().equals(unusedEnough.getId())));
+        assertTrue(list.stream().noneMatch(e -> e.ingredient().getId().equals(ingredient.getId())));
+    }
+
+    @Test
+    void exactlyEnoughStockIsNotListed() {
+        take(25, now.minus(Duration.ofDays(3)));
+        storageRepository.save(new Storage(null, ingredient, now.minus(Duration.ofDays(2)), 1.0, 250, 0));
+        entityManager.flush();
+
+        assertTrue(projectionService.shoppingList(30, now).stream()
+                .noneMatch(e -> e.ingredient().getId().equals(ingredient.getId())));
+    }
+
+    @Test
     void windowIsAtLeastOneDay() {
         assertEquals(1, StockProjectionService.windowDays(now.minusSeconds(60), now));
         assertEquals(1, StockProjectionService.windowDays(now.plus(Duration.ofDays(1)), now));
@@ -116,6 +161,13 @@ class StockProjectionServiceTest {
         purchasePartRepository.save(new PurchasePart(purchase, batch, ingredient, taken.units(), taken.cost()));
         storageRepository.save(batch);
         entityManager.flush();
+    }
+
+    private ShoppingListEntry shoppingEntryOf(Ingredient ingredient, int days) {
+        return projectionService.shoppingList(days, now).stream()
+                .filter(e -> e.ingredient().getId().equals(ingredient.getId()))
+                .findFirst()
+                .orElseThrow();
     }
 
     private StockProjectionDto projectionOf(Ingredient ingredient) {

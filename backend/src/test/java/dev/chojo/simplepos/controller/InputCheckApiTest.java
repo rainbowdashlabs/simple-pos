@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,13 +32,18 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,7 +106,9 @@ class InputCheckApiTest {
     void storageIsPaged() throws Exception {
         mvc.perform(get("/api/storage").param("limit", "1").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.items.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.page").value(0));
     }
 
     @Test
@@ -143,6 +151,132 @@ class InputCheckApiTest {
     }
 
     @Test
+    void aSaleSendsItsPurchasesAndCanBeUndone() throws Exception {
+        Category category = categoryRepository.save(new Category(null, "UndoCat"));
+        Product product = productService.create(new Product(null, category, "UndoProduct", 2.0, true,
+                new Recipe(null, null, Collections.emptyList())));
+        Account account = accountRepository.save(new Account(null, "UndoAccount", Instant.now()));
+
+        String receipt = mvc.perform(post("/api/account/" + account.getId() + "/purchase").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"product\": {\"id\": " + product.getId() + "}, \"amount\": 2}]"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.purchaseIds.length()").value(1))
+                .andReturn().getResponse().getContentAsString();
+        String ids = receipt.substring(receipt.indexOf('['), receipt.indexOf(']') + 1);
+
+        mvc.perform(post("/api/purchase/cancel").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ids\": " + ids + "}"))
+                .andExpect(status().isNoContent());
+        for (String body : new String[]{"{\"ids\": []}", "{\"ids\": [null]}"}) {
+            mvc.perform(post("/api/purchase/cancel").header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Test
+    void shoppingListDaysAreChecked() throws Exception {
+        for (String days : new String[]{"0", "91"}) {
+            mvc.perform(get("/api/storage/shopping-list").header("Authorization", "Bearer " + token).param("days", days))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors[0].field").value("days"));
+        }
+    }
+
+    @Test
+    void requestBodiesAreValidatedAtEveryEndpoint() throws Exception {
+        Account account = accountRepository.save(new Account(null, "ValidatedAccount", Instant.now()));
+        long cashBefore = cashRepository.count();
+        String[][] cases = {
+                {"POST", "/api/account", "{\"name\": \" \"}"},
+                {"POST", "/api/account", "{\"name\": \"" + "a".repeat(101) + "\"}"},
+                {"PATCH", "/api/account/" + account.getId(), "{\"name\": \"line\\nbreak\"}"},
+                {"PUT", "/api/user/preferences", "{\"locale\": \"fr\", \"colorTheme\": \"blue\", \"darkMode\": \"dark\"}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": 0, \"amount\": -5}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"total\": 5, \"pledge\": 0, \"amount\": 5}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": -1, \"amount\": 5}"},
+                {"PUT", "/api/storage", "[{\"ingredient\": 1, \"amount\": -1}]"},
+                {"PUT", "/api/storage", "[null]"},
+                {"POST", "/api/purchase/guest", "[]"},
+                {"POST", "/api/purchase/guest", "[{\"product\": {\"id\": 1}, \"amount\": 0}]"},
+                {"POST", "/api/account/" + account.getId() + "/purchase", "[]"},
+                {"POST", "/api/account/" + account.getId() + "/purchase", "[{\"product\": {\"id\": 1}, \"amount\": 0}]"},
+        };
+        for (String[] request : cases) {
+            mvc.perform(request(HttpMethod.valueOf(request[0]), request[1]).header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(request[2]))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").isNotEmpty());
+        }
+        assertEquals(cashBefore, cashRepository.count());
+    }
+
+    @Test
+    void theSummaryAndCartBodiesWithTheUnitCostWork() throws Exception {
+        Category category = categoryRepository.save(new Category(null, "SummaryCat"));
+        Product product = productService.create(new Product(null, category, "SummaryProduct", 2.0, true,
+                new Recipe(null, null, Collections.emptyList())));
+
+        mvc.perform(post("/api/purchase/guest").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"product\": {\"id\": " + product.getId() + ", \"unitCost\": 1.23}, \"amount\": 2}]"))
+                .andExpect(status().isCreated());
+        mvc.perform(get("/api/purchase/stats/summary").param("after", "2020-01-01T00:00:00Z")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sales").isNumber())
+                .andExpect(jsonPath("$.revenue").isNumber())
+                .andExpect(jsonPath("$.day").doesNotExist());
+    }
+
+    @Test
+    void validationAnswersCarryTheirCodeInTheUsersLanguage() throws Exception {
+        String english = mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)
+                        .header("Accept-Language", "en")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("invalid_request"))
+                .andReturn().getResponse().getContentAsString();
+        String german = mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)
+                        .header("Accept-Language", "de")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+        assertNotEquals(messageOf(english), messageOf(german));
+    }
+
+    @Test
+    void ownValidationMessagesAreTranslatedToo() throws Exception {
+        mvc.perform(post("/api/account").header("Authorization", "Bearer " + token)
+                        .header("Accept-Language", "de")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"line\\nbreak\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("darf keine Steuerzeichen enthalten"));
+    }
+
+    private static Object messageOf(String body) {
+        return ((Map<?, ?>) ((List<?>) JsonParserFactory.getJsonParser().parseMap(body).get("errors")).get(0)).get("message");
+    }
+
+    @Test
+    void returnedEmptiesAreChecked() throws Exception {
+        for (String body : new String[]{"[]", "[null]", "[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"}) {
+            mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Test
     void dailyStatsSendTheBusinessDate() throws Exception {
         Category category = categoryRepository.save(new Category(null, "DailyCat"));
         Product product = productService.create(new Product(null, category, "Late", 1.0, true,
@@ -159,7 +293,7 @@ class InputCheckApiTest {
 
     private String login() throws Exception {
         String body = mvc.perform(post("/api/auth/login").param("username", "inputadmin").param("password", "secret"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
         return (String) ((Map<?, ?>) tokens.get("token")).get("token");

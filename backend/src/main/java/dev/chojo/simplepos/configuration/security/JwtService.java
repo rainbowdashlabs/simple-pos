@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +30,14 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     static final int MIN_KEY_BYTES = 32;
+    /**
+     * The claim that marks a login token, which authenticates requests.
+     */
+    public static final Map<String, Object> LOGIN_CLAIM = Map.of("type", "login");
+    /**
+     * The claim that marks a refresh token, which only buys a new token pair.
+     */
+    public static final Map<String, Object> REFRESH_CLAIM = Map.of("type", "refresh");
 
     @Value("${security.jwt.secret-key:}")
     private String secretKey;
@@ -60,14 +67,6 @@ public class JwtService {
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
-    }
-
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(Collections.emptyMap(), userDetails);
-    }
-
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return generateToken(extraClaims, userDetails, jwtExpiration);
     }
 
     public long getExpirationTime() {

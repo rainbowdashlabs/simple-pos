@@ -18,7 +18,7 @@ public record CashDto(@NotNull @Digits(integer = 10, fraction = 2) BigDecimal am
                       @NotNull CashType type,
                       @Size(max = 255) String note) {
 
-    @AssertTrue(message = "must not be 0")
+    @AssertTrue(message = "{simplepos.validation.not_zero}")
     public boolean isAmount() {
         return amount == null || amount.signum() != 0;
     }

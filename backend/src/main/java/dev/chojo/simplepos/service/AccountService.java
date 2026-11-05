@@ -5,19 +5,33 @@ import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Money;
+import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.AccountDto;
+import dev.chojo.simplepos.entity.dto.LazyProduct;
+import dev.chojo.simplepos.entity.dto.PurchaseHistoryDto;
+import dev.chojo.simplepos.entity.response.PageResponse;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
-import jakarta.transaction.Transactional;
+import dev.chojo.simplepos.repository.PurchaseRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Closing accounts.
+ * Opening, renaming, paying into and closing accounts, and their purchase history.
  * <p>
  * The register total is the sum of all cash entries and all deposits, and an account's balance is its deposits minus
  * its purchases. Closing an account zeroes its balance with one balance entry. For a credit, that entry is the payout:
@@ -30,19 +44,20 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final BalanceRepository balanceRepository;
     private final CashRepository cashRepository;
+    private final PurchaseRepository purchaseRepository;
 
     public AccountService(AccountRepository accountRepository, BalanceRepository balanceRepository,
-                          CashRepository cashRepository) {
+                          CashRepository cashRepository, PurchaseRepository purchaseRepository) {
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.cashRepository = cashRepository;
+        this.purchaseRepository = purchaseRepository;
     }
 
     /**
      * Pays money into an account.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the account does not exist or is
-     *                                                                     deleted
+     * @throws NotFoundException if the account does not exist or is deleted
      */
     @Transactional
     public Balance deposit(int id, BigDecimal amount) {
@@ -53,8 +68,7 @@ public class AccountService {
     /**
      * Settles an account's balance, anonymises it and marks it deleted, in one transaction.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the account does not exist or is
-     *                                                                     already deleted
+     * @throws NotFoundException if the account does not exist or is already deleted
      */
     @Transactional
     public void close(int id, User closedBy) {
@@ -72,5 +86,59 @@ public class AccountService {
         account.setName("Deleted Account #" + account.getId());
         account.setDeleted(true);
         accountRepository.save(account);
+    }
+
+    /**
+     * Opens an account with the given name.
+     */
+    @Transactional
+    public Account create(String name) {
+        return accountRepository.save(new Account(null, name, Instant.now()));
+    }
+
+    /**
+     * Renames an account under its row lock, so a rename cannot bring back an account closed meanwhile.
+     *
+     * @throws NotFoundException if the account does not exist or is closed
+     */
+    @Transactional
+    public Account rename(int id, String name) {
+        Account account = accountRepository.requireNotDeletedLocked(id);
+        account.setName(name);
+        return account;
+    }
+
+    /**
+     * A page of an account's purchases, newest first, with the products they name.
+     *
+     * @throws NotFoundException if the account does not exist
+     */
+    @Transactional(readOnly = true)
+    public PurchaseHistoryDto history(int id, Pageable page) {
+        accountRepository.require(id);
+        Page<Purchase> purchases = purchaseRepository.findByAccount_IdOrderByPurchasedDescIdDesc(id, page);
+        Map<Integer, LazyProduct> products = purchases.stream()
+                .map(Purchase::getProduct)
+                .collect(Collectors.toMap(Product::getId, Product::asLazyProduct, (first, same) -> first));
+        return new PurchaseHistoryDto(products, PageResponse.of(purchases, Purchase::toDto));
+    }
+
+    /**
+     * A page of the open accounts, by name; with {@code query}, only those whose name contains it, ignoring case, the
+     * one named exactly so first and those starting with it next.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<AccountDto> list(String query, Pageable page) {
+        String exact = query.strip().toLowerCase(Locale.ROOT);
+        String escaped = exact.replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        return PageResponse.of(accountRepository.findAccounts(exact, escaped + "%", "%" + escaped + "%", page));
+    }
+
+    /**
+     * The open accounts that bought most recently, latest first.
+     */
+    @Transactional(readOnly = true)
+    public List<AccountDto> recentBuyers(int limit) {
+        return accountRepository.findRecentBuyers(PageRequest.of(0, limit));
     }
 }

@@ -28,6 +28,9 @@ public class Cash {
     public Cash() {
     }
 
+    /**
+     * The same with the amounts as {@code double}, for test fixtures and demo data.
+     */
     public Cash(User user, double amount, CashType type, String note) {
         this(user, Money.of(amount), type, note);
     }

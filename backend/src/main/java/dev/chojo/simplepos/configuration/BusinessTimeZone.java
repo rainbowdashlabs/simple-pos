@@ -3,7 +3,6 @@ package dev.chojo.simplepos.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 
@@ -24,16 +23,6 @@ public class BusinessTimeZone {
                     + zone + ": PostgreSQL reads offsets with the opposite sign.");
         }
         this.zone = parsed;
-    }
-
-    /**
-     * A business date read from a native query, which comes back as {@link LocalDate} or {@link java.sql.Date}
-     * depending on the driver mapping.
-     */
-    public static LocalDate dateOf(Object value) {
-        if (value == null) return null;
-        if (value instanceof LocalDate date) return date;
-        return ((java.sql.Date) value).toLocalDate();
     }
 
     /**
