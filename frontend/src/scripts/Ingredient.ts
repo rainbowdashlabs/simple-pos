@@ -14,6 +14,11 @@ export interface Ingredient {
 }
 
 
+/**
+ * An ingredient being filled in, which may not have a category yet.
+ */
+export type IngredientDraft = Omit<Ingredient, 'category'> & { category?: Category }
+
 export interface IngredientRequest {
     name: string,
     categoryId: number,

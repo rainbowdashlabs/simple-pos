@@ -1,7 +1,7 @@
 <script lang="ts">
 import IconButton from "./styles/buttons/IconButton.vue";
 import {store} from "@/scripts/store.ts";
-import {savePreferences} from "@/scripts/user.ts";
+import {setDarkMode} from "@/scripts/preferences.ts";
 import FormattedText from "./styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import {getHost} from "@/scripts/http.ts";
@@ -23,14 +23,7 @@ export default {
   },
   methods: {
     toggleDarkMode() {
-      const next = this.isDark ? 'light' : 'dark'
-      localStorage.theme = next
-      store.theme = next
-      savePreferences({
-        locale: this.$i18n.locale,
-        colorTheme: store.colorTheme,
-        darkMode: next
-      }).catch(() => {})
+      setDarkMode(this.isDark ? 'light' : 'dark')
     },
     async fetchVersion() {
       try {

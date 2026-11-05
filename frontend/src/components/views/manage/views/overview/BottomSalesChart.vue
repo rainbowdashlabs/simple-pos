@@ -1,4 +1,5 @@
 <script lang="ts">
+import {TooltipParam, chartTextColor} from "@/scripts/charts.ts";
 import {defineComponent} from 'vue'
 import {use} from 'echarts/core'
 import {BarChart} from 'echarts/charts'
@@ -10,7 +11,6 @@ import {Timeframe} from "@/scripts/product.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
-import {store} from "@/scripts/store.ts";
 
 use([BarChart, GridComponent, TooltipComponent, CanvasRenderer])
 
@@ -29,8 +29,8 @@ export default defineComponent({
     SizeGroup() {
       return SizeGroup
     },
-    textColor() {
-      return store.theme === 'dark' ? '#e0ecf6' : '#121417'
+    textColor(): string {
+      return chartTextColor()
     },
     chartOption() {
       const names = this.stat.map(s => s.product.name)
@@ -40,7 +40,7 @@ export default defineComponent({
         tooltip: {
           trigger: 'axis',
           axisPointer: {type: 'shadow'},
-          formatter: (params: any) => {
+          formatter: (params: TooltipParam[]) => {
             const p = params[0]
             return `${p.name}<br/>${p.value} ${this.$t('sales')}`
           }

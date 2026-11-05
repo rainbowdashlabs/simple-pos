@@ -1,4 +1,5 @@
 <script lang="ts">
+import {TooltipParam, chartTextColor, euro} from "@/scripts/charts.ts";
 import {defineComponent} from 'vue'
 import {use} from 'echarts/core'
 import {PieChart} from 'echarts/charts'
@@ -9,7 +10,6 @@ import {currentCash, currentPledge, currentBalance} from "@/scripts/cash.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
-import {store} from "@/scripts/store.ts";
 
 use([PieChart, TooltipComponent, LegendComponent, CanvasRenderer])
 
@@ -26,10 +26,12 @@ export default defineComponent({
   },
   computed: {
     SizeGroup() { return SizeGroup },
-    textColor() { return store.theme === 'dark' ? '#e0ecf6' : '#121417' },
+    textColor(): string {
+      return chartTextColor()
+    },
     chartOption() {
       const locale = this.$i18n.locale
-      const fmt = (v: number) => new Intl.NumberFormat(locale, {style: 'currency', currency: 'EUR'}).format(v)
+      const fmt = euro(locale)
       const data = [
         {name: this.$t('cash'), value: Math.round(this.cash * 100) / 100, itemStyle: {color: '#5193d5'}},
         {name: this.$t('pledge'), value: Math.round(Math.abs(this.pledge) * 100) / 100, itemStyle: {color: '#f59e0b'}},
@@ -39,7 +41,7 @@ export default defineComponent({
       return {
         tooltip: {
           trigger: 'item',
-          formatter: (p: any) => `${p.marker} ${p.name}<br/>${fmt(p.value)} (${p.percent}%)`
+          formatter: (p: TooltipParam) => `${p.marker} ${p.name}<br/>${fmt(p.value)} (${p.percent}%)`
         },
         legend: {
           orient: 'vertical',

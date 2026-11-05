@@ -40,6 +40,11 @@ export interface Product extends LazyProduct {
     recipe: Recipe
 }
 
+/**
+ * A product being filled in, which may not have a category yet.
+ */
+export type ProductDraft = Omit<Product, 'category'> & { category?: Category }
+
 export interface ProductGroup extends CategoryGroup<Product> {
 }
 

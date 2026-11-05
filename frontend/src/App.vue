@@ -6,8 +6,8 @@ import LiveRegion from './components/LiveRegion.vue'
 </script>
 
 <script lang="ts">
-import {COLOR_THEMES, ColorTheme, store} from "./scripts/store.ts";
-import {getPreferences} from "./scripts/user.ts";
+import {store} from "./scripts/store.ts";
+import {loadSavedPreferences, restoreLocalPreferences} from "./scripts/preferences.ts";
 import {applyTitle} from "./router.ts";
 
 /**
@@ -58,41 +58,11 @@ export default {
       document.documentElement.setAttribute('data-theme', store.colorTheme)
     },
     applyDefaults() {
-      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        store.theme = "dark"
-      } else {
-        store.theme = "light"
-      }
-
-      const savedColorTheme = localStorage.getItem('colorTheme')
-      if (savedColorTheme && COLOR_THEMES.includes(savedColorTheme as ColorTheme)) {
-        store.colorTheme = savedColorTheme as ColorTheme
-      }
-
-      const savedLocale = localStorage.getItem('locale')
-      this.$i18n.locale = savedLocale || "de"
-
+      restoreLocalPreferences()
       this.applyTheme()
     },
     loadPreferences() {
-      getPreferences().then(prefs => {
-        if (!prefs) return
-
-        if (prefs.darkMode === 'dark' || prefs.darkMode === 'light') {
-          store.theme = prefs.darkMode
-          localStorage.setItem('theme', prefs.darkMode)
-        }
-        if (prefs.colorTheme && COLOR_THEMES.includes(prefs.colorTheme as ColorTheme)) {
-          store.colorTheme = prefs.colorTheme as ColorTheme
-          localStorage.setItem('colorTheme', prefs.colorTheme)
-        }
-        if (prefs.locale) {
-          this.$i18n.locale = prefs.locale
-          localStorage.setItem('locale', prefs.locale)
-        }
-
-        this.applyTheme()
-      }).catch(() => undefined)
+      loadSavedPreferences().then(() => this.applyTheme()).catch(() => undefined)
     }
   },
   mounted() {

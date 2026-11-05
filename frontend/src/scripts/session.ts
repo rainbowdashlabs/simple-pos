@@ -312,14 +312,6 @@ export function getUsername() {
     return Cookies.get(username_cookie)
 }
 
-export function setLocale(locale: string) {
-    localStorage.setItem("locale", locale)
-}
-
-export function getLocale(): string | undefined {
-    return localStorage.getItem("locale") ?? undefined
-}
-
 let _demoMode: boolean | null = null
 
 export async function isDemoMode(): Promise<boolean> {

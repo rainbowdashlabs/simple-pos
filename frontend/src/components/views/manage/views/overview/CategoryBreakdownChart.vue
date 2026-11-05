@@ -1,4 +1,5 @@
 <script lang="ts">
+import {TooltipParam, chartTextColor, euro} from "@/scripts/charts.ts";
 import {defineComponent} from 'vue'
 import {UNCATEGORISED_ID} from "@/scripts/categories.ts";
 import {use} from 'echarts/core'
@@ -12,7 +13,6 @@ import {Timeframe} from "@/scripts/product.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
-import {store} from "@/scripts/store.ts";
 
 use([PieChart, TooltipComponent, LegendComponent, CanvasRenderer])
 
@@ -31,7 +31,9 @@ export default defineComponent({
       return Timeframes.month
     },
     SizeGroup() { return SizeGroup },
-    textColor() { return store.theme === 'dark' ? '#e0ecf6' : '#121417' },
+    textColor(): string {
+      return chartTextColor()
+    },
     chartOption() {
       const locale = this.$i18n.locale
       const data = this.stats
@@ -44,8 +46,8 @@ export default defineComponent({
       return {
         tooltip: {
           trigger: 'item',
-          formatter: (p: any) => {
-            const val = new Intl.NumberFormat(locale, {style: 'currency', currency: 'EUR'}).format(p.value)
+          formatter: (p: TooltipParam) => {
+            const val = euro(locale)(p.value)
             return `${p.marker} ${p.name}<br/>${val} (${p.percent}%)`
           }
         },

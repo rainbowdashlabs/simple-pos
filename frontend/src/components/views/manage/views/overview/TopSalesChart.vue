@@ -1,4 +1,5 @@
 <script lang="ts">
+import {TooltipParam, chartTextColor, euro, wholeEuro} from "@/scripts/charts.ts";
 import {defineComponent} from 'vue'
 import {use} from 'echarts/core'
 import {BarChart} from 'echarts/charts'
@@ -10,7 +11,6 @@ import {Timeframe} from "@/scripts/product.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
-import {store} from "@/scripts/store.ts";
 
 use([BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
@@ -32,8 +32,8 @@ export default defineComponent({
     SizeGroup() {
       return SizeGroup
     },
-    textColor() {
-      return store.theme === 'dark' ? '#e0ecf6' : '#121417'
+    textColor(): string {
+      return chartTextColor()
     },
     chartOption() {
       const names = this.stat.map(s => s.product.name)
@@ -49,10 +49,10 @@ export default defineComponent({
         tooltip: {
           trigger: 'axis',
           axisPointer: {type: 'shadow'},
-          formatter: (params: any) => {
+          formatter: (params: TooltipParam[]) => {
             const p = params[0]
             const val = isCurrency
-                ? new Intl.NumberFormat(this.$i18n.locale, {style: 'currency', currency: 'EUR'}).format(p.value)
+                ? euro(this.$i18n.locale)(p.value)
                 : p.value
             return `${p.name}<br/>${val}`
           }
@@ -66,7 +66,7 @@ export default defineComponent({
           axisLabel: {
             color: this.textColor,
             formatter: isCurrency
-                ? (v: number) => new Intl.NumberFormat(this.$i18n.locale, {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}).format(v)
+                ? (v: number) => wholeEuro(this.$i18n.locale)(v)
                 : undefined
           }
         },

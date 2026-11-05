@@ -1,4 +1,5 @@
 <script lang="ts">
+import {TooltipParam, chartTextColor, euro, wholeEuro} from "@/scripts/charts.ts";
 import {defineComponent, PropType} from 'vue'
 import {use} from 'echarts/core'
 import {LineChart} from 'echarts/charts'
@@ -9,7 +10,6 @@ import {ProductSalesStat} from "@/scripts/product.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
-import {store} from "@/scripts/store.ts";
 import {everyDay, localDateKey} from "@/scripts/util.ts";
 
 use([LineChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
@@ -31,8 +31,8 @@ export default defineComponent({
     SizeGroup() {
       return SizeGroup
     },
-    textColor() {
-      return store.theme === 'dark' ? '#e0ecf6' : '#121417'
+    textColor(): string {
+      return chartTextColor()
     },
     chartOption() {
       const locale = this.$i18n.locale
@@ -41,12 +41,12 @@ export default defineComponent({
       const days = filled.map(f => f.day.toLocaleDateString(locale, {month: 'short', day: 'numeric'}))
       const revenue = filled.map(f => Math.round(f.row.revenue * 100) / 100)
       const profit = filled.map(f => Math.round(f.row.profit * 100) / 100)
-      const fmt = (v: number) => new Intl.NumberFormat(locale, {style: 'currency', currency: 'EUR'}).format(v)
+      const fmt = euro(locale)
 
       return {
         tooltip: {
           trigger: 'axis',
-          formatter: (params: any) => {
+          formatter: (params: TooltipParam[]) => {
             let tip = `<strong>${params[0].axisValue}</strong>`
             for (const p of params) {
               tip += `<br/>${p.marker} ${p.seriesName}: ${fmt(p.value)}`
@@ -68,9 +68,7 @@ export default defineComponent({
           type: 'value',
           axisLabel: {
             color: this.textColor,
-            formatter: (v: number) => new Intl.NumberFormat(locale, {
-              style: 'currency', currency: 'EUR', maximumFractionDigits: 0
-            }).format(v)
+            formatter: wholeEuro(locale)
           }
         },
         series: [
