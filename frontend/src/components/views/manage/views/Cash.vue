@@ -127,11 +127,11 @@ export default defineComponent({
     <Transition>
       <GridWrapper v-show="inputActive" cols="1">
         <FormattedText :value="inputMode" :size="SizeGroup.lg" type="locale"/>
-        <SimpleInputField v-model="amount" type="number"
+        <SimpleInputField :label="$t('amount')" v-model="amount" type="number"
                           :placeholder="$t('amount')"/>
-        <SimpleInputField v-model="note" type="text"
+        <SimpleInputField :label="$t('note')" v-model="note" type="text"
                           :placeholder="$t('note')"/>
-        <SelectMenu class="col-span-full" @select="typeChange"
+        <SelectMenu class="col-span-full" :label="$t('type')" @select="typeChange"
                     :options="[[$t('pledge'), 'pledge'], [$t('purchase'), 'purchase'], [$t('other'), 'other']]"
                     :current="type"/>
         <ConfirmButton @click="() => submit()" :disabled="disabled" :hint="$t('button.save')" class="col-span-full"/>

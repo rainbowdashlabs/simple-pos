@@ -3,7 +3,8 @@ import {defineComponent} from 'vue'
 import Icon from "@/components/styles/Icon.vue";
 
 /**
- * The base button. `hint` names what the button does, as tooltip and accessible name, for buttons whose content
+ * The base button. A disabled one is disabled natively, so it is skipped by the keyboard and announced as
+ * unavailable. `hint` names what the button does, as tooltip and accessible name, for buttons whose content
  * does not say it in words.
  */
 export default defineComponent({
@@ -33,7 +34,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <button :class="currentColor" :title="hint" :aria-label="hint" @click="(e) => {if(!disabled) $emit('click', e)}">
+  <button :class="currentColor" :title="hint" :aria-label="hint" :disabled="disabled" @click="(e) => {if(!disabled) $emit('click', e)}">
     <slot/>
   </button>
 

@@ -2,11 +2,13 @@
 import app_header from './components/Header.vue'
 import app_footer from './components/Footer.vue'
 import Notifications from './components/Notifications.vue'
+import LiveRegion from './components/LiveRegion.vue'
 </script>
 
 <script lang="ts">
 import {COLOR_THEMES, ColorTheme, store} from "./scripts/store.ts";
 import {getPreferences} from "./scripts/user.ts";
+import {applyTitle} from "./router.ts";
 
 /**
  * The application shell. Theme and language come from local storage at once, and from the user's saved preferences
@@ -28,6 +30,7 @@ export default {
     '$i18n.locale': {
       handler(locale: string) {
         document.documentElement.lang = locale
+        applyTitle(this.$route)
       },
       immediate: true
     },
@@ -108,6 +111,7 @@ export default {
     </div>
     <app_footer/>
     <Notifications/>
+    <LiveRegion/>
   </div>
 </template>
 

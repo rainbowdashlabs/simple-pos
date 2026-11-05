@@ -89,18 +89,18 @@ export default defineComponent({
       <FormattedText :size="SizeGroup.md" value="of" type="locale"/>
       <FormattedText :size="SizeGroup.md" :value="listing.stock" type="number"/>
       <Icon :size="SizeGroup.md" icon="fa-equals"/>
-      <NumberText :size="SizeGroup.md" :amount="diff"/>
+      <NumberText :size="SizeGroup.md" :amount="diff" signed/>
     </div>
     <div v-else class="flex w-1/3 justify-evenly items-center opacity-60">
       <FormattedText :size="SizeGroup.md" :value="listing.stock" type="number"/>
     </div>
     <div class="flex w-1/6 items-center">
       <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-bottle-water"/>
-      <SimpleInputField class="w-5/6" @update:modelValue="updatePieces" type="number" nullable :model-value="pieceCount" placeholder="0"/>
+      <SimpleInputField class="w-5/6" :label="$t('pieces') + ': ' + listing.ingredient.name" @update:modelValue="updatePieces" type="number" nullable :model-value="pieceCount" placeholder="0"/>
     </div>
     <div :class="{invisible: listing.ingredient.containerSize <= 0}" class="flex w-1/6 items-center">
       <Icon :size="SizeGroup.xl" class="pr-2" icon="fa-box"/>
-      <SimpleInputField class="w-5/6" @update:modelValue="updateContainer" type="number" nullable :model-value="containerCount" placeholder="0"/>
+      <SimpleInputField class="w-5/6" :label="$t('container') + ': ' + listing.ingredient.name" @update:modelValue="updateContainer" type="number" nullable :model-value="containerCount" placeholder="0"/>
     </div>
   </ColorContainer>
 

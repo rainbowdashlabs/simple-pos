@@ -6,6 +6,7 @@ import IconButton from "@/components/styles/buttons/IconButton.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import Icon from "@/components/styles/Icon.vue";
 import {store} from "@/scripts/store.ts";
+import {announce} from "@/scripts/announcer.ts";
 import CartEntryPrice from "@/components/views/pos/views/components/CartEntryPrice.vue";
 
 export default defineComponent({
@@ -16,6 +17,7 @@ export default defineComponent({
     }
   },
   components: {CartEntryPrice, Icon, IconButton, FormattedText},
+  emits: ['emptied'],
   props: {
     entry: {
       type: Object as PropType<CartPosition>,
@@ -24,7 +26,10 @@ export default defineComponent({
   },
   methods: {
     decrease() {
+      const last = this.entry.amount <= 1
       store.cart.addProduct(this.entry.product, -1)
+      if (last) this.$emit('emptied')
+      announce(this.$t('cart_removed', {name: this.entry.product.name, total: this.$n(store.cart.totalPrice(), 'currency')}))
     }
   }
 })

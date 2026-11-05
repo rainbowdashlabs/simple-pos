@@ -14,7 +14,8 @@ export default defineComponent({
     options: {
       //type: Object as PropType<Array<Array<String>>>,
       required: true
-    }, current: [String, Number]
+    }, current: [String, Number],
+    label: String
   },
   methods:{
     extract(event: Event){
@@ -27,7 +28,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <select @input="$emit('select', extract($event))"
+  <select @input="$emit('select', extract($event))" :aria-label="label"
           class="bg-accent dark:bg-accent-d rounded-md form-select">
     <SelectMenuEntry v-for="item in options" :entry="item" :current="current"/>
   </select>

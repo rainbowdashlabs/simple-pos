@@ -38,7 +38,7 @@ export default defineComponent({
     <div class="grid grid-cols-1 gap-4">
       <div>
         <FormLabel :label="$t('name')"/>
-        <SimpleInputField type="text" v-model="name" :placeholder="$t('name')" :size="SizeGroup.xl"/>
+        <SimpleInputField :label="$t('name')" type="text" v-model="name" :placeholder="$t('name')" :size="SizeGroup.xl"/>
       </div>
       <ConfirmButton icon="fa-user-plus" :disabled="disabled" :hint="$t('button.create')" @click="createAccount"/>
     </div>

@@ -43,7 +43,7 @@ export default {
         </router-link>
 
         <template v-if="isStaff">
-          <Entry to="/" label="POS" icon="fa-money-bill"/>
+          <Entry to="/" :label="$t('title.pos')" icon="fa-money-bill"/>
           <Entry to="/accounts" :label="$t('accounts')" icon="fa-users"/>
           <Entry to="/manage" :label="$t('manage')" icon="fa-list-check"/>
         </template>
@@ -72,7 +72,7 @@ export default {
     <transition>
       <MobileNavbar v-if="navBar">
         <template v-if="isStaff">
-          <MobileNavEntry @click="navBar = false" to="/" label="POS" icon="fa-money-bill"/>
+          <MobileNavEntry @click="navBar = false" to="/" :label="$t('title.pos')" icon="fa-money-bill"/>
           <MobileNavEntry @click="navBar = false" to="/accounts" :label="$t('accounts')" icon="fa-users"/>
           <MobileNavEntry @click="navBar = false" to="/manage" :label="$t('manage')" icon="fa-list-check"/>
         </template>

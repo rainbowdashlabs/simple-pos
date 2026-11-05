@@ -49,7 +49,7 @@ export interface ProductListings {
 }
 
 export interface ProductSalesStat {
-    day: number | null,
+    day: string | null,
     product_id: number | undefined | null,
     sales: number,
     revenue: number,

@@ -125,23 +125,23 @@ export default defineComponent({
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
-      <SimpleInputField type="text" v-model="product.name"/>
+      <SimpleInputField :label="$t('name')" type="text" v-model="product.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
-      <SelectMenu class="w-full" @select="updateCategory"
+      <SelectMenu class="w-full" :label="$t('category')" @select="updateCategory"
                   :options="categoryList.map(e => {return [e.name, e.id]})"
                   :current="category?.id!"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="price" type="locale"/>
-      <SimpleInputField type="number" v-model="product.price"/>
+      <SimpleInputField :label="$t('price')" type="number" v-model="product.price"/>
     </ColorContainer>
 
     <ColorContainer>
-      <FormattedText value="Raw Price"/>
+      <FormattedText value="raw_price" type="locale"/>
       <FormattedText :value="rawPrice" type="currency"/>
     </ColorContainer>
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {store} from "@/scripts/store.ts";
+import {announce} from "@/scripts/announcer.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import CartEntry from "./mobilecart/CartEntry.vue";
 import {SizeGroup} from "@/scripts/text.ts";
@@ -31,16 +32,24 @@ export default defineComponent({
     },
     clearCart() {
       store.cart.clearCart()
+      announce(this.$t('cart_cleared'))
+      this.focusHeading()
+    },
+    /**
+     * Moves keyboard focus to the cart heading, for when the focused control goes away with the entry it belonged to.
+     */
+    focusHeading() {
+      this.$nextTick(() => (this.$refs.heading as HTMLElement | undefined)?.focus())
     }
   }
 })
 </script>
 
 <template>
-  <div class="sticky bottom-0 w-full bg-secondary dark:bg-secondary-d rounded-t-2xl border-t-2 border-accent-d dark:border-accent">
+  <section aria-labelledby="pos-cart" class="sticky bottom-0 w-full bg-secondary dark:bg-secondary-d rounded-t-2xl border-t-2 border-accent-d dark:border-accent">
     <div class="px-3 py-2">
       <div class="flex items-center justify-between gap-3 pb-2">
-        <FormattedText class="content-center" :size="SizeGroup.lg" value="Cart"/>
+        <h2 id="pos-cart" ref="heading" tabindex="-1" :class="SizeGroup.lg" class="content-center">{{ $t('cart') }}</h2>
         <FormattedText class="content-center font-bold" :size="SizeGroup.lg" :value="content.total" type="currency"/>
         <div class="flex gap-2 shrink-0">
           <TwoStepDeleteButton v-if="!empty" :hint="$t('button.clear_cart')" :confirm-hint="$t('button.clear_cart_confirm')" @click="clearCart"/>
@@ -48,10 +57,10 @@ export default defineComponent({
         </div>
       </div>
       <div class="max-h-[20vh] overflow-y-auto">
-        <CartEntry v-for="item in content.products" :key="item.product.id!" :entry="item"/>
+        <CartEntry v-for="item in content.products" :key="item.product.id!" :entry="item" @emptied="focusHeading"/>
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <style scoped>

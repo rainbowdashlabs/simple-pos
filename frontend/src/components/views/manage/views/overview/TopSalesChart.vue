@@ -103,7 +103,7 @@ export default defineComponent({
     <FormattedText :value="$t('last_days', {days: timeframe.days})" :size="SizeGroup.sm"/>
     <v-chart v-if="stat.length > 0" :option="chartOption" autoresize style="height: 300px; width: 100%"/>
     <div v-else class="h-[300px] flex items-center justify-center opacity-50">
-      <FormattedText value="No data" />
+      <FormattedText value="no_data" type="locale" />
     </div>
   </ColorContainer>
 </template>

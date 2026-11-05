@@ -1,4 +1,5 @@
 <script lang="ts">
+import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
 import {store} from "@/scripts/store.ts";
 import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
@@ -74,14 +75,14 @@ export default defineComponent({
       if (this.submitting || this.cartEmpty || !this.account) return
       this.submitting = true
       const accountId = this.account.id
-      purchase(accountId, Array.from(this.cart.products.values()))
+      keepingFocus(() => purchase(accountId, Array.from(this.cart.products.values()))
           .then(() => {
             this.cart.clearCart()
             this.$router.push({name: 'profile', params: {id: accountId}, query: {from: 'checkout'}})
           })
           .finally(() => {
             this.submitting = false
-          })
+          }))
     },
     back() {
       if (this.submitting) return
@@ -111,7 +112,7 @@ export default defineComponent({
     </ColorContainer>
 
     <FormattedText v-if="accountsLoaded && accountOptions.length === 0" value="checkout_no_accounts" type="locale"/>
-    <SelectMenu v-else-if="accountsLoaded" :key="selectRevision" :options="selectOptions" @select="checkoutAccount"/>
+    <SelectMenu :label="$t('checkout_choose_account')" v-else-if="accountsLoaded" :key="selectRevision" :options="selectOptions" @select="checkoutAccount"/>
 
     <GridWrapper v-if="account" bg="none" padding="0">
       <ColorContainer :class="SizeGroup.xl" bg="secondary" class="flex justify-between">

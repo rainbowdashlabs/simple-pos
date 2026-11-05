@@ -1,3 +1,4 @@
+import {i18n} from '@/i18n.ts'
 import {createRouter, createWebHistory, type RouteLocationNormalized} from 'vue-router'
 import {demoLogin, isDemoMode, isLoggedIn} from '@/scripts/session.ts'
 
@@ -37,7 +38,7 @@ import {hasRole, loadRole, type Role} from '@/scripts/roles.ts'
 declare module 'vue-router' {
     interface RouteMeta {
         public?: boolean
-        title?: string
+        titleKey?: string
         role?: Role
     }
 }
@@ -51,88 +52,88 @@ const router = createRouter({
             path: '/login',
             name: 'login',
             component: Login,
-            meta: {public: true, title: 'Login'}
+            meta: {public: true, titleKey: 'title.login'}
         },
         {
             path: '/logout',
             name: 'logout',
             component: Logout,
-            meta: {public: true, title: 'Logout'}
+            meta: {public: true, titleKey: 'title.logout'}
         },
         {
             path: '/',
             component: POS,
             children: [
-                {path: '', name: 'pos', component: CartSelection, meta: {title: 'POS'}},
-                {path: 'checkout', name: 'pos-checkout', component: Checkout, meta: {title: 'Checkout'}},
+                {path: '', name: 'pos', component: CartSelection, meta: {titleKey: 'title.pos'}},
+                {path: 'checkout', name: 'pos-checkout', component: Checkout, meta: {titleKey: 'title.checkout'}},
             ]
         },
         {
             path: '/accounts',
             name: 'accounts',
             component: Accounts,
-            meta: {title: 'Accounts'}
+            meta: {titleKey: 'title.accounts'}
         },
         {
             path: '/accounts/:id',
             name: 'profile',
             component: Profile,
             props: true,
-            meta: {title: 'Profile'}
+            meta: {titleKey: 'title.profile'}
         },
         {
             path: '/accounts/:id/balance',
             name: 'balance',
             component: Balance,
             props: true,
-            meta: {title: 'Balance'}
+            meta: {titleKey: 'title.balance'}
         },
         {
             path: '/manage',
             component: Manage,
             children: [
                 {path: '', redirect: {name: 'manage-overview'}},
-                {path: 'overview', name: 'manage-overview', component: Overview, meta: {title: 'Overview'}},
-                {path: 'accounts', name: 'manage-accounts', component: ManageAccounts, meta: {title: 'Accounts'}},
-                {path: 'accounts/create', name: 'manage-accounts-create', component: AccountCreate, meta: {title: 'New Account'}},
-                {path: 'products', name: 'manage-products', component: Products, meta: {title: 'Products'}},
-                {path: 'products/create', name: 'manage-products-create', component: ProductCreate, meta: {title: 'New Product'}},
-                {path: 'products/createmulti', name: 'manage-products-createmulti', component: ProductCreateMulti, meta: {title: 'New Products'}},
-                {path: 'products/:id', name: 'manage-products-info', component: ProductInfo, props: true, meta: {title: 'Product Details'}},
-                {path: 'products/:id/edit', name: 'manage-products-edit', component: ProductEdit, props: true, meta: {title: 'Edit Product'}},
-                {path: 'categories', name: 'manage-categories', component: Categories, meta: {title: 'Categories'}},
-                {path: 'storage', name: 'manage-storage', component: Storage, meta: {title: 'Storage'}},
-                {path: 'storage/create', name: 'manage-storage-create', component: StorageCreate, meta: {title: 'New Ingredient'}},
-                {path: 'storage/:id/add', name: 'manage-storage-add', component: StorageAdd, props: true, meta: {title: 'Add Stock'}},
-                {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {title: 'Edit Ingredient'}},
-                {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory, meta: {title: 'Inventory Check'}},
-                {path: 'cash', name: 'manage-cash', component: Cash, meta: {title: 'Cash'}},
-                {path: 'users', name: 'manage-users', component: Users, meta: {title: 'Users', role: 'ADMIN'}},
+                {path: 'overview', name: 'manage-overview', component: Overview, meta: {titleKey: 'title.overview'}},
+                {path: 'accounts', name: 'manage-accounts', component: ManageAccounts, meta: {titleKey: 'title.accounts'}},
+                {path: 'accounts/create', name: 'manage-accounts-create', component: AccountCreate, meta: {titleKey: 'title.new_account'}},
+                {path: 'products', name: 'manage-products', component: Products, meta: {titleKey: 'title.products'}},
+                {path: 'products/create', name: 'manage-products-create', component: ProductCreate, meta: {titleKey: 'title.new_product'}},
+                {path: 'products/createmulti', name: 'manage-products-createmulti', component: ProductCreateMulti, meta: {titleKey: 'title.new_products'}},
+                {path: 'products/:id', name: 'manage-products-info', component: ProductInfo, props: true, meta: {titleKey: 'title.product'}},
+                {path: 'products/:id/edit', name: 'manage-products-edit', component: ProductEdit, props: true, meta: {titleKey: 'title.edit_product'}},
+                {path: 'categories', name: 'manage-categories', component: Categories, meta: {titleKey: 'title.categories'}},
+                {path: 'storage', name: 'manage-storage', component: Storage, meta: {titleKey: 'title.storage'}},
+                {path: 'storage/create', name: 'manage-storage-create', component: StorageCreate, meta: {titleKey: 'title.new_ingredient'}},
+                {path: 'storage/:id/add', name: 'manage-storage-add', component: StorageAdd, props: true, meta: {titleKey: 'title.add_stock'}},
+                {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {titleKey: 'title.edit_ingredient'}},
+                {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory, meta: {titleKey: 'title.inventory'}},
+                {path: 'cash', name: 'manage-cash', component: Cash, meta: {titleKey: 'title.cash'}},
+                {path: 'users', name: 'manage-users', component: Users, meta: {titleKey: 'title.users', role: 'ADMIN'}},
             ]
         },
         {
             path: '/settings',
             name: 'settings',
             component: Settings,
-            meta: {title: 'Settings', role: 'USER'}
+            meta: {titleKey: 'title.settings', role: 'USER'}
         },
         {
             path: '/no-access',
             name: 'no-access',
             component: NoAccess,
-            meta: {title: 'No Access', role: 'USER'}
+            meta: {titleKey: 'title.no_access', role: 'USER'}
         },
         {
             path: '/theme',
             name: 'theme',
             component: ThemePreview,
-            meta: {title: 'Theme'}
+            meta: {titleKey: 'title.theme'}
         },
         {
             path: '/:pathMatch(.*)*',
             name: 'not-found',
             component: NotFound,
-            meta: {title: 'Not Found', role: 'USER'}
+            meta: {titleKey: 'title.not_found', role: 'USER'}
         }
     ]
 })
@@ -160,9 +161,14 @@ function allowedFor(role: Role | null, to: RouteLocationNormalized) {
     return to.name === 'no-access' ? true : {name: 'no-access'}
 }
 
-router.afterEach((to) => {
-    const title = to.meta.title
-    document.title = title ? `${title} — ${APP_NAME}` : APP_NAME
-})
+/**
+ * Sets the document title from the route's `titleKey`, in the current language.
+ */
+export function applyTitle(route: RouteLocationNormalized) {
+    const key = route.meta.titleKey
+    document.title = key ? `${i18n.global.t(key)} — ${APP_NAME}` : APP_NAME
+}
+
+router.afterEach(applyTitle)
 
 export default router

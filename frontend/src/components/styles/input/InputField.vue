@@ -5,6 +5,7 @@ export default defineComponent({
   name: "InputField",
   components: {},
   props: {
+    label: String,
     modelValue: {
       required: true
     },
@@ -32,11 +33,13 @@ export default defineComponent({
            :type="type"
            value=""
            :placeholder="String(modelValue)"
+           :aria-label="label"
            @input=" $emit('update', extract($event))"
            required>
     <input v-else class="text-primary bg-bright rounded-md justify-stretch  w-full text-xl md:text-2xl lg:text-4xl"
            :type="type"
            :placeholder="String(modelValue)"
+           :aria-label="label"
            @input="$emit('update', extract($event))"
            required>
   </div>

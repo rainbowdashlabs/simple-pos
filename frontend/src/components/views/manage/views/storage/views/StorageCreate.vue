@@ -104,24 +104,24 @@ export default defineComponent({
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="name" type="locale"/>
-      <SimpleInputField type="text" v-model="name"/>
+      <SimpleInputField :label="$t('name')" type="text" v-model="name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="category" type="locale"/>
-      <SelectMenu class="w-full" @select="updateCategory"
+      <SelectMenu :label="$t('category')" class="w-full" @select="updateCategory"
                   :options="categoryOptions" :current="category?.name"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
       <FormattedText class="pb-5" :size="SizeGroup.xl2" value="purchase_price" type="locale"/>
-      <SimpleInputField type="number" v-model="price"/>
+      <SimpleInputField :label="$t('purchase_price')" type="number" v-model="price"/>
     </ColorContainer>
 
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="container_size" type="locale"/>
-        <SimpleInputField type="number" v-model="container_size"/>
+        <SimpleInputField :label="$t('container_size')" type="number" v-model="container_size"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,6,12,20,24]" :key="String(item)"
@@ -134,7 +134,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge" type="locale"/>
-        <SimpleInputField type="number" v-model="pledge"/>
+        <SimpleInputField :label="$t('pledge')" type="number" v-model="pledge"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.08,0.12,0.25]" :key="String(item)"
@@ -147,7 +147,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="pledge_container" type="locale"/>
-        <SimpleInputField type="number" v-model="pledge_container"/>
+        <SimpleInputField :label="$t('pledge_container')" type="number" v-model="pledge_container"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [0,0.75,1.5]" :key="String(item)"
@@ -160,7 +160,7 @@ export default defineComponent({
     <ColorContainer bg="secondary">
       <div class="pb-5">
         <FormattedText class="pb-5" :size="SizeGroup.xl2" value="min_stock" type="locale"/>
-        <SimpleInputField type="number" v-model="min_stock"/>
+        <SimpleInputField :label="$t('min_stock')" type="number" v-model="min_stock"/>
       </div>
       <div class="flex justify-evenly w-full">
         <TextButton class="mx-2.5 w-full" v-for="item in [[1,1],[2,5],[3,10]]" :key="String(item)"

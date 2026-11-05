@@ -5,9 +5,12 @@ import {ProductGroup} from "@/scripts/product.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import PosProduct from "./PosProduct.vue";
 import {SizeGroup} from "@/scripts/text.ts";
-import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import Icon from "@/components/styles/Icon.vue";
 
+/**
+ * A category of the POS that opens and closes its products. The header is a disclosure button that says whether the
+ * products are shown.
+ */
 export default defineComponent({
   methods: {
     categoryName(category: Category | null | undefined): string {
@@ -23,11 +26,14 @@ export default defineComponent({
   computed: {
     SizeGroup() {
       return SizeGroup
+    },
+    panelId(): string {
+      return `pos-category-${this.group.category.id}`
     }
   },
   components: {
     Icon,
-    ColorContainer, PosProduct, FormattedText
+    PosProduct, FormattedText
   },
   props: {
     group: {
@@ -44,14 +50,14 @@ export default defineComponent({
 
 <template>
   <div class="flex-col w-full">
-    <ColorContainer @click="active = !active" bg="accent"
-                    class="flex justify-between items-center px-5 py-2 w-full hover:cursor-pointer gap-5" padding="0">
+    <button type="button" :aria-expanded="active" :aria-controls="panelId" @click="active = !active"
+            class="flex justify-between items-center px-5 py-2 w-full gap-5 rounded-md text-left min-h-0 border-0 bg-accent dark:bg-accent-d">
       <FormattedText :value="categoryName(group.category)"
                      :size="SizeGroup.xl"/>
       <Icon :icon="active ? 'fa-chevron-up' :'fa-chevron-down'"/>
-    </ColorContainer>
-    <div v-if="active" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-3">
-      <PosProduct v-for="item in group.entries" :product="item"/>
+    </button>
+    <div v-show="active" :id="panelId" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-3">
+      <PosProduct v-for="item in group.entries" :key="item.id!" :product="item"/>
     </div>
   </div>
 </template>
