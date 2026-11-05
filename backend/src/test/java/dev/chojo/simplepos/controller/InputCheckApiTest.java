@@ -143,6 +143,16 @@ class InputCheckApiTest {
     }
 
     @Test
+    void returnedEmptiesAreChecked() throws Exception {
+        for (String body : new String[]{"[]", "[null]", "[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"}) {
+            mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Test
     void dailyStatsSendTheBusinessDate() throws Exception {
         Category category = categoryRepository.save(new Category(null, "DailyCat"));
         Product product = productService.create(new Product(null, category, "Late", 1.0, true,

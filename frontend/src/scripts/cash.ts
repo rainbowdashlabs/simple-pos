@@ -51,3 +51,13 @@ export async function countTill(denominations: Record<number, number>): Promise<
 export async function tillCounts(limit: number = 5): Promise<TillCount[]> {
     return await getJson("api/cash/count", new Map([["limit", limit]]))
 }
+
+export interface EmptiesReturn {
+    ingredientId: number,
+    bottles: number,
+    crates: number
+}
+
+export async function returnEmpties(returns: EmptiesReturn[]): Promise<CashTotal> {
+    return await postJson("api/cash/pledge/return", returns)
+}

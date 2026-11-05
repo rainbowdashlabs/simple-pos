@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
+import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountDto;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
@@ -18,6 +19,9 @@ import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.TillCountRepository;
 import dev.chojo.simplepos.service.CashService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,6 +72,13 @@ public class CashController {
     @GetMapping("/total")
     public CashResponse totalCash() {
         return new CashResponse(cashService.tillTotal());
+    }
+
+    @PostMapping("/pledge/return")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CashResponse returnEmpties(@RequestBody @NotEmpty @Size(max = 500) List<@Valid @NotNull EmptiesReturn> returns) {
+        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new CashResponse(cashService.returnEmpties(returns, current));
     }
 
     @PostMapping("/count")

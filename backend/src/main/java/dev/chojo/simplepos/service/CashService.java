@@ -1,18 +1,24 @@
 package dev.chojo.simplepos.service;
 
+import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
+import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.TillCount;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
+import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.TillCountRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -27,9 +33,11 @@ public class CashService {
     private final CashRepository cashRepository;
     private final BalanceRepository balanceRepository;
     private final TillCountRepository tillCountRepository;
+    private final IngredientRepository ingredientRepository;
 
     public CashService(CashRepository cashRepository, BalanceRepository balanceRepository,
-                       TillCountRepository tillCountRepository) {
+                       TillCountRepository tillCountRepository, IngredientRepository ingredientRepository) {
+        this.ingredientRepository = ingredientRepository;
         this.cashRepository = cashRepository;
         this.balanceRepository = balanceRepository;
         this.tillCountRepository = tillCountRepository;
@@ -63,5 +71,48 @@ public class CashService {
             cashRepository.save(new Cash(countedBy, difference, CashType.CORRECTION, note));
         }
         return count;
+    }
+
+    /**
+     * Books the deposit refunded for empties given back to the supplier, one pledge entry per ingredient, in one
+     * transaction. The refund is the bottles times the ingredient's bottle deposit plus the crates times its crate
+     * deposit. More may be returned than is outstanding: the supplier decides what is refunded.
+     *
+     * @return the total refunded
+     * @throws BadRequestException if the list is empty, names an ingredient twice or one that does not exist, returns
+     *                             bottles or crates of an ingredient without that deposit, or a return refunds nothing
+     *                             or more than a money column holds
+     */
+    @Transactional
+    public BigDecimal returnEmpties(List<EmptiesReturn> returns, User returnedBy) {
+        if (returns.isEmpty()) throw new BadRequestException("Nothing is returned");
+        if (new HashSet<>(returns.stream().map(EmptiesReturn::ingredientId).toList()).size() != returns.size()) {
+            throw new BadRequestException("Each ingredient may only be listed once");
+        }
+        BigDecimal total = Money.ZERO;
+        for (EmptiesReturn empties : returns) {
+            Ingredient ingredient = ingredientRepository.requireReferenced(empties.ingredientId());
+            BigDecimal refund = refund(ingredient, empties);
+            String note = "Empties returned: %s (%d bottles, %d crates)".formatted(ingredient.getName(), empties.bottles(), empties.crates());
+            cashRepository.save(new Cash(returnedBy, refund, CashType.PLEDGE, note));
+            total = total.add(refund);
+        }
+        return total;
+    }
+
+    private static BigDecimal refund(Ingredient ingredient, EmptiesReturn empties) {
+        BigDecimal bottleDeposit = Money.orZero(ingredient.getPledge());
+        BigDecimal crateDeposit = Money.orZero(ingredient.getPledgeContainer());
+        if (empties.bottles() > 0 && bottleDeposit.signum() == 0) {
+            throw new BadRequestException("%s has no bottle deposit".formatted(ingredient.getName()));
+        }
+        if (empties.crates() > 0 && crateDeposit.signum() == 0) {
+            throw new BadRequestException("%s has no crate deposit".formatted(ingredient.getName()));
+        }
+        BigDecimal refund = Money.of(bottleDeposit.multiply(BigDecimal.valueOf(empties.bottles()))
+                .add(crateDeposit.multiply(BigDecimal.valueOf(empties.crates()))));
+        if (refund.signum() <= 0) throw new BadRequestException("Nothing is returned for %s".formatted(ingredient.getName()));
+        if (Money.integerDigits(refund) > 10) throw new BadRequestException("The refund is too large");
+        return refund;
     }
 }

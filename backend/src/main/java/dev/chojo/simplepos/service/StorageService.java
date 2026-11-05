@@ -56,8 +56,8 @@ public class StorageService {
                 : Money.of(delivery.price().multiply(BigDecimal.valueOf(delivery.amount())));
         if (cost.signum() < 0) throw new BadRequestException("The price must not be negative");
         if (delivery.pledge() == null || delivery.pledge().signum() < 0) throw new BadRequestException("The pledge must not be negative");
-        if (integerDigits(cost) > 10 || integerDigits(Money.perUnit(cost, delivery.amount())) > 8
-            || integerDigits(delivery.pledge()) > 10) {
+        if (Money.integerDigits(cost) > 10 || Money.integerDigits(Money.perUnit(cost, delivery.amount())) > 8
+            || Money.integerDigits(delivery.pledge()) > 10) {
             throw new BadRequestException("The price or pledge is too large");
         }
 
@@ -143,9 +143,5 @@ public class StorageService {
             missing -= stock.units();
         }
         return taken;
-    }
-
-    private static int integerDigits(BigDecimal amount) {
-        return Math.max(0, amount.precision() - amount.scale());
     }
 }

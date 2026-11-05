@@ -27,6 +27,7 @@ const StorageCreate = () => import('@/components/views/manage/views/storage/view
 const StorageAdd = () => import('@/components/views/manage/views/storage/views/StorageAdd.vue')
 const StorageEdit = () => import('@/components/views/manage/views/storage/views/StorageEdit.vue')
 const StorageInventory = () => import('@/components/views/manage/views/storage/views/StorageInventory.vue')
+const StorageEmpties = () => import('@/components/views/manage/views/storage/views/StorageEmpties.vue')
 const Cash = () => import('@/components/views/manage/views/Cash.vue')
 const Users = () => import('@/components/views/manage/views/Users.vue')
 const Settings = () => import('@/components/views/Settings.vue')
@@ -104,6 +105,7 @@ const router = createRouter({
                 {path: 'storage/:id/add', name: 'manage-storage-add', component: StorageAdd, props: true, meta: {titleKey: 'title.add_stock'}},
                 {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {titleKey: 'title.edit_ingredient'}},
                 {path: 'storage/inventory', name: 'manage-storage-inventory', component: StorageInventory, meta: {titleKey: 'title.inventory'}},
+                {path: 'storage/empties', name: 'manage-storage-empties', component: StorageEmpties, meta: {titleKey: 'title.empties'}},
                 {path: 'cash', name: 'manage-cash', component: Cash, meta: {titleKey: 'title.cash'}},
                 {path: 'users', name: 'manage-users', component: Users, meta: {titleKey: 'title.users', role: 'ADMIN'}},
             ]

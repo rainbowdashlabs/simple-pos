@@ -50,6 +50,13 @@ public final class Money {
     }
 
     /**
+     * The number of digits before the decimal point, used to refuse amounts a money column cannot hold.
+     */
+    public static int integerDigits(BigDecimal amount) {
+        return Math.max(0, amount.precision() - amount.scale());
+    }
+
+    /**
      * A sum read from a query, as money; null, which a sum over no rows gives, counts as zero.
      */
     public static BigDecimal orZero(BigDecimal amount) {

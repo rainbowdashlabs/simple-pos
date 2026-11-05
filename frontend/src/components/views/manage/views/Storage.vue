@@ -38,6 +38,9 @@ export default defineComponent({
     inventory() {
       this.$router.push({name: 'manage-storage-inventory'})
     },
+    empties() {
+      this.$router.push({name: 'manage-storage-empties'})
+    },
     createIngredient() {
       this.$router.push({name: 'manage-storage-create'})
     }
@@ -52,9 +55,10 @@ export default defineComponent({
 
 <template>
   <ViewWrapper>
-    <div class="grid grid-cols-3 gap-5">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-5">
       <ConfirmButton icon="fa-square-plus" :label="$t('button.new_ingredient')" @click="createIngredient"/>
       <ConfirmButton icon="fa-check-double" :label="$t('button.count_stock')" @click="inventory"/>
+      <ConfirmButton icon="fa-bottle-water" :label="$t('button.return_empties')" @click="empties"/>
       <IconButton :icon="'fa-triangle-exclamation'" :label="$t('button.low_stock_only')"
                   :bg="lowStockOnly ? 'warn' : 'secondary'"
                   @click="lowStockOnly = !lowStockOnly"/>
