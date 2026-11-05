@@ -74,10 +74,9 @@ function constructUrl(url: string, params: Map<string, string | number> = new Ma
     return req.toString()
 }
 
-export function urlEncode(data: Object) {
+export function urlEncode(data: Record<string, string | number | boolean>) {
     return Object.keys(data)
-        // @ts-expect-error
-        .map((key: string) => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
         .join('&');
 }
 

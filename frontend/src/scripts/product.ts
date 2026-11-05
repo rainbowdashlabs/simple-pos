@@ -116,19 +116,3 @@ export function salesStatSummary(id: number, date: Date): Promise<ProductSalesSt
     return getJson(`api/product/${id}/sales/stat/summary`, new Map([["after", date.toISOString()]]))
 }
 
-// statistic functions
-/**
- * A ranking for the best-selling products
- */
-// @ts-expect-error
-export function bestSellingProducts(date: Date, limit: number = 30) {
-
-}
-
-/**
- * A ranking for the worst-selling products
- */
-// @ts-expect-error
-export function worstSellingProducts(date: Date, limit: number = 30) {
-
-}

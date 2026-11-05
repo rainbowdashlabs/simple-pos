@@ -11,7 +11,7 @@ export interface Purchase {
 
 export interface History {
     purchases: Purchase[]
-    products: Map<number, LazyProduct>
+    products: Record<number, LazyProduct>
 }
 
 export interface SalesStat {
@@ -25,7 +25,7 @@ export function history(user_id: number, limit: number = 30): Promise<History> {
     return getJson(`api/account/${user_id}/purchase`, new Map([["limit", limit]]))
 }
 
-export function purchaseDelete(id: number): Promise<any> {
+export function purchaseDelete(id: number): Promise<unknown> {
     return deleteJson(`api/purchase/${id}`)
 }
 

@@ -55,7 +55,7 @@ export function ingredient(id: number): Promise<Ingredient> {
     return getJson("api/ingredient/" + id)
 }
 
-export function deleteIngredient(id: number): Promise<any> {
+export function deleteIngredient(id: number): Promise<unknown> {
     return deleteJson("api/ingredient/" + id)
 }
 

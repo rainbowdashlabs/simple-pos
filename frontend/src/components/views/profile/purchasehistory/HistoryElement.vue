@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {Product} from "@/scripts/product.ts";
+import {LazyProduct} from "@/scripts/product.ts";
 import {Purchase, purchaseDelete} from "@/scripts/purchase.ts";
 import IconButton from "@/components/styles/buttons/IconButton.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -34,7 +34,7 @@ export default defineComponent({
       required: true
     },
     product: {
-      type: Object as PropType<Product>,
+      type: Object as PropType<LazyProduct>,
       required: true
     }
   },

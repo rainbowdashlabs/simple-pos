@@ -63,7 +63,7 @@ export default defineComponent({
       this.deposit = false
       this.amount = 0
     },
-    typeChange(value: string): any {
+    typeChange(value: string) {
       console.log(`Change to ${value}`)
       this.type = value
     },

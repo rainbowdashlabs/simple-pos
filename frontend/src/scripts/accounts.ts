@@ -58,7 +58,7 @@ export function deposits(id: number, limit: number): Promise<Balance[]> {
     return getJson(`api/account/${id}/balance`, new Map([["limit", limit]]))
 }
 
-export function purchase(id: number, entries: CartPosition[]): Promise<any> {
+export function purchase(id: number, entries: CartPosition[]): Promise<unknown> {
     return postJson(`api/account/${id}/purchase`, entries)
 }
 
@@ -66,7 +66,7 @@ export function renameAccount(id: number, name: string): Promise<Account> {
     return patchJson(`api/account/${id}`, {name: name})
 }
 
-export function deleteAccount(id: number): Promise<any> {
+export function deleteAccount(id: number): Promise<unknown> {
     return deleteJson(`api/account/${id}`)
 }
 

@@ -162,12 +162,12 @@ async function refreshUnlessDone(rejectedToken: string | undefined, renewAged: b
     const current = Cookies.get(token)
     const settled = !renewAged || !isRefreshTokenAged()
     if (current && current !== rejectedToken && hasFreshAccessToken() && settled) return true
-    if (!hasValidRefreshToken()) {
+    const sentRefreshToken = Cookies.get(refresh_token)
+    if (!sentRefreshToken || !hasValidRefreshToken()) {
         clearTokens()
         return false
     }
 
-    const sentRefreshToken = Cookies.get(refresh_token)
     const replacedMeanwhile = () => Cookies.get(refresh_token) !== sentRefreshToken
     const url = getHost() + "/api/auth/refresh"
     let response: Response
