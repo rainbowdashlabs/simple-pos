@@ -31,9 +31,6 @@ dependencies {
     implementation(libs.bundles.spring.security)
     implementation(libs.springdoc.openapi)
 
-    implementation(libs.jjwt.api)
-    runtimeOnly(libs.bundles.jjwt.runtime)
-
     testImplementation(platform(SpringBootPlugin.BOM_COORDINATES))
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.boot.testcontainers)

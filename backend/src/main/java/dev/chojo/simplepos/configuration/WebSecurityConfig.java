@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.configuration;
 
-import dev.chojo.simplepos.configuration.security.JwtAuthenticationFilter;
+import dev.chojo.simplepos.configuration.security.LoginTokenAuthentication;
+import dev.chojo.simplepos.configuration.security.LoginTokens;
 import dev.chojo.simplepos.configuration.security.SecurityErrorResolver;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.service.UserService;
@@ -16,6 +17,7 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -25,8 +27,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -69,12 +71,14 @@ public class WebSecurityConfig {
     }
 
     /**
-     * Every request is authenticated by the {@code Bearer} token in its {@code Authorization} header, which a browser
-     * never adds on its own to a request another site triggers. CSRF protection therefore has nothing to guard and is
-     * switched off.
+     * Every request is authenticated by the {@code Bearer} login token in its {@code Authorization} header, which a
+     * browser never adds on its own to a request another site triggers. CSRF protection therefore has nothing to
+     * guard and is switched off. Rejected tokens, and failures while checking one, are answered by the
+     * {@link SecurityErrorResolver} like every other security error.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter,
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider,
+                                                   LoginTokens loginTokens, LoginTokenAuthentication loginTokenAuthentication,
                                                    SecurityErrorResolver securityErrorResolver) throws Exception {
         return http
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
@@ -90,8 +94,18 @@ public class WebSecurityConfig {
                         .authenticationEntryPoint(securityErrorResolver::resolve)
                         .accessDeniedHandler(securityErrorResolver::resolve))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(server -> server
+                        .jwt(jwt -> jwt.decoder(loginTokens.decoder()).jwtAuthenticationConverter(loginTokenAuthentication))
+                        .authenticationEntryPoint(securityErrorResolver::resolve)
+                        .accessDeniedHandler(securityErrorResolver::resolve)
+                        .withObjectPostProcessor(new ObjectPostProcessor<BearerTokenAuthenticationFilter>() {
+                            @Override
+                            public <O extends BearerTokenAuthenticationFilter> O postProcess(O filter) {
+                                filter.setAuthenticationFailureHandler(securityErrorResolver::resolve);
+                                return filter;
+                            }
+                        }))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

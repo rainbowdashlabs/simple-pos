@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,13 +69,44 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void shouldInvalidateRefreshTokenOnlyOnce() {
+    void shouldRedeemARefreshTokenOnlyOnce() {
         User user = createUser("invalidateuser", "pass");
         authenticationService.saveRefreshToken("to_invalidate", user, Duration.ofDays(1));
 
-        assertTrue(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
-        assertFalse(authenticationService.invalidateRefreshToken(user, "to_invalidate"));
+        assertEquals(user.getId(), authenticationService.redeemRefreshToken("to_invalidate").getId());
+        assertThrows(UnauthorizedException.class, () -> authenticationService.redeemRefreshToken("to_invalidate"));
         assertTrue(tokenRepository.findByUserAndToken(user, AuthenticationService.fingerprint("to_invalidate")).isEmpty());
+    }
+
+    @Test
+    void shouldRefuseAnExpiredRefreshToken() {
+        User user = createUser("expireduser", "pass");
+        authenticationService.saveRefreshToken("expired", user, Duration.ofSeconds(-1));
+
+        assertThrows(UnauthorizedException.class, () -> authenticationService.redeemRefreshToken("expired"));
+    }
+
+    @Test
+    void shouldKeepTheRefreshTokenOfADisabledUser() {
+        User user = createUser("disabledrefresh", "pass");
+        authenticationService.saveRefreshToken("kept", user, Duration.ofDays(1));
+        user.setEnabled(false);
+        userRepository.saveAndFlush(user);
+
+        assertThrows(DisabledException.class, () -> authenticationService.redeemRefreshToken("kept"));
+        assertTrue(tokenRepository.findByUserAndToken(user, AuthenticationService.fingerprint("kept")).isPresent());
+    }
+
+    @Test
+    void shouldIssueRandomRefreshTokens() {
+        User user = createUser("randomuser", "pass");
+
+        String first = authenticationService.issueTokens(user).refresh().token();
+        String second = authenticationService.issueTokens(user).refresh().token();
+
+        assertNotEquals(first, second);
+        assertEquals(43, first.length());
+        assertEquals(user.getId(), authenticationService.redeemRefreshToken(first).getId());
     }
 
     @Test
@@ -84,14 +116,12 @@ class AuthenticationServiceTest {
 
         assertTrue(authenticationService.logout("to_forget"));
         assertFalse(authenticationService.logout("to_forget"));
-        assertFalse(authenticationService.invalidateRefreshToken(user, "to_forget"));
+        assertThrows(UnauthorizedException.class, () -> authenticationService.redeemRefreshToken("to_forget"));
     }
 
     @Test
-    void shouldNotInvalidateUnknownRefreshToken() {
-        User user = createUser("notokenuser", "pass");
-
-        assertFalse(authenticationService.invalidateRefreshToken(user, "nonexistent"));
+    void shouldNotRedeemUnknownRefreshToken() {
+        assertThrows(UnauthorizedException.class, () -> authenticationService.redeemRefreshToken("nonexistent"));
     }
 
     @Test

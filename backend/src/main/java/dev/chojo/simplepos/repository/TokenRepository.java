@@ -19,15 +19,12 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
      * The user's stored token with this fingerprint; for tests that check what a login stored.
      */
     Optional<Token> findByUserAndToken(User user, String token);
+
     /**
-     * Deletes the refresh token in a single statement, so of two concurrent calls with the same token only one sees
-     * it deleted.
-     *
-     * @return the number of deleted tokens, 1 if the token existed and 0 otherwise
+     * The user of the refresh token with this fingerprint, unless the token has expired.
      */
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("DELETE FROM Token t WHERE t.user = ?1 AND t.token = ?2")
-    int deleteByUserAndToken(User user, String token);
+    @Query("SELECT t.user FROM Token t WHERE t.token = ?1 AND t.expires > ?2")
+    Optional<User> findUserOfUsableToken(String fingerprint, Instant now);
 
     /**
      * Deletes all refresh tokens of a user, which ends every session at its next refresh.
@@ -37,9 +34,10 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
     int deleteAllByUser(User user);
 
     /**
-     * Deletes one refresh token, whoever it belongs to.
+     * Deletes one refresh token, whoever it belongs to, in a single statement, so of two concurrent calls with the
+     * same token only one sees it deleted.
      *
-     * @return the number of deleted tokens
+     * @return the number of deleted tokens, 1 if the token existed and 0 otherwise
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("DELETE FROM Token t WHERE t.token = ?1")

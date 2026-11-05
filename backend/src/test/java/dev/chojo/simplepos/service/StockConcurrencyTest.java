@@ -10,6 +10,7 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
@@ -165,7 +166,12 @@ class StockConcurrencyTest {
             for (int i = 0; i < 2; i++) {
                 refreshes.add(executor.submit(() -> {
                     awaitUninterruptibly(start);
-                    return authenticationService.invalidateRefreshToken(user, "single-use");
+                    try {
+                        authenticationService.redeemRefreshToken("single-use");
+                        return true;
+                    } catch (UnauthorizedException e) {
+                        return false;
+                    }
                 }));
             }
             start.countDown();

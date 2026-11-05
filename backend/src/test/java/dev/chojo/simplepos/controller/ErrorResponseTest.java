@@ -1,6 +1,8 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
+import dev.chojo.simplepos.configuration.security.LoginTokens;
+import dev.chojo.simplepos.configuration.security.TestTokens;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
@@ -11,11 +13,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -43,6 +47,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Transactional
 class ErrorResponseTest {
+    @Autowired
+    LoginTokens loginTokens;
+    @Value("${security.jwt.secret-key}")
+    String secretKey;
     @Autowired
     WebApplicationContext context;
     @Autowired
@@ -78,6 +86,19 @@ class ErrorResponseTest {
         mvc.perform(get("/api/account").header("Authorization", "Bearer garbage"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail").value("Invalid or expired token"));
+    }
+
+    @Test
+    void shouldAnswerOldRefreshTokensAndTokensOfUnknownUsersWithUnauthorized() throws Exception {
+        String oldRefresh = TestTokens.signed(secretKey, MacAlgorithm.HS256, claims -> claims
+                .subject("erroruser").claim("type", "refresh"));
+        String unknownUser = loginTokens.issue(new User(null, "ghostuser", "x", true, Role.STAFF));
+
+        for (String token : new String[]{oldRefresh, unknownUser}) {
+            mvc.perform(get("/api/account").header("Authorization", "Bearer " + token))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.detail").value("Invalid or expired token"));
+        }
     }
 
     @Test

@@ -1,8 +1,8 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.configuration.security.LoginTokenAuthentication;
 import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -17,6 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -79,9 +80,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return respond(e, HttpStatus.FORBIDDEN, e.getMessage(), request);
     }
 
-    @ExceptionHandler(JwtException.class)
-    public ResponseEntity<Object> handleJwt(JwtException e, WebRequest request) {
-        return respond(e, HttpStatus.UNAUTHORIZED, "Invalid or expired token", request);
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    public ResponseEntity<Object> handleRejectedToken(OAuth2AuthenticationException e, WebRequest request) {
+        return respond(e, HttpStatus.UNAUTHORIZED, LoginTokenAuthentication.INVALID_TOKEN, request);
     }
 
     @ExceptionHandler(PessimisticLockingFailureException.class)

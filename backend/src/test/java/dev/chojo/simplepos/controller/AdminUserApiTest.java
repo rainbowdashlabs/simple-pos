@@ -134,7 +134,7 @@ class AdminUserApiTest {
         asAdmin(patch("/api/admin/users/" + staff.getId()), "{\"enabled\": false}")
                 .andExpect(status().isOk());
 
-        mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isForbidden());
+        mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isUnauthorized());
         assertTrue(tokenRepository.findByUserAndToken(staff, AuthenticationService.fingerprint(refresh)).isEmpty());
     }
 

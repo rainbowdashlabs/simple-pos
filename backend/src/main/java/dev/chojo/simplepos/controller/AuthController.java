@@ -1,10 +1,8 @@
 package dev.chojo.simplepos.controller;
 
-import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.configuration.security.RateLimiter;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenResponse;
-import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.service.AuthenticationService;
 import dev.chojo.simplepos.service.UserAdminService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,12 +25,10 @@ import java.nio.charset.StandardCharsets;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthenticationService authenticationService;
-    private final JwtService jwtService;
     private final RateLimiter rateLimiter;
 
-    public AuthController(AuthenticationService authenticationService, JwtService jwtService, RateLimiter rateLimiter) {
+    public AuthController(AuthenticationService authenticationService, RateLimiter rateLimiter) {
         this.authenticationService = authenticationService;
-        this.jwtService = jwtService;
         this.rateLimiter = rateLimiter;
     }
 
@@ -74,24 +70,14 @@ public class AuthController {
         authenticationService.logout(token);
     }
 
+    /**
+     * Trades a refresh token for a new login and refresh token. The refresh token can be used only once.
+     */
     @PostMapping("/refresh")
     ResponseEntity<TokenResponse> refresh(@RequestParam String token, HttpServletRequest request) {
         rateLimiter.checkRequest("refresh", request.getRemoteAddr());
-        String username = jwtService.extractUsername(token);
-        User user = authenticationService.findByUsername(username);
-        if (!user.isEnabled()) {
-            throw new DisabledException("Account is disabled");
-        }
-        if (!jwtService.isTokenValid(token, user, JwtService.REFRESH_CLAIM)) {
-            throw new UnauthorizedException("Invalid token");
-        }
-
-        if (!authenticationService.invalidateRefreshToken(user, token)) {
-            throw new UnauthorizedException("Unknown or already used token");
-        }
-        log.info("Valid token. Creating new login and refresh token");
-
-        TokenResponse tokenResponse = authenticationService.issueTokens(user);
-        return ResponseEntity.ok(tokenResponse);
+        TokenResponse tokens = authenticationService.refresh(token);
+        log.info("Valid token. Created new login and refresh token");
+        return ResponseEntity.ok(tokens);
     }
 }
