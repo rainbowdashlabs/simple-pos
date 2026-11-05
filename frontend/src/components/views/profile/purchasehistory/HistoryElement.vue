@@ -48,6 +48,7 @@ export default defineComponent({
       <div class="flex items-center gap-5">
         <FormattedText :value="purchase.purchased" type="date"/>
         <FormattedText :value="product.name"/>
+        <span v-if="purchase.soldBy" class="text-sm opacity-70">{{ $t('sold_by', {user: purchase.soldBy}) }}</span>
       </div>
       <div class="flex gap-5 items-center">
         <FormattedText :value="purchase.amount" type="number"/>

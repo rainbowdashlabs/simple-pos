@@ -35,6 +35,9 @@ public class Purchase {
     @OneToMany(mappedBy = "purchase", fetch = FetchType.LAZY)
     private List<PurchasePart> parts;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User soldBy;
+
     public Purchase(Integer id, Account account, Product product, Instant purchased, int amount, double price, List<PurchasePart> parts) {
         this(id, account, product, purchased, amount, Money.of(price), parts);
     }
@@ -108,7 +111,15 @@ public class Purchase {
         this.parts = parts;
     }
 
+    public User getSoldBy() {
+        return soldBy;
+    }
+
+    public void setSoldBy(User soldBy) {
+        this.soldBy = soldBy;
+    }
+
     public PurchaseDto toDto(){
-        return new PurchaseDto(id, product.getId(), purchased, amount, price);
+        return new PurchaseDto(id, product.getId(), purchased, amount, price, soldBy == null ? null : soldBy.getUsername());
     }
 }

@@ -218,5 +218,6 @@
   "no_matches": "Keine Treffer",
   "sale_booked": "Verkauf gebucht. Rückgängig noch {seconds} s möglich.",
   "sale_booked_undo": "Verkauf gebucht. Er kann {seconds} Sekunden lang rückgängig gemacht werden.",
-  "sale_undone": "Verkauf rückgängig gemacht"
+  "sale_undone": "Verkauf rückgängig gemacht",
+  "sold_by": "von {user}"
 }

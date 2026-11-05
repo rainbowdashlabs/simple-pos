@@ -218,5 +218,6 @@
   "no_matches": "No matches",
   "sale_booked": "Sale booked. Undo possible for {seconds} s.",
   "sale_booked_undo": "Sale booked. It can be undone for {seconds} seconds.",
-  "sale_undone": "Sale undone"
+  "sale_undone": "Sale undone",
+  "sold_by": "by {user}"
 }

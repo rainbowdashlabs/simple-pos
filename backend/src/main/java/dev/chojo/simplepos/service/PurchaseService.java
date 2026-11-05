@@ -10,6 +10,7 @@ import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.PurchasePart;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -53,9 +54,9 @@ public class PurchaseService {
     /**
      * Books a purchase for every cart position and takes the ingredients of each product's recipe from storage.
      * <p>
-     * Runs in one transaction: if any position names an unknown product, nothing is booked. A product whose
-     * ingredients are out of stock is still sold; the shortfall is logged as a warning and recorded as units sold
-     * without stock, costed at the ingredient's current price.
+     * Every purchase records {@code soldBy}, the user at the till. Runs in one transaction: if any position names an
+     * unknown product, nothing is booked. A product whose ingredients are out of stock is still sold; the shortfall
+     * is logged as a warning and recorded as units sold without stock, costed at the ingredient's current price.
      *
      * <p>
      * The account is loaded only here, under its row lock, so an account closed meanwhile is seen as closed.
@@ -68,7 +69,7 @@ public class PurchaseService {
      * @throws ConflictException if a product is not active
      */
     @Transactional
-    public synchronized List<Integer> purchase(int accountId, List<CartPositionDto> positions) {
+    public synchronized List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy) {
         if (positions == null || positions.isEmpty()) throw new BadRequestException("The cart is empty");
         for (CartPositionDto position : positions) {
             if (position.amount() < 1) throw new BadRequestException("Every position needs an amount of at least 1");
@@ -89,6 +90,7 @@ public class PurchaseService {
             CartPositionDto position = positions.get(index);
             Product prod = products.get(index);
             Purchase purchase = new Purchase(null, account, prod, Instant.now(), position.amount(), prod.getPrice(), Collections.emptyList());
+            purchase.setSoldBy(soldBy);
             purchase = purchaseRepository.save(purchase);
             ArrayList<PurchasePart> parts = new ArrayList<>();
             for (RecipeEntry recipe : prod.getRecipe().getEntries()) {

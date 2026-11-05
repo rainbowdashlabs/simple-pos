@@ -87,7 +87,7 @@ class ProfitTest {
         Storage batch = storageService.deliver(new InboundStorage(bottle, null, null, money(10.52), money(0.0), 12), staff);
         assertUnitPrice(0.8767, batch.getPrice());
 
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 12)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 12)), null);
         entityManager.flush();
 
         Tuple summary = purchaseRepository.getSalesStatSummary(product.getId(), Instant.now().minus(1, ChronoUnit.HOURS));
@@ -107,7 +107,7 @@ class ProfitTest {
         Storage second = storageRepository.save(new Storage(null, can, delivered, 0.3, 2, 0));
         entityManager.flush();
 
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 7)));
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 7)), null);
         entityManager.flush();
 
         List<PurchasePart> parts = purchasePartRepository.findAll(Sort.by("id")).stream()

@@ -17,9 +17,9 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     Optional<Integer> findAccountIdOf(int purchaseId);
 
     /**
-     * An account's purchases, newest first, with their products, in one query.
+     * An account's purchases, newest first, with their products and cashiers, in one query.
      */
-    @EntityGraph(attributePaths = {"product", "product.category", "product.recipe"})
+    @EntityGraph(attributePaths = {"product", "product.category", "product.recipe", "soldBy"})
     List<Purchase> findAllByAccount_IdOrderByPurchasedDesc(int id, Pageable pageable);
 
     @Query(value = """

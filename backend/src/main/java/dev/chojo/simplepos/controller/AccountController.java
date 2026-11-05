@@ -103,7 +103,8 @@ public class AccountController {
     @PostMapping("/{id}/purchase")
     @ResponseStatus(HttpStatus.CREATED)
     PurchaseReceipt purchase(@PathVariable int id, @RequestBody List<CartPositionDto> positions) {
-        return new PurchaseReceipt(purchaseService.purchase(id, positions));
+        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new PurchaseReceipt(purchaseService.purchase(id, positions, current));
     }
 
     @GetMapping("/{id}/purchase")

@@ -8,6 +8,7 @@ export interface Purchase {
     purchased: number
     amount: number
     price: number
+    soldBy?: string | null
 }
 
 export interface History {

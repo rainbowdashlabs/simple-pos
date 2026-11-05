@@ -55,6 +55,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final PurchaseRepository purchaseRepository;
     private final CashRepository cashRepository;
     private final boolean resetDatabase;
+    private User seller;
 
     public DemoDataSeeder(EntityManager entityManager, UserRepository userRepository, PasswordEncoder passwordEncoder,
                           CategoryRepository categoryRepository, IngredientRepository ingredientRepository,
@@ -108,6 +109,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         // Demo user
         User demoUser = userRepository.save(
                 new User(null, DEMO_USER, passwordEncoder.encode("demo"), true, Role.STAFF));
+        seller = demoUser;
 
         // Categories
         Category drinks = categoryRepository.save(new Category(null, "Drinks"));
@@ -357,6 +359,8 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void addPurchase(Account account, Product product, int amount, Instant purchased) {
-        purchaseRepository.save(new Purchase(null, account, product, purchased, amount, product.getPrice(), Collections.emptyList()));
+        Purchase purchase = new Purchase(null, account, product, purchased, amount, product.getPrice(), Collections.emptyList());
+        purchase.setSoldBy(seller);
+        purchaseRepository.save(purchase);
     }
 }
