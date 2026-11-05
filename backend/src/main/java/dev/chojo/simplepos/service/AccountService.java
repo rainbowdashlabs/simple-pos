@@ -10,8 +10,8 @@ import dev.chojo.simplepos.entity.dto.AccountDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;

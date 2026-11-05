@@ -9,10 +9,10 @@ import dev.chojo.simplepos.entity.dto.CreateUserRequest;
 import dev.chojo.simplepos.entity.dto.UpdateUserRequest;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

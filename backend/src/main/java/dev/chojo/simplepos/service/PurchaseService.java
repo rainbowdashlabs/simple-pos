@@ -22,9 +22,9 @@ import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchasePartRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.storage.StorageTransaction;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -80,7 +80,7 @@ public class PurchaseService {
      * @throws ConflictException if a product is not active
      */
     @Transactional
-    public synchronized List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy) {
+    public List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy) {
         requireCart(positions);
         Account account = accountRepository.requireNotDeletedLocked(accountId);
         return book(account, positions, soldBy).stream().map(Purchase::getId).toList();
@@ -97,7 +97,7 @@ public class PurchaseService {
      * @throws ConflictException if a product is not active
      */
     @Transactional
-    public synchronized List<Integer> purchaseAsGuest(List<CartPositionDto> positions, User soldBy) {
+    public List<Integer> purchaseAsGuest(List<CartPositionDto> positions, User soldBy) {
         requireCart(positions);
         List<Purchase> purchases = book(null, positions, soldBy);
         BigDecimal total = purchases.stream().map(PurchaseService::totalOf).reduce(Money.ZERO, BigDecimal::add);
@@ -175,7 +175,7 @@ public class PurchaseService {
      * @throws ConflictException if a purchase belongs to a closed account, whose balance was already settled
      */
     @Transactional
-    public synchronized void cancelAll(Collection<Integer> ids, User cancelledBy) {
+    public void cancelAll(Collection<Integer> ids, User cancelledBy) {
         List<Integer> distinct = ids.stream().distinct().sorted().toList();
         if (distinct.isEmpty()) throw new BadRequestException("No purchase to cancel");
         Map<Integer, Integer> accountOf = new HashMap<>();

@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.repository.StorageRepository;
 import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -41,6 +42,7 @@ public class StockProjectionService {
     /**
      * The {@value #LIMIT} ingredients that run out soonest; ingredients without usage come last.
      */
+    @Transactional(readOnly = true)
     public List<StockProjectionDto> soonestEmpty() {
         return soonestEmpty(Instant.now());
     }
@@ -72,6 +74,7 @@ public class StockProjectionService {
      * {@code days}; the amount is rounded up to full containers when the ingredient comes in containers. Sorted by
      * category, then name.
      */
+    @Transactional(readOnly = true)
     public List<ShoppingListEntry> shoppingList(int days) {
         return shoppingList(days, Instant.now());
     }

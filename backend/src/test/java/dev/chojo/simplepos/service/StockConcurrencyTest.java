@@ -40,9 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Checks stock changes from parallel, committed transactions: parallel purchases take exactly the sold amount, and
- * a transaction holding an ingredient makes every other stock change of it wait until it commits. Also checks that
- * a refresh token can be used only once when two refreshes race.
+ * Checks stock changes from parallel, committed transactions: parallel purchases, also guest sales that lock no
+ * account and recipes listing shared ingredients in opposite order, take exactly the sold amount without deadlocking,
+ * and a transaction holding an ingredient makes every other stock change of it wait until it commits. Also checks
+ * that a refresh token can be used only once when two refreshes race.
  * <p>
  * Because these tests commit, the context is discarded afterwards; the next context cleans and migrates the schema
  * afresh, so no data leaks into other tests.
@@ -95,6 +96,32 @@ class StockConcurrencyTest {
         }
 
         assertEquals(0, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+    }
+
+    @Test
+    void shouldNotOversellOrDeadlockConcurrentGuestSalesOverSharedIngredients() throws Exception {
+        Category category = categoryRepository.save(new Category(null, "GuestConcurrencyCat"));
+        Ingredient first = ingredientRepository.save(new Ingredient(null, category, "GuestConcurrencyA", 0.5, 24, 0, 0, 0));
+        Ingredient second = ingredientRepository.save(new Ingredient(null, category, "GuestConcurrencyB", 0.5, 24, 0, 0, 0));
+        Product forward = productService.create(new Product(null, category, "GuestForward", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, first, 1), new RecipeEntry(null, second, 1)))));
+        Product backward = productService.create(new Product(null, category, "GuestBackward", 2.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, second, 1), new RecipeEntry(null, first, 1)))));
+        storageService.addStorage(new Storage(null, first, Instant.now(), 0.5, BUYERS * UNITS_PER_BUYER, 0));
+        storageService.addStorage(new Storage(null, second, Instant.now(), 0.5, BUYERS * UNITS_PER_BUYER, 0));
+
+        try (ExecutorService executor = Executors.newFixedThreadPool(BUYERS)) {
+            List<Future<?>> sales = new ArrayList<>();
+            for (int i = 0; i < BUYERS; i++) {
+                Product product = i % 2 == 0 ? forward : backward;
+                sales.add(executor.submit(() ->
+                        purchaseService.purchaseAsGuest(List.of(new CartPositionDto(product, UNITS_PER_BUYER)), null)));
+            }
+            for (Future<?> sale : sales) sale.get(30, TimeUnit.SECONDS);
+        }
+
+        assertEquals(0, new StorageSummary(storageRepository.summaryById(first.getId())).getStock());
+        assertEquals(0, new StorageSummary(storageRepository.summaryById(second.getId())).getStock());
     }
 
     @Test

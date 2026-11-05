@@ -13,8 +13,8 @@ import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeEntryRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;

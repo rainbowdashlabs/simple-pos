@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.repository.TokenRepository;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 

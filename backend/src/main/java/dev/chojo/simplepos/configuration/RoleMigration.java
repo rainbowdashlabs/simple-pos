@@ -1,11 +1,11 @@
 package dev.chojo.simplepos.configuration;
 
 import dev.chojo.simplepos.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
