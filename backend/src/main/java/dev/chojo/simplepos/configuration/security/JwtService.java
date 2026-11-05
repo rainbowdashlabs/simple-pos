@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.configuration.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -15,7 +14,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -27,8 +25,8 @@ import java.util.function.Function;
  * at least {@value #MIN_KEY_BYTES} bytes.
  * <p>
  * Tokens name this application as issuer and audience ({@code security.jwt.issuer} and {@code security.jwt.audience},
- * both {@code simple-pos} by default), and a token naming another issuer or audience is rejected, so a token signed
- * with the same key for another service is not accepted here.
+ * both {@code simple-pos} by default), and a token without them or naming another issuer or audience is rejected, so a
+ * token signed with the same key for another service is not accepted here.
  */
 @Service
 public class JwtService {
@@ -113,29 +111,14 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        Claims claims = Jwts
+        return Jwts
                 .parser()
                 .verifyWith(getSignInKey())
+                .requireIssuer(issuer)
+                .requireAudience(audience)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        requireOwnIssuerAndAudience(claims);
-        return claims;
-    }
-
-    /**
-     * Rejects a token issued by or for someone else. Tokens issued before the claims were added carry neither and
-     * are still accepted, so nobody is logged out when this is deployed.
-     */
-    private void requireOwnIssuerAndAudience(Claims claims) {
-        // TODO require both claims once tokens issued without them have expired
-        if (claims.getIssuer() != null && !issuer.equals(claims.getIssuer())) {
-            throw new IncorrectClaimException(null, claims, Claims.ISSUER, claims.getIssuer(), "Token was issued by someone else");
-        }
-        Set<String> audiences = claims.getAudience();
-        if (audiences != null && !audiences.isEmpty() && !audiences.contains(audience)) {
-            throw new IncorrectClaimException(null, claims, Claims.AUDIENCE, audiences, "Token is meant for someone else");
-        }
     }
 
     private SecretKey getSignInKey() {

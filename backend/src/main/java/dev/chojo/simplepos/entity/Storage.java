@@ -67,6 +67,13 @@ public class Storage {
         this.id = id;
     }
 
+    /**
+     * The id of the ingredient this batch belongs to, read without loading the ingredient.
+     */
+    public Integer getIngredientId() {
+        return ingredient == null ? null : ingredient.getId();
+    }
+
     public Ingredient getIngredient() {
         return ingredient;
     }

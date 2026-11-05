@@ -48,7 +48,7 @@ class JwtServiceTest {
     }
 
     @Test
-    void tokensWithoutIssuerAndAudienceAreStillAccepted() {
+    void tokensWithoutIssuerAndAudienceAreRejected() {
         JwtService service = configured("simple-pos", "simple-pos");
         String legacy = Jwts.builder()
                 .subject("user")
@@ -56,7 +56,7 @@ class JwtServiceTest {
                 .signWith(Keys.hmacShaKeyFor(KEY.getBytes(StandardCharsets.UTF_8)))
                 .compact();
 
-        assertEquals("user", service.extractUsername(legacy));
+        assertThrows(JwtException.class, () -> service.extractUsername(legacy));
     }
 
     private static JwtService configured(String issuer, String audience) {

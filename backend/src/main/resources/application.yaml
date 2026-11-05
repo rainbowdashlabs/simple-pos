@@ -6,9 +6,6 @@ spring:
       - org.springdoc.core.configuration.SpringDocDataRestConfiguration
       - org.springdoc.core.configuration.SpringDocHateoasConfiguration
   datasource:
-    url: "jdbc:postgresql://0.0.0.0/postgres"
-    username: postgres
-    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: true
