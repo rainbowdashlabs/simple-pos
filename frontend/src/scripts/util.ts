@@ -25,15 +25,6 @@ export function localDateKey(day: Date): string {
 }
 
 /**
- * A `yyyy-mm-dd` business date as a local `Date` at midnight. `new Date("yyyy-mm-dd")` would read it as UTC midnight
- * and show the day before in zones west of UTC.
- */
-export function parseLocalDate(value: string): Date {
-    const [year, month, date] = value.split("-").map(Number)
-    return new Date(year, month - 1, date)
-}
-
-/**
  * The rows of a daily statistic for every day from `days` days ago until today, in order. Days without a row get
  * `empty(day)`, so a chart shows days without sales as zero instead of skipping them. Rows carry their business date
  * as `yyyy-mm-dd` and are matched to the calendar days by it.

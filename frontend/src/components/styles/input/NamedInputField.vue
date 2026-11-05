@@ -30,9 +30,8 @@ export default defineComponent({
     },
   }, emits: ["update"],
   methods: {
-    extract(event: Event) {
-      // @ts-expect-error
-      return event.target.value
+    extract(event: Event): string {
+      return (event.target as HTMLInputElement).value
     }
   }
 })

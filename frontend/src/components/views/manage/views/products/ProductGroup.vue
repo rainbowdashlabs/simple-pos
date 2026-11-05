@@ -2,7 +2,7 @@
 import {Category, categoryLabel} from "@/scripts/categories.ts";
 import {defineComponent, PropType} from 'vue'
 import ProductEntry from "./ProductEntry.vue";
-import {ProductGroup} from "@/scripts/product.ts";
+import {ProductGroup, Product} from "@/scripts/product.ts";
 import TextButton from "@/components/styles/buttons/TextButton.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
@@ -26,14 +26,15 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['deleted']
+  emits: ['deleted', 'changed']
 })
 </script>
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <FormattedText class="col-span-full" :value="categoryName(group.category)" :size="SizeGroup.xl"/>
-    <ProductEntry v-for="item in group.entries" :key="item.id!" :product="item" @deleted="$emit('deleted')"/>
+    <ProductEntry v-for="item in group.entries" :key="item.id!" :product="item" @deleted="$emit('deleted')"
+                  @changed="(product: Product) => $emit('changed', product)"/>
   </div>
 </template>
 

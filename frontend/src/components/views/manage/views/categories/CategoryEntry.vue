@@ -33,7 +33,7 @@ export default defineComponent({
       default: () => []
     }
   },
-  emits: ['deleted'],
+  emits: ['deleted', 'changed'],
   data() {
     return {
       edit: false,
@@ -64,7 +64,7 @@ export default defineComponent({
     updateCategory() {
       this.edit = false
       updateCategory({...this.category, name: this.newName})
-          .then(() => this.category.name = this.newName)
+          .then(() => this.$emit('changed', {...this.category, name: this.newName}))
     },
     cancelEdit() {
       this.edit = false
@@ -76,7 +76,6 @@ export default defineComponent({
 
 <template>
   <ColorContainer bg="secondary" class="flex flex-col gap-3">
-    <!-- Header: name + actions -->
     <div v-if="edit" class="flex gap-2">
       <SimpleInputField class="flex-1" :label="$t('name')" type="text" v-model="newName"/>
       <ConfirmButton :hint="$t('button.save')" @click="updateCategory"/>
@@ -90,14 +89,12 @@ export default defineComponent({
       </div>
     </div>
 
-    <!-- Stats -->
     <div class="flex gap-4 text-sm opacity-70">
       <span>{{ activeProducts.length }} {{ $t('products') }}</span>
       <span v-if="inactiveProducts.length > 0" class="italic">{{ inactiveProducts.length }} {{ $t('inactive') }}</span>
       <span>{{ ingredients.length }} {{ $t('ingredients') }}</span>
     </div>
 
-    <!-- Product list -->
     <div v-if="products.length > 0" class="flex flex-wrap gap-1.5">
       <span v-for="p in activeProducts" :key="p.id!"
             class="px-2 py-0.5 rounded-md text-xs bg-accent/20 dark:bg-accent-d/30">

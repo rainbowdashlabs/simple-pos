@@ -1,6 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {ProductListings, products} from "@/scripts/product.ts";
+import {ProductListings, products, Product} from "@/scripts/product.ts";
 import ProductGroup from "./products/ProductGroup.vue";
 import FreeButton from "@/components/styles/buttons/FreeButton.vue";
 import Icon from "@/components/styles/Icon.vue";
@@ -22,6 +22,12 @@ export default defineComponent({
     },
   },
   methods: {
+    productChanged(product: Product) {
+      for (const group of this.productList.categories) {
+        const index = group.entries.findIndex(entry => entry.id === product.id)
+        if (index >= 0) group.entries[index] = product
+      }
+    },
     createProduct() {
       this.$router.push({name: 'manage-products-create'})
     },
@@ -63,7 +69,7 @@ export default defineComponent({
         </span>
       </FreeButton>
     </div>
-    <ProductGroup v-for="item in productList.categories" :key="item.category.id" :group="item" @deleted="loadProducts"/>
+    <ProductGroup v-for="item in productList.categories" :key="item.category.id" :group="item" @deleted="loadProducts" @changed="productChanged"/>
   </ViewWrapper>
 
 </template>

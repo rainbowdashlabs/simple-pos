@@ -1,8 +1,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import {COLOR_THEMES, ColorTheme, store} from "@/scripts/store.ts";
-import {savePreferences} from "@/scripts/user.ts";
-import {setLocale} from "@/scripts/session.ts";
+import {setColorTheme, setLanguage} from "@/scripts/preferences.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -37,23 +36,8 @@ export default defineComponent({
     }
   },
   methods: {
-    persistPreferences() {
-      savePreferences({
-        locale: this.$i18n.locale,
-        colorTheme: store.colorTheme,
-        darkMode: store.theme || 'dark'
-      }).catch(() => {})
-    },
-    setColorTheme(theme: ColorTheme) {
-      localStorage.setItem('colorTheme', theme)
-      store.colorTheme = theme
-      this.persistPreferences()
-    },
-    setLocale(locale: string) {
-      this.$i18n.locale = locale
-      setLocale(locale)
-      this.persistPreferences()
-    },
+    setColorTheme,
+    setLocale: setLanguage,
     themeColor(theme: ColorTheme): string {
       return THEME_COLORS[theme]
     }

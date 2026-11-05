@@ -162,12 +162,12 @@ async function refreshUnlessDone(rejectedToken: string | undefined, renewAged: b
     const current = Cookies.get(token)
     const settled = !renewAged || !isRefreshTokenAged()
     if (current && current !== rejectedToken && hasFreshAccessToken() && settled) return true
-    if (!hasValidRefreshToken()) {
+    const sentRefreshToken = Cookies.get(refresh_token)
+    if (!sentRefreshToken || !hasValidRefreshToken()) {
         clearTokens()
         return false
     }
 
-    const sentRefreshToken = Cookies.get(refresh_token)
     const replacedMeanwhile = () => Cookies.get(refresh_token) !== sentRefreshToken
     const url = getHost() + "/api/auth/refresh"
     let response: Response
@@ -310,14 +310,6 @@ function storeTokens(username: string, cred: TokenResponse) {
 
 export function getUsername() {
     return Cookies.get(username_cookie)
-}
-
-export function setLocale(locale: string) {
-    localStorage.setItem("locale", locale)
-}
-
-export function getLocale(): string | undefined {
-    return localStorage.getItem("locale") ?? undefined
 }
 
 let _demoMode: boolean | null = null

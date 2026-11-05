@@ -1,7 +1,6 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
 import {Ingredient, ingredientRequest} from "./Ingredient.ts";
 import {deleteJson, getJson, patchJson, postJson, putJson} from "./http.ts";
-import {store} from "./store.ts";
 
 export class Timeframe {
     locale: string
@@ -41,6 +40,11 @@ export interface Product extends LazyProduct {
     recipe: Recipe
 }
 
+/**
+ * A product being filled in, which may not have a category yet.
+ */
+export type ProductDraft = Omit<Product, 'category'> & { category?: Category }
+
 export interface ProductGroup extends CategoryGroup<Product> {
 }
 
@@ -58,7 +62,6 @@ export interface ProductSalesStat {
 
 export function product(id: number): Promise<Product> {
     return getJson("api/product/" + id)
-    return store.productCache.promiseById(id) ?? getJson("api/product/" + id)
 }
 
 /**
@@ -91,7 +94,6 @@ function productRequest(product: Product) {
 
 export function products(): Promise<Listing<Product>> {
     return getJson("api/product")
-    return store.productCache.allAsListingPromise() ?? store.productCache.cacheListingPromise(getJson("api/product"))
 }
 
 export function activeProducts(): Promise<Listing<Product>> {
@@ -100,7 +102,6 @@ export function activeProducts(): Promise<Listing<Product>> {
 
 export function deleteProduct(id: number) {
     return deleteJson("api/product/" + id)
-        .then(() => store.productCache.delete(id))
 }
 
 export function toggleActive(id: number): Promise<Product> {
@@ -120,19 +121,3 @@ export function salesStatSummary(id: number, date: Date): Promise<ProductSalesSt
     return getJson(`api/product/${id}/sales/stat/summary`, new Map([["after", date.toISOString()]]))
 }
 
-// statistic functions
-/**
- * A ranking for the best-selling products
- */
-// @ts-expect-error
-export function bestSellingProducts(date: Date, limit: number = 30) {
-
-}
-
-/**
- * A ranking for the worst-selling products
- */
-// @ts-expect-error
-export function worstSellingProducts(date: Date, limit: number = 30) {
-
-}

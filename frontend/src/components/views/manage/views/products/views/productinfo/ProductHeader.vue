@@ -21,14 +21,16 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['edit'],
+  emits: ['edit', 'changed'],
   data() {
     return {
-      active: this.product.active,
       showDeleteModal: false
     }
   },
   computed: {
+    active(): boolean {
+      return this.product.active
+    },
     SizeGroup() {
       return SizeGroup
     },
@@ -41,10 +43,7 @@ export default defineComponent({
       return categoryLabel(category, key => this.$t(key))
     },
     toggleActive() {
-      toggleActive(this.product.id!).then(p => {
-        this.active = p.active
-        this.product.active = p.active
-      })
+      toggleActive(this.product.id!).then(product => this.$emit('changed', product))
     },
     doDelete() {
       this.showDeleteModal = false

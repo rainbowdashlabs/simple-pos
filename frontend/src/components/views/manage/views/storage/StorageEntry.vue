@@ -15,6 +15,7 @@ export default defineComponent({
     GridWrapper,
     Icon, IconButton, NumberText, FormattedText
   },
+  emits: ['changed'],
   props: {
     listing: {
       type: Object as PropType<StorageSummary>,
@@ -43,14 +44,8 @@ export default defineComponent({
     edit() {
       this.$router.push({name: 'manage-storage-edit', params: {id: this.listing.ingredient.id}})
     },
-    /**
-     * Writes the new state into the listing, which the storage view owns and shares with its low-stock filter, so
-     * every view of this ingredient follows.
-     */
     toggleActive() {
-      toggleIngredientActive(this.listing.ingredient.id!).then(i => {
-        this.listing.ingredient.active = i.active
-      })
+      toggleIngredientActive(this.listing.ingredient.id!).then(ingredient => this.$emit('changed', ingredient))
     }
   }
 })

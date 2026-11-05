@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, PropType} from 'vue'
 import SelectMenuEntry from "./SelectMenuEntry.vue";
 
 export default defineComponent({
@@ -12,15 +12,14 @@ export default defineComponent({
   },
   props: {
     options: {
-      //type: Object as PropType<Array<Array<String>>>,
+      type: Array as PropType<Array<string | Array<string | number>>>,
       required: true
     }, current: [String, Number],
     label: String
   },
   methods:{
-    extract(event: Event){
-      // @ts-expect-error
-      return event.target.value
+    extract(event: Event): string {
+      return (event.target as HTMLSelectElement).value
     }
   },
   emits: ["select"]

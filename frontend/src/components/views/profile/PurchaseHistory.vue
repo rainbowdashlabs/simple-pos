@@ -3,7 +3,7 @@ import {defineComponent} from 'vue'
 import HistoryElement from "./purchasehistory/HistoryElement.vue";
 import {History, history} from "@/scripts/purchase.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
-import {Product} from "@/scripts/product.ts";
+import {LazyProduct} from "@/scripts/product.ts";
 
 export default defineComponent({
   name: "PurchaseHistory",
@@ -17,12 +17,11 @@ export default defineComponent({
   emits: ["changed"],
   data() {
     return {
-      purchases: {purchases: [], products: new Map()} as History
+      purchases: {purchases: [], products: {}} as History
     }
   },
   methods: {
-    productFromId(id: number): Product {
-      // @ts-expect-error
+    productFromId(id: number): LazyProduct {
       return this.purchases.products[id]
     },
     loadHistory() {

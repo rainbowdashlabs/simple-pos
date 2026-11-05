@@ -5,7 +5,7 @@ export default defineComponent({
   name: "RawGridRowWrapper",
   props: {
     entries: {
-      type: Object as PropType<Array<any>>,
+      type: Array as PropType<Array<unknown>>,
       required: true
     }
   }

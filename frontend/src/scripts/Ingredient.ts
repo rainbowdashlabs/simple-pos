@@ -14,6 +14,11 @@ export interface Ingredient {
 }
 
 
+/**
+ * An ingredient being filled in, which may not have a category yet.
+ */
+export type IngredientDraft = Omit<Ingredient, 'category'> & { category?: Category }
+
 export interface IngredientRequest {
     name: string,
     categoryId: number,
@@ -55,7 +60,7 @@ export function ingredient(id: number): Promise<Ingredient> {
     return getJson("api/ingredient/" + id)
 }
 
-export function deleteIngredient(id: number): Promise<any> {
+export function deleteIngredient(id: number): Promise<unknown> {
     return deleteJson("api/ingredient/" + id)
 }
 
