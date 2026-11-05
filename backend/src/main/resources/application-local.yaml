@@ -13,3 +13,5 @@ springdoc:
 security:
   jwt:
     secret-key: local-development-only-secret-key-not-for-production
+  refresh-cookie:
+    secure: false

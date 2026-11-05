@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import {getHost, urlEncode} from "./http.ts";
 import {store} from "./store.ts";
 import router from "@/router.ts";
@@ -9,57 +8,92 @@ interface Token {
     expiresIn: number
 }
 
-export interface TokenResponse {
+/**
+ * What the backend answers when a session starts or is refreshed. The refresh token is not part of it: it lives in
+ * an HttpOnly cookie that only the browser and the backend see.
+ */
+export interface SessionResponse {
     token: Token
-    refresh: Token
+    username: string
 }
 
-const token: string = "TOKEN"
-const refresh_token: string = "REFRESH_TOKEN"
-const token_expire: string = "TOKEN_EXPIRE"
-const refresh_token_expire: string = "REFRESH_TOKEN_EXPIRE"
-const refresh_token_issued: string = "REFRESH_TOKEN_ISSUED"
-const username_cookie: string = "username"
+/**
+ * The login token of this tab, its expiry as epoch millis, and whose it is.
+ */
+interface Session {
+    token: string
+    expires: number
+    username: string
+}
+
+type SessionEvent = { type: "login", username: string } | { type: "logout" }
+
+/**
+ * How a refresh ended: with a fresh login token, refused by the backend, or thrown away because this tab logged out
+ * while it was under way.
+ */
+type RefreshResult = "fresh" | "refused" | "ended"
+
+const SESSION_KEY = "simple-pos-session"
+const CSRF_HEADER = {"X-Requested-With": "simple-pos"}
+const LEGACY_COOKIES = ["TOKEN", "TOKEN_EXPIRE", "REFRESH_TOKEN", "REFRESH_TOKEN_EXPIRE", "REFRESH_TOKEN_ISSUED", "username"]
 const REFRESH_MARGIN_MILLIS = 5 * 60 * 1000
 const REFRESH_JITTER_MILLIS = 30 * 1000
 const REFRESH_RETRY_MILLIS = 60 * 1000
 const REFRESH_TIMEOUT_MILLIS = 10 * 1000
-const REFRESH_RACE_GRACE_MILLIS = 3000
-const RENEW_REFRESH_TOKEN_AFTER_MILLIS = 60 * 60 * 1000
 const REFRESH_LOCK = "simple-pos-refresh"
 
-let pendingRefresh: Promise<boolean> | null = null
+const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel("simple-pos-session")
+let session: Session | null = readStoredSession()
+let generation = 0
+let pendingRefresh: Promise<RefreshResult> | null = null
 let refreshTimer: ReturnType<typeof setTimeout> | undefined
 
-function accessTokenExpiry(): number {
-    return Number(Cookies.get(token_expire) ?? 0)
+/**
+ * The session of this tab as it was before a reload. Session storage keeps it for the tab only and drops it when the
+ * tab closes; a new tab starts its own session from the refresh cookie.
+ */
+function readStoredSession(): Session | null {
+    try {
+        const stored = sessionStorage.getItem(SESSION_KEY)
+        return stored ? JSON.parse(stored) as Session : null
+    } catch {
+        return null
+    }
+}
+
+function keepSession(next: Session | null) {
+    session = next
+    try {
+        if (next) sessionStorage.setItem(SESSION_KEY, JSON.stringify(next))
+        else sessionStorage.removeItem(SESSION_KEY)
+    } catch {
+        return
+    }
 }
 
 function hasFreshAccessToken(): boolean {
-    return !!Cookies.get(token) && accessTokenExpiry() - REFRESH_MARGIN_MILLIS > Date.now()
-}
-
-function hasValidRefreshToken(): boolean {
-    return !!Cookies.get(refresh_token) && Number(Cookies.get(refresh_token_expire) ?? 0) > Date.now()
+    return !!session && session.expires - REFRESH_MARGIN_MILLIS > Date.now()
 }
 
 /**
- * True when the refresh token was issued more than an hour ago. Renewing it then means that any use of the app
- * extends the session to the full refresh-token lifetime from (almost) that moment, not only uses that happen to
- * fall shortly before the login token expires.
+ * Deletes the cookies in which earlier versions kept the tokens readable for scripts.
  */
-function isRefreshTokenAged(): boolean {
-    return Number(Cookies.get(refresh_token_issued) ?? 0) + RENEW_REFRESH_TOKEN_AFTER_MILLIS < Date.now()
+function removeLegacyCookies() {
+    const present = document.cookie.split("; ").map(cookie => cookie.split("=")[0])
+    for (const name of LEGACY_COOKIES.filter(name => present.includes(name))) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+    }
 }
 
-function clearTokens() {
+/**
+ * Ends the session in this tab. Raising the generation makes a refresh that is still under way discard its answer
+ * instead of bringing the session back.
+ */
+function clearSession() {
+    generation++
     clearTimeout(refreshTimer)
-    Cookies.remove(token)
-    Cookies.remove(token_expire)
-    Cookies.remove(refresh_token)
-    Cookies.remove(refresh_token_expire)
-    Cookies.remove(refresh_token_issued)
-    Cookies.remove(username_cookie)
+    keepSession(null)
     store.loggedIn = false
     store.role = null
     store.roleOf = null
@@ -68,48 +102,72 @@ function clearTokens() {
 }
 
 /**
- * Ends the session here and on the server: the refresh token is forgotten by the backend, so it cannot be used
- * again even if a copy of it exists elsewhere.
+ * Ends the session here, in the other tabs and on the server: the backend forgets the refresh token and tells the
+ * browser to drop its cookie. The server is told under the refresh lock, after any refresh under way, so it is the
+ * newest cookie that is forgotten.
  */
 export function logout() {
-    forgetOnServer(Cookies.get(refresh_token))
-    clearTokens()
+    void withRefreshLock(forgetOnServer)
+    clearSession()
+    channel?.postMessage({type: "logout"} satisfies SessionEvent)
     router.push({name: 'login'})
 }
 
-function forgetOnServer(token: string | undefined) {
-    if (!token) return
-    fetch(getHost() + "/api/auth/logout", {
+/**
+ * Shows the login page for a tab whose session is already gone, refused by the backend or ended by a logout, without
+ * telling the server or the other tabs again.
+ */
+export function showLogin() {
+    clearSession()
+    router.push({name: 'login'})
+}
+
+function forgetOnServer(): Promise<unknown> {
+    return fetch(getHost() + "/api/auth/logout", {
         method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: urlEncode({token}),
+        headers: CSRF_HEADER,
         keepalive: true
     }).catch(() => undefined)
 }
 
 /**
+ * Follows what other tabs do: a logout there ends the session here, and a login as someone else replaces it with a
+ * session of the new user from the shared refresh cookie. The previous user's cart and last sale are dropped with it.
+ */
+function followOtherTabs(event: MessageEvent<SessionEvent>) {
+    if (event.data.type === "logout") {
+        clearSession()
+        router.push({name: 'login'})
+    } else if (session?.username !== event.data.username) {
+        keepSession(null)
+        store.cart.clearCart()
+        store.lastSale = null
+        refreshInBackground()
+    }
+}
+
+/**
  * Reacts to a request the backend rejected with 401 although it carried `rejectedToken`: the session is refreshed
- * once, unless another request or tab already did that. Logs out when the refresh is refused.
+ * once, unless another request already did that. Logs out when the refresh is refused.
  *
  * @return whether a new token is available, so the request can be retried
  */
 export async function handleUnauthorized(rejectedToken: string): Promise<boolean> {
-    if (await refreshSession(rejectedToken)) return true
-    logout()
-    return false
+    const result = await refreshSession(rejectedToken)
+    if (result === "refused") logout()
+    return result === "fresh"
 }
 
 export async function isLoggedIn() {
     if (hasFreshAccessToken()) {
         store.loggedIn = true
-        if (isRefreshTokenAged()) refreshInBackground(true)
-        else scheduleRefresh()
+        scheduleRefresh()
         return true
     }
     try {
-        store.loggedIn = await refreshSession()
+        store.loggedIn = await refreshSession() === "fresh"
     } catch {
-        store.loggedIn = hasValidRefreshToken()
+        store.loggedIn = session !== null
     }
     return store.loggedIn
 }
@@ -122,108 +180,78 @@ export async function isLoggedIn() {
  * account is disabled (403)
  */
 export async function getSessionToken(): Promise<string | null> {
-    if (hasFreshAccessToken()) return Cookies.get(token)!
-    if (!await refreshSession()) return null
-    return Cookies.get(token) ?? null
+    if (hasFreshAccessToken()) return session!.token
+    if (await refreshSession() !== "fresh") return null
+    return session?.token ?? null
 }
 
 /**
  * Refreshes the session once, no matter how many callers ask at the same time. Across tabs, a browser lock makes
- * sure only one tab uses the single-use refresh token; the others find the new token in the shared cookies.
+ * sure only one tab at a time uses the single-use refresh cookie; the next one then sends the cookie the first one
+ * received.
  *
  * @param rejectedToken a login token the backend refused; it is replaced even if it has not expired yet
- * @param renewAged also refresh when the login token is still fresh but the refresh token has aged
- * @return whether a valid login token is available afterwards. False means the backend refused the refresh and the
- * tokens were cleared.
- * @throws ApiError if the backend could not be reached or failed; the tokens are kept for a later attempt. Also for
- * a disabled account, after the tokens were cleared.
+ * @return "fresh" if a valid login token is available afterwards, "refused" if the backend refused the refresh and
+ * the session was cleared, "ended" if this tab logged out meanwhile
+ * @throws ApiError if the backend could not be reached or failed; the session is kept for a later attempt. Also for
+ * a disabled account, after logging out.
  */
-function refreshSession(rejectedToken?: string, renewAged: boolean = false): Promise<boolean> {
-    pendingRefresh ??= withRefreshLock(() => refreshUnlessDone(rejectedToken, renewAged))
-        .then(refreshed => {
-            if (refreshed) scheduleRefresh()
-            return refreshed
+function refreshSession(rejectedToken?: string): Promise<RefreshResult> {
+    pendingRefresh ??= withRefreshLock(() => refreshUnlessDone(rejectedToken))
+        .then(result => {
+            if (result === "fresh") scheduleRefresh()
+            return result
         })
         .finally(() => pendingRefresh = null)
     return pendingRefresh
 }
 
+/**
+ * Runs `task` while no other tab uses the refresh cookie. Browsers offer the lock only in a secure context; without
+ * it, on plain http other than localhost, two tabs can race for the single-use cookie and the loser is logged out.
+ */
 function withRefreshLock<T>(task: () => Promise<T>): Promise<T> {
     if (!navigator.locks) return task()
     return navigator.locks.request(REFRESH_LOCK, task)
 }
 
 /**
- * Uses the refresh token, unless the work is already done: another tab may have refreshed (the login token in the
- * shared cookies changed) or logged out (the refresh token is gone) meanwhile. The same check runs again when the
- * answer arrives, so a refresh that loses a race against another tab or a logout neither clears the other tab's new
- * tokens nor revives a session that was just ended.
+ * Uses the refresh cookie unless this tab already holds a fresh token other than `rejectedToken`. An answer that
+ * arrives after this tab logged out is thrown away, and the session it started on the server is ended again.
  */
-async function refreshUnlessDone(rejectedToken: string | undefined, renewAged: boolean): Promise<boolean> {
-    const current = Cookies.get(token)
-    const settled = !renewAged || !isRefreshTokenAged()
-    if (current && current !== rejectedToken && hasFreshAccessToken() && settled) return true
-    const sentRefreshToken = Cookies.get(refresh_token)
-    if (!sentRefreshToken || !hasValidRefreshToken()) {
-        clearTokens()
-        return false
-    }
+async function refreshUnlessDone(rejectedToken: string | undefined): Promise<RefreshResult> {
+    if (session && session.token !== rejectedToken && hasFreshAccessToken()) return "fresh"
+    const started = generation
 
-    const replacedMeanwhile = () => Cookies.get(refresh_token) !== sentRefreshToken
     const url = getHost() + "/api/auth/refresh"
     let response: Response
     try {
         response = await fetch(url, {
             method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: urlEncode({token: sentRefreshToken}),
+            headers: {"Accept": "application/json", ...CSRF_HEADER},
             signal: AbortSignal.timeout(REFRESH_TIMEOUT_MILLIS)
         })
     } catch (e) {
         throw ApiError.network("POST", url, e)
     }
 
-    if (replacedMeanwhile()) return hasFreshAccessToken()
-
     if (!response.ok) {
         const error = await ApiError.fromResponse("POST", url, response)
         if (error.status !== 401 && error.status !== 403) throw error
-        if (error.status === 401 && await replacedWithin(REFRESH_RACE_GRACE_MILLIS, replacedMeanwhile)) {
-            return hasFreshAccessToken()
-        }
         if (error.isAccountDisabled) {
             logout()
             throw error
         }
-        clearTokens()
-        return false
+        clearSession()
+        return "refused"
     }
 
-    const cred: TokenResponse = await response.json()
-    storeTokens(getUsername() ?? subjectOf(cred.token.token), cred)
-    return true
-}
-
-/**
- * Waits briefly for another tab to store the tokens it won with, since its answer may arrive after the rejection of
- * the same refresh token here.
- */
-async function replacedWithin(millis: number, replaced: () => boolean): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, millis))
-    return replaced()
-}
-
-function subjectOf(jwt: string): string {
-    try {
-        const payload = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")
-        const bytes = Uint8Array.from(atob(payload), c => c.charCodeAt(0))
-        return JSON.parse(new TextDecoder().decode(bytes)).sub ?? ""
-    } catch {
-        return ""
+    if (started !== generation) {
+        await forgetOnServer()
+        return "ended"
     }
+    startSession(await response.json())
+    return "fresh"
 }
 
 /**
@@ -233,39 +261,45 @@ function subjectOf(jwt: string): string {
  */
 function scheduleRefresh() {
     clearTimeout(refreshTimer)
-    if (!Cookies.get(token_expire)) return
+    if (!session) return
     const jitter = Math.random() * REFRESH_JITTER_MILLIS
-    const delay = Math.max(accessTokenExpiry() - REFRESH_MARGIN_MILLIS - jitter - Date.now(), 0)
+    const delay = Math.max(session.expires - REFRESH_MARGIN_MILLIS - jitter - Date.now(), 0)
     refreshTimer = setTimeout(refreshInBackground, delay)
 }
 
-function refreshInBackground(renewAged: boolean = false) {
-    refreshSession(undefined, renewAged)
-        .then(refreshed => {
-            if (!refreshed) logout()
+function refreshInBackground() {
+    refreshSession()
+        .then(result => {
+            if (result === "refused") logout()
         })
         .catch(() => {
             clearTimeout(refreshTimer)
-            refreshTimer = setTimeout(() => refreshInBackground(renewAged), REFRESH_RETRY_MILLIS)
+            refreshTimer = setTimeout(refreshInBackground, REFRESH_RETRY_MILLIS)
         })
 }
 
 function refreshIfDue() {
-    if (document.visibilityState !== "visible" || !hasValidRefreshToken()) return
-    if (hasFreshAccessToken() && !isRefreshTokenAged()) return
-    refreshInBackground(true)
+    if (document.visibilityState !== "visible" || !session || hasFreshAccessToken()) return
+    refreshInBackground()
 }
 
+removeLegacyCookies()
+channel?.addEventListener("message", followOtherTabs)
 document.addEventListener("visibilitychange", refreshIfDue)
 window.addEventListener("focus", refreshIfDue)
-if (hasValidRefreshToken()) scheduleRefresh()
+if (session) scheduleRefresh()
 
 /**
- * Logs in and stores the tokens.
+ * Logs in and starts the session. Runs under the refresh lock, so a refresh or logout of another tab cannot replace
+ * the new refresh cookie with an older one.
  *
  * @throws ApiError if the credentials are wrong (401), the account is disabled (403) or the server is unreachable (0)
  */
-export async function login(username: string, password: string): Promise<void> {
+export function login(username: string, password: string): Promise<void> {
+    return withRefreshLock(() => loginUnlocked(username, password))
+}
+
+async function loginUnlocked(username: string, password: string): Promise<void> {
     const url = getHost() + "/api/auth/login"
     let response: Response
     try {
@@ -285,40 +319,29 @@ export async function login(username: string, password: string): Promise<void> {
         throw await ApiError.fromResponse("POST", url, response)
     }
 
-    storeTokens(username, await response.json())
+    startSession(await response.json(), true)
 }
 
 /**
- * Stores the tokens in cookies that live as long as the refresh token, so the session survives a browser restart.
- * Whether the login token is still usable is decided by its stored expiry, not by the cookie lifetime.
+ * Keeps the login token of a session the backend started; the backend set the refresh cookie with the same answer.
+ *
+ * @param announce tell the other tabs, so they follow a login as another user
  */
-function storeTokens(username: string, cred: TokenResponse) {
-    const now = Date.now()
-    const options: Cookies.CookieAttributes = {
-        expires: new Date(now + cred.refresh.expiresIn),
-        sameSite: "strict",
-        secure: window.location.protocol === "https:"
-    }
-    Cookies.set(username_cookie, username, options)
-    Cookies.set(token, cred.token.token, options)
-    Cookies.set(token_expire, String(now + cred.token.expiresIn), options)
-    Cookies.set(refresh_token, cred.refresh.token, options)
-    Cookies.set(refresh_token_expire, String(now + cred.refresh.expiresIn), options)
-    Cookies.set(refresh_token_issued, String(now), options)
+function startSession(answer: SessionResponse, announce: boolean = false) {
+    keepSession({token: answer.token.token, expires: Date.now() + answer.token.expiresIn, username: answer.username})
     scheduleRefresh()
+    if (announce) channel?.postMessage({type: "login", username: answer.username} satisfies SessionEvent)
 }
 
-
 /**
- * Takes over the tokens of a new session the backend started for the logged-in user, such as after a password change.
+ * Takes over a new session the backend started for the logged-in user, such as after a password change.
  */
-export function adoptTokens(cred: TokenResponse) {
-    const username = getUsername()
-    if (username) storeTokens(username, cred)
+export function adoptSession(answer: SessionResponse) {
+    startSession(answer)
 }
 
 export function getUsername() {
-    return Cookies.get(username_cookie)
+    return session?.username
 }
 
 let _demoMode: boolean | null = null
@@ -339,14 +362,18 @@ export async function isDemoMode(): Promise<boolean> {
     return _demoMode
 }
 
-export async function demoLogin(): Promise<boolean> {
-    const response = await fetch(getHost() + "/api/demo/login", {
-        method: "POST",
-        headers: {"Accept": "application/json"}
+/**
+ * Logs in as the demo user, under the refresh lock like {@link login}.
+ */
+export function demoLogin(): Promise<boolean> {
+    return withRefreshLock(async () => {
+        const response = await fetch(getHost() + "/api/demo/login", {
+            method: "POST",
+            headers: {"Accept": "application/json"}
+        })
+        if (!response.ok) return false
+        startSession(await response.json(), true)
+        store.loggedIn = true
+        return true
     })
-    if (!response.ok) return false
-    const cred: TokenResponse = await response.json()
-    storeTokens("demo", cred)
-    store.loggedIn = true
-    return true
 }

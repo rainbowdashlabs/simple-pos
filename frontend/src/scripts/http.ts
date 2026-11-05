@@ -1,5 +1,5 @@
 import {i18n} from "@/i18n.ts";
-import {getSessionToken, handleUnauthorized, logout} from "./session.ts";
+import {getSessionToken, handleUnauthorized, logout, showLogin} from "./session.ts";
 import {ApiError} from "./errors.ts";
 import {forgetRole} from "./roles.ts";
 
@@ -52,7 +52,7 @@ export async function downloadFile(url: string, params: Map<string, string | num
 async function send(requrl: string, method: string, body: Object | null, retryUnauthorized: boolean, raw: boolean = false): Promise<any> {
     const token = await getSessionToken()
     if (!token) {
-        logout()
+        showLogin()
         throw new ApiError(401, "Not logged in")
     }
     let header = new Headers()

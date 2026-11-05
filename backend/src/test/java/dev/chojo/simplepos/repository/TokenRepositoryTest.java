@@ -66,21 +66,12 @@ public class TokenRepositoryTest {
     }
 
     @Test
-    void shouldDeleteByUserAndToken() {
+    void shouldDeleteByFingerprint() {
         Token token = tokenRepository.save(new Token("deleteme", testUser, null));
 
-        long count = tokenRepository.deleteByUserAndToken(testUser, "deleteme");
-        assertEquals(1, count);
+        assertEquals(1, tokenRepository.deleteByFingerprint("deleteme"));
+        assertEquals(0, tokenRepository.deleteByFingerprint("deleteme"));
         assertTrue(tokenRepository.findById(token.getId()).isEmpty());
-    }
-
-    @Test
-    void shouldNotDeleteTokenOfDifferentUser() {
-        User otherUser = userRepository.save(new User(null, "otheruser", "password", true, Role.STAFF));
-        tokenRepository.save(new Token("shared", testUser, null));
-
-        long count = tokenRepository.deleteByUserAndToken(otherUser, "shared");
-        assertEquals(0, count);
     }
 
     @Test

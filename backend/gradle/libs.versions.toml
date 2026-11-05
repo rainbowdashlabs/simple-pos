@@ -1,7 +1,6 @@
 [versions]
 spring-boot = "4.1.2"
 springdoc = "3.2.0"
-jjwt = "0.13.0"
 testcontainers = "2.0.5"
 
 [libraries]
@@ -14,6 +13,8 @@ spring-boot-starter-test = { group = "org.springframework.boot", name = "spring-
 spring-boot-testcontainers = { group = "org.springframework.boot", name = "spring-boot-testcontainers" }
 spring-security-web = { group = "org.springframework.security", name = "spring-security-web" }
 spring-security-config = { group = "org.springframework.security", name = "spring-security-config" }
+spring-security-oauth2-resource-server = { group = "org.springframework.security", name = "spring-security-oauth2-resource-server" }
+spring-security-oauth2-jose = { group = "org.springframework.security", name = "spring-security-oauth2-jose" }
 
 # Database
 postgresql = { group = "org.postgresql", name = "postgresql" }
@@ -22,11 +23,6 @@ flyway-postgresql = { group = "org.flywaydb", name = "flyway-database-postgresql
 
 # OpenAPI
 springdoc-openapi = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
-
-# JWT
-jjwt-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jjwt" }
-jjwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jjwt" }
-jjwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jjwt" }
 
 # Database testing
 testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
@@ -37,8 +33,12 @@ testcontainers-junit = { group = "org.testcontainers", name = "testcontainers-ju
 junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher" }
 
 [bundles]
-spring-security = ["spring-security-web", "spring-security-config"]
-jjwt-runtime = ["jjwt-impl", "jjwt-jackson"]
+spring-security = [
+    "spring-security-web",
+    "spring-security-config",
+    "spring-security-oauth2-resource-server",
+    "spring-security-oauth2-jose"
+]
 testcontainers = [
     "testcontainers-core",
     "testcontainers-junit",

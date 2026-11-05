@@ -1,8 +1,9 @@
 package dev.chojo.simplepos.controller;
 
-import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.configuration.security.RateLimiter;
+import dev.chojo.simplepos.configuration.security.RefreshCookie;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.security.SessionResponse;
 import dev.chojo.simplepos.entity.security.TokenResponse;
 import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.service.AuthenticationService;
@@ -10,14 +11,15 @@ import dev.chojo.simplepos.service.UserAdminService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.charset.StandardCharsets;
@@ -27,13 +29,13 @@ import java.nio.charset.StandardCharsets;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     private final AuthenticationService authenticationService;
-    private final JwtService jwtService;
     private final RateLimiter rateLimiter;
+    private final RefreshCookie refreshCookie;
 
-    public AuthController(AuthenticationService authenticationService, JwtService jwtService, RateLimiter rateLimiter) {
+    public AuthController(AuthenticationService authenticationService, RateLimiter rateLimiter, RefreshCookie refreshCookie) {
         this.authenticationService = authenticationService;
-        this.jwtService = jwtService;
         this.rateLimiter = rateLimiter;
+        this.refreshCookie = refreshCookie;
     }
 
     /**
@@ -42,8 +44,8 @@ public class AuthController {
      * that can be stored are rejected as wrong before anything is counted or hashed.
      */
     @PostMapping("/login")
-    ResponseEntity<TokenResponse> login(@RequestParam String username, @RequestParam String password,
-                                        HttpServletRequest request) {
+    ResponseEntity<SessionResponse> login(@RequestParam String username, @RequestParam String password,
+                                          HttpServletRequest request) {
         if (username.length() > UserAdminService.MAX_USERNAME_LENGTH
                 || password.getBytes(StandardCharsets.UTF_8).length > UserAdminService.MAX_PASSWORD_BYTES) {
             throw new BadCredentialsException("Bad credentials");
@@ -58,40 +60,45 @@ public class AuthController {
         }
         attempt.succeeded();
 
-        TokenResponse tokenResponse = authenticationService.issueTokens(authenticatedUser);
-
-        return ResponseEntity.ok(tokenResponse);
+        TokenResponse tokens = authenticationService.issueTokens(authenticatedUser);
+        return refreshCookie.respond(tokens, authenticatedUser.getUsername());
     }
 
     /**
-     * Ends the session a refresh token belongs to. Answers the same whether or not the token was known, so it says
-     * nothing about which tokens exist.
+     * Ends the session of the refresh cookie and makes the browser forget it. Answers the same whether or not the
+     * token was known, so it says nothing about which tokens exist.
      */
     @PostMapping("/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void logout(@RequestParam String token, HttpServletRequest request) {
+    ResponseEntity<Void> logout(
+            @CookieValue(name = RefreshCookie.NAME, required = false) String token,
+            @RequestHeader(name = RefreshCookie.CSRF_HEADER, required = false) String requestedWith,
+            HttpServletRequest request) {
+        RefreshCookie.requireOwnFrontend(requestedWith);
         rateLimiter.checkRequest("logout", request.getRemoteAddr());
-        authenticationService.logout(token);
+        if (token != null) authenticationService.logout(token);
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, refreshCookie.cleared()).build();
     }
 
+    /**
+     * Trades the refresh cookie for a new login token and a new refresh cookie. A refresh token can be used only
+     * once; one that is refused is also removed from the browser, so new tabs do not send it again.
+     */
     @PostMapping("/refresh")
-    ResponseEntity<TokenResponse> refresh(@RequestParam String token, HttpServletRequest request) {
+    ResponseEntity<SessionResponse> refresh(
+            @CookieValue(name = RefreshCookie.NAME, required = false) String token,
+            @RequestHeader(name = RefreshCookie.CSRF_HEADER, required = false) String requestedWith,
+            HttpServletRequest request) {
+        RefreshCookie.requireOwnFrontend(requestedWith);
         rateLimiter.checkRequest("refresh", request.getRemoteAddr());
-        String username = jwtService.extractUsername(token);
-        User user = authenticationService.findByUsername(username);
-        if (!user.isEnabled()) {
-            throw new DisabledException("Account is disabled");
+        if (token == null) throw new UnauthorizedException("No session");
+        AuthenticationService.Session session;
+        try {
+            session = authenticationService.refresh(token);
+        } catch (UnauthorizedException e) {
+            e.getHeaders().add(HttpHeaders.SET_COOKIE, refreshCookie.cleared());
+            throw e;
         }
-        if (!jwtService.isTokenValid(token, user, JwtService.REFRESH_CLAIM)) {
-            throw new UnauthorizedException("Invalid token");
-        }
-
-        if (!authenticationService.invalidateRefreshToken(user, token)) {
-            throw new UnauthorizedException("Unknown or already used token");
-        }
-        log.info("Valid token. Creating new login and refresh token");
-
-        TokenResponse tokenResponse = authenticationService.issueTokens(user);
-        return ResponseEntity.ok(tokenResponse);
+        log.info("Valid token. Created new login and refresh token");
+        return refreshCookie.respond(session.tokens(), session.user().getUsername());
     }
 }

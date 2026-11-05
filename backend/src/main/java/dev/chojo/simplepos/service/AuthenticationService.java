@@ -1,6 +1,6 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.configuration.security.JwtService;
+import dev.chojo.simplepos.configuration.security.LoginTokens;
 import dev.chojo.simplepos.configuration.security.Sha256;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
@@ -13,30 +13,37 @@ import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 
 @Service
 public class AuthenticationService {
+    private static final int REFRESH_TOKEN_BYTES = 32;
+    private static final String UNUSABLE_REFRESH_TOKEN = "Unknown or already used token";
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
 
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
+    private final LoginTokens loginTokens;
     private final PasswordEncoder passwordEncoder;
     private final long refreshLifetime;
 
     public AuthenticationService(
             UserRepository userRepository, TokenRepository tokenRepository,
-            AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager, LoginTokens loginTokens, PasswordEncoder passwordEncoder,
             @Value("${security.jwt.refresh-expiration-time}") long refreshLifetime
     ) {
-        this.jwtService = jwtService;
+        this.loginTokens = loginTokens;
         this.passwordEncoder = passwordEncoder;
         this.refreshLifetime = refreshLifetime;
         this.tokenRepository = tokenRepository;
@@ -45,14 +52,58 @@ public class AuthenticationService {
     }
 
     /**
-     * Issues a new login and refresh token for the user and remembers the refresh token.
+     * Issues a new login and refresh token for the user and remembers the refresh token. The refresh token is a
+     * random value with no meaning of its own: only its stored fingerprint makes it usable.
      */
     public TokenResponse issueTokens(User user) {
-        TokenResponse tokens = new TokenResponse(
-                new TokenDto(jwtService.generateToken(JwtService.LOGIN_CLAIM, user, jwtService.getExpirationTime()), jwtService.getExpirationTime()),
-                new TokenDto(jwtService.generateToken(JwtService.REFRESH_CLAIM, user, refreshLifetime), refreshLifetime));
-        saveRefreshToken(tokens.refresh().token(), user, Duration.ofMillis(refreshLifetime));
-        return tokens;
+        String refresh = newRefreshToken();
+        saveRefreshToken(refresh, user, Duration.ofMillis(refreshLifetime));
+        return new TokenResponse(
+                new TokenDto(loginTokens.issue(user), loginTokens.lifetime().toMillis()),
+                new TokenDto(refresh, refreshLifetime));
+    }
+
+    private static String newRefreshToken() {
+        byte[] bytes = new byte[REFRESH_TOKEN_BYTES];
+        RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    /**
+     * Trades a refresh token for a new login and refresh token in one transaction, so the old token is only used up
+     * when the new one is stored.
+     *
+     * @throws UnauthorizedException if the token is unknown, expired or already used
+     * @throws DisabledException     if the user is disabled
+     */
+    @Transactional
+    public Session refresh(String token) {
+        User user = redeemRefreshToken(token);
+        return new Session(user, issueTokens(user));
+    }
+
+    /**
+     * A session started for a user, with its tokens.
+     */
+    public record Session(User user, TokenResponse tokens) {
+    }
+
+    /**
+     * Uses up a refresh token. Of two concurrent calls with the same token only one succeeds. The token of a disabled
+     * user is not used up.
+     *
+     * @return the user the token belongs to
+     * @throws UnauthorizedException if the token is unknown, expired or already used
+     * @throws DisabledException     if the user is disabled
+     */
+    @Transactional
+    public User redeemRefreshToken(String token) {
+        String fingerprint = fingerprint(token);
+        User user = tokenRepository.findUserOfUsableToken(fingerprint, Instant.now())
+                .orElseThrow(() -> new UnauthorizedException(UNUSABLE_REFRESH_TOKEN));
+        if (!user.isEnabled()) throw new DisabledException("Account is disabled");
+        if (tokenRepository.deleteByFingerprint(fingerprint) != 1) throw new UnauthorizedException(UNUSABLE_REFRESH_TOKEN);
+        return user;
     }
 
     /**
@@ -137,10 +188,4 @@ public class AuthenticationService {
 
         return findByUsername(username);
     }
-
-    @Transactional
-    public boolean invalidateRefreshToken(User user, String token) {
-        return tokenRepository.deleteByUserAndToken(user, fingerprint(token)) == 1;
-    }
-
 }

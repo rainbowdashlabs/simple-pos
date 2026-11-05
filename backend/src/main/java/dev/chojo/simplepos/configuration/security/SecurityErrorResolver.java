@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.configuration.security;
 
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -34,7 +33,7 @@ public class SecurityErrorResolver {
     }
 
     private static HttpStatus fallbackStatus(Exception exception) {
-        if (exception instanceof AuthenticationException || exception instanceof JwtException) return HttpStatus.UNAUTHORIZED;
+        if (exception instanceof AuthenticationException) return HttpStatus.UNAUTHORIZED;
         if (exception instanceof AccessDeniedException) return HttpStatus.FORBIDDEN;
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
