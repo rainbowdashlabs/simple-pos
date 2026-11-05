@@ -14,6 +14,9 @@ import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -65,7 +68,7 @@ public class PurchaseController {
 
     @PostMapping("/guest")
     @ResponseStatus(HttpStatus.CREATED)
-    PurchaseReceipt guest(@RequestBody List<CartPositionDto> positions) {
+    PurchaseReceipt guest(@RequestBody @NotEmpty @Size(max = 100) List<@Valid @NotNull CartPositionDto> positions) {
         return new PurchaseReceipt(purchaseService.purchaseAsGuest(positions, currentUser()));
     }
 

@@ -15,8 +15,11 @@ import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.StockProjectionService;
 import dev.chojo.simplepos.service.StorageService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -81,14 +84,14 @@ public class StorageController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Storage> add(@RequestBody InboundStorage storage) {
+    ResponseEntity<Storage> add(@Valid @RequestBody InboundStorage storage) {
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ResponseEntity.accepted().body(storageService.deliver(storage, current));
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public void updateInventory(@RequestBody List<InventoryCorrection> corrections) {
+    public void updateInventory(@RequestBody @Size(max = 1000) List<@Valid @NotNull InventoryCorrection> corrections) {
         storageService.processInventoryCorrection(corrections);
     }
 

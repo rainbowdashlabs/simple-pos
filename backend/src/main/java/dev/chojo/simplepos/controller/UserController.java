@@ -11,6 +11,7 @@ import dev.chojo.simplepos.service.AuthenticationService;
 import dev.chojo.simplepos.service.UserAdminService;
 import dev.chojo.simplepos.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +44,7 @@ public class UserController {
      * the same way. Other sessions of the user end; the answer carries the tokens of the caller's new session.
      */
     @PutMapping("/me/password")
-    public TokenResponse changePassword(@RequestBody ChangePasswordRequest body, HttpServletRequest request) {
+    public TokenResponse changePassword(@Valid @RequestBody ChangePasswordRequest body, HttpServletRequest request) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (body.current() != null && body.current().getBytes(StandardCharsets.UTF_8).length > UserAdminService.MAX_PASSWORD_BYTES) {
             throw AuthenticationService.wrongCurrentPassword();
@@ -68,7 +69,7 @@ public class UserController {
     }
 
     @PutMapping("/preferences")
-    public ResponseEntity<UserPreferencesDto> updatePreferences(@RequestBody UserPreferencesDto dto) {
+    public ResponseEntity<UserPreferencesDto> updatePreferences(@Valid @RequestBody UserPreferencesDto dto) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserPreferences prefs = preferencesRepository.findByUser(user)
                 .orElseGet(() -> new UserPreferences(user));

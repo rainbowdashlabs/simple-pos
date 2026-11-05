@@ -194,7 +194,7 @@ class ErrorResponseTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("[{\"amount\": 1}]"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value("Product id is missing"));
+                .andExpect(jsonPath("$.errors[0].field").value("positions[0].product"));
     }
 
     @Test

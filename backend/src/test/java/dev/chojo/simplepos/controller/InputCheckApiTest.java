@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,9 +36,11 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -176,6 +179,35 @@ class InputCheckApiTest {
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.errors[0].field").value("days"));
         }
+    }
+
+    @Test
+    void requestBodiesAreValidatedAtEveryEndpoint() throws Exception {
+        Account account = accountRepository.save(new Account(null, "ValidatedAccount", Instant.now()));
+        long cashBefore = cashRepository.count();
+        String[][] cases = {
+                {"POST", "/api/account", "{\"name\": \" \"}"},
+                {"POST", "/api/account", "{\"name\": \"" + "a".repeat(101) + "\"}"},
+                {"PATCH", "/api/account/" + account.getId(), "{\"name\": \"line\\nbreak\"}"},
+                {"PUT", "/api/user/preferences", "{\"locale\": \"fr\", \"colorTheme\": \"blue\", \"darkMode\": \"dark\"}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": 0, \"amount\": -5}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"total\": 5, \"pledge\": 0, \"amount\": 5}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": -1, \"amount\": 5}"},
+                {"PUT", "/api/storage", "[{\"ingredient\": 1, \"amount\": -1}]"},
+                {"PUT", "/api/storage", "[null]"},
+                {"POST", "/api/purchase/guest", "[]"},
+                {"POST", "/api/purchase/guest", "[{\"product\": {\"id\": 1}, \"amount\": 0}]"},
+                {"POST", "/api/account/" + account.getId() + "/purchase", "[]"},
+                {"POST", "/api/account/" + account.getId() + "/purchase", "[{\"product\": {\"id\": 1}, \"amount\": 0}]"},
+        };
+        for (String[] request : cases) {
+            mvc.perform(request(HttpMethod.valueOf(request[0]), request[1]).header("Authorization", "Bearer " + token)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(request[2]))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors").isNotEmpty());
+        }
+        assertEquals(cashBefore, cashRepository.count());
     }
 
     @Test

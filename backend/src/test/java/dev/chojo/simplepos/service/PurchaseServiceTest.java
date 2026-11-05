@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.ConflictException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
@@ -272,19 +271,6 @@ class PurchaseServiceTest {
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 1)).get(0);
         assertMoney(product.getPrice(), purchase.getPrice());
-    }
-
-    @Test
-    void shouldRejectAnEmptyCart() {
-        assertThrows(BadRequestException.class, () -> purchaseService.purchase(account.getId(), List.of(), null));
-    }
-
-    @Test
-    void shouldRejectAPositionBelowOne() {
-        assertThrows(BadRequestException.class,
-                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 0)), null));
-        assertThrows(BadRequestException.class,
-                () -> purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, -10)), null));
     }
 
     @Test

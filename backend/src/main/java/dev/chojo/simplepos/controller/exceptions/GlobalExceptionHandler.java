@@ -16,6 +16,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -136,9 +138,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                             HttpHeaders headers, HttpStatusCode status,
                                                                             WebRequest request) {
         List<Map<String, String>> errors = e.getParameterValidationResults().stream()
-                .flatMap(result -> result.getResolvableErrors().stream().map(error -> Map.of(
-                        "field", Objects.requireNonNullElse(result.getMethodParameter().getParameterName(), "parameter"),
-                        "message", Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid"))))
+                .flatMap(result -> {
+                    String parameter = Objects.requireNonNullElse(
+                            result.getMethodParameter().getParameterName(), "parameter");
+                    if (result instanceof ParameterErrors elementErrors && elementErrors.getContainerIndex() != null) {
+                        String element = "%s[%d]".formatted(parameter, elementErrors.getContainerIndex());
+                        return elementErrors.getAllErrors().stream().map(error -> Map.of(
+                                "field", error instanceof FieldError field ? element + "." + field.getField() : element,
+                                "message", Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid")));
+                    }
+                    return result.getResolvableErrors().stream().map(error -> Map.of(
+                            "field", parameter,
+                            "message", Objects.requireNonNullElse(error.getDefaultMessage(), "is invalid")));
+                })
                 .toList();
         return invalid(e, errors, headers, request);
     }

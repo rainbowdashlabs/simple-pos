@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The shape of deliveries and counts (present fields, positive amounts, limits) is checked by the request validation
+ * at the API, not here again; a new caller has to pass validated requests.
+ */
 @Service
 public class StorageService {
     private final StorageRepository storageRepository;
@@ -40,22 +44,17 @@ public class StorageService {
      * Books a delivery: the new stock, and the money paid for it and for its pledge, in one transaction. A delivery
      * without a purchase date counts as purchased now, so it is used up in order with the others.
      *
-     * @throws BadRequestException if the ingredient is missing, the amount is not positive, not exactly one of the
-     *                             price per unit and the total is given, or the cost or pledge is missing or negative
+     * @throws BadRequestException if the ingredient id is missing, or the cost, unit price or pledge is too large for
+     *                             the money columns; the rest of the delivery's shape is checked by the request
+     *                             validation
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the ingredient does not exist
      */
     @Transactional
     public Storage deliver(InboundStorage delivery, User receivedBy) {
         Ingredient ingredient = ingredientRepository.require(delivery.ingredientId());
-        if (delivery.amount() == null || delivery.amount() < 1) throw new BadRequestException("The amount must be at least 1");
-        if ((delivery.price() == null) == (delivery.total() == null)) {
-            throw new BadRequestException("Give either the price per unit or the total, not both");
-        }
         BigDecimal cost = delivery.total() != null
                 ? Money.of(delivery.total())
                 : Money.of(delivery.price().multiply(BigDecimal.valueOf(delivery.amount())));
-        if (cost.signum() < 0) throw new BadRequestException("The price must not be negative");
-        if (delivery.pledge() == null || delivery.pledge().signum() < 0) throw new BadRequestException("The pledge must not be negative");
         if (Money.integerDigits(cost) > 10 || Money.integerDigits(Money.perUnit(cost, delivery.amount())) > 8
             || Money.integerDigits(delivery.pledge()) > 10) {
             throw new BadRequestException("The price or pledge is too large");
@@ -65,8 +64,9 @@ public class StorageService {
             String note = "%s x %d".formatted(ingredient.getName(), delivery.amount());
             cashRepository.save(new Cash(receivedBy, cost.negate(), CashType.PURCHASE, note));
         }
-        if (delivery.pledge().signum() > 0) {
-            cashRepository.save(new Cash(receivedBy, delivery.pledge().negate(), CashType.PLEDGE, ingredient.getName()));
+        BigDecimal pledge = Money.of(delivery.pledge());
+        if (pledge.signum() > 0) {
+            cashRepository.save(new Cash(receivedBy, pledge.negate(), CashType.PLEDGE, ingredient.getName()));
         }
         Instant purchased = delivery.purchased() == null ? Instant.now() : delivery.purchased();
         Storage created = storageRepository.save(Storage.withCost(ingredient, purchased, cost, delivery.amount()));
@@ -98,16 +98,16 @@ public class StorageService {
      * Brings the stock of each ingredient to the counted amount, taking from or adding to storage as needed.
      * Runs in one transaction: if any correction is invalid, nothing is changed.
      *
-     * @throws BadRequestException if a correction lacks its ingredient or amount
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a correction names an unknown ingredient
+     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a correction names an unknown ingredient;
+     *                                                                     ingredient and amount being present and the
+     *                                                                     amount not negative is checked by the
+     *                                                                     request validation
      */
     @Transactional
     public void processInventoryCorrection(List<InventoryCorrection> corrections) {
         ingredientRepository.requireLockedInOrder(corrections.stream().map(InventoryCorrection::ingredient).toList());
         for (InventoryCorrection correction : corrections) {
             Ingredient ingredient = ingredientRepository.require(correction.ingredient());
-            if (correction.amount() == null) throw new BadRequestException("Amount is missing");
-            if (correction.amount() < 0) throw new BadRequestException("The counted amount must not be negative");
             StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;

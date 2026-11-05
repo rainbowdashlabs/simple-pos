@@ -39,6 +39,10 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * The shape of carts (present fields, positive amounts, limits) is checked by the request validation at the API,
+ * not here again; a new caller has to pass validated requests.
+ */
 @Service
 public class PurchaseService {
     private static final Logger log = getLogger(PurchaseService.class);
@@ -73,7 +77,8 @@ public class PurchaseService {
      * The account is loaded only here, under its row lock, so an account closed meanwhile is seen as closed.
      *
      * @return the ids of the purchases booked, one per position, in the order of the positions
-     * @throws BadRequestException if the cart is empty or a position's amount is below 1
+     * @throws BadRequestException if a position names no product; the cart's shape (not empty, amounts of at least 1)
+     *                             is checked by the request validation
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a position names an unknown or deleted
      *                                                                     product, or the account does not exist or
      *                                                                     is closed
@@ -81,7 +86,6 @@ public class PurchaseService {
      */
     @Transactional
     public List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy) {
-        requireCart(positions);
         Account account = accountRepository.requireNotDeletedLocked(accountId);
         return book(account, positions, soldBy).stream().map(Purchase::getId).toList();
     }
@@ -91,25 +95,18 @@ public class PurchaseService {
      * and their total goes into the till as one {@code sale} cash entry, all in one transaction.
      *
      * @return the ids of the purchases booked, one per position, in the order of the positions
-     * @throws BadRequestException if the cart is empty or a position's amount is below 1
+     * @throws BadRequestException if a position names no product; the cart's shape (not empty, amounts of at least 1)
+     *                             is checked by the request validation
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a position names an unknown or deleted
      *                                                                     product
      * @throws ConflictException if a product is not active
      */
     @Transactional
     public List<Integer> purchaseAsGuest(List<CartPositionDto> positions, User soldBy) {
-        requireCart(positions);
         List<Purchase> purchases = book(null, positions, soldBy);
         BigDecimal total = purchases.stream().map(PurchaseService::totalOf).reduce(Money.ZERO, BigDecimal::add);
         cashRepository.save(new Cash(soldBy, total, CashType.SALE, note("Guest sale", purchases)));
         return purchases.stream().map(Purchase::getId).toList();
-    }
-
-    private static void requireCart(List<CartPositionDto> positions) {
-        if (positions == null || positions.isEmpty()) throw new BadRequestException("The cart is empty");
-        for (CartPositionDto position : positions) {
-            if (position.amount() < 1) throw new BadRequestException("Every position needs an amount of at least 1");
-        }
     }
 
     private List<Purchase> book(Account account, List<CartPositionDto> positions, User soldBy) {

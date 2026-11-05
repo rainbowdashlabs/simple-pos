@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
@@ -239,30 +238,12 @@ class StorageServiceTest {
     }
 
     @Test
-    void shouldRejectADeliveryOfAnUnknownIngredientOrWithoutAmount() {
+    void shouldRejectADeliveryOfAnUnknownIngredient() {
         User receiver = userRepository.save(new User(null, "receiver3", "x", true, Role.STAFF));
         Ingredient unknown = new Ingredient(999999, null, "unknown", 0.0, 1, 0, 0, 0);
 
         assertThrows(NotFoundException.class,
                 () -> storageService.deliver(new InboundStorage(unknown, null, money(1.0), null, money(0.0), 1), receiver));
-        assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, money(1.0), null, money(0.0), null), receiver));
-    }
-
-    @Test
-    void shouldRejectDeliveriesThatWouldPutMoneyIntoTheRegister() {
-        User receiver = userRepository.save(new User(null, "receiver2", "x", true, Role.STAFF));
-        long cashBefore = cashRepository.count();
-
-        assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, money(2.0), null, money(0.0), -5), receiver));
-        assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, money(-2.0), null, money(0.0), 5), receiver));
-        assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, money(2.0), null, money(-1.0), 5), receiver));
-        assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, null, null, money(0.0), 5), receiver));
-        assertEquals(cashBefore, cashRepository.count());
     }
 
     @Test
@@ -278,11 +259,4 @@ class StorageServiceTest {
                 .anyMatch(cash -> cash.getType() == CashType.PURCHASE && money(-17.54).equals(cash.getAmount())));
     }
 
-    @Test
-    void shouldRejectADeliveryWithBothPriceAndTotal() {
-        User receiver = userRepository.save(new User(null, "receiver5", "x", true, Role.STAFF));
-
-        assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, money(1.0), money(20.0), money(0.0), 20), receiver));
-    }
 }

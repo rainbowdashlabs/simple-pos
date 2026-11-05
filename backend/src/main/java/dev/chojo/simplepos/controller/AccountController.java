@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.AccountDto;
+import dev.chojo.simplepos.entity.dto.AccountRequest;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.DepositDto;
 import dev.chojo.simplepos.entity.dto.LazyProduct;
@@ -20,6 +21,9 @@ import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.AccountService;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,8 +62,8 @@ public class AccountController {
     }
 
     @PostMapping
-    ResponseEntity<Account> create(@RequestBody AccountDto account) {
-        return ResponseEntity.accepted().body(accountRepository.save(new Account(null,account.getName(), Instant.now())));
+    ResponseEntity<Account> create(@Valid @RequestBody AccountRequest account) {
+        return ResponseEntity.accepted().body(accountRepository.save(new Account(null, account.name(), Instant.now())));
     }
 
     @GetMapping("/{id}")
@@ -69,9 +73,9 @@ public class AccountController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<Account> rename(@PathVariable int id, @RequestBody AccountDto account) {
+    ResponseEntity<Account> rename(@PathVariable int id, @Valid @RequestBody AccountRequest account) {
         Account existing = accountRepository.requireNotDeleted(id);
-        existing.setName(account.getName());
+        existing.setName(account.name());
         return ResponseEntity.ok(accountRepository.save(existing));
     }
 
@@ -102,7 +106,8 @@ public class AccountController {
 
     @PostMapping("/{id}/purchase")
     @ResponseStatus(HttpStatus.CREATED)
-    PurchaseReceipt purchase(@PathVariable int id, @RequestBody List<CartPositionDto> positions) {
+    PurchaseReceipt purchase(@PathVariable int id,
+                             @RequestBody @NotEmpty @Size(max = 100) List<@Valid @NotNull CartPositionDto> positions) {
         var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return new PurchaseReceipt(purchaseService.purchase(id, positions, current));
     }

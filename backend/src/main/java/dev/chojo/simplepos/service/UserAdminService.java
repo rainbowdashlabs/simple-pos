@@ -24,6 +24,9 @@ import java.util.List;
  * enabled admins are locked while such a change is checked, so two concurrent changes cannot each remove "another"
  * admin. Disabling a user or setting a new password deletes the user's refresh tokens, so those sessions end at their
  * next refresh at the latest.
+ * <p>
+ * The shape of user requests (a role for a new user, at least one field in a change) is checked by the request
+ * validation at the API, not here again; a new caller has to pass validated requests.
  */
 @Service
 public class UserAdminService {
@@ -48,14 +51,14 @@ public class UserAdminService {
     /**
      * Creates an enabled user.
      *
-     * @throws BadRequestException if the username, password or role is missing or invalid
+     * @throws BadRequestException if the username or password is invalid; a missing role is refused by the request
+     *                             validation
      * @throws ConflictException   if the username is taken, ignoring case
      */
     @Transactional
     public User create(CreateUserRequest request) {
         String username = requireUsername(request.username());
         requirePassword(request.password());
-        if (request.role() == null) throw new BadRequestException("Role is missing");
         if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new ConflictException("Username %s is already taken".formatted(username));
         }
@@ -65,13 +68,11 @@ public class UserAdminService {
     /**
      * Changes the role and/or the enabled state of a user.
      *
-     * @throws BadRequestException if the request changes nothing
      * @throws NotFoundException   if the user does not exist
      * @throws ConflictException   if the change would leave no enabled admin
      */
     @Transactional
     public User update(int id, UpdateUserRequest request) {
-        if (request.role() == null && request.enabled() == null) throw new BadRequestException("Nothing to change");
         List<User> enabledAdmins = userRepository.lockEnabledByRole(Role.ADMIN);
         User user = require(id);
         Role role = request.role() == null ? user.getRole() : request.role();
