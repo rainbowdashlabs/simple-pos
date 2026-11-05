@@ -1,9 +1,11 @@
 package dev.chojo.simplepos.entity.dto;
 
-import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.response.PageResponse;
 
-import java.util.List;
 import java.util.Map;
 
-public record PurchaseHistoryDto(Map<Integer, LazyProduct> products, List<PurchaseDto> purchases) {
+/**
+ * A page of an account's purchases, with the products those purchases name.
+ */
+public record PurchaseHistoryDto(Map<Integer, LazyProduct> products, PageResponse<PurchaseDto> purchases) {
 }

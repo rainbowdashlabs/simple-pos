@@ -3,10 +3,15 @@ import {defineComponent} from 'vue'
 import HistoryElement from "./deposithistory/HistoryElement.vue";
 import {Balance, deposits} from "@/scripts/accounts.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
+import {loadNext, pagedList} from "@/scripts/page.ts";
 
+/**
+ * An account's deposits, newest first, a page at a time.
+ */
 export default defineComponent({
   name: "DepositHistory",
-  components: {ColorContainer, HistoryElement},
+  components: {LoadMore, ColorContainer, HistoryElement},
   props: {
     accountId: {
       type: Number,
@@ -15,12 +20,16 @@ export default defineComponent({
   },
   data() {
       return {
-        deposits: [] as Balance[]
+        deposits: pagedList<Balance>()
       }
   },
+  methods: {
+    more() {
+      loadNext(this.deposits, page => deposits(this.accountId, page))
+    }
+  },
   mounted() {
-      deposits(this.accountId, 30)
-          .then(e => {this.deposits = e})
+    this.more()
   },
 })
 </script>
@@ -35,9 +44,10 @@ export default defineComponent({
       </tr>
       </thead>
       <tbody class="max-h-64 overflow-y-scroll">
-      <HistoryElement v-for="item in deposits" :deposit="item"/>
+      <HistoryElement v-for="item in deposits.items" :key="item.id!" :deposit="item"/>
       </tbody>
     </table>
+    <LoadMore :page="deposits.page" :shown="deposits.items.length" :loading="deposits.loading" @more="more"/>
   </ColorContainer>
 </template>
 

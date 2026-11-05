@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
@@ -15,12 +16,17 @@ import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeEntryRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -163,5 +169,17 @@ public class ProductService {
         Product product = productRepository.requireNotDeleted(id);
         product.setActive(!product.isActive());
         return product;
+    }
+
+    /**
+     * A page of the products that are not deleted, optionally only those on sale and of one category, by category name
+     * (products without one last), then name, each with its recipe.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<Product> page(boolean activeOnly, Integer categoryId, Pageable pageable) {
+        Page<Integer> ids = productRepository.findIdPage(activeOnly, categoryId, pageable);
+        Map<Integer, Product> products = productRepository.findAllByIdIn(ids.getContent()).stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+        return PageResponse.of(ids, products::get);
     }
 }

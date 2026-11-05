@@ -181,7 +181,7 @@ class PurchaseRepositoryTest {
         purchaseRepository.save(new Purchase(null, account, product, now.minus(40, ChronoUnit.DAYS), 4, 2.5, Collections.emptyList()));
         purchaseRepository.save(new Purchase(null, account, product, now.minus(2, ChronoUnit.DAYS), 1, 2.5, Collections.emptyList()));
 
-        var days = purchaseRepository.getSalesStatByProduct(product.getId(), now.minus(30, ChronoUnit.DAYS), "Europe/Berlin", PageRequest.of(0, 100));
+        var days = purchaseRepository.getSalesStatByProduct(product.getId(), now.minus(30, ChronoUnit.DAYS), "Europe/Berlin", PageRequest.of(0, 100)).getContent();
 
         assertEquals(1, days.size());
         assertEquals(1, days.get(0).getSales().intValue());

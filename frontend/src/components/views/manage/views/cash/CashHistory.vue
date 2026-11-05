@@ -6,24 +6,29 @@ import FormattedText from "@/components/styles/text/FormattedText.vue";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
+import {loadNext, pagedList} from "@/scripts/page.ts";
 
+/**
+ * The cash entries, newest first, a page at a time.
+ */
 export default defineComponent({
   name: "CashHistory",
-  components: {GridWrapper, MoneyText, FormattedText, GridRowWrapper},
+  components: {LoadMore, GridWrapper, MoneyText, FormattedText, GridRowWrapper},
   data() {
-    return {history: [] as CashHistoryEntry[]}
+    return {history: pagedList<CashHistoryEntry>()}
   },
   computed: {
     SizeGroup() {
       return SizeGroup
     }
   }, methods: {
-    async fetchHistory(): Promise<CashHistoryEntry[]> {
-      return await cashHistory()
+    more() {
+      loadNext(this.history, page => cashHistory(page))
     }
   },
   mounted() {
-    this.fetchHistory().then(res => this.history = res)
+    this.more()
   },
 })
 </script>
@@ -34,13 +39,14 @@ export default defineComponent({
     <FormattedText :size="SizeGroup.md" class="font-bold" :value="$t('history')"/>
     <div class="overflow-y-scroll height">
       <div class="grid grid-cols-6 gap-x-2 auto-cols-max border-slate-400 border-b"
-           v-for="item in history">
+           v-for="item in history.items" :key="item.id">
         <FormattedText class="col-span-2" :value="item.created" :size="SizeGroup.sm" type="date"/>
         <FormattedText class="col-span-2" :value="item.user.username" :size="SizeGroup.sm"/>
         <MoneyText class="col-span-2" :amount="item.amount" :size="SizeGroup.sm"/>
         <FormattedText class="col-start-1 col-span-2" :value="item.type" :size="SizeGroup.sm" type="locale"/>
         <FormattedText class=" mx-5 col-start-2 col-span-4 row-span-2" :value="item.note" :size="SizeGroup.sm"/>
       </div>
+      <LoadMore :page="history.page" :shown="history.items.length" :loading="history.loading" @more="more"/>
     </div>
   </GridWrapper>
 

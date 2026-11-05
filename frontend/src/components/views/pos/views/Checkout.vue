@@ -2,6 +2,7 @@
 import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
 import {store, UNDO_MILLIS} from "@/scripts/store.ts";
+import {notifyError} from "@/scripts/notifications.ts";
 import AccountPicker from "./checkout/AccountPicker.vue";
 import {account, Account, accounts, GUEST_ACCOUNT_ID, purchase, purchaseAsGuest} from "@/scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
@@ -33,7 +34,7 @@ export default defineComponent({
       accountsLoaded: false,
       selectedId: null as number | null,
       pickerRevision: 0,
-      accountList: [] as Account[],
+      noAccounts: false,
       submitting: false
     }
   },
@@ -113,10 +114,10 @@ export default defineComponent({
     }
   },
   mounted() {
-    accounts().then(e => {
-      this.accountList = e
-      this.accountsLoaded = true
-    })
+    accounts("", 0, 1)
+        .then(page => this.noAccounts = page.totalItems === 0)
+        .catch(notifyError)
+        .finally(() => this.accountsLoaded = true)
   },
 })
 </script>
@@ -134,9 +135,9 @@ export default defineComponent({
       </div>
     </ColorContainer>
 
-    <FormattedText v-if="accountsLoaded && accountList.length === 0" value="checkout_no_accounts" type="locale"/>
+    <FormattedText v-if="accountsLoaded && noAccounts" value="checkout_no_accounts" type="locale"/>
     <AccountPicker v-if="accountsLoaded" :key="pickerRevision" :label="$t('checkout_choose_account')"
-                   :accounts="accountList" :guest="guest" :autofocus="pickerRevision > 0" @select="checkoutAccount"/>
+                   :guest="guest" :autofocus="pickerRevision > 0" @select="checkoutAccount"/>
 
     <GridWrapper v-if="account" bg="none" padding="0">
       <ColorContainer v-if="isGuest" :class="SizeGroup.xl" bg="secondary" class="flex justify-between">

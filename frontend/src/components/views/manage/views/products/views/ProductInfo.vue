@@ -45,7 +45,7 @@ export default defineComponent({
   mounted() {
     const pid = Number(this.id)
     product(pid).then(p => this.focusProduct = p)
-    salesStat(pid, Timeframes.month.getDate()).then(s => this.dailyStats = s)
+    salesStat(pid, Timeframes.month.getDate()).then(s => this.dailyStats = s.items)
   }
 })
 </script>

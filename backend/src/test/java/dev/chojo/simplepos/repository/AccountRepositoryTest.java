@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +70,7 @@ class AccountRepositoryTest {
         accountRepository.save(new Account(null, "Alice", Instant.now()));
         accountRepository.save(new Account(null, "Bob", Instant.now()));
 
-        List<AccountDto> all = accountRepository.findAllAccounts();
+        List<AccountDto> all = accountRepository.findAccounts("", "%", "%", PageRequest.of(0, 500)).getContent();
         assertEquals(2, all.size());
     }
 
@@ -78,7 +79,7 @@ class AccountRepositoryTest {
         accountRepository.save(new Account(null, "Zara", Instant.now()));
         accountRepository.save(new Account(null, "Anna", Instant.now()));
 
-        List<AccountDto> all = accountRepository.findAllAccounts();
+        List<AccountDto> all = accountRepository.findAccounts("", "%", "%", PageRequest.of(0, 500)).getContent();
         assertEquals("Anna", all.get(0).getName());
         assertEquals("Zara", all.get(1).getName());
     }
@@ -92,7 +93,7 @@ class AccountRepositoryTest {
         purchaseRepository.save(new Purchase(null, buyer, null, later, 1, 1.0, List.of()));
         purchaseRepository.save(new Purchase(null, buyer, null, earlier, 1, 1.0, List.of()));
 
-        List<AccountDto> all = accountRepository.findAllAccounts();
+        List<AccountDto> all = accountRepository.findAccounts("", "%", "%", PageRequest.of(0, 500)).getContent();
         assertEquals(later, all.stream().filter(a -> a.getId().equals(buyer.getId())).findFirst().orElseThrow().getLastPurchase());
         assertNull(all.stream().filter(a -> a.getId().equals(idle.getId())).findFirst().orElseThrow().getLastPurchase());
     }

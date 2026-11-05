@@ -10,6 +10,8 @@ import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,8 +47,8 @@ public class UserAdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<User> list() {
-        return userRepository.findAll(Sort.by("username"));
+    public Page<User> list(PageRequest page) {
+        return userRepository.findAll(page.withSort(Sort.by("username", "id")));
     }
 
     /**

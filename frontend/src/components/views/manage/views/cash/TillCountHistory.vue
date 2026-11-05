@@ -5,15 +5,17 @@ import {differenceClass} from "@/scripts/denominations.ts";
 import {SizeGroup} from "@/scripts/text.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import GridWrapper from "@/components/styles/grid/GridWrapper.vue";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
+import {loadNext, pagedList} from "@/scripts/page.ts";
 
 /**
- * The latest till counts with what was expected, what was counted and the difference.
+ * The till counts, newest first, a page at a time, with what was expected, what was counted and the difference.
  */
 export default defineComponent({
   name: "TillCountHistory",
-  components: {GridWrapper, FormattedText},
+  components: {LoadMore, GridWrapper, FormattedText},
   data() {
-    return {counts: [] as TillCount[]}
+    return {counts: pagedList<TillCount>()}
   },
   computed: {
     SizeGroup() {
@@ -22,18 +24,18 @@ export default defineComponent({
   },
   methods: {
     differenceClass,
-    refresh() {
-      tillCounts().then(counts => this.counts = counts)
+    more() {
+      loadNext(this.counts, page => tillCounts(page))
     }
   },
   mounted() {
-    this.refresh()
+    this.more()
   }
 })
 </script>
 
 <template>
-  <GridWrapper v-if="counts.length" bg="secondary" cols="1">
+  <GridWrapper v-if="counts.items.length" bg="secondary" cols="1">
     <FormattedText :size="SizeGroup.md" class="font-bold" value="till_counts" type="locale"/>
     <table class="w-full text-sm">
       <thead>
@@ -46,7 +48,7 @@ export default defineComponent({
       </tr>
       </thead>
       <tbody>
-      <tr v-for="count in counts" :key="count.id" class="border-slate-400 border-b">
+      <tr v-for="count in counts.items" :key="count.id" class="border-slate-400 border-b">
         <td>{{ $d(new Date(count.created), 'long') }}</td>
         <td>{{ count.countedBy }}</td>
         <td class="text-right">{{ $n(count.expected, 'currency') }}</td>
@@ -55,5 +57,6 @@ export default defineComponent({
       </tr>
       </tbody>
     </table>
+    <LoadMore :page="counts.page" :shown="counts.items.length" :loading="counts.loading" @more="more"/>
   </GridWrapper>
 </template>

@@ -53,7 +53,7 @@ class BalanceRepositoryTest {
         balanceRepository.save(new Balance(null, account, now.minus(1, ChronoUnit.HOURS), 20.0));
         balanceRepository.save(new Balance(null, account, now, 30.0));
 
-        List<Balance> results = balanceRepository.findAllByAccount_IdOrderByAddedDesc(account.getId(), PageRequest.of(0, 10));
+        List<Balance> results = balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(account.getId(), PageRequest.of(0, 10)).getContent();
         assertEquals(3, results.size());
         assertMoney(30.0, results.get(0).getAmount());
         assertMoney(20.0, results.get(1).getAmount());
@@ -66,7 +66,7 @@ class BalanceRepositoryTest {
             balanceRepository.save(new Balance(null, account, Instant.now().minus(i, ChronoUnit.HOURS), i * 10.0));
         }
 
-        List<Balance> page = balanceRepository.findAllByAccount_IdOrderByAddedDesc(account.getId(), PageRequest.of(0, 2));
+        List<Balance> page = balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(account.getId(), PageRequest.of(0, 2)).getContent();
         assertEquals(2, page.size());
     }
 
@@ -90,14 +90,14 @@ class BalanceRepositoryTest {
         Account other = accountRepository.save(new Account(null, "Other", Instant.now()));
         balanceRepository.save(new Balance(null, other, Instant.now(), 100.0));
 
-        List<Balance> results = balanceRepository.findAllByAccount_IdOrderByAddedDesc(account.getId(), PageRequest.of(0, 10));
+        List<Balance> results = balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(account.getId(), PageRequest.of(0, 10)).getContent();
         assertTrue(results.isEmpty());
     }
 
     @Test
     void shouldHandleNegativeBalances() {
         balanceRepository.save(new Balance(null, account, Instant.now(), -15.0));
-        Balance found = balanceRepository.findAllByAccount_IdOrderByAddedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
+        Balance found = balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(account.getId(), PageRequest.of(0, 1)).getContent().get(0);
         assertMoney(-15.0, found.getAmount());
     }
 }

@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountDto;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
 import dev.chojo.simplepos.entity.response.CashResponse;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.TillCountRepository;
 import dev.chojo.simplepos.service.CashService;
@@ -16,7 +17,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,9 +50,9 @@ public class CashController {
     }
 
     @GetMapping
-    public List<Cash> all(@RequestParam(defaultValue = "100") @PageSize int limit,
-                          @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(limit).withPage(page));
+    public PageResponse<Cash> all(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                  @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(cashRepository.findByOrderByCreatedDescIdDesc(PageRequest.of(page, limit)));
     }
 
     @GetMapping("/total")
@@ -73,11 +74,9 @@ public class CashController {
     }
 
     @GetMapping("/count")
-    public List<TillCountDto> counts(@RequestParam(defaultValue = "20") @PageSize int limit,
-                                     @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return tillCountRepository.findByOrderByCreatedDescIdDesc(Pageable.ofSize(limit).withPage(page)).stream()
-                .map(TillCountDto::of)
-                .toList();
+    public PageResponse<TillCountDto> counts(@RequestParam(defaultValue = "20") @PageSize int limit,
+                                             @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(tillCountRepository.findByOrderByCreatedDescIdDesc(PageRequest.of(page, limit)), TillCountDto::of);
     }
 
     @GetMapping("/total/balance")

@@ -1,19 +1,18 @@
 package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.entity.TillCount;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
 
 public interface TillCountRepository extends JpaRepository<TillCount, Integer> {
     /**
      * Counts, newest first, with the user who counted, in one query.
      */
     @EntityGraph(attributePaths = "countedBy")
-    List<TillCount> findByOrderByCreatedDescIdDesc(Pageable pageable);
+    Page<TillCount> findByOrderByCreatedDescIdDesc(Pageable pageable);
 
     /**
      * Waits until no other transaction is counting the till, and holds that lock until the surrounding transaction

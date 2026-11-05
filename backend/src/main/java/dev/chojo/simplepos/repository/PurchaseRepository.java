@@ -7,6 +7,7 @@ import dev.chojo.simplepos.repository.projection.ProductSalesRow;
 import dev.chojo.simplepos.repository.projection.TotalsRow;
 import jakarta.persistence.QueryHint;
 import org.hibernate.jpa.HibernateHints;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,10 +29,18 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     List<Object[]> findAccountIdsOf(Collection<Integer> ids);
 
     /**
-     * An account's purchases, newest first, with their products and cashiers, in one query.
+     * An account's purchases, newest first, with their products and cashiers, in one query; for tests that look at what
+     * a sale booked. The history the API sends is read a page at a time through
+     * {@link #findByAccount_IdOrderByPurchasedDescIdDesc}.
      */
     @EntityGraph(attributePaths = {"product", "product.category", "product.recipe", "soldBy"})
     List<Purchase> findAllByAccount_IdOrderByPurchasedDesc(int id, Pageable pageable);
+
+    /**
+     * A page of an account's purchases, newest first, with their products and cashiers.
+     */
+    @EntityGraph(attributePaths = {"product", "product.category", "product.recipe", "soldBy"})
+    Page<Purchase> findByAccount_IdOrderByPurchasedDescIdDesc(int id, Pageable pageable);
 
     @Query(value = """
             SELECT
@@ -44,8 +53,12 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
               AND p.purchased > ?2
             GROUP BY "day"
             ORDER BY "day" DESC
-            """, nativeQuery = true)
-    List<DayRow> getSalesStatByProduct(int id, Instant after, String zone, Pageable pageable);
+            """,
+            countQuery = """
+                    SELECT count(DISTINCT cast(p.purchased AT TIME ZONE ?3 AS date))
+                    FROM purchase p WHERE p.product_id = ?1 AND p.purchased > ?2""",
+            nativeQuery = true)
+    Page<DayRow> getSalesStatByProduct(int id, Instant after, String zone, Pageable pageable);
 
     @Query(value = """
             SELECT
@@ -76,18 +89,20 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
      * profit; the rows are wrapped in a derived table so it applies to them.
      */
     @Query(value = """
-            SELECT s.* FROM (
+            SELECT s.product_id as "productId", s.sales as sales, s.revenue as revenue, s.profit as profit FROM (
               SELECT
-                p.product_id as "productId",
+                p.product_id as product_id,
                 coalesce(sum(p.amount), 0) as sales,
                 coalesce(sum(p.price * p.amount), 0) as revenue,
                 coalesce(sum(p.price * p.amount - p.cost), 0) as profit
               FROM purchase p
-              WHERE p.purchased > ?1
+              WHERE p.purchased > ?1 AND p.product_id IS NOT NULL
               GROUP BY p.product_id
             ) s
-            """, nativeQuery = true)
-    List<ProductSalesRow> getTopSales(Instant after, Pageable pageable);
+            """,
+            countQuery = "SELECT count(DISTINCT p.product_id) FROM purchase p WHERE p.purchased > ?1 AND p.product_id IS NOT NULL",
+            nativeQuery = true)
+    Page<ProductSalesRow> getTopSales(Instant after, Pageable pageable);
 
     @Query(value = """
             SELECT
@@ -127,9 +142,11 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             LEFT JOIN purchase p ON p.product_id = pr.id AND p.purchased > ?1
             WHERE pr.active = true AND pr.deleted = false
             GROUP BY pr.id
-            ORDER BY "sales" ASC, pr.name ASC
-            """, nativeQuery = true)
-    List<ProductSalesRow> getBottomSales(Instant after, Pageable pageable);
+            ORDER BY "sales" ASC, pr.name ASC, pr.id ASC
+            """,
+            countQuery = "SELECT count(*) FROM product pr WHERE pr.active = true AND pr.deleted = false",
+            nativeQuery = true)
+    Page<ProductSalesRow> getBottomSales(Instant after, Pageable pageable);
 
     @Query("SELECT sum(price * amount) FROM Purchase")
     BigDecimal totalPurchases();

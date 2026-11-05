@@ -1,3 +1,4 @@
+import {Page} from "./page.ts";
 import {LazyProduct, Product} from './product.ts'
 import {deleteJson, getJson, postJson} from "./http.ts";
 import {store} from "./store.ts";
@@ -12,7 +13,7 @@ export interface Purchase {
 }
 
 export interface History {
-    purchases: Purchase[]
+    purchases: Page<Purchase>
     products: Record<number, LazyProduct>
 }
 
@@ -23,8 +24,8 @@ export interface SalesStat {
     profit: number
 }
 
-export function history(user_id: number, limit: number = 30): Promise<History> {
-    return getJson(`api/account/${user_id}/purchase`, new Map([["limit", limit]]))
+export function history(user_id: number, page: number = 0, limit: number = 30): Promise<History> {
+    return getJson(`api/account/${user_id}/purchase`, new Map([["page", page], ["limit", limit]]))
 }
 
 /**
@@ -51,7 +52,7 @@ export function cancelPurchases(ids: number[]): Promise<unknown> {
     return postJson("api/purchase/cancel", {ids: ids})
 }
 
-export function statsTop(type: string, after: Date, limit: number = 30): Promise<SalesStat[]> {
+export function statsTop(type: string, after: Date, limit: number = 30): Promise<Page<SalesStat>> {
     let args = new Map([
         ["sorting", type],
         ["limit", String(limit)],
@@ -60,7 +61,7 @@ export function statsTop(type: string, after: Date, limit: number = 30): Promise
     return getJson("api/purchase/stats/top", args)
 }
 
-export function statsBottom(after: Date, limit: number = 10): Promise<SalesStat[]> {
+export function statsBottom(after: Date, limit: number = 10): Promise<Page<SalesStat>> {
     let args = new Map([
         ["limit", String(limit)],
         ["after", after.toISOString()]

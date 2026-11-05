@@ -4,6 +4,7 @@ import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import jakarta.persistence.QueryHint;
 import org.hibernate.jpa.HibernateHints;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,12 +13,11 @@ import org.springframework.data.jpa.repository.QueryHints;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 import java.util.stream.Stream;
 
 public interface CashRepository extends JpaRepository<Cash, Integer> {
     @EntityGraph(attributePaths = "user")
-    List<Cash> findByOrderByCreatedDesc(Pageable pageable);
+    Page<Cash> findByOrderByCreatedDescIdDesc(Pageable pageable);
 
     @Query("SELECT sum(amount) FROM Cash")
     BigDecimal totalAmount();

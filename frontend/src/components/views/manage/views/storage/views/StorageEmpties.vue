@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
+import {allPages, groupByCategory} from "@/scripts/page.ts";
 import {ingredients, Ingredient} from "@/scripts/Ingredient.ts";
 import {currentPledge, EmptiesReturn, returnEmpties} from "@/scripts/cash.ts";
 import {categoryLabel, CategoryGroup} from "@/scripts/categories.ts";
@@ -75,8 +76,8 @@ export default defineComponent({
     }
   },
   mounted() {
-    ingredients().then(listing => {
-      this.groups = listing.categories
+    allPages(page => ingredients(page)).then(list => {
+      this.groups = groupByCategory(list, ingredient => ingredient.category).categories
           .map(group => ({
             category: group.category,
             entries: group.entries.filter(ingredient => ingredient.pledge > 0 || ingredient.pledgeContainer > 0)

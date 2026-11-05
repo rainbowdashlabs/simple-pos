@@ -1,3 +1,4 @@
+import {Page} from "./page.ts";
 import {getJson, patchJson, postJson, putJson} from "./http.ts";
 import type {Role} from "./roles.ts";
 
@@ -8,8 +9,8 @@ export interface ManagedUser {
     enabled: boolean
 }
 
-export function listUsers(): Promise<ManagedUser[]> {
-    return getJson("api/admin/users")
+export function listUsers(page: number = 0, limit: number = 50): Promise<Page<ManagedUser>> {
+    return getJson("api/admin/users", new Map([["page", page], ["limit", limit]]))
 }
 
 export function createUser(username: string, password: string, role: Role): Promise<ManagedUser> {

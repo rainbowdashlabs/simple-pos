@@ -1,5 +1,6 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
+import {allPages} from "@/scripts/page.ts";
 import {categories, Category} from "@/scripts/categories.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
@@ -59,7 +60,7 @@ export default defineComponent({
     }
   },
   mounted() {
-    categories().then(e => {
+    allPages(page => categories(page)).then(e => {
       this.categoryList = e
       if (!this.category && e.length > 0) this.category = e[0]
     })

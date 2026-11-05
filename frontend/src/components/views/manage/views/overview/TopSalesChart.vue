@@ -92,7 +92,7 @@ export default defineComponent({
   },
   mounted() {
     statsTop(this.type, this.timeframe.getDate(), 10)
-        .then(e => this.stat = e)
+        .then(e => this.stat = e.items)
   }
 })
 </script>

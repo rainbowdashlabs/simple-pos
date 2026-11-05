@@ -6,7 +6,7 @@ import dev.chojo.simplepos.entity.dto.IngredientUsage;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import jakarta.persistence.QueryHint;
 import org.hibernate.jpa.HibernateHints;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public interface StorageRepository extends JpaRepository<Storage, Integer> {
     boolean existsByIngredient_Id(int ingredientId);
 
-    List<Storage> findAllBy(Pageable pageable);
+    Page<Storage> findAllBy(Pageable pageable);
 
     /**
      * The stock of one ingredient, or null if there is no ingredient with this id.
@@ -31,13 +31,22 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
     @Query("SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true")
     List<StorageSummary> summary();
 
-    @Query("SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND i.minStock > s.stock AND s.stock > 0 ORDER BY cast(s.stock as double) / i.minStock ASC, i.name ASC")
-    List<StorageSummary> lowStock(PageRequest pageRequest);
+    /**
+     * A page of the active ingredients' stock, by category name (ingredients without one last), then name.
+     */
+    @Query(value = "SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category c JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true ORDER BY c.name ASC NULLS LAST, c.id, i.name, i.id",
+            countQuery = "SELECT count(i) FROM Ingredient i WHERE i.active = true")
+    Page<StorageSummary> summaryPage(Pageable pageable);
 
-    @Query("SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND s.stock = 0 ORDER BY i.name ASC")
-    List<StorageSummary> outOfStock(PageRequest pageRequest);
+    @Query(value = "SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND i.minStock > s.stock AND s.stock > 0 ORDER BY cast(s.stock as double) / i.minStock ASC, i.name ASC, i.id",
+            countQuery = "SELECT count(i) FROM Ingredient i JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND i.minStock > s.stock AND s.stock > 0")
+    Page<StorageSummary> lowStock(Pageable pageable);
 
-    List<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
+    @Query(value = "SELECT NEW dev.chojo.simplepos.entity.dto.StorageSummary(i, s.stock) FROM Ingredient i LEFT JOIN FETCH i.category JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND s.stock = 0 ORDER BY i.name ASC, i.id",
+            countQuery = "SELECT count(i) FROM Ingredient i JOIN IngredientStock s ON s.ingredientId = i.id WHERE i.active = true AND s.stock = 0")
+    Page<StorageSummary> outOfStock(Pageable pageable);
+
+    Page<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
 
     /**
      * The oldest batch of the ingredient that still holds units: by delivery time, then by id.

@@ -81,8 +81,8 @@ class AdminUserApiTest {
         login("newstaff", "password123");
         mvc.perform(get("/api/admin/users").header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[?(@.username == 'newstaff')].role").value("STAFF"))
-                .andExpect(jsonPath("$[*].password").isEmpty());
+                .andExpect(jsonPath("$.items[?(@.username == 'newstaff')].role").value("STAFF"))
+                .andExpect(jsonPath("$.items[*].password").isEmpty());
     }
 
     @Test

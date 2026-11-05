@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
@@ -12,10 +11,14 @@ import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.AccountDto;
 import dev.chojo.simplepos.entity.dto.LazyProduct;
 import dev.chojo.simplepos.entity.dto.PurchaseHistoryDto;
+import dev.chojo.simplepos.entity.response.PageResponse;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -105,17 +109,36 @@ public class AccountService {
     }
 
     /**
-     * An account's purchases, newest first, with the products they name.
+     * A page of an account's purchases, newest first, with the products they name.
      *
      * @throws NotFoundException if the account does not exist
      */
     @Transactional(readOnly = true)
     public PurchaseHistoryDto history(int id, Pageable page) {
         accountRepository.require(id);
-        List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(id, page);
+        Page<Purchase> purchases = purchaseRepository.findByAccount_IdOrderByPurchasedDescIdDesc(id, page);
         Map<Integer, LazyProduct> products = purchases.stream()
                 .map(Purchase::getProduct)
                 .collect(Collectors.toMap(Product::getId, Product::asLazyProduct, (first, same) -> first));
-        return new PurchaseHistoryDto(products, purchases.stream().map(Purchase::toDto).toList());
+        return new PurchaseHistoryDto(products, PageResponse.of(purchases, Purchase::toDto));
+    }
+
+    /**
+     * A page of the open accounts, by name; with {@code query}, only those whose name contains it, ignoring case, the
+     * one named exactly so first and those starting with it next.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<AccountDto> list(String query, Pageable page) {
+        String exact = query.strip().toLowerCase(Locale.ROOT);
+        String escaped = exact.replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        return PageResponse.of(accountRepository.findAccounts(exact, escaped + "%", "%" + escaped + "%", page));
+    }
+
+    /**
+     * The open accounts that bought most recently, latest first.
+     */
+    @Transactional(readOnly = true)
+    public List<AccountDto> recentBuyers(int limit) {
+        return accountRepository.findRecentBuyers(PageRequest.of(0, limit));
     }
 }

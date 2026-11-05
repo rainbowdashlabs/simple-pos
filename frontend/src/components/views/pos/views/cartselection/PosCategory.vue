@@ -56,8 +56,11 @@ export default defineComponent({
                      :size="SizeGroup.xl"/>
       <Icon :icon="active ? 'fa-chevron-up' :'fa-chevron-down'"/>
     </button>
-    <div v-show="active" :id="panelId" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-3">
-      <PosProduct v-for="item in group.entries" :key="item.id!" :product="item"/>
+    <div v-show="active" :id="panelId">
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-3">
+        <PosProduct v-for="item in group.entries" :key="item.id!" :product="item"/>
+      </div>
+      <slot/>
     </div>
   </div>
 </template>

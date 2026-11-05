@@ -9,12 +9,18 @@ import {ingredients} from "@/scripts/Ingredient.ts";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
+import {allPages, loadNext, pagedList, reload} from "@/scripts/page.ts";
 
+/**
+ * Managing the categories, by name, a page at a time. Each shows what it holds, so every product and ingredient is
+ * loaded to count them per category.
+ */
 export default defineComponent({
   name: "Categories",
   data() {
     return {
-      categoryList: [] as Category[],
+      categoryList: pagedList<Category>(),
       productsByCategory: new Map<number, Product[]>(),
       ingredientsByCategory: new Map<number, Ingredient[]>(),
       name: ""
@@ -22,8 +28,8 @@ export default defineComponent({
   },
   methods: {
     categoryChanged(category: Category) {
-      const index = this.categoryList.findIndex(entry => entry.id === category.id)
-      if (index >= 0) this.categoryList[index] = category
+      const index = this.categoryList.items.findIndex(entry => entry.id === category.id)
+      if (index >= 0) this.categoryList.items[index] = category
     },
     submit() {
       createCategory(this.name).then(() => {
@@ -31,22 +37,13 @@ export default defineComponent({
         this.loadData()
       })
     },
+    more() {
+      loadNext(this.categoryList, page => categories(page))
+    },
     loadData() {
-      categories().then(e => this.categoryList = e)
-      products().then(listing => {
-        const map = new Map<number, Product[]>()
-        for (const group of listing.categories) {
-          map.set(group.category.id, group.entries)
-        }
-        this.productsByCategory = map
-      })
-      ingredients().then(listing => {
-        const map = new Map<number, Ingredient[]>()
-        for (const group of listing.categories) {
-          map.set(group.category.id, group.entries)
-        }
-        this.ingredientsByCategory = map
-      })
+      reload(this.categoryList, page => categories(page))
+      allPages(page => products(page)).then(list => this.productsByCategory = byCategory(list))
+      allPages(page => ingredients(page)).then(list => this.ingredientsByCategory = byCategory(list))
     },
     productsFor(categoryId: number): Product[] {
       return this.productsByCategory.get(categoryId) ?? []
@@ -55,11 +52,20 @@ export default defineComponent({
       return this.ingredientsByCategory.get(categoryId) ?? []
     }
   },
-  components: {ViewWrapper, SimpleInputField, ConfirmButton, CategoryEntry},
+  components: {LoadMore, ViewWrapper, SimpleInputField, ConfirmButton, CategoryEntry},
   mounted() {
     this.loadData()
   },
 })
+
+function byCategory<T extends { category?: Category | null }>(entries: T[]): Map<number, T[]> {
+  const map = new Map<number, T[]>()
+  for (const entry of entries) {
+    if (!entry.category) continue
+    map.set(entry.category.id, [...(map.get(entry.category.id) ?? []), entry])
+  }
+  return map
+}
 </script>
 
 <template>
@@ -69,9 +75,10 @@ export default defineComponent({
       <ConfirmButton :disabled="name == ''" :hint="$t('button.create')" @click="submit"/>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <CategoryEntry v-for="item in categoryList" :key="item.id" :category="item"
+      <CategoryEntry v-for="item in categoryList.items" :key="item.id" :category="item"
                      :products="productsFor(item.id)" :ingredients="ingredientsFor(item.id)"
                      @deleted="loadData" @changed="categoryChanged"/>
     </div>
+    <LoadMore :page="categoryList.page" :shown="categoryList.items.length" :loading="categoryList.loading" @more="more"/>
   </ViewWrapper>
 </template>

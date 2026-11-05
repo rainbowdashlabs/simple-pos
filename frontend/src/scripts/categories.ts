@@ -1,3 +1,4 @@
+import {Page} from "./page.ts";
 import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
 
 export interface Category {
@@ -22,8 +23,8 @@ export function updateCategory(category: Category): Promise<Category> {
     return patchJson("api/category/" + category.id, {name: category.name})
 }
 
-export function categories(): Promise<Category[]> {
-    return getJson("api/category")
+export function categories(page: number = 0, limit: number = 100): Promise<Page<Category>> {
+    return getJson("api/category", new Map([["page", page], ["limit", limit]]))
 }
 
 export function createCategory(name: string): Promise<Category> {

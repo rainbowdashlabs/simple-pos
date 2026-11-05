@@ -6,7 +6,7 @@ import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.dto.DayStat;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
-import dev.chojo.simplepos.entity.response.Listing;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.ProductService;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -50,15 +49,13 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/sales/stat")
-    ResponseEntity<List<DayStat>> getSalesStat(@PathVariable int id,
-                                                           @RequestParam(required = false) Instant after,
-                                                           @RequestParam(defaultValue = "100") @PageSize int limit,
-                                                           @RequestParam(defaultValue = "0") @PageNumber int page) {
+    PageResponse<DayStat> getSalesStat(@PathVariable int id,
+                                       @RequestParam(required = false) Instant after,
+                                       @RequestParam(defaultValue = "100") @PageSize int limit,
+                                       @RequestParam(defaultValue = "0") @PageNumber int page) {
         Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
-        List<DayStat> list = purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(), PageRequest.of(page, limit)).stream()
-                .map(DayStat::of)
-                .toList();
-        return ResponseEntity.ok(list);
+        return PageResponse.of(purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(),
+                PageRequest.of(page, limit)), DayStat::of);
     }
 
     @GetMapping("/{id}/sales/stat/summary")
@@ -67,13 +64,17 @@ public class ProductController {
     }
 
     @GetMapping
-    ResponseEntity<Listing<Product>> get() {
-        return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalse(), Product::getCategory));
+    PageResponse<Product> get(@RequestParam(required = false) Integer categoryId,
+                              @RequestParam(defaultValue = "100") @PageSize int limit,
+                              @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return productService.page(false, categoryId, PageRequest.of(page, limit));
     }
 
     @GetMapping("/active")
-    ResponseEntity<Listing<Product>> getActive() {
-        return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalseAndActiveTrue(), Product::getCategory));
+    PageResponse<Product> getActive(@RequestParam(required = false) Integer categoryId,
+                                    @RequestParam(defaultValue = "100") @PageSize int limit,
+                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return productService.page(true, categoryId, PageRequest.of(page, limit));
     }
 
     @PostMapping

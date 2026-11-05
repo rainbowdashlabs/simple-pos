@@ -5,8 +5,11 @@ import dev.chojo.simplepos.entity.dto.AccountDto;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +65,12 @@ public interface AccountRepository extends LookupRepository<Account> {
             WHERE a.id = ?1""")
     Optional<AccountDto> findAccountById(int id);
 
-    @Query("""
+    /**
+     * The open accounts whose lower-case name matches the {@code contains} LIKE pattern ({@code !} escapes): the one
+     * named exactly {@code exact} first, then those matching the {@code prefix} pattern, then the rest, each by name.
+     * So a short name contained in many others still comes first when it is typed out.
+     */
+    @Query(value = """
             SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, b.balance, p.last)
             FROM Account a
             JOIN AccountBalance b ON b.accountId = a.id
@@ -73,7 +81,28 @@ public interface AccountRepository extends LookupRepository<Account> {
               GROUP BY account.id
             ) p
             ON a.id = p.id
+            WHERE a.deleted = false AND lower(a.name) LIKE :contains ESCAPE '!'
+            ORDER BY CASE WHEN lower(a.name) = :exact THEN 0 WHEN lower(a.name) LIKE :prefix ESCAPE '!' THEN 1 ELSE 2 END,
+                     a.name, a.id""",
+            countQuery = "SELECT count(a) FROM Account a WHERE a.deleted = false AND lower(a.name) LIKE :contains ESCAPE '!'")
+    Page<AccountDto> findAccounts(@Param("exact") String exact, @Param("prefix") String prefixPattern,
+                                  @Param("contains") String containsPattern, Pageable pageable);
+
+    /**
+     * The open accounts that bought something, latest buyer first.
+     */
+    @Query("""
+            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, b.balance, p.last)
+            FROM Account a
+            JOIN AccountBalance b ON b.accountId = a.id
+            JOIN (
+              SELECT account.id AS id, max(purchased) AS last
+              FROM Purchase
+              WHERE account IS NOT NULL
+              GROUP BY account.id
+            ) p
+            ON a.id = p.id
             WHERE a.deleted = false
-            ORDER BY a.name""")
-    List<AccountDto> findAllAccounts();
+            ORDER BY p.last DESC, a.id""")
+    List<AccountDto> findRecentBuyers(Pageable limit);
 }

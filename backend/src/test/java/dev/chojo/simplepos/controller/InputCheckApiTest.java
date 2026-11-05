@@ -106,7 +106,9 @@ class InputCheckApiTest {
     void storageIsPaged() throws Exception {
         mvc.perform(get("/api/storage").param("limit", "1").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.items.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.page").value(0));
     }
 
     @Test

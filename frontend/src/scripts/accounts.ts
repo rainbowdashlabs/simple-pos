@@ -1,3 +1,4 @@
+import {Page} from "./page.ts";
 import {CartPosition} from "./cart.ts";
 import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
 
@@ -29,8 +30,15 @@ export interface Deposit {
 /**
  * Retrieve all accounts
  */
-export function accounts(): Promise<Account[]> {
-    return getJson("api/account")
+export function accounts(query: string = "", page: number = 0, limit: number = 50): Promise<Page<Account>> {
+    return getJson("api/account", new Map<string, string | number>([["q", query], ["page", page], ["limit", limit]]))
+}
+
+/**
+ * The open accounts that bought most recently, latest first.
+ */
+export function recentAccounts(limit: number = 5): Promise<Account[]> {
+    return getJson("api/account/recent", new Map([["limit", limit]]))
 }
 
 /**
@@ -55,8 +63,8 @@ export function addDeposit(account: Account, deposit: number): Promise<Balance> 
  * @param id account id
  * @param limit limit
  */
-export function deposits(id: number, limit: number): Promise<Balance[]> {
-    return getJson(`api/account/${id}/balance`, new Map([["limit", limit]]))
+export function deposits(id: number, page: number = 0, limit: number = 30): Promise<Page<Balance>> {
+    return getJson(`api/account/${id}/balance`, new Map([["page", page], ["limit", limit]]))
 }
 
 export interface PurchaseReceipt {

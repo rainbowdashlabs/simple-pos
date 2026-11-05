@@ -41,7 +41,9 @@
     "undo": "Undo",
     "change_password": "Change password",
     "shopping_list": "Shopping list",
-    "copy_list": "Copy list"
+    "copy_list": "Copy list",
+    "load_more": "Load more",
+    "load_more_of": "Load more: {name}"
   },
   "checkout_choose_account": "Choose an account",
   "checkout_no_accounts": "No accounts yet; only guest sales are possible.",
@@ -292,5 +294,9 @@
     "product": "Product",
     "user": "User",
     "purchase": "Purchase"
-  }
+  },
+  "shown_of": "{shown} of {total} shown",
+  "loaded_more": "{count} more loaded",
+  "search_more_matches": "More matches. Keep typing to narrow them down.",
+  "all_shown": "All {total} shown."
 }

@@ -41,7 +41,9 @@
     "undo": "Rückgängig",
     "change_password": "Passwort ändern",
     "shopping_list": "Einkaufsliste",
-    "copy_list": "Liste kopieren"
+    "copy_list": "Liste kopieren",
+    "load_more": "Mehr laden",
+    "load_more_of": "Mehr laden: {name}"
   },
   "checkout_choose_account": "Konto auswählen",
   "checkout_no_accounts": "Noch keine Konten; nur Gastverkäufe sind möglich.",
@@ -292,5 +294,9 @@
     "product": "Produkt",
     "user": "Benutzer",
     "purchase": "Kauf"
-  }
+  },
+  "shown_of": "{shown} von {total} angezeigt",
+  "loaded_more": "{count} weitere geladen",
+  "search_more_matches": "Weitere Treffer. Weiter tippen, um sie einzugrenzen.",
+  "all_shown": "Alle {total} angezeigt."
 }

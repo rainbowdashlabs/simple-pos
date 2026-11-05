@@ -125,7 +125,7 @@ class StorageRepositoryTest {
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 10, 0));
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.5, 5, 0));
 
-        List<Storage> results = storageRepository.findAllByIngredient(ingredient, PageRequest.of(0, 10));
+        List<Storage> results = storageRepository.findAllByIngredient(ingredient, PageRequest.of(0, 10)).getContent();
         assertEquals(2, results.size());
     }
 
@@ -144,7 +144,7 @@ class StorageRepositoryTest {
         // ingredient has minStock=5, add storage with stock=3
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 3, 0));
 
-        List<StorageSummary> lowStock = storageRepository.lowStock(PageRequest.of(0, 10));
+        List<StorageSummary> lowStock = storageRepository.lowStock(PageRequest.of(0, 10)).getContent();
         boolean found = lowStock.stream()
                 .anyMatch(s -> s.getIngredient().getId().equals(ingredient.getId()));
         assertTrue(found);

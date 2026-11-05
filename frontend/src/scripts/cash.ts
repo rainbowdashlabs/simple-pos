@@ -1,7 +1,9 @@
+import {Page} from "./page.ts";
 import {getJson, postJson} from "./http.ts";
 import {User} from "./user.ts";
 
 export interface CashHistoryEntry extends CashDto {
+    id: number,
     user: User,
     created: number
 }
@@ -26,8 +28,8 @@ export async function currentBalance(): Promise<CashTotal> {
     return await getJson("/api/cash/total/balance")
 }
 
-export async function cashHistory(limit: number = 100): Promise<CashHistoryEntry[]> {
-    return await getJson("api/cash", new Map([["limit", limit]]))
+export async function cashHistory(page: number = 0, limit: number = 50): Promise<Page<CashHistoryEntry>> {
+    return await getJson("api/cash", new Map([["page", page], ["limit", limit]]))
 }
 
 export async function submitCash(amount: number, note: string, type: string) {
@@ -48,8 +50,8 @@ export async function countTill(denominations: Record<number, number>): Promise<
     return await postJson("api/cash/count", {denominations: denominations})
 }
 
-export async function tillCounts(limit: number = 5): Promise<TillCount[]> {
-    return await getJson("api/cash/count", new Map([["limit", limit]]))
+export async function tillCounts(page: number = 0, limit: number = 5): Promise<Page<TillCount>> {
+    return await getJson("api/cash/count", new Map([["page", page], ["limit", limit]]))
 }
 
 export interface EmptiesReturn {

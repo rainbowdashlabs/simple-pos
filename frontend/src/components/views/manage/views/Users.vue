@@ -3,6 +3,9 @@ import {defineComponent} from 'vue'
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 import {createUser, listUsers, type ManagedUser, setUserPassword, updateUser} from "@/scripts/admin.ts";
+import {Page} from "@/scripts/page.ts";
+import {announce} from "@/scripts/announcer.ts";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
 import {notifyError} from "@/scripts/notifications.ts";
 import type {Role} from "@/scripts/roles.ts";
 import {getUsername} from "@/scripts/session.ts";
@@ -22,10 +25,12 @@ interface Draft {
  */
 export default defineComponent({
   name: "Users",
-  components: {ColorContainer, ViewWrapper},
+  components: {LoadMore, ColorContainer, ViewWrapper},
   data() {
     return {
       users: [] as ManagedUser[],
+      usersPage: null as Page<ManagedUser> | null,
+      loadingMore: false,
       drafts: {} as Record<number, Draft>,
       loaded: false,
       loadCount: 0,
@@ -53,13 +58,29 @@ export default defineComponent({
     load() {
       const count = ++this.loadCount
       listUsers()
-          .then(users => {
+          .then(page => {
             if (count !== this.loadCount) return
-            this.users = users
-            this.drafts = Object.fromEntries(users.map(user => [user.id, {role: user.role, enabled: user.enabled}]))
+            this.users = page.items
+            this.usersPage = page
+            this.drafts = Object.fromEntries(page.items.map(user => [user.id, {role: user.role, enabled: user.enabled}]))
             this.loaded = true
           })
           .catch(notifyError)
+    },
+    more() {
+      if (!this.usersPage || this.loadingMore) return
+      const count = this.loadCount
+      this.loadingMore = true
+      listUsers(this.usersPage.page + 1)
+          .then(page => {
+            if (count !== this.loadCount) return
+            this.users = [...this.users, ...page.items]
+            this.usersPage = page
+            this.drafts = {...this.drafts, ...Object.fromEntries(page.items.map(user => [user.id, {role: user.role, enabled: user.enabled}]))}
+            announce(this.$t('loaded_more', {count: page.items.length}))
+          })
+          .catch(notifyError)
+          .finally(() => this.loadingMore = false)
     },
     isSelf(user: ManagedUser): boolean {
       return user.username.toLowerCase() === (getUsername() ?? "").toLowerCase()
@@ -211,6 +232,7 @@ export default defineComponent({
           </form>
         </li>
       </ul>
+      <LoadMore :page="usersPage" :shown="users.length" :loading="loadingMore" @more="more"/>
     </ColorContainer>
   </ViewWrapper>
 </template>

@@ -6,7 +6,6 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
-import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.exceptions.ConflictException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -119,10 +119,9 @@ class CategoryServiceTest {
         Ingredient ingredient = ingredientRepository.save(new Ingredient(null, category, "Grouped", 1.0, 0, 0, 0, 0));
         Ingredient loose = ingredientRepository.save(new Ingredient(null, null, "Loose", 1.0, 0, 0, 0, 0));
 
-        Listing<Ingredient> listing = Listing.map(List.of(loose, ingredient), Ingredient::getCategory);
+        List<Integer> order = ingredientRepository.findPage(null, PageRequest.of(0, 500)).stream().map(Ingredient::getId).toList();
 
-        assertEquals(2, listing.categories().size());
-        assertSame(Category.UNCATEGORISED, listing.categories().get(1).category());
-        assertEquals(List.of(loose), listing.categories().get(1).entries());
+        assertTrue(order.indexOf(ingredient.getId()) < order.indexOf(loose.getId()));
+        assertEquals(order.size() - 1, order.indexOf(loose.getId()));
     }
 }

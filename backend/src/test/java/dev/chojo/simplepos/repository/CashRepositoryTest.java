@@ -53,7 +53,7 @@ class CashRepositoryTest {
         cashRepository.save(new Cash(user, 20.0, CashType.DEPOSIT, "second"));
         cashRepository.save(new Cash(user, 30.0, CashType.DEPOSIT, "third"));
 
-        List<Cash> results = cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(10));
+        List<Cash> results = cashRepository.findByOrderByCreatedDescIdDesc(Pageable.ofSize(10)).getContent();
         assertEquals(3, results.size());
         assertTrue(results.get(0).getCreated().compareTo(results.get(1).getCreated()) >= 0);
     }
@@ -63,7 +63,7 @@ class CashRepositoryTest {
         for (int i = 0; i < 5; i++) {
             cashRepository.save(new Cash(user, i * 10.0, CashType.DEPOSIT, "entry " + i));
         }
-        List<Cash> page = cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(2).withPage(0));
+        List<Cash> page = cashRepository.findByOrderByCreatedDescIdDesc(Pageable.ofSize(2).withPage(0)).getContent();
         assertEquals(2, page.size());
     }
 

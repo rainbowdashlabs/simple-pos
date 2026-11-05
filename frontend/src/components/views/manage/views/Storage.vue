@@ -5,35 +5,36 @@ import StorageGroup from "./storage/StorageGroup.vue";
 import {stockSummary, StorageSummary} from "@/scripts/storage.ts";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 import IconButton from "@/components/styles/buttons/IconButton.vue";
-import {CategoryGroup, Listing} from "@/scripts/categories.ts";
+import {CategoryGroup} from "@/scripts/categories.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
+import LoadMore from "@/components/styles/buttons/LoadMore.vue";
+import {groupByCategory, hasMore, loadAll, loadNext, pagedList} from "@/scripts/page.ts";
 
+/**
+ * The stock of every active ingredient, grouped by category, a page at a time. "Low stock only" needs every
+ * ingredient to filter, so it loads the remaining pages first.
+ */
 export default defineComponent({
   name: "Storage",
-  components: {ViewWrapper, IconButton, ConfirmButton, StorageGroup},
+  components: {LoadMore, ViewWrapper, IconButton, ConfirmButton, StorageGroup},
   data() {
     return {
-      inventorySummary: {categories: []} as Listing<StorageSummary>,
+      stock: pagedList<StorageSummary>(),
       lowStockOnly: false
     }
   },
   computed: {
     filteredCategories(): CategoryGroup<StorageSummary>[] {
-      if (!this.lowStockOnly) return this.inventorySummary.categories
-      return this.inventorySummary.categories
-          .map(group => ({
-            category: group.category,
-            entries: group.entries.filter(e => e.stock <= e.ingredient.minStock)
-          }))
-          .filter(group => group.entries.length > 0)
+      const shown = this.lowStockOnly
+          ? this.stock.items.filter(e => e.stock <= e.ingredient.minStock)
+          : this.stock.items
+      return groupByCategory(shown, summary => summary.ingredient.category).categories
     }
   },
   methods: {
     ingredientChanged(ingredient: Ingredient) {
-      for (const group of this.inventorySummary.categories) {
-        const listing = group.entries.find(entry => entry.ingredient.id === ingredient.id)
-        if (listing) listing.ingredient = ingredient
-      }
+      const listing = this.stock.items.find(entry => entry.ingredient.id === ingredient.id)
+      if (listing) listing.ingredient = ingredient
     },
     inventory() {
       this.$router.push({name: 'manage-storage-inventory'})
@@ -46,12 +47,19 @@ export default defineComponent({
     },
     createIngredient() {
       this.$router.push({name: 'manage-storage-create'})
+    },
+    more() {
+      loadNext(this.stock, page => stockSummary(page))
+    },
+    toggleLowStock() {
+      this.lowStockOnly = !this.lowStockOnly
+      if (this.lowStockOnly && (this.stock.page === null || hasMore(this.stock.page))) {
+        loadAll(this.stock, page => stockSummary(page))
+      }
     }
   },
   mounted() {
-      stockSummary().then(e => {
-        this.inventorySummary = e
-      })
+    this.more()
   },
 })
 </script>
@@ -65,9 +73,10 @@ export default defineComponent({
       <ConfirmButton icon="fa-list-check" :label="$t('button.shopping_list')" @click="shopping"/>
       <IconButton class="col-span-2 sm:col-span-1" :icon="'fa-triangle-exclamation'" :label="$t('button.low_stock_only')"
                   :bg="lowStockOnly ? 'warn' : 'secondary'"
-                  @click="lowStockOnly = !lowStockOnly"/>
+                  @click="toggleLowStock"/>
     </div>
     <StorageGroup v-for="item in filteredCategories" :key="item.category.id" :group="item" @changed="ingredientChanged"/>
+    <LoadMore v-if="!lowStockOnly" :page="stock.page" :shown="stock.items.length" :loading="stock.loading" @more="more"/>
   </ViewWrapper>
 </template>
 

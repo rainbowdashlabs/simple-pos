@@ -11,12 +11,15 @@ import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.DepositDto;
 import dev.chojo.simplepos.entity.dto.PurchaseHistoryDto;
 import dev.chojo.simplepos.entity.dto.PurchaseReceipt;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.service.AccountService;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -75,8 +78,15 @@ public class AccountController {
     }
 
     @GetMapping
-    ResponseEntity<List<AccountDto>> get() {
-        return ResponseEntity.ok(accountRepository.findAllAccounts());
+    PageResponse<AccountDto> get(@RequestParam(defaultValue = "") @Size(max = 100) String q,
+                                 @RequestParam(defaultValue = "50") @PageSize int limit,
+                                 @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return accountService.list(q, PageRequest.of(page, limit));
+    }
+
+    @GetMapping("/recent")
+    List<AccountDto> recent(@RequestParam(defaultValue = "5") @Min(1) @Max(20) int limit) {
+        return accountService.recentBuyers(limit);
     }
 
     @PostMapping("/{id}/balance")
@@ -85,11 +95,10 @@ public class AccountController {
     }
 
     @GetMapping("/{id}/balance")
-    ResponseEntity<List<Balance>> deposit(@PathVariable int id,
-                                          @RequestParam(defaultValue = "100") @PageSize int limit,
-                                          @RequestParam(defaultValue = "0") @PageNumber int page) {
-        var balance = balanceRepository.findAllByAccount_IdOrderByAddedDesc(id, PageRequest.of(page, limit));
-        return ResponseEntity.ok(balance);
+    PageResponse<Balance> deposit(@PathVariable int id,
+                                  @RequestParam(defaultValue = "100") @PageSize int limit,
+                                  @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(id, PageRequest.of(page, limit)));
     }
 
     @PostMapping("/{id}/purchase")

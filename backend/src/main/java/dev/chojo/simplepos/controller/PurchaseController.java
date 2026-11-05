@@ -13,6 +13,7 @@ import dev.chojo.simplepos.entity.dto.PurchaseCancelRequest;
 import dev.chojo.simplepos.entity.dto.PurchaseReceipt;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
+import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.projection.ProductSalesRow;
@@ -21,6 +22,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -84,19 +86,19 @@ public class PurchaseController {
     }
 
     @GetMapping("stats/top")
-    ResponseEntity<List<SalesStatDto>> getTopSales(@RequestParam() Instant after,
-                                                   @RequestParam(defaultValue = "sales") SalesSorting sorting,
-                                                   @RequestParam(defaultValue = "100") @PageSize int limit,
-                                                   @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return ResponseEntity.ok(withProducts(purchaseRepository.getTopSales(after,
-                PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting.name())))));
+    PageResponse<SalesStatDto> getTopSales(@RequestParam() Instant after,
+                                           @RequestParam(defaultValue = "sales") SalesSorting sorting,
+                                           @RequestParam(defaultValue = "100") @PageSize int limit,
+                                           @RequestParam(defaultValue = "0") @PageNumber int page) {
+        Sort order = Sort.by(Sort.Direction.DESC, sorting.name()).and(Sort.by("product_id"));
+        return withProducts(purchaseRepository.getTopSales(after, PageRequest.of(page, limit, order)));
     }
 
     @GetMapping("stats/bottom")
-    ResponseEntity<List<SalesStatDto>> getBottomSales(@RequestParam() Instant after,
-                                                      @RequestParam(defaultValue = "10") @PageSize int limit,
-                                                      @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return ResponseEntity.ok(withProducts(purchaseRepository.getBottomSales(after, PageRequest.of(page, limit))));
+    PageResponse<SalesStatDto> getBottomSales(@RequestParam() Instant after,
+                                              @RequestParam(defaultValue = "10") @PageSize int limit,
+                                              @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return withProducts(purchaseRepository.getBottomSales(after, PageRequest.of(page, limit)));
     }
 
     @GetMapping("stats/summary")
@@ -114,11 +116,12 @@ public class PurchaseController {
         return ResponseEntity.ok(purchaseRepository.getSalesByCategory(after).stream().map(CategoryStat::of).toList());
     }
 
-    private List<SalesStatDto> withProducts(List<ProductSalesRow> rows) {
+    private PageResponse<SalesStatDto> withProducts(Page<ProductSalesRow> rows) {
         Map<Integer, Product> products = productRepository.findAllByIdIn(rows.stream().map(ProductSalesRow::getProductId).toList())
                 .stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
-        return SalesStatDto.of(rows, products);
+        List<SalesStatDto> stats = SalesStatDto.of(rows.getContent(), products);
+        return new PageResponse<>(stats, rows.getNumber(), rows.getSize(), rows.getTotalElements(), rows.getTotalPages());
     }
 
     /**

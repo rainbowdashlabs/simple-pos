@@ -1,24 +1,24 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {Account} from "@/scripts/accounts.ts";
+import {Account, accounts, recentAccounts} from "@/scripts/accounts.ts";
+import {notifyError} from "@/scripts/notifications.ts";
 
 const RECENT_COUNT = 5
+const MATCHES = 20
+const SEARCH_DELAY_MILLIS = 250
 
 /**
- * Chooses an account by typing part of its name. With nothing typed, the `guest` entry (if given) comes first, then
- * the accounts that bought most recently, then everyone else alphabetically. With a name typed, the matching accounts
- * come first and a matching guest entry last, so Enter on a typed name never picks the guest by accident. Works as a
- * combobox: arrow keys move through the list, Enter chooses, Escape closes it and, pressed again, clears the field.
- * Nothing is chosen until the user picks an entry or leaves the field with a name typed out exactly; text left in
- * the field that names nobody is cleared.
+ * Chooses an account by typing part of its name; the backend searches, so the till never needs every account. With
+ * nothing typed, the `guest` entry (if given) comes first, then the accounts that bought most recently, then the first
+ * accounts by name. With a name typed, the matching accounts come first and a matching guest entry last, so Enter on a
+ * typed name never picks the guest by accident; when there are more matches than shown, a hint says to keep typing.
+ * Works as a combobox: arrow keys move through the list, Enter chooses, Escape closes it and, pressed again, clears
+ * the field. Nothing is chosen until the user picks an entry or leaves the field with a name typed out exactly; text
+ * left in the field that names nobody is cleared.
  */
 export default defineComponent({
   name: "AccountPicker",
   props: {
-    accounts: {
-      type: Array as PropType<Account[]>,
-      required: true
-    },
     label: {
       type: String,
       required: true
@@ -39,23 +39,22 @@ export default defineComponent({
       open: false,
       active: 0,
       chosen: null as Account | null,
+      recent: [] as Account[],
+      matches: [] as Account[],
+      moreMatches: false,
+      search: 0,
+      timer: undefined as number | undefined,
       listId: `account-list-${Math.random().toString(36).slice(2)}`
     }
   },
   computed: {
-    recent(): Account[] {
-      return this.accounts
-          .filter(account => account.lastPurchase)
-          .sort((a, b) => new Date(b.lastPurchase!).getTime() - new Date(a.lastPurchase!).getTime())
-          .slice(0, RECENT_COUNT)
-    },
     options(): Account[] {
       const query = this.query.trim().toLocaleLowerCase()
-      const byName = [...this.accounts].sort((a, b) => a.name.localeCompare(b.name))
       const guest = this.guest ? [this.guest] : []
-      if (query) return [...byName, ...guest].filter(account => account.name.toLocaleLowerCase().includes(query))
+      const matching = (account: Account) => account.name.toLocaleLowerCase().includes(query)
+      if (query) return [...this.matches.filter(matching), ...guest.filter(matching)]
       const recentIds = new Set(this.recent.map(account => account.id))
-      return [...guest, ...this.recent, ...byName.filter(account => !recentIds.has(account.id))]
+      return [...guest, ...this.recent, ...this.matches.filter(account => !recentIds.has(account.id))]
     },
     expanded(): boolean {
       return this.open && this.options.length > 0
@@ -67,9 +66,21 @@ export default defineComponent({
   watch: {
     query() {
       this.active = 0
+      window.clearTimeout(this.timer)
+      this.timer = window.setTimeout(this.find, SEARCH_DELAY_MILLIS)
     }
   },
   methods: {
+    find() {
+      const search = ++this.search
+      accounts(this.query.trim(), 0, MATCHES)
+          .then(page => {
+            if (search !== this.search) return
+            this.matches = page.items
+            this.moreMatches = page.totalItems > page.items.length
+          })
+          .catch(notifyError)
+    },
     optionId(index: number): string {
       return `${this.listId}-${index}`
     },
@@ -121,14 +132,20 @@ export default defineComponent({
       this.open = false
       if (this.chosen) return
       const typed = this.query.trim().toLocaleLowerCase()
-      const exact = [...(this.guest ? [this.guest] : []), ...this.accounts]
+      const exact = [...(this.guest ? [this.guest] : []), ...this.matches, ...this.recent]
           .filter(account => account.name.toLocaleLowerCase() === typed)
-      if (typed && exact.length === 1) this.choose(exact[0])
+      const unique = [...new Map(exact.map(account => [account.id, account])).values()]
+      if (typed && unique.length === 1) this.choose(unique[0])
       else this.query = ""
     }
   },
   mounted() {
     if (this.autofocus) (this.$refs.input as HTMLInputElement | undefined)?.focus()
+    recentAccounts(RECENT_COUNT).then(recent => this.recent = recent).catch(notifyError)
+    this.find()
+  },
+  unmounted() {
+    window.clearTimeout(this.timer)
   }
 })
 </script>
@@ -153,6 +170,6 @@ export default defineComponent({
         {{ account.name }}
       </li>
     </ul>
-    <p role="status" class="px-2 py-1 text-dark/60 dark:text-bright/60 empty:hidden">{{ open && query && !options.length ? $t('no_matches') : '' }}</p>
+    <p role="status" class="px-2 py-1 text-dark/60 dark:text-bright/60 empty:hidden">{{ open && query && !options.length ? $t('no_matches') : open && query && moreMatches ? $t('search_more_matches') : '' }}</p>
   </div>
 </template>
