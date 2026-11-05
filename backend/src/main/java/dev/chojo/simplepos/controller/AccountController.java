@@ -109,7 +109,9 @@ public class AccountController {
                                                  @RequestParam(defaultValue = "0") @PageNumber int page) {
         accountRepository.require(id);
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(id, PageRequest.of(page, limit));
-        Map<Integer, LazyProduct> products = purchases.stream().map(Purchase::getProduct).distinct().collect(Collectors.toMap(Product::getId, Product::asLazyProduct));
+        Map<Integer, LazyProduct> products = purchases.stream()
+                .map(Purchase::getProduct)
+                .collect(Collectors.toMap(Product::getId, Product::asLazyProduct, (first, same) -> first));
         return ResponseEntity.ok(new PurchaseHistoryDto(products, purchases.stream().map(Purchase::toDto).toList()));
     }
 }

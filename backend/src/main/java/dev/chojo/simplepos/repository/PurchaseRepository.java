@@ -3,6 +3,7 @@ package dev.chojo.simplepos.repository;
 import dev.chojo.simplepos.entity.Purchase;
 import jakarta.persistence.Tuple;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -15,6 +16,10 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     @Query("SELECT p.account.id FROM Purchase p WHERE p.id = ?1")
     Optional<Integer> findAccountIdOf(int purchaseId);
 
+    /**
+     * An account's purchases, newest first, with their products, in one query.
+     */
+    @EntityGraph(attributePaths = {"product", "product.category", "product.recipe"})
     List<Purchase> findAllByAccount_IdOrderByPurchasedDesc(int id, Pageable pageable);
 
     @Query(value = """

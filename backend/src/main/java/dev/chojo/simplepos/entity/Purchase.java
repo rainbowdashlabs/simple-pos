@@ -19,10 +19,10 @@ public class Purchase {
     @GeneratedValue
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Account account;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
     private Instant purchased;

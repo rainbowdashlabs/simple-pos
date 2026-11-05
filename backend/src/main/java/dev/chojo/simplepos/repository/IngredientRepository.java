@@ -4,6 +4,7 @@ import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Ingredient;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -46,6 +47,13 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
     default void requireLockedInOrder(Collection<Integer> ids) {
         ids.stream().map(this::requireId).distinct().sorted().forEach(this::requireLocked);
     }
+
+    /**
+     * Every ingredient with its category, in one query.
+     */
+    @Override
+    @EntityGraph(attributePaths = "category")
+    List<Ingredient> findAll();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM Ingredient i WHERE i.id = ?1")

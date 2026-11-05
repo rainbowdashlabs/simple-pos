@@ -9,7 +9,6 @@ import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.PurchaseService;
-import jakarta.persistence.Tuple;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -59,10 +58,7 @@ public class PurchaseController {
                                                    @RequestParam(defaultValue = "sales") SalesSorting sorting,
                                                    @RequestParam(defaultValue = "100") @PageSize int limit,
                                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
-        var sales = purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting.name())))
-                .stream()
-                .map(t -> SalesStatDto.build(t, productRepository))
-                .toList();
+        var sales = SalesStatDto.build(purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting.name()))), productRepository);
         return ResponseEntity.ok(sales);
     }
 
@@ -70,10 +66,7 @@ public class PurchaseController {
     ResponseEntity<List<SalesStatDto>> getBottomSales(@RequestParam() Instant after,
                                                       @RequestParam(defaultValue = "10") @PageSize int limit,
                                                       @RequestParam(defaultValue = "0") @PageNumber int page) {
-        var sales = purchaseRepository.getBottomSales(after, PageRequest.of(page, limit))
-                .stream()
-                .map(t -> SalesStatDto.build(t, productRepository))
-                .toList();
+        var sales = SalesStatDto.build(purchaseRepository.getBottomSales(after, PageRequest.of(page, limit)), productRepository);
         return ResponseEntity.ok(sales);
     }
 

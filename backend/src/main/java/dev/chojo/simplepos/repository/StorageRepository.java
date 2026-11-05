@@ -17,16 +17,16 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
 
     List<Storage> findAllBy(Pageable pageable);
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) AS stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold AND ingredient.id = ?1 GROUP BY ingredient) s ON i.id = s.id WHERE i.id = ?1")
+    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) AS stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold AND ingredient.id = ?1 GROUP BY ingredient) s ON i.id = s.id WHERE i.id = ?1")
     Tuple summaryById(int id);
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true")
+    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true")
     List<Tuple> summary();
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND i.minStock > stock AND coalesce(s.stock, 0) > 0 ORDER BY cast(coalesce(s.stock, 0) as double) / i.minStock ASC, i.name ASC")
+    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND i.minStock > stock AND coalesce(s.stock, 0) > 0 ORDER BY cast(coalesce(s.stock, 0) as double) / i.minStock ASC, i.name ASC")
     List<Tuple> lowStock(PageRequest pageRequest);
 
-    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND coalesce(s.stock, 0) = 0 ORDER BY i.name ASC")
+    @Query("SELECT i as ingredient, cast(coalesce(s.stock, 0) as integer) as stock FROM Ingredient i LEFT JOIN FETCH i.category LEFT JOIN (SELECT ingredient.id as id, sum(amount - sold) as stock FROM Storage WHERE amount > sold GROUP BY ingredient) s ON i.id = s.id WHERE i.active = true AND coalesce(s.stock, 0) = 0 ORDER BY i.name ASC")
     List<Tuple> outOfStock(PageRequest pageRequest);
 
     List<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
