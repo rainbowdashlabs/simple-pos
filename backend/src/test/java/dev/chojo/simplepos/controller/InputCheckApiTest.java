@@ -159,7 +159,7 @@ class InputCheckApiTest {
 
         String receipt = mvc.perform(post("/api/account/" + account.getId() + "/purchase").header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("[{\"product\": {\"id\": " + product.getId() + "}, \"amount\": 2}]"))
+                        .content("[{\"productId\": " + product.getId() + ", \"amount\": 2}]"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.purchaseIds.length()").value(1))
                 .andReturn().getResponse().getContentAsString();
@@ -195,15 +195,17 @@ class InputCheckApiTest {
                 {"POST", "/api/account", "{\"name\": \"" + "a".repeat(101) + "\"}"},
                 {"PATCH", "/api/account/" + account.getId(), "{\"name\": \"line\\nbreak\"}"},
                 {"PUT", "/api/user/preferences", "{\"locale\": \"fr\", \"colorTheme\": \"blue\", \"darkMode\": \"dark\"}"},
-                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": 0, \"amount\": -5}"},
-                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"total\": 5, \"pledge\": 0, \"amount\": 5}"},
-                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": -1, \"amount\": 5}"},
+                {"POST", "/api/storage", "{\"ingredientId\": 1, \"price\": 1, \"pledge\": 0, \"amount\": -5}"},
+                {"POST", "/api/storage", "{\"ingredientId\": 1, \"price\": 1, \"total\": 5, \"pledge\": 0, \"amount\": 5}"},
+                {"POST", "/api/storage", "{\"ingredientId\": 1, \"price\": 1, \"pledge\": -1, \"amount\": 5}"},
+                {"POST", "/api/storage", "{\"ingredient\": {\"id\": 1}, \"price\": 1, \"pledge\": 0, \"amount\": 5}"},
                 {"PUT", "/api/storage", "[{\"ingredient\": 1, \"amount\": -1}]"},
                 {"PUT", "/api/storage", "[null]"},
                 {"POST", "/api/purchase/guest", "[]"},
-                {"POST", "/api/purchase/guest", "[{\"product\": {\"id\": 1}, \"amount\": 0}]"},
+                {"POST", "/api/purchase/guest", "[{\"productId\": 1, \"amount\": 0}]"},
+                {"POST", "/api/purchase/guest", "[{\"product\": {\"id\": 1}, \"amount\": 1}]"},
                 {"POST", "/api/account/" + account.getId() + "/purchase", "[]"},
-                {"POST", "/api/account/" + account.getId() + "/purchase", "[{\"product\": {\"id\": 1}, \"amount\": 0}]"},
+                {"POST", "/api/account/" + account.getId() + "/purchase", "[{\"productId\": 1, \"amount\": 0}]"},
         };
         for (String[] request : cases) {
             mvc.perform(request(HttpMethod.valueOf(request[0]), request[1]).header("Authorization", "Bearer " + token)
@@ -216,14 +218,14 @@ class InputCheckApiTest {
     }
 
     @Test
-    void theSummaryAndCartBodiesWithTheUnitCostWork() throws Exception {
+    void theSalesSummaryAnswersAfterASale() throws Exception {
         Category category = categoryRepository.save(new Category(null, "SummaryCat"));
         Product product = productService.create(new Product(null, category, "SummaryProduct", 2.0, true,
                 new Recipe(null, null, Collections.emptyList())));
 
         mvc.perform(post("/api/purchase/guest").header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("[{\"product\": {\"id\": " + product.getId() + ", \"unitCost\": 1.23}, \"amount\": 2}]"))
+                        .content("[{\"productId\": " + product.getId() + ", \"amount\": 2}]"))
                 .andExpect(status().isCreated());
         mvc.perform(get("/api/purchase/stats/summary").param("after", "2020-01-01T00:00:00Z")
                         .header("Authorization", "Bearer " + token))

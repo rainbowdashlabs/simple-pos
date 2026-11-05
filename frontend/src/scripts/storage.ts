@@ -26,7 +26,7 @@ export interface StorageEntry {
 }
 
 export interface InboundStorage {
-    ingredient: Ingredient,
+    ingredientId: number,
     purchased: Date,
     price: number | null,
     total: number | null,

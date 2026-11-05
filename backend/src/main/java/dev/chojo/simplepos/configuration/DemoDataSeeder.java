@@ -344,6 +344,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void addPurchase(Account account, Product product, int amount, Instant purchased) {
-        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, amount)), seller, purchased);
+        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product.getId(), amount)), seller, purchased);
     }
 }
