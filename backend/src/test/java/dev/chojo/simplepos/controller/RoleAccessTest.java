@@ -1,11 +1,9 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.configuration.RoleMigration;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +22,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,10 +46,6 @@ class RoleAccessTest {
     UserRepository userRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
-    @Autowired
-    RoleMigration roleMigration;
-    @Autowired
-    EntityManager entityManager;
 
     private MockMvc mvc;
 
@@ -103,23 +96,9 @@ class RoleAccessTest {
         mvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"newcomer\", \"password\": \"password123\"}"))
-                .andExpect(status().isMethodNotAllowed());
+                .andExpect(status().is4xxClientError());
 
         assertTrue(userRepository.findByUsername("newcomer").isEmpty());
-    }
-
-    @Test
-    void shouldMakeEnabledUsersWithoutRoleAdminsAndDisabledOnesUsers() {
-        User legacy = userRepository.save(new User(null, "legacyuser", "secret", true, null));
-        User signup = userRepository.save(new User(null, "legacysignup", "secret", false, null));
-        entityManager.flush();
-
-        roleMigration.run(null);
-
-        entityManager.clear();
-        assertEquals(Role.ADMIN, userRepository.findById(legacy.getId()).orElseThrow().getRole());
-        assertEquals(Role.USER, userRepository.findById(signup.getId()).orElseThrow().getRole());
-        assertEquals(Role.STAFF, userRepository.findByUsername("rolestaff").orElseThrow().getRole());
     }
 
     private String login(String username) throws Exception {

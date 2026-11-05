@@ -31,7 +31,7 @@ export async function cashHistory(limit: number = 100): Promise<CashHistoryEntry
 }
 
 export async function submitCash(amount: number, note: string, type: string) {
-    await postJson("api/cash", {date: Date.now(), amount: amount, note: note, type: type} as CashDto)
+    await postJson("api/cash", {amount: amount, note: note, type: type} as CashDto)
 }
 
 export interface TillCount {

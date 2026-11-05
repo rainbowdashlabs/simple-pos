@@ -11,6 +11,7 @@ import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.NotFoundException;
+import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;
@@ -40,7 +41,7 @@ class ProductServiceTest {
     @Autowired
     CategoryService categoryService;
     @Autowired
-    IngredientService ingredientService;
+    IngredientRepository ingredientRepository;
     @Autowired
     ProductRepository productRepository;
     @Autowired
@@ -54,7 +55,7 @@ class ProductServiceTest {
     @BeforeEach
     void setUp() {
         category = categoryService.create("ProductTestCat");
-        ingredient = ingredientService.create(new Ingredient(null, category, "TestIngredient", 0.5, 12, 0, 0, 0));
+        ingredient = ingredientRepository.save(new Ingredient(null, category, "TestIngredient", 0.5, 12, 0, 0, 0));
     }
 
     @Test
@@ -72,7 +73,7 @@ class ProductServiceTest {
 
     @Test
     void createProductWithMultipleRecipeEntries() {
-        Ingredient second = ingredientService.create(new Ingredient(null, category, "Syrup", 0.3, 1, 0, 0, 0));
+        Ingredient second = ingredientRepository.save(new Ingredient(null, category, "Syrup", 0.3, 1, 0, 0, 0));
         RecipeEntry entry1 = new RecipeEntry(null, ingredient, 2);
         RecipeEntry entry2 = new RecipeEntry(null, second, 1);
         Recipe recipe = new Recipe(null, null, List.of(entry1, entry2));

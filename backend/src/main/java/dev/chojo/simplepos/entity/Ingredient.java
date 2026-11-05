@@ -1,12 +1,10 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
@@ -37,6 +35,9 @@ public class Ingredient implements Comparable<Ingredient> {
     @Column(columnDefinition = "boolean default true")
     private boolean active = true;
 
+    /**
+     * The same with the amounts as {@code double}, for test fixtures and demo data.
+     */
     public Ingredient(Integer id, Category category, String name, double price, int containerSize, double pledge, double pledgeContainer, int minStock) {
         this(id, category, name, BigDecimal.valueOf(price), containerSize, Money.of(pledge), Money.of(pledgeContainer), minStock);
     }

@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.exceptions.NotFoundException;
-import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.dto.IngredientRequest;
+import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.RecipeEntryRepository;
@@ -41,10 +41,6 @@ public class IngredientService {
             throw new ConflictException("%s is used in recipes or storage. Deactivate it instead.".formatted(ingredient.getName()));
         }
         repository.delete(ingredient);
-    }
-
-    public Ingredient create(Ingredient ingredient) {
-        return repository.save(ingredient);
     }
 
     /**

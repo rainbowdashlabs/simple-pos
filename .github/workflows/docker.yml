@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: gradle/actions/wrapper-validation@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - name: Build Image
-        run: docker build . --build-arg GITHUB_ACTIONS=true --build-arg GITHUB_REF_TYPE="$REF_TYPE" --build-arg GITHUB_REF_NAME="$REF_NAME" --build-arg GITHUB_SHA="$SHA" -f Dockerfile -t "$IMAGE:$SHA"
+        run: docker build . -f Dockerfile -t "$IMAGE:$SHA"
       - name: Login to Registry
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}

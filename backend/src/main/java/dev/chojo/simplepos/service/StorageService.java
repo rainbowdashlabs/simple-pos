@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
@@ -11,6 +10,7 @@ import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
@@ -79,7 +79,8 @@ public class StorageService {
     }
 
     /**
-     * Stores a batch and makes its unit cost the ingredient's default price.
+     * Stores a batch and makes its unit cost the ingredient's default price. Deliveries go through {@link #deliver};
+     * this books no cash and serves test fixtures.
      *
      * @throws BadRequestException if the batch holds no units or more sold units than it holds
      */

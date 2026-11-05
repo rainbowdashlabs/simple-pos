@@ -39,6 +39,9 @@ public class Product implements Comparable<Product> {
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Recipe recipe;
 
+    /**
+     * The same with the amounts as {@code double}, for test fixtures and demo data.
+     */
     public Product(Integer id, Category category, String name, double price, boolean active, Recipe recipe) {
         this(id, category, name, Money.of(price), active, recipe);
     }

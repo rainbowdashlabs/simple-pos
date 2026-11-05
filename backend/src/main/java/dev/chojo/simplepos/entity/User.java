@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,11 +28,12 @@ public class User implements UserDetails {
     boolean enabled;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role == null ? List.of() : List.of(new SimpleGrantedAuthority(role.authority()));
+        return List.of(new SimpleGrantedAuthority(role.authority()));
     }
 
     public User() {

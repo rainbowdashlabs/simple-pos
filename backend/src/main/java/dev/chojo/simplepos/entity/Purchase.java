@@ -41,6 +41,9 @@ public class Purchase {
     @ManyToOne(fetch = FetchType.LAZY)
     private User soldBy;
 
+    /**
+     * The same with the amounts as {@code double}, for test fixtures and demo data.
+     */
     public Purchase(Integer id, Account account, Product product, Instant purchased, int amount, double price, List<PurchasePart> parts) {
         this(id, account, product, purchased, amount, Money.of(price), parts);
     }

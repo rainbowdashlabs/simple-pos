@@ -36,6 +36,8 @@ class MigrationTest {
                 VALUES (1, 20, 0, 'Bottle', 0.08, 1.5, 0.877, 1)""");
         jdbc.update("INSERT INTO storage (id, amount, price, purchased, sold, ingredient_id) VALUES (1, 12, 0.877, now(), 0, 1)");
         jdbc.update("INSERT INTO users (id, enabled, username, role) VALUES (1, true, 'staff', 'STAFF')");
+        jdbc.update("INSERT INTO users (id, enabled, username, role) VALUES (2, true, 'legacy', NULL)");
+        jdbc.update("INSERT INTO users (id, enabled, username, role) VALUES (3, false, 'legacysignup', NULL)");
         jdbc.update("INSERT INTO cash (id, amount, type, user_id) VALUES (1, -10.524000000000001, 'purchase', 1)");
         jdbc.update("INSERT INTO cash (id, amount, type, user_id) VALUES (2, 0.30000000000000004, 'other', 1)");
         jdbc.update("INSERT INTO account (id, name, deleted) VALUES (1, 'Guest', false)");
@@ -128,6 +130,13 @@ class MigrationTest {
                 SELECT count(*) FROM purchase p
                 WHERE p.cost <> coalesce((SELECT sum(pp.cost) FROM purchase_part pp WHERE pp.purchase_id = p.id), 0)""",
                 Integer.class));
+    }
+
+    @Test
+    void usersWithoutARoleGetOneByWhetherTheyWereEnabled() {
+        assertEquals("ADMIN", jdbc.queryForObject("SELECT role FROM users WHERE id = 2", String.class));
+        assertEquals("USER", jdbc.queryForObject("SELECT role FROM users WHERE id = 3", String.class));
+        assertEquals("STAFF", jdbc.queryForObject("SELECT role FROM users WHERE id = 1", String.class));
     }
 
     private static <T> T part(int purchase, int storage, String column, Class<T> type) {
