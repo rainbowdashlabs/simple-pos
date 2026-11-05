@@ -12,13 +12,17 @@ import org.springframework.data.jpa.repository.QueryHints;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
-    @Query("SELECT p.account.id FROM Purchase p WHERE p.id = ?1")
-    Optional<Integer> findAccountIdOf(int purchaseId);
+    /**
+     * Pairs of purchase id and account id for the purchases that exist among {@code ids}; the account id is null for
+     * a guest purchase.
+     */
+    @Query("SELECT p.id, a.id FROM Purchase p LEFT JOIN p.account a WHERE p.id IN ?1")
+    List<Object[]> findAccountIdsOf(Collection<Integer> ids);
 
     /**
      * An account's purchases, newest first, with their products and cashiers, in one query.
@@ -152,6 +156,12 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query("SELECT sum(price * amount) FROM Purchase")
     BigDecimal totalPurchases();
+
+    /**
+     * What all accounts together bought; guest sales are paid in cash and are left out.
+     */
+    @Query("SELECT sum(price * amount) FROM Purchase WHERE account IS NOT NULL")
+    BigDecimal totalAccountPurchases();
 
     @Query("SELECT sum(price * amount) FROM Purchase WHERE purchased > ?1")
     BigDecimal totalPurchases(Instant after);

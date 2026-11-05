@@ -98,7 +98,7 @@ public class CashController {
 
     @GetMapping("/total/balance")
     public CashResponse balanceAmount() {
-        return new CashResponse(Money.orZero(balanceRepository.totalBalance()).subtract(Money.orZero(purchaseRepository.totalPurchases())));
+        return new CashResponse(Money.orZero(balanceRepository.totalBalance()).subtract(Money.orZero(purchaseRepository.totalAccountPurchases())));
     }
 
     @GetMapping("/total/pledge")

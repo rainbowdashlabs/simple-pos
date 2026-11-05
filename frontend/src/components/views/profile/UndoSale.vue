@@ -1,5 +1,5 @@
 <script lang="ts">
-import {defineComponent} from 'vue'
+import {defineComponent, PropType} from 'vue'
 import {store} from "@/scripts/store.ts";
 import {cancelPurchases} from "@/scripts/purchase.ts";
 import {announce} from "@/scripts/announcer.ts";
@@ -7,16 +7,16 @@ import IconButton from "@/components/styles/buttons/IconButton.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 
 /**
- * Offers to undo the sale this tab just booked on the account, until its undo time is over. Undoing cancels every
- * position of the sale at once.
+ * Offers to undo the sale this tab just booked on the account, or the guest sale when no account is given, until its
+ * undo time is over. Undoing cancels every position of the sale at once.
  */
 export default defineComponent({
   name: "UndoSale",
   components: {ColorContainer, IconButton},
   props: {
     accountId: {
-      type: Number,
-      required: true
+      type: Number as PropType<number | null>,
+      default: null
     }
   },
   emits: ["undone"],

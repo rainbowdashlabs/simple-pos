@@ -4,7 +4,10 @@ import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Money;
+import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.PurchaseCancelRequest;
+import dev.chojo.simplepos.entity.dto.PurchaseReceipt;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,14 +53,24 @@ public class PurchaseController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        purchaseService.cancel(id);
+        purchaseService.cancel(id, currentUser());
         return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/cancel")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void cancel(@Valid @RequestBody PurchaseCancelRequest request) {
-        purchaseService.cancelAll(request.ids());
+        purchaseService.cancelAll(request.ids(), currentUser());
+    }
+
+    @PostMapping("/guest")
+    @ResponseStatus(HttpStatus.CREATED)
+    PurchaseReceipt guest(@RequestBody List<CartPositionDto> positions) {
+        return new PurchaseReceipt(purchaseService.purchaseAsGuest(positions, currentUser()));
+    }
+
+    private static User currentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     @GetMapping("stats/total")

@@ -63,6 +63,18 @@ export interface PurchaseReceipt {
     purchaseIds: number[]
 }
 
+/**
+ * The id standing for "no account" in an account choice: a guest who pays cash. Stored accounts never have it.
+ */
+export const GUEST_ACCOUNT_ID = 0
+
+/**
+ * Sells the cart to a guest who pays cash; the money goes into the till.
+ */
+export function purchaseAsGuest(entries: CartPosition[]): Promise<PurchaseReceipt> {
+    return postJson("api/purchase/guest", entries)
+}
+
 export function purchase(id: number, entries: CartPosition[]): Promise<PurchaseReceipt> {
     return postJson(`api/account/${id}/purchase`, entries)
 }

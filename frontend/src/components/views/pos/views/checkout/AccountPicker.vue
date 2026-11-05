@@ -5,10 +5,12 @@ import {Account} from "@/scripts/accounts.ts";
 const RECENT_COUNT = 5
 
 /**
- * Chooses an account by typing part of its name. With nothing typed, the accounts that bought most recently come
- * first, then everyone else alphabetically. Works as a combobox: arrow keys move through the list, Enter chooses,
- * Escape closes it and, pressed again, clears the field. Nothing is chosen until the user picks an entry or leaves
- * the field with a name typed out exactly; text left in the field that names nobody is cleared.
+ * Chooses an account by typing part of its name. With nothing typed, the `guest` entry (if given) comes first, then
+ * the accounts that bought most recently, then everyone else alphabetically. With a name typed, the matching accounts
+ * come first and a matching guest entry last, so Enter on a typed name never picks the guest by accident. Works as a
+ * combobox: arrow keys move through the list, Enter chooses, Escape closes it and, pressed again, clears the field.
+ * Nothing is chosen until the user picks an entry or leaves the field with a name typed out exactly; text left in
+ * the field that names nobody is cleared.
  */
 export default defineComponent({
   name: "AccountPicker",
@@ -24,6 +26,10 @@ export default defineComponent({
     autofocus: {
       type: Boolean,
       default: false
+    },
+    guest: {
+      type: Object as PropType<Account | null>,
+      default: null
     }
   },
   emits: ["select"],
@@ -46,9 +52,10 @@ export default defineComponent({
     options(): Account[] {
       const query = this.query.trim().toLocaleLowerCase()
       const byName = [...this.accounts].sort((a, b) => a.name.localeCompare(b.name))
-      if (query) return byName.filter(account => account.name.toLocaleLowerCase().includes(query))
+      const guest = this.guest ? [this.guest] : []
+      if (query) return [...byName, ...guest].filter(account => account.name.toLocaleLowerCase().includes(query))
       const recentIds = new Set(this.recent.map(account => account.id))
-      return [...this.recent, ...byName.filter(account => !recentIds.has(account.id))]
+      return [...guest, ...this.recent, ...byName.filter(account => !recentIds.has(account.id))]
     },
     expanded(): boolean {
       return this.open && this.options.length > 0
@@ -114,7 +121,8 @@ export default defineComponent({
       this.open = false
       if (this.chosen) return
       const typed = this.query.trim().toLocaleLowerCase()
-      const exact = this.accounts.filter(account => account.name.toLocaleLowerCase() === typed)
+      const exact = [...(this.guest ? [this.guest] : []), ...this.accounts]
+          .filter(account => account.name.toLocaleLowerCase() === typed)
       if (typed && exact.length === 1) this.choose(exact[0])
       else this.query = ""
     }

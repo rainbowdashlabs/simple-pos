@@ -44,7 +44,7 @@
     "copy_list": "Copy list"
   },
   "checkout_choose_account": "Choose an account",
-  "checkout_no_accounts": "There are no accounts yet. Create one first.",
+  "checkout_no_accounts": "No accounts yet; only guest sales are possible.",
   "checkout_cart_empty": "The cart is empty.",
   "manage": "Manage",
   "date": "Date",
@@ -247,5 +247,8 @@
   "shopping_nothing": "Nothing to buy for this period.",
   "shopping_copied": "List copied",
   "quantity": "Quantity",
-  "shopping_copy_failed": "Copying is not possible here. Select the text below to copy it."
+  "shopping_copy_failed": "Copying is not possible here. Select the text below to copy it.",
+  "guest_cash": "Guest (cash)",
+  "checkout_collect": "To collect",
+  "sale": "Sale"
 }

@@ -6,10 +6,11 @@ export const COLOR_THEMES = ['blue', 'red', 'green', 'pink'] as const
 export type ColorTheme = typeof COLOR_THEMES[number]
 
 /**
- * The sale this tab just booked, which may still be undone until `until` (epoch milliseconds).
+ * The sale this tab just booked, which may still be undone until `until` (epoch milliseconds). `accountId` is null for
+ * a guest sale.
  */
 export interface LastSale {
-    accountId: number,
+    accountId: number | null,
     purchaseIds: number[],
     until: number
 }

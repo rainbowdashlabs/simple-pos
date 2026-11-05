@@ -3,7 +3,7 @@ import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
 import {store, UNDO_MILLIS} from "@/scripts/store.ts";
 import AccountPicker from "./checkout/AccountPicker.vue";
-import {account, Account, accounts, purchase} from "@/scripts/accounts.ts";
+import {account, Account, accounts, GUEST_ACCOUNT_ID, purchase, purchaseAsGuest} from "@/scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -16,8 +16,9 @@ import {SizeGroup} from "@/scripts/text.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
 /**
- * Pays for the cart from an account. Nobody is charged by default: the account has to be chosen explicitly, and the
- * purchase is sent at most once at a time and never with an empty cart.
+ * Pays for the cart from an account, or as a guest who pays cash: then the total to collect is shown, the money goes
+ * into the till and the POS opens again with the undo notice. Nobody is charged by default: the account or the guest
+ * has to be chosen explicitly, and the purchase is sent at most once at a time and never with an empty cart.
  */
 export default defineComponent({
   name: "Checkout",
@@ -45,6 +46,12 @@ export default defineComponent({
     },
     cartEmpty(): boolean {
       return this.cart.products.size === 0
+    },
+    guest(): Account {
+      return {id: GUEST_ACCOUNT_ID, name: this.$t('guest_cash'), created: 0, balance: 0}
+    },
+    isGuest(): boolean {
+      return this.account?.id === GUEST_ACCOUNT_ID
     }
   },
   methods: {
@@ -55,6 +62,11 @@ export default defineComponent({
         return
       }
       const id = chosen.id
+      if (id === GUEST_ACCOUNT_ID) {
+        this.selectedId = id
+        this.account = chosen
+        return
+      }
       this.selectedId = id
       this.account = null
       account(id)
@@ -72,7 +84,20 @@ export default defineComponent({
       if (this.submitting || this.cartEmpty || !this.account) return
       this.submitting = true
       const accountId = this.account.id
-      keepingFocus(() => purchase(accountId, Array.from(this.cart.products.values()))
+      const positions = Array.from(this.cart.products.values())
+      if (this.isGuest) {
+        keepingFocus(() => purchaseAsGuest(positions)
+            .then(receipt => {
+              store.lastSale = {accountId: null, purchaseIds: receipt.purchaseIds, until: Date.now() + UNDO_MILLIS}
+              this.cart.clearCart()
+              this.$router.push({name: 'pos'})
+            })
+            .finally(() => {
+              this.submitting = false
+            }))
+        return
+      }
+      keepingFocus(() => purchase(accountId, positions)
           .then(receipt => {
             store.lastSale = {accountId: accountId, purchaseIds: receipt.purchaseIds, until: Date.now() + UNDO_MILLIS}
             this.cart.clearCart()
@@ -110,11 +135,15 @@ export default defineComponent({
     </ColorContainer>
 
     <FormattedText v-if="accountsLoaded && accountList.length === 0" value="checkout_no_accounts" type="locale"/>
-    <AccountPicker v-else-if="accountsLoaded" :key="pickerRevision" :label="$t('checkout_choose_account')"
-                   :accounts="accountList" :autofocus="pickerRevision > 0" @select="checkoutAccount"/>
+    <AccountPicker v-if="accountsLoaded" :key="pickerRevision" :label="$t('checkout_choose_account')"
+                   :accounts="accountList" :guest="guest" :autofocus="pickerRevision > 0" @select="checkoutAccount"/>
 
     <GridWrapper v-if="account" bg="none" padding="0">
-      <ColorContainer :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
+      <ColorContainer v-if="isGuest" :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
+        <span>{{ $t('checkout_collect') }}</span>
+        <FormattedText :value="cart.totalPrice()" type="currency"/>
+      </ColorContainer>
+      <ColorContainer v-else :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
         <MoneyText :amount="account.balance"/>
         <Icon icon="fa-arrow-right"/>
         <MoneyText :amount="account.balance - cart.totalPrice()"/>
