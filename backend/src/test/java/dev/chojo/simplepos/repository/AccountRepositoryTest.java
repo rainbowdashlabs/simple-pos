@@ -3,6 +3,7 @@ package dev.chojo.simplepos.repository;
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
+import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.dto.AccountDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,20 @@ class AccountRepositoryTest {
         List<AccountDto> all = accountRepository.findAllAccounts();
         assertEquals("Anna", all.get(0).getName());
         assertEquals("Zara", all.get(1).getName());
+    }
+
+    @Test
+    void shouldFindTheLatestPurchaseOfEachAccount() {
+        Account buyer = accountRepository.save(new Account(null, "Buyer", Instant.now()));
+        Account idle = accountRepository.save(new Account(null, "Idle", Instant.now()));
+        Instant earlier = Instant.parse("2026-01-01T10:00:00Z");
+        Instant later = Instant.parse("2026-02-01T10:00:00Z");
+        purchaseRepository.save(new Purchase(null, buyer, null, later, 1, 1.0, List.of()));
+        purchaseRepository.save(new Purchase(null, buyer, null, earlier, 1, 1.0, List.of()));
+
+        List<AccountDto> all = accountRepository.findAllAccounts();
+        assertEquals(later, all.stream().filter(a -> a.getId().equals(buyer.getId())).findFirst().orElseThrow().getLastPurchase());
+        assertNull(all.stream().filter(a -> a.getId().equals(idle.getId())).findFirst().orElseThrow().getLastPurchase());
     }
 
     @Test

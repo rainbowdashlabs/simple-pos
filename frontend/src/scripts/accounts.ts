@@ -8,7 +8,8 @@ export interface Account {
     id: number,
     name: string,
     created: Date | string | number,
-    balance: number
+    balance: number,
+    lastPurchase?: string | null
 }
 
 /**

@@ -213,5 +213,6 @@
   "empties_refund": "Refund",
   "empties_outstanding_after": "Outstanding afterwards",
   "empties_more_than_outstanding": "This returns more deposit than is outstanding.",
-  "empties_returned": "Refund booked"
+  "empties_returned": "Refund booked",
+  "no_matches": "No matches"
 }

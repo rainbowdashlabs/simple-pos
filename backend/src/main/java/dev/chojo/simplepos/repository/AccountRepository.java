@@ -81,7 +81,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Optional<AccountDto> findAccountById(int id);
 
     @Query("""
-            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0))
+            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0), p.last)
             FROM Account a
             LEFT JOIN (
               SELECT account.id AS id, sum(amount) AS balance
@@ -89,7 +89,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
               GROUP BY account) b
             ON a.id = b.id
             LEFT JOIN (
-              SELECT account.id AS id, sum(amount * price) AS purchase
+              SELECT account.id AS id, sum(amount * price) AS purchase, max(purchased) AS last
               FROM Purchase
               GROUP BY account.id
             ) p

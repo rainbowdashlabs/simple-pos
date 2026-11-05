@@ -213,5 +213,6 @@
   "empties_refund": "Erstattung",
   "empties_outstanding_after": "Danach offen",
   "empties_more_than_outstanding": "Damit wird mehr Pfand zurückgegeben als offen ist.",
-  "empties_returned": "Erstattung gebucht"
+  "empties_returned": "Erstattung gebucht",
+  "no_matches": "Keine Treffer"
 }

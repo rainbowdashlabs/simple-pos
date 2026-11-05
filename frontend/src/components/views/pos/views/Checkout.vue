@@ -2,7 +2,7 @@
 import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
 import {store} from "@/scripts/store.ts";
-import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
+import AccountPicker from "./checkout/AccountPicker.vue";
 import {account, Account, accounts, purchase} from "@/scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
@@ -24,15 +24,15 @@ export default defineComponent({
   components: {
     ViewWrapper,
     GridWrapper,
-    ColorContainer, BackButton, ConfirmButton, Icon, FormattedText, MoneyText, CheckoutEntry, SelectMenu
+    ColorContainer, BackButton, ConfirmButton, Icon, FormattedText, MoneyText, CheckoutEntry, AccountPicker
   },
   data() {
     return {
       account: null as Account | null,
       accountsLoaded: false,
       selectedId: null as number | null,
-      selectRevision: 0,
-      accountOptions: [] as Array<Array<string | number>>,
+      pickerRevision: 0,
+      accountList: [] as Account[],
       submitting: false
     }
   },
@@ -45,19 +45,16 @@ export default defineComponent({
     },
     cartEmpty(): boolean {
       return this.cart.products.size === 0
-    },
-    selectOptions(): Array<Array<string | number>> {
-      return [[this.$t('checkout_choose_account'), ''], ...this.accountOptions]
     }
   },
   methods: {
-    checkoutAccount(value: string) {
-      if (value === '') {
+    checkoutAccount(chosen: Account | null) {
+      if (!chosen) {
         this.selectedId = null
         this.account = null
         return
       }
-      const id = Number(value)
+      const id = chosen.id
       this.selectedId = id
       this.account = null
       account(id)
@@ -67,7 +64,7 @@ export default defineComponent({
           .catch(error => {
             if (this.selectedId !== id) return
             this.selectedId = null
-            this.selectRevision++
+            this.pickerRevision++
             throw error
           })
     },
@@ -91,7 +88,7 @@ export default defineComponent({
   },
   mounted() {
     accounts().then(e => {
-      this.accountOptions = e.map((value: Account) => [value.name, value.id])
+      this.accountList = e
       this.accountsLoaded = true
     })
   },
@@ -111,8 +108,9 @@ export default defineComponent({
       </div>
     </ColorContainer>
 
-    <FormattedText v-if="accountsLoaded && accountOptions.length === 0" value="checkout_no_accounts" type="locale"/>
-    <SelectMenu :label="$t('checkout_choose_account')" v-else-if="accountsLoaded" :key="selectRevision" :options="selectOptions" @select="checkoutAccount"/>
+    <FormattedText v-if="accountsLoaded && accountList.length === 0" value="checkout_no_accounts" type="locale"/>
+    <AccountPicker v-else-if="accountsLoaded" :key="pickerRevision" :label="$t('checkout_choose_account')"
+                   :accounts="accountList" :autofocus="pickerRevision > 0" @select="checkoutAccount"/>
 
     <GridWrapper v-if="account" bg="none" padding="0">
       <ColorContainer :class="SizeGroup.xl" bg="secondary" class="flex justify-between">
