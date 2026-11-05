@@ -13,6 +13,7 @@ in addition to the bundled defaults. Besides the datasource, one setting is requ
 | `security.jwt.expiration-time` (`SECURITY_JWT_EXPIRATION_TIME`) | `3600000` (1 h)    | Lifetime of a login token in milliseconds.                                                                |
 | `security.jwt.refresh-expiration-time` (`SECURITY_JWT_REFRESH_EXPIRATION_TIME`) | `2592000000` (30 d) | Lifetime of a refresh token in milliseconds. Every refresh issues a new one, so a session stays alive as long as it is used within this time.                              |
 | `security.jwt.issuer` / `security.jwt.audience` (`SECURITY_JWT_ISSUER` / `SECURITY_JWT_AUDIENCE`) | `simple-pos` | Written into every token and checked on every request, so a token signed with the same key for another service is not accepted. |
+| `pos.time-zone` (`POS_TIME_ZONE`) | `Europe/Berlin` | Where a business day starts and ends in the daily statistics. |
 
 Changing the secret key logs out every user. Without a key the application does not start. The `local` Spring
 profile comes with a key that is only meant for development; compose reads the key from `.env` (see below).

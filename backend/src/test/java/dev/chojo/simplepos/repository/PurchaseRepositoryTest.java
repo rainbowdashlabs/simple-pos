@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.repository;
 
+import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Category;
@@ -7,18 +8,21 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
+import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
@@ -45,15 +49,18 @@ class PurchaseRepositoryTest {
     ProductService productService;
     @Autowired
     PurchasePartRepository purchasePartRepository;
+    @Autowired
+    StorageRepository storageRepository;
 
     private Account account;
     private Product product;
+    private Ingredient ingredient;
 
     @BeforeEach
     void setUp() {
         account = accountRepository.save(new Account(null, "Buyer", Instant.now()));
         Category category = categoryRepository.save(new Category(null, "PurchaseCat"));
-        ingredientRepository.save(new Ingredient(null, category, "PurchaseIngr", 0.5, 12, 0, 0, 0));
+        ingredient = ingredientRepository.save(new Ingredient(null, category, "PurchaseIngr", 0.5, 12, 0, 0, 0));
         Recipe recipe = new Recipe(null, null, Collections.emptyList());
         product = productService.create(new Product(null, category, "PurchaseProduct", 2.5, true, recipe));
     }
@@ -174,7 +181,7 @@ class PurchaseRepositoryTest {
         purchaseRepository.save(new Purchase(null, account, product, now.minus(40, ChronoUnit.DAYS), 4, 2.5, Collections.emptyList()));
         purchaseRepository.save(new Purchase(null, account, product, now.minus(2, ChronoUnit.DAYS), 1, 2.5, Collections.emptyList()));
 
-        var days = purchaseRepository.getSalesStatByProduct(product.getId(), now.minus(30, ChronoUnit.DAYS), PageRequest.of(0, 100));
+        var days = purchaseRepository.getSalesStatByProduct(product.getId(), now.minus(30, ChronoUnit.DAYS), "Europe/Berlin", PageRequest.of(0, 100));
 
         assertEquals(1, days.size());
         assertEquals(1, ((Number) days.get(0).get("sales")).intValue());
@@ -198,5 +205,23 @@ class PurchaseRepositoryTest {
         assertEquals(5, ((Number) grouped.get(0).get("sales")).intValue());
         assertTrue(rows.stream().anyMatch(t -> ((Number) t.get("category_id")).intValue() == Category.UNCATEGORISED_ID
                 && ((Number) t.get("sales")).intValue() == 1));
+    }
+
+    @Test
+    void daysEndAtMidnightInTheBusinessTimeZone() {
+        Instant afterMidnightInBerlin = Instant.parse("2026-06-10T22:30:00Z");
+        purchaseRepository.save(new Purchase(null, account, product, afterMidnightInBerlin, 1, 2.5, Collections.emptyList()));
+
+        var berlin = purchaseRepository.getDailyStats(Instant.parse("2026-06-09T00:00:00Z"), "Europe/Berlin");
+        var utc = purchaseRepository.getDailyStats(Instant.parse("2026-06-09T00:00:00Z"), "UTC");
+
+        assertEquals(LocalDate.of(2026, 6, 11), BusinessTimeZone.dateOf(berlin.get(0).get("day")));
+        assertEquals(LocalDate.of(2026, 6, 10), BusinessTimeZone.dateOf(utc.get(0).get("day")));
+    }
+
+    @Test
+    void storageCannotSellMoreThanItHolds() {
+        assertThrows(DataIntegrityViolationException.class,
+                () -> storageRepository.saveAndFlush(new Storage(null, ingredient, Instant.now(), 1.0, 2, 3)));
     }
 }

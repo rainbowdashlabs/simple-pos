@@ -1,22 +1,23 @@
 package dev.chojo.simplepos.entity.dto;
 
+import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.entity.Money;
 import jakarta.persistence.Tuple;
 import org.slf4j.Logger;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public final class ProductSalesStatDto {
     private static final Logger log = getLogger(ProductSalesStatDto.class);
-    private Instant day;
+    private LocalDate day;
     private int sales;
     private BigDecimal revenue;
     private BigDecimal profit;
 
-    public ProductSalesStatDto(Instant day, int sales, BigDecimal revenue, BigDecimal profit) {
+    public ProductSalesStatDto(LocalDate day, int sales, BigDecimal revenue, BigDecimal profit) {
         this.day = day;
         this.sales = sales;
         this.revenue = revenue;
@@ -27,23 +28,27 @@ public final class ProductSalesStatDto {
     }
 
     public ProductSalesStatDto(Tuple tuple) {
-        this.day = (Instant) tuple.get("day");
+        this.day = BusinessTimeZone.dateOf(tuple.get("day"));
         this.sales = ((Long) tuple.get("sales")).intValue();
         this.revenue = Money.fromQuery((Number) tuple.get("revenue"));
         this.profit = Money.fromQuery((Number) tuple.get("profit"));
     }
-    public ProductSalesStatDto(Tuple tuple, Instant instant) {
-        this.day = instant;
-        this.sales = ((Long) tuple.get("sales")).intValue();
-        this.revenue = Money.fromQuery((Number) tuple.get("revenue"));
-        this.profit = Money.fromQuery((Number) tuple.get("profit"));
+    /**
+     * Totals over a whole period, which belong to no single day.
+     */
+    public static ProductSalesStatDto summary(Tuple tuple) {
+        ProductSalesStatDto summary = new ProductSalesStatDto();
+        summary.sales = ((Long) tuple.get("sales")).intValue();
+        summary.revenue = Money.fromQuery((Number) tuple.get("revenue"));
+        summary.profit = Money.fromQuery((Number) tuple.get("profit"));
+        return summary;
     }
 
-    public Instant getDay() {
+    public LocalDate getDay() {
         return day;
     }
 
-    public void setDay(Instant day) {
+    public void setDay(LocalDate day) {
         this.day = day;
     }
 

@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Product;
@@ -32,14 +33,16 @@ import java.util.Objects;
 @RestController
 @RequestMapping("api/product")
 public class ProductController {
+    private final BusinessTimeZone businessTimeZone;
     private final ProductRepository productRepository;
     private final ProductService productService;
     private final PurchaseRepository purchaseRepository;
 
-    public ProductController(ProductRepository productRepository, ProductService productService, PurchaseRepository purchaseRepository) {
+    public ProductController(ProductRepository productRepository, ProductService productService, PurchaseRepository purchaseRepository, BusinessTimeZone businessTimeZone) {
         this.productRepository = productRepository;
         this.productService = productService;
         this.purchaseRepository = purchaseRepository;
+        this.businessTimeZone = businessTimeZone;
     }
 
     @GetMapping("/{id}")
@@ -55,7 +58,7 @@ public class ProductController {
                                                            @RequestParam(defaultValue = "100") @PageSize int limit,
                                                            @RequestParam(defaultValue = "0") @PageNumber int page) {
         Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
-        List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, PageRequest.of(page, limit)).stream()
+        List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(), PageRequest.of(page, limit)).stream()
                 .map(ProductSalesStatDto::new)
                 .toList();
         return ResponseEntity.ok(list);
@@ -63,7 +66,7 @@ public class ProductController {
 
     @GetMapping("/{id}/sales/stat/summary")
     ResponseEntity<ProductSalesStatDto> getSalesStatSummary(@PathVariable int id, @RequestParam Instant after) {
-        ProductSalesStatDto dto = new ProductSalesStatDto(purchaseRepository.getSalesStatSummary(id, after), after);
+        ProductSalesStatDto dto = ProductSalesStatDto.summary(purchaseRepository.getSalesStatSummary(id, after));
         return ResponseEntity.ok(dto);
     }
 

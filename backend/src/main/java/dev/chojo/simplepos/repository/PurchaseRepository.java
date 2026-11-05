@@ -22,7 +22,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                b.day, b.sales, b.revenue, b.profit
             FROM (
                 SELECT
-                  date_trunc('day', p.purchased) as day, sum(p.amount) as sales, sum(p.revenue) as revenue, sum(p.revenue - p.raw_price) as profit
+                  cast(p.purchased AT TIME ZONE ?3 AS date) as day, sum(p.amount) as sales, sum(p.revenue) as revenue, sum(p.revenue - p.raw_price) as profit
                 FROM
                   (
                     SELECT p.purchased as purchased, p.amount as amount, p.price * p.amount as revenue, coalesce(raw.raw_price,0) as raw_price
@@ -40,7 +40,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 ORDER BY day DESC
             ) b
             """, nativeQuery = true)
-    List<Tuple> getSalesStatByProduct(int id, Instant after, Pageable pageable);
+    List<Tuple> getSalesStatByProduct(int id, Instant after, String zone, Pageable pageable);
 
     @Query(value = """
             SELECT
@@ -91,7 +91,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query(value = """
             SELECT
-                date_trunc('day', p.purchased) as day,
+                cast(p.purchased AT TIME ZONE ?2 AS date) as day,
                 cast(coalesce(sum(p.amount), 0) as integer) as sales,
                 coalesce(sum(p.price * p.amount), 0) as revenue,
                 coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
@@ -105,7 +105,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             GROUP BY day
             ORDER BY day ASC
             """, nativeQuery = true)
-    List<Tuple> getDailyStats(Instant after);
+    List<Tuple> getDailyStats(Instant after, String zone);
 
     @Query(value = """
             SELECT

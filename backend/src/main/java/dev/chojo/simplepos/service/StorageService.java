@@ -77,8 +77,16 @@ public class StorageService {
         return created;
     }
 
+    /**
+     * Stores a batch and makes its unit cost the ingredient's default price.
+     *
+     * @throws BadRequestException if the batch holds no units or more sold units than it holds
+     */
     @Transactional
     public Storage addStorage(Storage storage) {
+        if (storage.getAmount() < 1 || storage.getSold() < 0 || storage.getSold() > storage.getAmount()) {
+            throw new BadRequestException("A batch needs at least one unit and cannot have sold more than it holds");
+        }
         Storage created = storageRepository.save(storage);
         if (created.getCost().signum() > 0) {
             ingredientRepository.updateByIdIs(storage.getIngredient().getId(), storage.getPrice());
@@ -99,6 +107,7 @@ public class StorageService {
         for (InventoryCorrection correction : corrections) {
             Ingredient ingredient = ingredientRepository.require(correction.ingredient());
             if (correction.amount() == null) throw new BadRequestException("Amount is missing");
+            if (correction.amount() < 0) throw new BadRequestException("The counted amount must not be negative");
             StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;

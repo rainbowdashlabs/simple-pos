@@ -3,11 +3,18 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.CashType;
+import dev.chojo.simplepos.entity.Category;
+import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.Purchase;
+import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CashRepository;
+import dev.chojo.simplepos.repository.CategoryRepository;
+import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.service.ProductService;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,6 +62,12 @@ class InputCheckApiTest {
     AccountRepository accountRepository;
     @Autowired
     CashRepository cashRepository;
+    @Autowired
+    ProductService productService;
+    @Autowired
+    CategoryRepository categoryRepository;
+    @Autowired
+    PurchaseRepository purchaseRepository;
 
     private MockMvc mvc;
     private String token;
@@ -126,6 +140,21 @@ class InputCheckApiTest {
                 .andExpect(status().isCreated());
         assertTrue(cashRepository.findAll().stream()
                 .anyMatch(cash -> cash.getType() == CashType.PLEDGE && "bottles".equals(cash.getNote())));
+    }
+
+    @Test
+    void dailyStatsSendTheBusinessDate() throws Exception {
+        Category category = categoryRepository.save(new Category(null, "DailyCat"));
+        Product product = productService.create(new Product(null, category, "Late", 1.0, true,
+                new Recipe(null, null, Collections.emptyList())));
+        Account account = accountRepository.save(new Account(null, "Night", Instant.now()));
+        purchaseRepository.save(new Purchase(null, account, product, Instant.parse("2026-06-10T22:30:00Z"), 1, 1.0,
+                Collections.emptyList()));
+
+        mvc.perform(get("/api/purchase/stats/daily").param("after", "2026-06-10T00:00:00Z")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].day").value("2026-06-11"));
     }
 
     private String login() throws Exception {

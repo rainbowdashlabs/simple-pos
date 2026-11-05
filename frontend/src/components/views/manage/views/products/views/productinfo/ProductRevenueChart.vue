@@ -10,7 +10,7 @@ import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import {store} from "@/scripts/store.ts";
-import {everyDay} from "@/scripts/util.ts";
+import {everyDay, localDateKey} from "@/scripts/util.ts";
 
 use([LineChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
@@ -37,7 +37,7 @@ export default defineComponent({
     chartOption() {
       const locale = this.$i18n.locale
       const filled = everyDay(this.stats, this.days, s => s.day,
-          day => ({day: day.toISOString(), product_id: null, sales: 0, revenue: 0, profit: 0}))
+          day => ({day: localDateKey(day), product_id: null, sales: 0, revenue: 0, profit: 0}))
       const days = filled.map(f => f.day.toLocaleDateString(locale, {month: 'short', day: 'numeric'}))
       const revenue = filled.map(f => Math.round(f.row.revenue * 100) / 100)
       const profit = filled.map(f => Math.round(f.row.profit * 100) / 100)

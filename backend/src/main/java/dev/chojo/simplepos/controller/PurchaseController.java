@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Money;
@@ -28,15 +29,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/purchase")
 public class PurchaseController {
+    private final BusinessTimeZone businessTimeZone;
     private final PurchaseRepository purchaseRepository;
     private final ProductRepository productRepository;
     private final PurchaseService purchaseService;
 
     public PurchaseController(PurchaseRepository purchaseRepository, ProductRepository productRepository,
-                              PurchaseService purchaseService) {
+                              PurchaseService purchaseService, BusinessTimeZone businessTimeZone) {
         this.purchaseRepository = purchaseRepository;
         this.productRepository = productRepository;
         this.purchaseService = purchaseService;
+        this.businessTimeZone = businessTimeZone;
     }
 
     @DeleteMapping("/{id}")
@@ -76,9 +79,9 @@ public class PurchaseController {
 
     @GetMapping("stats/daily")
     ResponseEntity<List<Map<String, Object>>> getDailyStats(@RequestParam() Instant after) {
-        return ResponseEntity.ok(purchaseRepository.getDailyStats(after).stream().map(t -> {
+        return ResponseEntity.ok(purchaseRepository.getDailyStats(after, businessTimeZone.id()).stream().map(t -> {
             Map<String, Object> m = new LinkedHashMap<>();
-            m.put("day", t.get("day"));
+            m.put("day", BusinessTimeZone.dateOf(t.get("day")));
             m.put("sales", t.get("sales"));
             m.put("revenue", t.get("revenue"));
             m.put("profit", t.get("profit"));

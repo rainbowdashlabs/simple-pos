@@ -1,0 +1,30 @@
+CREATE INDEX balance_account_added_idx ON balance (account_id, added);
+CREATE INDEX cash_user_idx ON cash (user_id);
+CREATE INDEX cash_created_idx ON cash (created);
+CREATE INDEX ingredient_category_idx ON ingredient (category_id);
+CREATE INDEX product_category_idx ON product (category_id);
+CREATE INDEX purchase_account_purchased_idx ON purchase (account_id, purchased);
+CREATE INDEX purchase_product_purchased_idx ON purchase (product_id, purchased);
+CREATE INDEX purchase_purchased_idx ON purchase (purchased);
+CREATE INDEX purchase_part_purchase_idx ON purchase_part (purchase_id);
+CREATE INDEX purchase_part_storage_idx ON purchase_part (storage_id);
+CREATE INDEX purchase_part_ingredient_idx ON purchase_part (ingredient_id);
+CREATE INDEX recipe_entry_recipe_idx ON recipe_entry (recipe_id);
+CREATE INDEX recipe_entry_ingredient_idx ON recipe_entry (ingredient_id);
+CREATE INDEX storage_ingredient_idx ON storage (ingredient_id);
+CREATE INDEX storage_ingredient_in_stock_idx ON storage (ingredient_id, purchased, id) WHERE amount > sold;
+CREATE INDEX token_user_idx ON token (user_id);
+CREATE INDEX token_token_idx ON token (token);
+
+ALTER TABLE purchase ADD CONSTRAINT purchase_amount_check CHECK (amount > 0);
+ALTER TABLE purchase ADD CONSTRAINT purchase_price_check CHECK (price >= 0);
+ALTER TABLE purchase_part ADD CONSTRAINT purchase_part_amount_check CHECK (amount > 0);
+ALTER TABLE purchase_part ADD CONSTRAINT purchase_part_cost_check CHECK (cost >= 0);
+ALTER TABLE storage ADD CONSTRAINT storage_amount_check CHECK (amount > 0);
+ALTER TABLE storage ADD CONSTRAINT storage_sold_check CHECK (sold >= 0 AND sold <= amount);
+ALTER TABLE storage ADD CONSTRAINT storage_cost_check CHECK (cost >= 0);
+ALTER TABLE recipe_entry ADD CONSTRAINT recipe_entry_amount_check CHECK (amount > 0);
+ALTER TABLE product ADD CONSTRAINT product_price_check CHECK (price >= 0);
+ALTER TABLE ingredient ADD CONSTRAINT ingredient_values_check
+    CHECK (price >= 0 AND pledge >= 0 AND pledge_container >= 0 AND container_size >= 0 AND min_stock >= 0);
+ALTER TABLE cash ADD CONSTRAINT cash_type_check CHECK (type IN ('deposit', 'purchase', 'pledge', 'balance', 'other'));

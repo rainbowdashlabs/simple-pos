@@ -6,7 +6,7 @@ import {GridComponent, TooltipComponent, LegendComponent} from 'echarts/componen
 import {CanvasRenderer} from 'echarts/renderers'
 import VChart from 'vue-echarts'
 import {DailyStat, dailyStats} from "@/scripts/purchase.ts";
-import {everyDay, Timeframes} from "@/scripts/util.ts";
+import {everyDay, localDateKey, Timeframes} from "@/scripts/util.ts";
 import {Timeframe} from "@/scripts/product.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -32,7 +32,7 @@ export default defineComponent({
     chartOption() {
       const locale = this.$i18n.locale
       const filled = everyDay(this.stats, this.timeframe.days, s => s.day,
-          day => ({day: day.toISOString(), sales: 0, revenue: 0, profit: 0}))
+          day => ({day: localDateKey(day), sales: 0, revenue: 0, profit: 0}))
       const days = filled.map(f => f.day.toLocaleDateString(locale, {month: 'short', day: 'numeric'}))
       const revenue = filled.map(f => Math.round(f.row.revenue * 100) / 100)
       const profit = filled.map(f => Math.round(f.row.profit * 100) / 100)
