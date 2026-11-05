@@ -64,7 +64,6 @@ export default defineComponent({
       this.amount = 0
     },
     typeChange(value: string) {
-      console.log(`Change to ${value}`)
       this.type = value
     },
     refreshCash() {
