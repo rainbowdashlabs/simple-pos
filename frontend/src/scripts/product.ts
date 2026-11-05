@@ -1,7 +1,6 @@
 import {Category, CategoryGroup, Listing} from "./categories.ts";
 import {Ingredient, ingredientRequest} from "./Ingredient.ts";
 import {deleteJson, getJson, patchJson, postJson, putJson} from "./http.ts";
-import {store} from "./store.ts";
 
 export class Timeframe {
     locale: string
@@ -58,7 +57,6 @@ export interface ProductSalesStat {
 
 export function product(id: number): Promise<Product> {
     return getJson("api/product/" + id)
-    return store.productCache.promiseById(id) ?? getJson("api/product/" + id)
 }
 
 /**
@@ -91,7 +89,6 @@ function productRequest(product: Product) {
 
 export function products(): Promise<Listing<Product>> {
     return getJson("api/product")
-    return store.productCache.allAsListingPromise() ?? store.productCache.cacheListingPromise(getJson("api/product"))
 }
 
 export function activeProducts(): Promise<Listing<Product>> {
@@ -100,7 +97,6 @@ export function activeProducts(): Promise<Listing<Product>> {
 
 export function deleteProduct(id: number) {
     return deleteJson("api/product/" + id)
-        .then(() => store.productCache.delete(id))
 }
 
 export function toggleActive(id: number): Promise<Product> {

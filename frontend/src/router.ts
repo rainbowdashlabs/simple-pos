@@ -9,7 +9,6 @@ import Accounts from '@/components/views/Accounts.vue'
 import Profile from '@/components/views/Profile.vue'
 import Balance from '@/components/views/Balance.vue'
 import Manage from '@/components/views/Manage.vue'
-import ThemePreview from '@/components/ThemePreview.vue'
 import NotFound from '@/components/views/NotFound.vue'
 
 import CartSelection from '@/components/views/pos/views/CartSelection.vue'
@@ -123,12 +122,12 @@ const router = createRouter({
             component: NoAccess,
             meta: {titleKey: 'title.no_access', role: 'USER'}
         },
-        {
+        ...(import.meta.env.DEV ? [{
             path: '/theme',
             name: 'theme',
-            component: ThemePreview,
+            component: () => import('@/components/ThemePreview.vue'),
             meta: {titleKey: 'title.theme'}
-        },
+        }] : []),
         {
             path: '/:pathMatch(.*)*',
             name: 'not-found',
