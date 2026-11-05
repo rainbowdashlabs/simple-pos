@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.controller;
 
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Ingredient;
@@ -12,6 +11,7 @@ import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.entity.response.Listing;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.StockProjectionService;
@@ -25,7 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -87,8 +86,7 @@ public class StorageController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity<Storage> add(@Valid @RequestBody InboundStorage storage) {
-        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    ResponseEntity<Storage> add(@Valid @RequestBody InboundStorage storage, @CurrentUser User current) {
         return ResponseEntity.accepted().body(storageService.deliver(storage, current));
     }
 

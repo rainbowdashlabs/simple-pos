@@ -1,7 +1,6 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
@@ -13,6 +12,7 @@ import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import static dev.chojo.simplepos.MoneyAssertions.money;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -113,6 +112,18 @@ class AccountServiceTest {
     void shouldAnonymiseAndDeleteTheAccount() {
         accountService.close(account.getId(), cashier);
 
+        entityManager.flush();
+        entityManager.clear();
+        Account closed = accountRepository.findById(account.getId()).orElseThrow();
+        assertTrue(closed.isDeleted());
+        assertEquals("Deleted Account #" + account.getId(), closed.getName());
+    }
+
+    @Test
+    void shouldNotRenameAClosedAccount() {
+        accountService.close(account.getId(), cashier);
+
+        assertThrows(NotFoundException.class, () -> accountService.rename(account.getId(), "Revived"));
         entityManager.flush();
         entityManager.clear();
         Account closed = accountRepository.findById(account.getId()).orElseThrow();

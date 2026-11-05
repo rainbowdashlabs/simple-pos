@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.UpdateUserRequest;
+import dev.chojo.simplepos.exceptions.ConflictException;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

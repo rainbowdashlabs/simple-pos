@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/ingredient")
 public class IngredientController {
@@ -64,8 +62,6 @@ public class IngredientController {
 
     @PatchMapping("/{id}/active")
     ResponseEntity<Ingredient> toggleActive(@PathVariable int id) {
-        Ingredient ingredient = ingredientRepository.require(id);
-        ingredient.setActive(!ingredient.isActive());
-        return ResponseEntity.ok(ingredientRepository.save(ingredient));
+        return ResponseEntity.ok(ingredientService.toggleActive(id));
     }
 }

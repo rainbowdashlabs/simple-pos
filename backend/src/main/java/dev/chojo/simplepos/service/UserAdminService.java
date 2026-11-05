@@ -1,12 +1,12 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CreateUserRequest;
 import dev.chojo.simplepos.entity.dto.UpdateUserRequest;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.springframework.data.domain.Sort;

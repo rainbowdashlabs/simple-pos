@@ -1,12 +1,13 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.configuration.security.JwtService;
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
+import dev.chojo.simplepos.configuration.security.Sha256;
 import dev.chojo.simplepos.entity.Token;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,12 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HexFormat;
 
 @Service
 public class AuthenticationService {
@@ -117,12 +114,7 @@ public class AuthenticationService {
      * What is stored for a refresh token: its SHA-256, hex encoded.
      */
     public static String fingerprint(String token) {
-        try {
-            byte[] hash = MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 is always available", e);
-        }
+        return Sha256.hex(token);
     }
 
     /**

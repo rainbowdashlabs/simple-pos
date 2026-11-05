@@ -25,7 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,25 +59,22 @@ public class PurchaseController {
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Void> delete(@PathVariable int id) {
-        purchaseService.cancel(id, currentUser());
+    ResponseEntity<Void> delete(@PathVariable int id, @CurrentUser User current) {
+        purchaseService.cancel(id, current);
         return ResponseEntity.accepted().build();
     }
 
     @PostMapping("/cancel")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void cancel(@Valid @RequestBody PurchaseCancelRequest request) {
-        purchaseService.cancelAll(request.ids(), currentUser());
+    void cancel(@Valid @RequestBody PurchaseCancelRequest request, @CurrentUser User current) {
+        purchaseService.cancelAll(request.ids(), current);
     }
 
     @PostMapping("/guest")
     @ResponseStatus(HttpStatus.CREATED)
-    PurchaseReceipt guest(@RequestBody @NotEmpty @Size(max = 100) List<@Valid @NotNull CartPositionDto> positions) {
-        return new PurchaseReceipt(purchaseService.purchaseAsGuest(positions, currentUser()));
-    }
-
-    private static User currentUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    PurchaseReceipt guest(@RequestBody @NotEmpty @Size(max = 100) List<@Valid @NotNull CartPositionDto> positions,
+                          @CurrentUser User current) {
+        return new PurchaseReceipt(purchaseService.purchaseAsGuest(positions, current));
     }
 
     @GetMapping("stats/total")

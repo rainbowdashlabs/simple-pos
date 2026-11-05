@@ -1,4 +1,4 @@
-package dev.chojo.simplepos.controller.exceptions;
+package dev.chojo.simplepos.exceptions;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

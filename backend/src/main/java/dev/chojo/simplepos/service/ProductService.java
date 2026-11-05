@@ -1,6 +1,6 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
@@ -8,6 +8,7 @@ import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
+import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -98,7 +99,7 @@ public class ProductService {
      * taken; whether the product is deleted or active never changes here, and the changes always go to the recipe
      * stored for the product. A product without a stored recipe gets one.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the product does not exist or is deleted
+     * @throws NotFoundException if the product does not exist or is deleted
      * @throws BadRequestException if the category or an ingredient does not exist, or a recipe entry names neither or
      *                             both an existing and a new ingredient
      */
@@ -137,5 +138,29 @@ public class ProductService {
                 ? ingredientRepository.requireReferenced(request.ingredientId())
                 : request.ingredient().toIngredient(categoryRepository.requireReferenced(request.ingredient().categoryId()));
         return new RecipeEntry(null, ingredient, request.amount());
+    }
+
+    /**
+     * Takes a product off the till for good: it is marked deleted and inactive, and its sales stay in the history.
+     *
+     * @throws NotFoundException if the product does not exist or is deleted
+     */
+    @Transactional
+    public void delete(int id) {
+        Product product = productRepository.requireNotDeleted(id);
+        product.setDeleted(true);
+        product.setActive(false);
+    }
+
+    /**
+     * Puts a product on sale or takes it off.
+     *
+     * @throws NotFoundException if the product does not exist or is deleted
+     */
+    @Transactional
+    public Product toggleActive(int id) {
+        Product product = productRepository.requireNotDeleted(id);
+        product.setActive(!product.isActive());
+        return product;
     }
 }

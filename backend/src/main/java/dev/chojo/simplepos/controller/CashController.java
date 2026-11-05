@@ -3,17 +3,13 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Cash;
-import dev.chojo.simplepos.entity.CashType;
-import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
 import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountDto;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
 import dev.chojo.simplepos.entity.response.CashResponse;
-import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
-import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.TillCountRepository;
 import dev.chojo.simplepos.service.CashService;
 import jakarta.validation.Valid;
@@ -22,7 +18,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,25 +32,19 @@ import java.util.List;
 @RequestMapping("/api/cash")
 public class CashController {
     private final CashRepository cashRepository;
-    private final IngredientRepository ingredientRepository;
     private final TillCountRepository tillCountRepository;
-    private final AccountBalanceRepository accountBalanceRepository;
     private final CashService cashService;
 
-    public CashController(CashRepository cashRepository, IngredientRepository ingredientRepository,
-                          TillCountRepository tillCountRepository, CashService cashService,
-                          AccountBalanceRepository accountBalanceRepository) {
-        this.accountBalanceRepository = accountBalanceRepository;
+    public CashController(CashRepository cashRepository,
+                          TillCountRepository tillCountRepository, CashService cashService) {
         this.tillCountRepository = tillCountRepository;
         this.cashService = cashService;
         this.cashRepository = cashRepository;
-        this.ingredientRepository = ingredientRepository;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void add(@Valid @RequestBody CashDto cash) {
-        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public void add(@Valid @RequestBody CashDto cash, @CurrentUser User current) {
         cashRepository.save(cash.toNewEntry(current));
     }
 
@@ -73,15 +62,14 @@ public class CashController {
 
     @PostMapping("/pledge/return")
     @ResponseStatus(HttpStatus.CREATED)
-    public CashResponse returnEmpties(@RequestBody @NotEmpty @Size(max = 500) List<@Valid @NotNull EmptiesReturn> returns) {
-        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public CashResponse returnEmpties(@RequestBody @NotEmpty @Size(max = 500) List<@Valid @NotNull EmptiesReturn> returns,
+                                      @CurrentUser User current) {
         return new CashResponse(cashService.returnEmpties(returns, current));
     }
 
     @PostMapping("/count")
     @ResponseStatus(HttpStatus.CREATED)
-    public TillCountDto count(@Valid @RequestBody TillCountRequest request) {
-        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public TillCountDto count(@Valid @RequestBody TillCountRequest request, @CurrentUser User current) {
         return TillCountDto.of(cashService.count(request, current));
     }
 
@@ -95,11 +83,11 @@ public class CashController {
 
     @GetMapping("/total/balance")
     public CashResponse balanceAmount() {
-        return new CashResponse(Money.orZero(accountBalanceRepository.totalBalance()));
+        return new CashResponse(cashService.accountsTotal());
     }
 
     @GetMapping("/total/pledge")
     public CashResponse pledgeAmount() {
-        return new CashResponse(Money.orZero(cashRepository.totalAmount(CashType.PLEDGE)));
+        return new CashResponse(cashService.pledgeTotal());
     }
 }

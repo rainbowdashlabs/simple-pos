@@ -1,5 +1,6 @@
-package dev.chojo.simplepos.controller.exceptions;
+package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;

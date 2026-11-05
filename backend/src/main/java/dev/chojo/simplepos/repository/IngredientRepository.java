@@ -1,11 +1,10 @@
 package dev.chojo.simplepos.repository;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,15 +14,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface IngredientRepository extends JpaRepository<Ingredient, Integer> {
-    /**
-     * Finds an ingredient.
-     *
-     * @throws BadRequestException if the id is missing
-     * @throws NotFoundException if no ingredient with this id exists
-     */
-    default Ingredient require(Integer id) {
-        return findById(requireId(id)).orElseThrow(() -> new NotFoundException("Ingredient", id));
+public interface IngredientRepository extends LookupRepository<Ingredient> {
+    @Override
+    default String entityName() {
+        return "Ingredient";
     }
 
     /**
@@ -34,7 +28,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
      * @throws NotFoundException if no ingredient with this id exists
      */
     default Ingredient requireLocked(Integer id) {
-        return findByIdForUpdate(requireId(id)).orElseThrow(() -> new NotFoundException("Ingredient", id));
+        return findByIdForUpdate(requireId(id)).orElseThrow(() -> new NotFoundException(entityName(), id));
     }
 
     /**
@@ -62,21 +56,6 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Ingredient SET price = ?2 where id = ?1")
     int updateByIdIs(int id, BigDecimal price);
-
-    /**
-     * Finds an ingredient that a request refers to by id. A missing one is the request's fault, so it is reported as
-     * a bad request rather than as a missing resource.
-     *
-     * @throws BadRequestException if the id is missing or no ingredient with this id exists
-     */
-    default Ingredient requireReferenced(Integer id) {
-        return findById(requireId(id)).orElseThrow(() -> new BadRequestException("Ingredient %d does not exist".formatted(id)));
-    }
-
-    private Integer requireId(Integer id) {
-        if (id == null) throw new BadRequestException("Ingredient id is missing");
-        return id;
-    }
 
     long countByCategory_Id(int categoryId);
 }

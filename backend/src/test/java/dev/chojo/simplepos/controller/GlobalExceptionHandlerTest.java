@@ -1,4 +1,4 @@
-package dev.chojo.simplepos.controller.exceptions;
+package dev.chojo.simplepos.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.CannotAcquireLockException;

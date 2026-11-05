@@ -2,18 +2,14 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.RateLimiter;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.UserPreferences;
 import dev.chojo.simplepos.entity.dto.ChangePasswordRequest;
 import dev.chojo.simplepos.entity.dto.UserPreferencesDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
-import dev.chojo.simplepos.repository.UserPreferencesRepository;
 import dev.chojo.simplepos.service.AuthenticationService;
+import dev.chojo.simplepos.service.PreferencesService;
 import dev.chojo.simplepos.service.UserAdminService;
-import dev.chojo.simplepos.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,15 +22,13 @@ import java.nio.charset.StandardCharsets;
 @RequestMapping("/api/user")
 public class UserController {
 
-    private final UserService userService;
-    private final UserPreferencesRepository preferencesRepository;
+    private final PreferencesService preferencesService;
     private final AuthenticationService authenticationService;
     private final RateLimiter rateLimiter;
 
-    public UserController(UserService userService, UserPreferencesRepository preferencesRepository,
+    public UserController(PreferencesService preferencesService,
                           AuthenticationService authenticationService, RateLimiter rateLimiter) {
-        this.userService = userService;
-        this.preferencesRepository = preferencesRepository;
+        this.preferencesService = preferencesService;
         this.authenticationService = authenticationService;
         this.rateLimiter = rateLimiter;
     }
@@ -44,9 +38,9 @@ public class UserController {
      * the same way. Other sessions of the user end; the answer carries the tokens of the caller's new session.
      */
     @PutMapping("/me/password")
-    public TokenResponse changePassword(@Valid @RequestBody ChangePasswordRequest body, HttpServletRequest request) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (body.current() != null && body.current().getBytes(StandardCharsets.UTF_8).length > UserAdminService.MAX_PASSWORD_BYTES) {
+    public TokenResponse changePassword(@Valid @RequestBody ChangePasswordRequest body, HttpServletRequest request,
+                                        @CurrentUser User user) {
+        if (body.current().getBytes(StandardCharsets.UTF_8).length > UserAdminService.MAX_PASSWORD_BYTES) {
             throw AuthenticationService.wrongCurrentPassword();
         }
         RateLimiter.Attempt attempt = rateLimiter.beginLogin(user.getUsername(), request.getRemoteAddr());
@@ -56,27 +50,18 @@ public class UserController {
     }
 
     @GetMapping("me")
-    public User me() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public User me(@CurrentUser User user) {
+        return user;
     }
 
     @GetMapping("/preferences")
-    public ResponseEntity<UserPreferencesDto> getPreferences() {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserPreferences prefs = preferencesRepository.findByUser(user)
-                .orElseGet(() -> preferencesRepository.save(new UserPreferences(user)));
-        return ResponseEntity.ok(new UserPreferencesDto(prefs.getLocale(), prefs.getColorTheme(), prefs.getDarkMode()));
+    public UserPreferencesDto getPreferences(@CurrentUser User user) {
+        return preferencesService.get(user);
     }
 
     @PutMapping("/preferences")
-    public ResponseEntity<UserPreferencesDto> updatePreferences(@Valid @RequestBody UserPreferencesDto dto) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserPreferences prefs = preferencesRepository.findByUser(user)
-                .orElseGet(() -> new UserPreferences(user));
-        prefs.setLocale(dto.locale());
-        prefs.setColorTheme(dto.colorTheme());
-        prefs.setDarkMode(dto.darkMode());
-        preferencesRepository.save(prefs);
-        return ResponseEntity.ok(dto);
+    public UserPreferencesDto updatePreferences(@Valid @RequestBody UserPreferencesDto dto,
+                                                @CurrentUser User user) {
+        return preferencesService.save(user, dto);
     }
 }

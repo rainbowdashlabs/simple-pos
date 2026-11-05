@@ -1,8 +1,6 @@
 package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.TestcontainersConfiguration;
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
@@ -11,6 +9,8 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.dto.IngredientRequest;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
 import jakarta.persistence.EntityManager;

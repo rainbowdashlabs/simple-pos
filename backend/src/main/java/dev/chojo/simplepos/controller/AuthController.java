@@ -2,9 +2,9 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.JwtService;
 import dev.chojo.simplepos.configuration.security.RateLimiter;
-import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenResponse;
+import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.service.AuthenticationService;
 import dev.chojo.simplepos.service.UserAdminService;
 import jakarta.servlet.http.HttpServletRequest;

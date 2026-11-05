@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
@@ -9,6 +8,8 @@ import dev.chojo.simplepos.entity.TillCount;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -34,9 +35,12 @@ public class CashService {
     private final BalanceRepository balanceRepository;
     private final TillCountRepository tillCountRepository;
     private final IngredientRepository ingredientRepository;
+    private final AccountBalanceRepository accountBalanceRepository;
 
     public CashService(CashRepository cashRepository, BalanceRepository balanceRepository,
-                       TillCountRepository tillCountRepository, IngredientRepository ingredientRepository) {
+                       TillCountRepository tillCountRepository, IngredientRepository ingredientRepository,
+                       AccountBalanceRepository accountBalanceRepository) {
+        this.accountBalanceRepository = accountBalanceRepository;
         this.ingredientRepository = ingredientRepository;
         this.cashRepository = cashRepository;
         this.balanceRepository = balanceRepository;
@@ -114,5 +118,21 @@ public class CashService {
         if (refund.signum() <= 0) throw new BadRequestException("Nothing is returned for %s".formatted(ingredient.getName()));
         if (Money.integerDigits(refund) > 10) throw new BadRequestException("The refund is too large");
         return refund;
+    }
+
+    /**
+     * What all accounts together hold: their deposits minus their purchases.
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal accountsTotal() {
+        return Money.orZero(accountBalanceRepository.totalBalance());
+    }
+
+    /**
+     * The deposit paid for empties that is still out with the supplier, as a negative amount.
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal pledgeTotal() {
+        return Money.orZero(cashRepository.totalAmount(CashType.PLEDGE));
     }
 }

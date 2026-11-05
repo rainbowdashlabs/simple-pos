@@ -1,6 +1,6 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
@@ -10,6 +10,7 @@ import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
@@ -47,7 +48,7 @@ public class StorageService {
      * @throws BadRequestException if the ingredient id is missing, or the cost, unit price or pledge is too large for
      *                             the money columns; the rest of the delivery's shape is checked by the request
      *                             validation
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the ingredient does not exist
+     * @throws NotFoundException if the ingredient does not exist
      */
     @Transactional
     public Storage deliver(InboundStorage delivery, User receivedBy) {
@@ -98,10 +99,8 @@ public class StorageService {
      * Brings the stock of each ingredient to the counted amount, taking from or adding to storage as needed.
      * Runs in one transaction: if any correction is invalid, nothing is changed.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a correction names an unknown ingredient;
-     *                                                                     ingredient and amount being present and the
-     *                                                                     amount not negative is checked by the
-     *                                                                     request validation
+     * @throws NotFoundException if a correction names an unknown ingredient; ingredient and amount being present and
+     *                           the amount not negative is checked by the request validation
      */
     @Transactional
     public void processInventoryCorrection(List<InventoryCorrection> corrections) {

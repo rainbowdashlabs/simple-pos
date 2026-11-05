@@ -1,8 +1,5 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
@@ -15,6 +12,9 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -79,9 +79,8 @@ public class PurchaseService {
      * @return the ids of the purchases booked, one per position, in the order of the positions
      * @throws BadRequestException if a position names no product; the cart's shape (not empty, amounts of at least 1)
      *                             is checked by the request validation
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a position names an unknown or deleted
-     *                                                                     product, or the account does not exist or
-     *                                                                     is closed
+     * @throws NotFoundException if a position names an unknown or deleted product, or the account does not exist or is
+     *                           closed
      * @throws ConflictException if a product is not active
      */
     @Transactional
@@ -97,8 +96,7 @@ public class PurchaseService {
      * @return the ids of the purchases booked, one per position, in the order of the positions
      * @throws BadRequestException if a position names no product; the cart's shape (not empty, amounts of at least 1)
      *                             is checked by the request validation
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a position names an unknown or deleted
-     *                                                                     product
+     * @throws NotFoundException if a position names an unknown or deleted product
      * @throws ConflictException if a product is not active
      */
     @Transactional
@@ -155,7 +153,7 @@ public class PurchaseService {
      * its units back. A guest purchase is paid back out of the till instead, booked by {@code cancelledBy}. Runs in one
      * transaction under the same ingredient locks a purchase takes.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the purchase does not exist
+     * @throws NotFoundException if the purchase does not exist
      * @throws ConflictException if the purchase belongs to a closed account, whose balance was already settled
      */
     @Transactional
@@ -169,7 +167,7 @@ public class PurchaseService {
      * purchase does, so a cancellation cannot deadlock with a sale.
      *
      * @throws BadRequestException if no purchase is named
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a purchase does not exist
+     * @throws NotFoundException if a purchase does not exist
      * @throws ConflictException if a purchase belongs to a closed account, whose balance was already settled
      */
     @Transactional

@@ -88,18 +88,13 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
-        Product product = productRepository.requireNotDeleted(id);
-        product.setDeleted(true);
-        product.setActive(false);
-        productRepository.save(product);
+        productService.delete(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/active")
     ResponseEntity<Product> toggleActive(@PathVariable int id) {
-        Product product = productRepository.requireNotDeleted(id);
-        product.setActive(!product.isActive());
-        return ResponseEntity.ok(productRepository.save(product));
+        return ResponseEntity.ok(productService.toggleActive(id));
     }
 
     @PutMapping("/{id}")

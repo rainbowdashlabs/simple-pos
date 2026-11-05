@@ -1,8 +1,9 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.controller.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.dto.CategoryRequest;
+import dev.chojo.simplepos.exceptions.ConflictException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -34,7 +35,7 @@ public class CategoryService {
     /**
      * Renames a category.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the category does not exist
+     * @throws NotFoundException if the category does not exist
      */
     @Transactional
     public Category update(int id, CategoryRequest request) {
@@ -47,7 +48,7 @@ public class CategoryService {
      * Deletes a category no product or ingredient uses any more. Deleted products still pointing at it are detached
      * from it first.
      *
-     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the category does not exist
+     * @throws NotFoundException if the category does not exist
      * @throws ConflictException if a product that is not deleted, or an ingredient, is in the category
      */
     @Transactional

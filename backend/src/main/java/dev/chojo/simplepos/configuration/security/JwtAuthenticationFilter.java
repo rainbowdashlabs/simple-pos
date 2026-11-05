@@ -1,6 +1,6 @@
 package dev.chojo.simplepos.configuration.security;
 
-import dev.chojo.simplepos.controller.exceptions.UnauthorizedException;
+import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

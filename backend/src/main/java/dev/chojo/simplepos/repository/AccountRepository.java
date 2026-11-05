@@ -1,18 +1,22 @@
 package dev.chojo.simplepos.repository;
 
-import dev.chojo.simplepos.controller.exceptions.BadRequestException;
-import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.dto.AccountDto;
+import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface AccountRepository extends JpaRepository<Account, Integer> {
+public interface AccountRepository extends LookupRepository<Account> {
+    @Override
+    default String entityName() {
+        return "Account";
+    }
+
     /**
      * Finds an account, including deleted ones, and locks its row until the surrounding transaction ends. Everything
      * that changes an account's balance or closes it takes this lock first, before any ingredient lock, so closing an
@@ -22,7 +26,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      * @throws NotFoundException if no account with this id exists
      */
     default Account requireLocked(Integer id) {
-        return findByIdForUpdate(requireId(id)).orElseThrow(() -> new NotFoundException("Account", id));
+        return findByIdForUpdate(requireId(id)).orElseThrow(() -> new NotFoundException(entityName(), id));
     }
 
     /**
@@ -32,23 +36,13 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      */
     default Account requireNotDeletedLocked(Integer id) {
         Account account = requireLocked(id);
-        if (account.isDeleted()) throw new NotFoundException("Account", id);
+        if (account.isDeleted()) throw new NotFoundException(entityName(), id);
         return account;
     }
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Account a WHERE a.id = ?1")
     Optional<Account> findByIdForUpdate(int id);
-
-    /**
-     * Finds an account, including deleted ones.
-     *
-     * @throws BadRequestException if the id is missing
-     * @throws NotFoundException if no account with this id exists
-     */
-    default Account require(Integer id) {
-        return findById(requireId(id)).orElseThrow(() -> new NotFoundException("Account", id));
-    }
 
     /**
      * Finds an account that is not deleted.
@@ -58,7 +52,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
      */
     default Account requireNotDeleted(Integer id) {
         return findById(requireId(id)).filter(account -> !account.isDeleted())
-                .orElseThrow(() -> new NotFoundException("Account", id));
+                .orElseThrow(() -> new NotFoundException(entityName(), id));
     }
 
     @Query("""
@@ -82,9 +76,4 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             WHERE a.deleted = false
             ORDER BY a.name""")
     List<AccountDto> findAllAccounts();
-
-    private Integer requireId(Integer id) {
-        if (id == null) throw new BadRequestException("Account id is missing");
-        return id;
-    }
 }
