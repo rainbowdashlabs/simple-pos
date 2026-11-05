@@ -228,5 +228,11 @@
   "password_too_short": "Mindestens {min} Zeichen",
   "password_mismatch": "Die Passwörter stimmen nicht überein",
   "password_changed": "Passwort geändert. Andere Geräte sind abgemeldet.",
-  "current_password_wrong": "Das aktuelle Passwort ist falsch."
+  "current_password_wrong": "Das aktuelle Passwort ist falsch.",
+  "export": "Export",
+  "export_from": "Von",
+  "export_to": "Bis",
+  "export_sales": "Verkäufe (CSV)",
+  "export_cash": "Kasse (CSV)",
+  "export_stock": "Lagerzugänge (CSV)"
 }

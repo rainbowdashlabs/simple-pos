@@ -228,5 +228,11 @@
   "password_too_short": "At least {min} characters",
   "password_mismatch": "The passwords do not match",
   "password_changed": "Password changed. Other devices are logged out.",
-  "current_password_wrong": "The current password is wrong."
+  "current_password_wrong": "The current password is wrong.",
+  "export": "Export",
+  "export_from": "From",
+  "export_to": "To",
+  "export_sales": "Sales (CSV)",
+  "export_cash": "Cash (CSV)",
+  "export_stock": "Stock batches (CSV)"
 }

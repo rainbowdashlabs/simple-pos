@@ -31,7 +31,24 @@ export async function requestJson(url: string, method: string, params: Map<strin
     return send(constructUrl(url, params), method, body, true)
 }
 
-async function send(requrl: string, method: string, body: Object | null, retryUnauthorized: boolean): Promise<any> {
+/**
+ * Downloads a file the backend sends, such as an export, and hands it to the browser to save under its file name.
+ */
+export async function downloadFile(url: string, params: Map<string, string | number>, fallbackName: string) {
+    const response: Response = await send(constructUrl(url, params), "GET", null, true, true)
+    const disposition = response.headers.get("Content-Disposition") ?? ""
+    const name = /filename="([^"]+)"/.exec(disposition)?.[1] ?? fallbackName
+    const href = URL.createObjectURL(await response.blob())
+    const link = document.createElement("a")
+    link.href = href
+    link.download = name
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(href), 10_000)
+}
+
+async function send(requrl: string, method: string, body: Object | null, retryUnauthorized: boolean, raw: boolean = false): Promise<any> {
     const token = await getSessionToken()
     if (!token) {
         logout()
@@ -54,10 +71,12 @@ async function send(requrl: string, method: string, body: Object | null, retryUn
         if (error.isAccountDisabled) logout()
         else if (error.status === 401) {
             if (!retryUnauthorized) logout()
-            else if (await handleUnauthorized(token)) return send(requrl, method, body, false)
+            else if (await handleUnauthorized(token)) return send(requrl, method, body, false, raw)
         }
         throw error
     }
+
+    if (raw) return response
 
     let resBody = await response.text()
     if (resBody) {

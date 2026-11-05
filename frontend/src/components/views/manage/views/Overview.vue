@@ -9,6 +9,7 @@ import CategoryBreakdownChart from "./overview/CategoryBreakdownChart.vue";
 import CashOverviewChart from "./overview/CashOverviewChart.vue";
 import BottomSalesChart from "./overview/BottomSalesChart.vue";
 import OutOfStockList from "./overview/OutOfStockList.vue";
+import ExportCard from "./overview/ExportCard.vue";
 import {Timeframes} from "@/scripts/util.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 
@@ -20,6 +21,7 @@ export default defineComponent({
     }
   },
   components: {
+    ExportCard,
     ViewWrapper, SalesSummary, RevenueTrendChart, CategoryBreakdownChart,
     CashOverviewChart, StockProjectionChart, LowStockChart, TopSalesChart, BottomSalesChart, OutOfStockList
   }
@@ -40,6 +42,7 @@ export default defineComponent({
       <TopSalesChart type="revenue" name="revenue" :timeframe="Timeframes.year" value-type="currency"/>
       <TopSalesChart type="profit" name="profit" :timeframe="Timeframes.year" value-type="currency"/>
       <BottomSalesChart :timeframe="Timeframes.month"/>
+      <ExportCard/>
     </div>
   </ViewWrapper>
 </template>

@@ -1,16 +1,20 @@
 package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.entity.Purchase;
+import jakarta.persistence.QueryHint;
 import jakarta.persistence.Tuple;
+import org.hibernate.jpa.HibernateHints;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     @Query("SELECT p.account.id FROM Purchase p WHERE p.id = ?1")
@@ -151,4 +155,12 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query("SELECT sum(price * amount) FROM Purchase WHERE purchased > ?1")
     BigDecimal totalPurchases(Instant after);
+
+    /**
+     * The purchases made in {@code [from, to)}, oldest first, with account, product and cashier, read as a stream.
+     */
+    @QueryHints({@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "500"), @QueryHint(name = HibernateHints.HINT_READ_ONLY, value = "true")})
+    @Query("SELECT p FROM Purchase p LEFT JOIN FETCH p.account LEFT JOIN FETCH p.product LEFT JOIN FETCH p.soldBy "
+           + "WHERE p.purchased >= ?1 AND p.purchased < ?2 ORDER BY p.purchased, p.id")
+    Stream<Purchase> streamBetween(Instant from, Instant to);
 }

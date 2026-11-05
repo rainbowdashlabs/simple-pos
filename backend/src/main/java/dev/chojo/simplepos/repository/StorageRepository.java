@@ -2,15 +2,19 @@ package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
+import jakarta.persistence.QueryHint;
 import jakarta.persistence.Tuple;
+import org.hibernate.jpa.HibernateHints;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface StorageRepository extends JpaRepository<Storage, Integer> {
     boolean existsByIngredient_Id(int ingredientId);
@@ -50,4 +54,11 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
             HAVING sum(pp.amount) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) > 0
             """)
     List<Tuple> usageByIngredient(Instant after, Instant until);
+
+    /**
+     * The stock batches bought in {@code [from, to)}, oldest first, with their ingredients, read as a stream.
+     */
+    @QueryHints({@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "500"), @QueryHint(name = HibernateHints.HINT_READ_ONLY, value = "true")})
+    @Query("SELECT s FROM Storage s JOIN FETCH s.ingredient WHERE s.purchased >= ?1 AND s.purchased < ?2 ORDER BY s.purchased, s.id")
+    Stream<Storage> streamBetween(Instant from, Instant to);
 }
