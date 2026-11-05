@@ -33,7 +33,9 @@
     "reset": "Reset",
     "remove_one": "Remove one",
     "add_one": "Add one",
-    "menu": "Menu"
+    "menu": "Menu",
+    "count_till": "Count till",
+    "save_count": "Save count"
   },
   "checkout_choose_account": "Choose an account",
   "checkout_no_accounts": "There are no accounts yet. Create one first.",
@@ -190,5 +192,14 @@
   "skip_to_cart": "Skip to cart",
   "per_piece": "Per piece",
   "total_paid": "Total paid",
-  "price_mode": "Price given as"
+  "price_mode": "Price given as",
+  "till_count": "Count till",
+  "till_counts": "Till counts",
+  "till_expected": "Expected",
+  "till_counted": "Counted",
+  "till_difference": "Difference",
+  "till_count_saved": "Till count saved",
+  "coins": "Coins",
+  "notes": "Notes",
+  "correction": "Correction"
 }

@@ -10,6 +10,8 @@ import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
 import CashHistory from "./cash/CashHistory.vue";
+import TillCount from "./cash/TillCount.vue";
+import TillCountHistory from "./cash/TillCountHistory.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import IconButton from "@/components/styles/buttons/IconButton.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -22,6 +24,7 @@ export default defineComponent({
     FormattedText,
     IconButton,
     ColorContainer,
+    TillCount, TillCountHistory,
     CashHistory, SelectMenu, ConfirmButton, SimpleInputField, InputField, Container, MoneyText, GridWrapper
   },
   data() {
@@ -31,6 +34,7 @@ export default defineComponent({
       type: "other",
       withdraw: false,
       deposit: false,
+      counting: false,
       componentKey: 0,
       current_cash: 0,
       current_pledge: 0,
@@ -53,13 +57,25 @@ export default defineComponent({
       this.amount = 0
       this.note = ""
     },
+    toggleCount() {
+      this.counting = !this.counting
+      this.deposit = false
+      this.withdraw = false
+    },
+    counted() {
+      this.counting = false
+      this.componentKey += 1
+      this.refreshCash()
+    },
     toggleDeposit() {
       this.deposit = !this.deposit
+      this.counting = false
       this.withdraw = false
       this.amount = 0
     },
     toggleWithdraw() {
       this.withdraw = !this.withdraw
+      this.counting = false
       this.deposit = false
       this.amount = 0
     },
@@ -120,7 +136,10 @@ export default defineComponent({
     <div class="flex justify-evenly gap-5">
       <IconButton class="w-full" bg="okay" icon="fa-download" :label="$t('button.deposit')" @click="toggleDeposit"/>
       <IconButton class="w-full" bg="warn" icon="fa-upload" :label="$t('button.withdraw')" @click="toggleWithdraw"/>
+      <IconButton class="w-full" icon="fa-cash-register" :label="$t('button.count_till')" @click="toggleCount"/>
     </div>
+
+    <TillCount v-if="counting" @counted="counted"/>
 
     <Transition>
       <GridWrapper v-show="inputActive" cols="1">
@@ -135,6 +154,7 @@ export default defineComponent({
         <ConfirmButton @click="() => submit()" :disabled="disabled" :hint="$t('button.save')" class="col-span-full"/>
       </GridWrapper>
     </Transition>
+    <TillCountHistory :key="'counts-' + componentKey"/>
     <CashHistory :key="componentKey"/>
   </ViewWrapper>
 </template>

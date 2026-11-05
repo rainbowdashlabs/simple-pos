@@ -12,7 +12,7 @@ import java.util.Locale;
  * Why money went into or out of the register. Stored and sent as its lower-case name.
  */
 public enum CashType {
-    DEPOSIT, PURCHASE, PLEDGE, BALANCE, OTHER;
+    DEPOSIT, PURCHASE, PLEDGE, BALANCE, OTHER, CORRECTION;
 
     @JsonValue
     public String value() {

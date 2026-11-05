@@ -7,12 +7,16 @@ import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
+import dev.chojo.simplepos.entity.dto.TillCountDto;
+import dev.chojo.simplepos.entity.dto.TillCountRequest;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import dev.chojo.simplepos.repository.TillCountRepository;
+import dev.chojo.simplepos.service.CashService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -34,8 +38,13 @@ public class CashController {
     private final PurchaseRepository purchaseRepository;
     private final BalanceRepository balanceRepository;
     private final IngredientRepository ingredientRepository;
+    private final TillCountRepository tillCountRepository;
+    private final CashService cashService;
 
-    public CashController(CashRepository cashRepository, PurchaseRepository purchaseRepository, BalanceRepository balanceRepository, IngredientRepository ingredientRepository) {
+    public CashController(CashRepository cashRepository, PurchaseRepository purchaseRepository, BalanceRepository balanceRepository,
+                          IngredientRepository ingredientRepository, TillCountRepository tillCountRepository, CashService cashService) {
+        this.tillCountRepository = tillCountRepository;
+        this.cashService = cashService;
         this.cashRepository = cashRepository;
         this.purchaseRepository = purchaseRepository;
         this.balanceRepository = balanceRepository;
@@ -58,7 +67,22 @@ public class CashController {
 
     @GetMapping("/total")
     public CashResponse totalCash() {
-        return new CashResponse(Money.orZero(cashRepository.totalAmount()).add(Money.orZero(balanceRepository.totalBalance())));
+        return new CashResponse(cashService.tillTotal());
+    }
+
+    @PostMapping("/count")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TillCountDto count(@Valid @RequestBody TillCountRequest request) {
+        var current = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return TillCountDto.of(cashService.count(request, current));
+    }
+
+    @GetMapping("/count")
+    public List<TillCountDto> counts(@RequestParam(defaultValue = "20") @PageSize int limit,
+                                     @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return tillCountRepository.findByOrderByCreatedDescIdDesc(Pageable.ofSize(limit).withPage(page)).stream()
+                .map(TillCountDto::of)
+                .toList();
     }
 
     @GetMapping("/total/balance")

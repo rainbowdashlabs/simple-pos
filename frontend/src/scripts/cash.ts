@@ -33,3 +33,21 @@ export async function cashHistory(limit: number = 100): Promise<CashHistoryEntry
 export async function submitCash(amount: number, note: string, type: string) {
     await postJson("api/cash", {date: Date.now(), amount: amount, note: note, type: type} as CashDto)
 }
+
+export interface TillCount {
+    id: number,
+    counted: number,
+    expected: number,
+    difference: number,
+    denominations: Record<number, number>,
+    countedBy: string,
+    created: string | number
+}
+
+export async function countTill(denominations: Record<number, number>): Promise<TillCount> {
+    return await postJson("api/cash/count", {denominations: denominations})
+}
+
+export async function tillCounts(limit: number = 5): Promise<TillCount[]> {
+    return await getJson("api/cash/count", new Map([["limit", limit]]))
+}
