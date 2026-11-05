@@ -1,10 +1,12 @@
 package dev.chojo.simplepos.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -17,7 +19,8 @@ public class Cash {
     private User user;
 
     private Instant created = Instant.now();
-    private double amount;
+    @Column(precision = 12, scale = Money.SCALE, nullable = false)
+    private BigDecimal amount;
     private CashType type;
     private String note;
 
@@ -25,8 +28,12 @@ public class Cash {
     }
 
     public Cash(User user, double amount, CashType type, String note) {
+        this(user, Money.of(amount), type, note);
+    }
+
+    public Cash(User user, BigDecimal amount, CashType type, String note) {
         this.user = user;
-        this.amount = amount;
+        this.amount = Money.of(amount);
         this.type = type;
         this.note = note;
     }
@@ -55,12 +62,12 @@ public class Cash {
         this.created = created;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setAmount(BigDecimal amount) {
+        this.amount = Money.of(amount);
     }
 
     public CashType getType() {

@@ -2,6 +2,7 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -18,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/purchase")
@@ -46,8 +47,8 @@ public class PurchaseController {
 
     @GetMapping("stats/total")
     ResponseEntity<CashResponse> getTotalPurchases(@RequestParam(required = false) Instant after) {
-        Double total = after == null ? purchaseRepository.totalPurchases() : purchaseRepository.totalPurchases(after);
-        return ResponseEntity.ok(new CashResponse(Objects.requireNonNullElse(total, 0.0)));
+        BigDecimal total = after == null ? purchaseRepository.totalPurchases() : purchaseRepository.totalPurchases(after);
+        return ResponseEntity.ok(new CashResponse(Money.orZero(total)));
     }
 
     @GetMapping("stats/top")

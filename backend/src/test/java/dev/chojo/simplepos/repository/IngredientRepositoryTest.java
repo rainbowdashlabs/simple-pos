@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
+import static dev.chojo.simplepos.MoneyAssertions.money;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -63,12 +65,12 @@ class IngredientRepositoryTest {
         Ingredient saved = ingredientRepository.save(
                 new Ingredient(null, category, "Sprite", 1.0, 6, 0, 0, 0));
 
-        int updated = ingredientRepository.updateByIdIs(saved.getId(), 2.5);
+        int updated = ingredientRepository.updateByIdIs(saved.getId(), money(2.5));
         assertEquals(1, updated);
 
         ingredientRepository.flush();
         Ingredient found = ingredientRepository.findById(saved.getId()).orElseThrow();
-        assertEquals(2.5, found.getPrice(), 0.001);
+        assertMoney(2.5, found.getPrice());
     }
 
     @Test
@@ -78,10 +80,10 @@ class IngredientRepositoryTest {
         Ingredient found = ingredientRepository.findById(saved.getId()).orElseThrow();
 
         assertEquals("Beer", found.getName());
-        assertEquals(0.8, found.getPrice(), 0.001);
+        assertMoney(0.8, found.getPrice());
         assertEquals(20, found.getContainerSize());
-        assertEquals(0.08, found.getPledge(), 0.001);
-        assertEquals(1.6, found.getPledgeContainer(), 0.001);
+        assertMoney(0.08, found.getPledge());
+        assertMoney(1.6, found.getPledgeContainer());
         assertEquals(15, found.getMinStock());
         assertEquals(category.getId(), found.getCategory().getId());
     }

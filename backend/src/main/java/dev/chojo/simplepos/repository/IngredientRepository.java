@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -52,10 +53,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Ingredient SET price = ?2 where id = ?1")
-    int updateByIdIs(int id, double price);
-
-    @Query("SELECT Ingredient ")
-    List<Ingredient> findBy(double price);
+    int updateByIdIs(int id, BigDecimal price);
 
     /**
      * Finds an ingredient that a request refers to by id. A missing one is the request's fault, so it is reported as

@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Category;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import static dev.chojo.simplepos.MoneyAssertions.money;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -97,7 +99,7 @@ class AccountServiceTest {
 
         assertEquals(before, registerTotal(), 0.001);
         assertEquals(0, balanceOf(account), 0.001);
-        assertEquals(List.of(-5.0), closingEntries().stream().map(Cash::getAmount).toList());
+        assertEquals(List.of(money(-5.0)), closingEntries().stream().map(Cash::getAmount).toList());
     }
 
     @Test
@@ -127,12 +129,11 @@ class AccountServiceTest {
 
     private double registerTotal() {
         entityManager.flush();
-        return Objects.requireNonNullElse(cashRepository.totalAmount(), 0.)
-                + Objects.requireNonNullElse(balanceRepository.totalBalance(), 0.);
+        return Money.orZero(cashRepository.totalAmount()).add(Money.orZero(balanceRepository.totalBalance())).doubleValue();
     }
 
     private double balanceOf(Account account) {
         entityManager.flush();
-        return accountRepository.findAccountById(account.getId()).orElseThrow().getBalance();
+        return accountRepository.findAccountById(account.getId()).orElseThrow().getBalance().doubleValue();
     }
 }

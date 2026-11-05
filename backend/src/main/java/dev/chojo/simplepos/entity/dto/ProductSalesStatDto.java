@@ -1,8 +1,10 @@
 package dev.chojo.simplepos.entity.dto;
 
+import dev.chojo.simplepos.entity.Money;
 import jakarta.persistence.Tuple;
 import org.slf4j.Logger;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -11,10 +13,10 @@ public final class ProductSalesStatDto {
     private static final Logger log = getLogger(ProductSalesStatDto.class);
     private Instant day;
     private int sales;
-    private double revenue;
-    private double profit;
+    private BigDecimal revenue;
+    private BigDecimal profit;
 
-    public ProductSalesStatDto(Instant day, int sales, double revenue, double profit) {
+    public ProductSalesStatDto(Instant day, int sales, BigDecimal revenue, BigDecimal profit) {
         this.day = day;
         this.sales = sales;
         this.revenue = revenue;
@@ -27,14 +29,14 @@ public final class ProductSalesStatDto {
     public ProductSalesStatDto(Tuple tuple) {
         this.day = (Instant) tuple.get("day");
         this.sales = ((Long) tuple.get("sales")).intValue();
-        this.revenue = (double) tuple.get("revenue");
-        this.profit = (double) tuple.get("profit");
+        this.revenue = Money.fromQuery((Number) tuple.get("revenue"));
+        this.profit = Money.fromQuery((Number) tuple.get("profit"));
     }
     public ProductSalesStatDto(Tuple tuple, Instant instant) {
         this.day = instant;
         this.sales = ((Long) tuple.get("sales")).intValue();
-        this.revenue = (double) tuple.get("revenue");
-        this.profit = (double) tuple.get("profit");
+        this.revenue = Money.fromQuery((Number) tuple.get("revenue"));
+        this.profit = Money.fromQuery((Number) tuple.get("profit"));
     }
 
     public Instant getDay() {
@@ -53,19 +55,19 @@ public final class ProductSalesStatDto {
         this.sales = sales;
     }
 
-    public double getRevenue() {
+    public BigDecimal getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(double revenue) {
+    public void setRevenue(BigDecimal revenue) {
         this.revenue = revenue;
     }
 
-    public double getProfit() {
+    public BigDecimal getProfit() {
         return profit;
     }
 
-    public void setProfit(double profit) {
+    public void setProfit(BigDecimal profit) {
         this.profit = profit;
     }
 }

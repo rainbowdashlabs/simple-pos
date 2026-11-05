@@ -12,6 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 @Entity
 public class Product implements Comparable<Product> {
     @Id
@@ -26,7 +28,8 @@ public class Product implements Comparable<Product> {
     private String name;
 
     @NotNull
-    private double price;
+    @Column(precision = 12, scale = Money.SCALE, nullable = false)
+    private BigDecimal price;
 
     private boolean active = true;
 
@@ -37,10 +40,14 @@ public class Product implements Comparable<Product> {
     private Recipe recipe;
 
     public Product(Integer id, Category category, String name, double price, boolean active, Recipe recipe) {
+        this(id, category, name, Money.of(price), active, recipe);
+    }
+
+    public Product(Integer id, Category category, String name, BigDecimal price, boolean active, Recipe recipe) {
         this.id = id;
         this.category = category;
         this.name = name;
-        this.price = price;
+        this.price = Money.of(price);
         this.active = active;
         this.recipe = recipe;
     }
@@ -81,12 +88,12 @@ public class Product implements Comparable<Product> {
     }
 
     @NotNull
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(@NotNull double price) {
-        this.price = price;
+    public void setPrice(@NotNull BigDecimal price) {
+        this.price = Money.of(price);
     }
 
     public boolean isActive() {

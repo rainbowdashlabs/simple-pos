@@ -75,7 +75,7 @@ export default defineComponent({
     <GridWrapper v-if="active" bg="none" padding="0" cols="2">
       <div class="flex items-center">
         <Icon class="mr-2.5" icon="fa-cart-arrow-down"/>
-        <FormattedText :value="listing.ingredient.price" type="currency"/>
+        <span>{{ $n(listing.ingredient.price, 'unit_price') }}</span>
       </div>
 
       <div v-if="listing.ingredient.containerSize != 0" class="flex items-center">

@@ -2,9 +2,15 @@ package dev.chojo.simplepos.entity.dto;
 
 import dev.chojo.simplepos.entity.Ingredient;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
-public record InboundStorage(Ingredient ingredient, Instant purchased, Double price, Double pledge, Integer amount) {
+/**
+ * A delivery of an ingredient. What was paid is given either per unit ({@code price}) or for the whole delivery
+ * ({@code total}), never both.
+ */
+public record InboundStorage(Ingredient ingredient, Instant purchased, BigDecimal price, BigDecimal total,
+                             BigDecimal pledge, Integer amount) {
     /**
      * The id of the delivered ingredient, or null if the request names none.
      */

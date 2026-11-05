@@ -11,8 +11,6 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
-import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.util.List;
+
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -58,10 +60,10 @@ class IngredientServiceTest {
 
         Ingredient found = ingredientRepository.findById(ingredient.getId()).orElseThrow();
         assertEquals("Fanta", found.getName());
-        assertEquals(1.2, found.getPrice(), 0.001);
+        assertMoney(1.2, found.getPrice());
         assertEquals(12, found.getContainerSize());
-        assertEquals(0.15, found.getPledge(), 0.001);
-        assertEquals(2.0, found.getPledgeContainer(), 0.001);
+        assertMoney(0.15, found.getPledge());
+        assertMoney(2.0, found.getPledgeContainer());
         assertEquals(5, found.getMinStock());
     }
 

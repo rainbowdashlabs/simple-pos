@@ -1,18 +1,21 @@
 package dev.chojo.simplepos.entity.dto;
 
+import dev.chojo.simplepos.entity.Money;
+
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public class AccountDto {
     private Integer id;
     private  String name;
     private  Instant created;
-    private  Double balance;
+    private  BigDecimal balance;
 
-    public AccountDto(Integer id, String name, Instant created, Double balance) {
+    public AccountDto(Integer id, String name, Instant created, BigDecimal balance) {
         this.id = id;
         this.name = name;
         this.created = created;
-        this.balance = balance;
+        this.balance = Money.of(balance);
     }
 
     public AccountDto() {
@@ -42,11 +45,11 @@ public class AccountDto {
         this.created = created;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
-        this.balance = balance;
+    public void setBalance(BigDecimal balance) {
+        this.balance = Money.of(balance);
     }
 }

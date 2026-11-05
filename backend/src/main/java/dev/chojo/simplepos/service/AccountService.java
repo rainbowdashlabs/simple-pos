@@ -4,6 +4,7 @@ import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.AccountDto;
 import dev.chojo.simplepos.repository.AccountRepository;
@@ -12,6 +13,7 @@ import dev.chojo.simplepos.repository.CashRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 /**
@@ -43,7 +45,7 @@ public class AccountService {
      *                                                                     deleted
      */
     @Transactional
-    public Balance deposit(int id, double amount) {
+    public Balance deposit(int id, BigDecimal amount) {
         Account account = accountRepository.requireNotDeletedLocked(id);
         return balanceRepository.save(new Balance(null, account, Instant.now(), amount));
     }
@@ -57,12 +59,12 @@ public class AccountService {
     @Transactional
     public void close(int id, User closedBy) {
         Account account = accountRepository.requireNotDeletedLocked(id);
-        double balance = Math.round(accountRepository.findAccountById(id).map(AccountDto::getBalance).orElse(0.0) * 100) / 100.0;
+        BigDecimal balance = accountRepository.findAccountById(id).map(AccountDto::getBalance).orElse(Money.ZERO);
 
-        if (balance != 0) {
-            balanceRepository.save(new Balance(null, account, Instant.now(), -balance));
+        if (balance.signum() != 0) {
+            balanceRepository.save(new Balance(null, account, Instant.now(), balance.negate()));
         }
-        if (balance < 0) {
+        if (balance.signum() < 0) {
             String note = "Debt written off, account closed: %s".formatted(account.getName());
             cashRepository.save(new Cash(closedBy, balance, CashType.BALANCE, note));
         }

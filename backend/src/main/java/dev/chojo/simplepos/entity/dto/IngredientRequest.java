@@ -2,10 +2,13 @@ package dev.chojo.simplepos.entity.dto;
 
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 /**
  * What a client may set on an ingredient. Its id comes from the path, and whether it is active only changes through
@@ -13,10 +16,10 @@ import jakarta.validation.constraints.Size;
  */
 public record IngredientRequest(@NotBlank @Size(max = 100) String name,
                                 @NotNull Integer categoryId,
-                                @NotNull @PositiveOrZero Double price,
+                                @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 4) BigDecimal price,
                                 @NotNull @PositiveOrZero Integer containerSize,
-                                @NotNull @PositiveOrZero Double pledge,
-                                @NotNull @PositiveOrZero Double pledgeContainer,
+                                @NotNull @PositiveOrZero @Digits(integer = 10, fraction = 2) BigDecimal pledge,
+                                @NotNull @PositiveOrZero @Digits(integer = 10, fraction = 2) BigDecimal pledgeContainer,
                                 @NotNull @PositiveOrZero Integer minStock) {
 
     /**

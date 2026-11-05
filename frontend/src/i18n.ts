@@ -7,6 +7,10 @@ const numberformats = {
         currency: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
+        unit_price: {
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol',
+            minimumFractionDigits: 2, maximumFractionDigits: 4
+        },
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2
         },
@@ -17,6 +21,10 @@ const numberformats = {
     de: {
         currency: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
+        },
+        unit_price: {
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol',
+            minimumFractionDigits: 2, maximumFractionDigits: 4
         },
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2

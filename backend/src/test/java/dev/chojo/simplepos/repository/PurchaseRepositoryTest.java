@@ -17,11 +17,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -83,9 +85,8 @@ class PurchaseRepositoryTest {
         purchaseRepository.save(new Purchase(null, account, product, Instant.now(), 2, 2.5, Collections.emptyList()));
         purchaseRepository.save(new Purchase(null, account, product, Instant.now(), 3, 1.0, Collections.emptyList()));
 
-        Double total = purchaseRepository.totalPurchases();
-        // 2*2.5 + 3*1.0 = 8.0
-        assertEquals(8.0, total, 0.001);
+        BigDecimal total = purchaseRepository.totalPurchases();
+        assertMoney(8.0, total);
     }
 
     @Test
@@ -94,14 +95,13 @@ class PurchaseRepositoryTest {
         purchaseRepository.save(new Purchase(null, account, product, Instant.now().minus(2, ChronoUnit.HOURS), 1, 2.5, Collections.emptyList()));
         purchaseRepository.save(new Purchase(null, account, product, Instant.now(), 2, 3.0, Collections.emptyList()));
 
-        Double total = purchaseRepository.totalPurchases(cutoff);
-        // Only the recent purchase: 2*3.0 = 6.0
-        assertEquals(6.0, total, 0.001);
+        BigDecimal total = purchaseRepository.totalPurchases(cutoff);
+        assertMoney(6.0, total);
     }
 
     @Test
     void shouldReturnNullTotalWhenEmpty() {
-        Double total = purchaseRepository.totalPurchases();
+        BigDecimal total = purchaseRepository.totalPurchases();
         assertNull(total);
     }
 
@@ -124,7 +124,7 @@ class PurchaseRepositoryTest {
         assertEquals(purchase.getId(), dto.id());
         assertEquals(product.getId(), dto.productId());
         assertEquals(2, dto.amount());
-        assertEquals(2.5, dto.price(), 0.001);
+        assertMoney(2.5, dto.price());
     }
 
     @Test

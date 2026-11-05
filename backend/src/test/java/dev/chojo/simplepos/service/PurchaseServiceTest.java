@@ -35,6 +35,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -92,7 +93,7 @@ class PurchaseServiceTest {
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
         assertEquals(1, purchases.get(0).getAmount());
-        assertEquals(2.0, purchases.get(0).getPrice(), 0.001);
+        assertMoney(2.0, purchases.get(0).getPrice());
     }
 
     @Test
@@ -239,7 +240,7 @@ class PurchaseServiceTest {
 
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 1)).get(0);
-        assertEquals(product.getPrice(), purchase.getPrice(), 0.001);
+        assertMoney(product.getPrice(), purchase.getPrice());
     }
 
     @Test
@@ -289,7 +290,7 @@ class PurchaseServiceTest {
         assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
         assertTrue(purchaseRepository.findById(purchase.getId()).isEmpty());
         assertEquals(0, purchasePartRepository.count());
-        assertEquals(0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance(), 0.001);
+        assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
     }
 
     @Test

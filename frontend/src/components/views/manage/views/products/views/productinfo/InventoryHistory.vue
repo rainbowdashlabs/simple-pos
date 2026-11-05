@@ -36,9 +36,9 @@ export default defineComponent({
         <div class="flex justify-evenly">
           <div>{{ entry.amount }}</div>
           <div>x</div>
-          <div>{{ $n(entry.price, 'currency') }}</div>
+          <div>{{ $n(entry.price, 'unit_price') }}</div>
           <div>=</div>
-          <div>{{ $n(entry.price * entry.amount, 'currency') }}</div>
+          <div>{{ $n(entry.cost, 'currency') }}</div>
         </div>
       </div>
     </div>

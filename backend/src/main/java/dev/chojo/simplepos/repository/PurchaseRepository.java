@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                     FROM Purchase p
                     LEFT JOIN
                       (
-                        SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                        SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
                         FROM purchase_part pp
                         LEFT JOIN storage s
                         ON pp.storage_id = s.id
@@ -54,7 +55,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 FROM Purchase p
                 LEFT JOIN
                   (
-                    SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                    SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
                     FROM purchase_part pp
                     LEFT JOIN storage s
                     ON pp.storage_id = s.id
@@ -82,7 +83,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 FROM Purchase p
                 LEFT JOIN
                   (
-                    SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                    SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
                     FROM purchase_part pp
                     LEFT JOIN storage s
                     ON pp.storage_id = s.id
@@ -102,7 +103,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
             FROM purchase p
             LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
                 FROM purchase_part pp
                 LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
@@ -137,7 +138,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             FROM product pr
             LEFT JOIN purchase p ON p.product_id = pr.id AND p.purchased > ?1
             LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
                 FROM purchase_part pp
                 LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
@@ -149,8 +150,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     List<Tuple> getBottomSales(Instant after, Pageable pageable);
 
     @Query("SELECT sum(price * amount) FROM Purchase")
-    Double totalPurchases();
+    BigDecimal totalPurchases();
 
     @Query("SELECT sum(price * amount) FROM Purchase WHERE purchased > ?1")
-    Double totalPurchases(Instant after);
+    BigDecimal totalPurchases(Instant after);
 }

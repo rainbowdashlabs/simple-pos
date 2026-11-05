@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -53,7 +54,7 @@ class ProductRepositoryTest {
         Optional<Product> found = productRepository.findById(product.getId());
         assertTrue(found.isPresent());
         assertEquals("TestProduct", found.get().getName());
-        assertEquals(2.0, found.get().getPrice(), 0.001);
+        assertMoney(2.0, found.get().getPrice());
     }
 
     @Test
@@ -101,7 +102,7 @@ class ProductRepositoryTest {
         var lazy = product.asLazyProduct();
         assertEquals(product.getId(), lazy.id());
         assertEquals("LazyTest", lazy.name());
-        assertEquals(2.5, lazy.price(), 0.001);
+        assertMoney(2.5, lazy.price());
         assertTrue(lazy.active());
     }
 }

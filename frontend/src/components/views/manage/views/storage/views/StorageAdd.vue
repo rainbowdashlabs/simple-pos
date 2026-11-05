@@ -1,4 +1,5 @@
 <script lang="ts">
+import {roundCurrency} from "@/scripts/util.ts";
 import {defineComponent} from 'vue'
 import FieldName from "@/components/views/manage/views/products/views/productcreate/FieldName.vue";
 import NamedInputField from "@/components/styles/input/NamedInputField.vue";
@@ -39,11 +40,21 @@ export default defineComponent({
     return {
       summary: null as StorageSummary | null,
       price: 0,
+      priceMode: "piece" as "piece" | "total",
       pieceCount: 0,
       containerCount: 0,
       pledgePieces: 0,
       pledgeContainers: 0,
       state: "price"
+    }
+  },
+  watch: {
+    priceMode(mode: "piece" | "total") {
+      if (this.pieceCount > 0) {
+        this.price = mode === "total" ? roundCurrency(this.price * this.pieceCount) : this.price / this.pieceCount
+      } else {
+        this.price = mode === "total" ? 0 : this.ingredient.price
+      }
     }
   },
   methods: {
@@ -73,7 +84,8 @@ export default defineComponent({
       addStorage({
         ingredient: this.ingredient,
         purchased: new Date(),
-        price: this.price,
+        price: this.priceMode === "piece" ? this.price : null,
+        total: this.priceMode === "total" ? this.price : null,
         amount: this.pieceCount,
         pledge: this.pledgePieces + this.pledgeContainers
       } as InboundStorage)
@@ -87,6 +99,13 @@ export default defineComponent({
     },
     ingredient() {
       return this.summary!.ingredient
+    },
+    totalCost(): number {
+      return this.priceMode === "total" ? this.price : this.price * this.pieceCount
+    },
+    unitPrice(): number {
+      if (this.priceMode === "piece") return this.price
+      return this.pieceCount > 0 ? this.price / this.pieceCount : 0
     },
     states() {
       if (!this.summary) return []
@@ -119,12 +138,21 @@ export default defineComponent({
     <h1 class="col-span-full">{{ ingredient.name }}</h1>
 
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'price'">
+      <fieldset class="flex gap-5">
+        <legend class="sr-only">{{ $t('price_mode') }}</legend>
+        <label class="flex items-center gap-2">
+          <input type="radio" value="piece" v-model="priceMode">{{ $t('per_piece') }}
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="radio" value="total" v-model="priceMode">{{ $t('total_paid') }}
+        </label>
+      </fieldset>
       <FormattedText :size="SizeGroup.xl"
-                     :value="$t('price') + ' ' + $t('piece')"/>
+                     :value="priceMode === 'piece' ? $t('per_piece') : $t('total_paid')"/>
       <SimpleInputField type="number"
                         v-model="price"
-                        :label="$t('price') + ' ' + $t('piece')"/>
-      <ConfirmButton :hint="$t('button.next')" @click="nextState"/>
+                        :label="priceMode === 'piece' ? $t('per_piece') : $t('total_paid')"/>
+      <ConfirmButton :hint="$t('button.next')" :disabled="price < 0" @click="nextState"/>
     </ColorContainer>
 
     <ColorContainer class="flex flex-col gap-5" v-if="state == 'container_count'">
@@ -191,7 +219,8 @@ export default defineComponent({
 
     <div v-if="state == 'overview'" class="flex-col">
       <GridWrapper class="col-span-full bg-secondary" :cols="3">
-        <RawGridRowWrapper :entries="[$t('pieces'), pieceCount, $n(price  * pieceCount, 'currency')]"/>
+        <RawGridRowWrapper :entries="[$t('pieces'), pieceCount, $n(totalCost, 'currency')]"/>
+        <RawGridRowWrapper :entries="[$t('per_piece'), '', $n(unitPrice, 'unit_price')]"/>
         <RawGridRowWrapper
             :entries="[$t('container'), '',containerCount]"/>
         <RawGridRowWrapper
@@ -201,7 +230,7 @@ export default defineComponent({
         <RawGridRowWrapper
             :entries="[$t('total') +' '+ $t('pledge'),'', $n(pledgeContainers + pledgePieces, 'currency')]"/>
         <RawGridRowWrapper class="font-bold"
-                           :entries="[$t('total'), '', $n(pledgeContainers + pledgePieces + price * pieceCount, 'currency')]"/>
+                           :entries="[$t('total'), '', $n(pledgeContainers + pledgePieces + totalCost, 'currency')]"/>
       </GridWrapper>
       <div class="flex gap-5 pt-5">
         <BackButton class="w-1/4" :hint="$t('button.back')" @click="previousState"/>

@@ -4,6 +4,7 @@ import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/cash")
@@ -58,21 +58,16 @@ public class CashController {
 
     @GetMapping("/total")
     public CashResponse totalCash() {
-        Double cash = Objects.requireNonNullElse(cashRepository.totalAmount(), 0.);
-        Double balance = Objects.requireNonNullElse(balanceRepository.totalBalance(), 0.);
-        return new CashResponse(cash + balance);
+        return new CashResponse(Money.orZero(cashRepository.totalAmount()).add(Money.orZero(balanceRepository.totalBalance())));
     }
 
     @GetMapping("/total/balance")
     public CashResponse balanceAmount() {
-        Double balance = Objects.requireNonNullElse(balanceRepository.totalBalance(), 0.);
-        Double purchases = Objects.requireNonNullElse(purchaseRepository.totalPurchases(), 0.);
-        return new CashResponse(balance - purchases);
+        return new CashResponse(Money.orZero(balanceRepository.totalBalance()).subtract(Money.orZero(purchaseRepository.totalPurchases())));
     }
 
     @GetMapping("/total/pledge")
     public CashResponse pledgeAmount() {
-        Double cash = Objects.requireNonNullElse(cashRepository.totalAmount(CashType.PLEDGE), 0.);
-        return new CashResponse(cash);
+        return new CashResponse(Money.orZero(cashRepository.totalAmount(CashType.PLEDGE)));
     }
 }

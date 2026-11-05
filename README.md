@@ -36,6 +36,11 @@ migrations, the first of which drops the unused `authority` table. Before that f
 - take a backup (`pg_dump`),
 - remove any `spring.jpa.hibernate.ddl-auto` from a mounted `application.yaml`, so it does not override the check.
 
+The migration to exact money is one way. It rounds amounts stored with fractions of a cent (cash entries such as
+−10.524 become −10.52, prices to cents, the default unit price of an ingredient to four decimals) and replaces the
+price per unit of a delivery by what was paid for it; the previous version cannot read the migrated database, so the
+only way back is restoring the backup.
+
 A database that was not kept up to date by the previous version (missing columns, an older role constraint) fails the
 check at startup or later; compare it with `V1__baseline.sql`, or dump the data and recreate it.
 

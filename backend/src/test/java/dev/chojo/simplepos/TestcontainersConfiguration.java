@@ -24,6 +24,25 @@ public class TestcontainersConfiguration {
         POSTGRES.start();
     }
 
+    /**
+     * A JDBC URL for another database in the shared container, for tests that need a database of their own.
+     */
+    public static String jdbcUrl(String database) {
+        return POSTGRES.getJdbcUrl().replace("/" + POSTGRES.getDatabaseName(), "/" + database);
+    }
+
+    public static String databaseName() {
+        return POSTGRES.getDatabaseName();
+    }
+
+    public static String username() {
+        return POSTGRES.getUsername();
+    }
+
+    public static String password() {
+        return POSTGRES.getPassword();
+    }
+
     @Bean
     FlywayMigrationStrategy cleanBeforeMigrating() {
         return flyway -> {
