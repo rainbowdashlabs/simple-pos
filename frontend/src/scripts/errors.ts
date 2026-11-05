@@ -25,6 +25,21 @@ export class ApiError extends Error {
         this.problem = problem
     }
 
+    /**
+     * Why the backend refused the request, as a code to translate, if it sent one.
+     */
+    get code(): string | null {
+        return typeof this.problem?.code === "string" ? this.problem.code : null
+    }
+
+    /**
+     * The values the refusal mentions, by name, for the translation of its code.
+     */
+    get args(): Record<string, string> {
+        const args = this.problem?.args
+        return args && typeof args === "object" ? args as Record<string, string> : {}
+    }
+
     get isNetworkError(): boolean {
         return this.status === 0
     }

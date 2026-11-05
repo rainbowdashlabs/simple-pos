@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.service;
 
-import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
@@ -9,6 +8,8 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
+import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
@@ -52,7 +53,7 @@ public class ProductService {
 
         Recipe recipe = product.getRecipe();
         if (recipe == null || recipe.getEntries() == null) {
-            throw new BadRequestException("Recipe is missing");
+            throw new BadRequestException(ErrorCode.RECIPE_MISSING);
         }
         recipe.setId(null);
         recipe.getEntries().forEach(entry -> entry.setId(null));
@@ -132,7 +133,7 @@ public class ProductService {
 
     private RecipeEntry toEntry(RecipeEntryRequest request) {
         if ((request.ingredientId() == null) == (request.ingredient() == null)) {
-            throw new BadRequestException("Each recipe entry needs either an existing ingredient or a new one");
+            throw new BadRequestException(ErrorCode.RECIPE_ENTRY_AMBIGUOUS);
         }
         Ingredient ingredient = request.ingredientId() != null
                 ? ingredientRepository.requireReferenced(request.ingredientId())

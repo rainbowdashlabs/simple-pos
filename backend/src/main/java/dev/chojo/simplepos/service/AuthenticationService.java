@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.security.TokenDto;
 import dev.chojo.simplepos.entity.security.TokenResponse;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.UnauthorizedException;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
@@ -71,7 +72,7 @@ public class AuthenticationService {
      * form can show it at the field.
      */
     public static BadRequestException wrongCurrentPassword() {
-        BadRequestException error = new BadRequestException("The current password is wrong");
+        BadRequestException error = new BadRequestException(ErrorCode.CURRENT_PASSWORD_WRONG);
         error.getBody().setProperty("field", "current");
         return error;
     }

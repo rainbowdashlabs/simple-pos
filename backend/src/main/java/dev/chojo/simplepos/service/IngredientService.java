@@ -4,6 +4,7 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.dto.IngredientRequest;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -38,7 +39,7 @@ public class IngredientService {
     public void delete(int id) {
         Ingredient ingredient = repository.require(id);
         if (recipeEntryRepository.existsByIngredient_IdAndRecipeIsNotNull(id) || storageRepository.existsByIngredient_Id(id)) {
-            throw new ConflictException("%s is used in recipes or storage. Deactivate it instead.".formatted(ingredient.getName()));
+            throw new ConflictException(ErrorCode.INGREDIENT_IN_USE, ingredient.getName());
         }
         repository.delete(ingredient);
     }

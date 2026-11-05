@@ -9,6 +9,6 @@ import jakarta.validation.constraints.Size;
  */
 public record AccountRequest(@NotBlank
                              @Size(max = 100)
-                             @Pattern(regexp = "\\P{Cc}*", message = "must not contain control characters")
+                             @Pattern(regexp = "\\P{Cc}*", message = "{simplepos.validation.no_control_characters}")
                              String name) {
 }

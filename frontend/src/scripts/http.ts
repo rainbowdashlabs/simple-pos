@@ -1,3 +1,4 @@
+import {i18n} from "@/i18n.ts";
 import {getSessionToken, handleUnauthorized, logout} from "./session.ts";
 import {ApiError} from "./errors.ts";
 import {forgetRole} from "./roles.ts";
@@ -57,6 +58,7 @@ async function send(requrl: string, method: string, body: Object | null, retryUn
     let header = new Headers()
     header.append("Authorization", `Bearer ${token}`)
     header.append("Content-Type", "application/json")
+    header.append("Accept-Language", String(i18n.global.locale))
     if (import.meta.env.DEV) console.log(`${method} ${requrl}`)
     let response: Response
     try {

@@ -154,7 +154,41 @@
     "invalid_credentials": "Benutzername oder Passwort ist falsch.",
     "account_disabled": "Dein Konto ist deaktiviert. Lass es von der Administration freischalten.",
     "too_many_logins": "Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minute erneut. | Zu viele fehlgeschlagene Anmeldungen. Versuche es in {minutes} Minuten erneut.",
-    "too_many_requests": "Zu viele Anfragen. Versuche es gleich noch einmal."
+    "too_many_requests": "Zu viele Anfragen. Versuche es gleich noch einmal.",
+    "code": {
+      "not_found": "{entity} {id} wurde nicht gefunden.",
+      "reference_unknown": "{entity} {id} existiert nicht.",
+      "id_missing": "Die ID für {entity} fehlt.",
+      "invalid_request": "Bitte die Eingaben prüfen: {details}",
+      "data_conflict": "Die Änderung passt nicht zu zwischenzeitlich geänderten Daten. Neu laden und noch einmal versuchen.",
+      "concurrent_change": "Die Daten wurden gleichzeitig geändert. Bitte noch einmal versuchen.",
+      "range_backwards": "Der Zeitraum endet, bevor er beginnt.",
+      "range_too_long": "Der Zeitraum darf höchstens {years} Jahre umfassen.",
+      "nothing_returned": "Es wurde nichts zur Rückgabe eingetragen.",
+      "ingredient_listed_twice": "Jede Zutat darf nur einmal vorkommen.",
+      "no_bottle_deposit": "{name} hat kein Flaschenpfand.",
+      "no_crate_deposit": "{name} hat kein Kistenpfand.",
+      "nothing_returned_for": "Für {name} wird nichts zurückgegeben.",
+      "refund_too_large": "Die Erstattung ist zu hoch.",
+      "recipe_missing": "Das Rezept fehlt.",
+      "recipe_entry_ambiguous": "Jeder Rezepteintrag braucht entweder eine bestehende oder eine neue Zutat.",
+      "no_purchase_to_cancel": "Es gibt keinen Kauf zum Stornieren.",
+      "amount_too_large": "Preis oder Pfand sind zu hoch.",
+      "batch_invalid": "Eine Charge braucht mindestens eine Einheit und kann nicht mehr verkauft haben, als sie enthält.",
+      "current_password_wrong": "Das aktuelle Passwort ist falsch.",
+      "username_missing": "Der Benutzername fehlt.",
+      "username_control_characters": "Der Benutzername darf keine Steuerzeichen enthalten.",
+      "username_too_long": "Der Benutzername darf höchstens {max} Zeichen lang sein.",
+      "password_too_short": "Das Passwort muss mindestens {min} Zeichen lang sein.",
+      "password_too_long": "Das Passwort darf höchstens {max} Bytes lang sein.",
+      "username_taken": "Der Benutzername {name} ist schon vergeben.",
+      "last_admin": "Mindestens ein aktiver Administrator muss bleiben.",
+      "category_in_use": "{name} wird noch von {products} Produkt(en) und {ingredients} Zutat(en) genutzt, inaktive eingeschlossen. Erst in eine andere Kategorie verschieben.",
+      "category_just_used": "{name} wurde gerade einem Produkt oder einer Zutat zugeordnet. Erst in eine andere Kategorie verschieben.",
+      "ingredient_in_use": "{name} wird in Rezepten oder im Lager verwendet. Stattdessen deaktivieren.",
+      "product_not_on_sale": "{name} ist nicht im Verkauf.",
+      "purchase_of_closed_account": "Der Kauf gehört zu einem geschlossenen Konto und kann nicht storniert werden."
+    }
   },
   "quarter": "Quartal",
   "week": "Woche",
@@ -250,5 +284,13 @@
   "shopping_copy_failed": "Kopieren ist hier nicht möglich. Markiere den Text unten, um ihn zu kopieren.",
   "guest_cash": "Gast (bar)",
   "checkout_collect": "Zu kassieren",
-  "sale": "Verkauf"
+  "sale": "Verkauf",
+  "entities": {
+    "account": "Konto",
+    "category": "Kategorie",
+    "ingredient": "Zutat",
+    "product": "Produkt",
+    "user": "Benutzer",
+    "purchase": "Kauf"
+  }
 }

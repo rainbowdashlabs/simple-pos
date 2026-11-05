@@ -10,7 +10,7 @@ public record UpdateUserRequest(Role role, Boolean enabled) {
     /**
      * At least one field is given.
      */
-    @AssertTrue(message = "nothing to change")
+    @AssertTrue(message = "{simplepos.validation.something_to_change}")
     public boolean isChanging() {
         return role != null || enabled != null;
     }

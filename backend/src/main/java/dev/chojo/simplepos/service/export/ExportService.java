@@ -6,6 +6,7 @@ import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
@@ -53,9 +54,9 @@ public class ExportService {
      * @throws BadRequestException if {@code to} is before {@code from} or too far after it
      */
     public static void requireRange(LocalDate from, LocalDate to) {
-        if (to.isBefore(from)) throw new BadRequestException("The range ends before it starts");
+        if (to.isBefore(from)) throw new BadRequestException(ErrorCode.RANGE_BACKWARDS);
         if (to.isAfter(from.plusYears(MAX_RANGE_YEARS))) {
-            throw new BadRequestException("The range may span at most %d years".formatted(MAX_RANGE_YEARS));
+            throw new BadRequestException(ErrorCode.RANGE_TOO_LONG, MAX_RANGE_YEARS);
         }
     }
 

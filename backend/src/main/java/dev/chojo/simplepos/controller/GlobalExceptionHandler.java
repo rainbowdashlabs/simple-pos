@@ -1,10 +1,10 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
-import org.springframework.core.NestedExceptionUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -86,12 +86,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(PessimisticLockingFailureException.class)
     public ResponseEntity<Object> handleLockFailure(PessimisticLockingFailureException e, WebRequest request) {
-        return respond(e, HttpStatus.CONFLICT, "The data was changed concurrently. Please retry.", request);
+        return handleExceptionInternal(e, ErrorCode.CONCURRENT_CHANGE.problem(HttpStatus.CONFLICT), new HttpHeaders(),
+                HttpStatus.CONFLICT, request);
     }
 
+    /**
+     * Answers a write the database refused, such as a duplicate, with a generic conflict. The database's own message
+     * names tables and constraints, so it is only logged with the failure, never sent to the client.
+     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> handleDataIntegrity(DataIntegrityViolationException e, WebRequest request) {
-        return respond(e, HttpStatus.CONFLICT, NestedExceptionUtils.getMostSpecificCause(e).getMessage(), request);
+        return handleExceptionInternal(e, ErrorCode.DATA_CONFLICT.problem(HttpStatus.CONFLICT), new HttpHeaders(),
+                HttpStatus.CONFLICT, request);
     }
 
     @ExceptionHandler(Exception.class)
@@ -126,6 +132,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ? "The request is invalid."
                 : errors.stream().map(error -> error.get("field") + ": " + error.get("message")).collect(Collectors.joining("; "));
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        problem.setProperty("code", ErrorCode.INVALID_REQUEST.value());
         problem.setProperty("errors", errors);
         return handleExceptionInternal(e, problem, headers, HttpStatus.BAD_REQUEST, request);
     }

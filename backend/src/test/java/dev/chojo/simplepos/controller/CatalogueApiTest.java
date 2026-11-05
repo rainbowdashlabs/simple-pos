@@ -187,7 +187,10 @@ class CatalogueApiTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"Lost\", \"categoryId\": 999999, \"price\": 0.7, \"containerSize\": 0, \"pledge\": 0, \"pledgeContainer\": 0, \"minStock\": 0}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value("Category 999999 does not exist"));
+                .andExpect(jsonPath("$.detail").value("Category 999999 does not exist"))
+                .andExpect(jsonPath("$.code").value("reference_unknown"))
+                .andExpect(jsonPath("$.args.entity").value("Category"))
+                .andExpect(jsonPath("$.args.id").value("999999"));
     }
 
     @Test

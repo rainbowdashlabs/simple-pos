@@ -14,6 +14,7 @@ import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CashRepository;
@@ -126,7 +127,7 @@ public class PurchaseService {
                 .map(position -> productRepository.requireNotDeleted(position.productId()))
                 .toList();
         for (Product product : products) {
-            if (!product.isActive()) throw new ConflictException("%s is not on sale".formatted(product.getName()));
+            if (!product.isActive()) throw new ConflictException(ErrorCode.PRODUCT_NOT_ON_SALE, product.getName());
         }
         ingredientRepository.requireLockedInOrder(products.stream()
                 .flatMap(product -> product.getRecipe().getEntries().stream())
@@ -187,7 +188,7 @@ public class PurchaseService {
     @Transactional
     public void cancelAll(Collection<Integer> ids, User cancelledBy) {
         List<Integer> distinct = ids.stream().distinct().sorted().toList();
-        if (distinct.isEmpty()) throw new BadRequestException("No purchase to cancel");
+        if (distinct.isEmpty()) throw new BadRequestException(ErrorCode.NO_PURCHASE_TO_CANCEL);
         Map<Integer, Integer> accountOf = new HashMap<>();
         for (Object[] row : purchaseRepository.findAccountIdsOf(distinct)) {
             accountOf.put((Integer) row[0], (Integer) row[1]);
@@ -198,7 +199,7 @@ public class PurchaseService {
         List<Integer> accountIds = accountOf.values().stream().filter(Objects::nonNull).distinct().sorted().toList();
         for (int accountId : accountIds) {
             if (accountRepository.requireLocked(accountId).isDeleted()) {
-                throw new ConflictException("The purchase belongs to a closed account and cannot be cancelled");
+                throw new ConflictException(ErrorCode.PURCHASE_OF_CLOSED_ACCOUNT);
             }
         }
         ingredientRepository.requireLockedInOrder(distinct.stream()

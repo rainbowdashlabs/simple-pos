@@ -6,6 +6,7 @@ import dev.chojo.simplepos.entity.dto.CreateUserRequest;
 import dev.chojo.simplepos.entity.dto.UpdateUserRequest;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.ConflictException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.TokenRepository;
 import dev.chojo.simplepos.repository.UserRepository;
@@ -60,7 +61,7 @@ public class UserAdminService {
         String username = requireUsername(request.username());
         requirePassword(request.password());
         if (userRepository.existsByUsernameIgnoreCase(username)) {
-            throw new ConflictException("Username %s is already taken".formatted(username));
+            throw new ConflictException(ErrorCode.USERNAME_TAKEN, username);
         }
         return userRepository.save(new User(null, username, passwordEncoder.encode(request.password()), true, request.role()));
     }
@@ -79,7 +80,7 @@ public class UserAdminService {
         boolean enabled = request.enabled() == null ? user.isEnabled() : request.enabled();
         boolean removesAdmin = user.isEnabled() && user.getRole() == Role.ADMIN && (role != Role.ADMIN || !enabled);
         if (removesAdmin && enabledAdmins.size() <= 1) {
-            throw new ConflictException("At least one enabled administrator must remain");
+            throw new ConflictException(ErrorCode.LAST_ADMIN);
         }
         user.setRole(role);
         user.setEnabled(enabled);
@@ -110,12 +111,12 @@ public class UserAdminService {
 
     private static String requireUsername(String username) {
         String trimmed = username == null ? "" : username.strip();
-        if (trimmed.isEmpty()) throw new BadRequestException("Username is missing");
+        if (trimmed.isEmpty()) throw new BadRequestException(ErrorCode.USERNAME_MISSING);
         if (trimmed.chars().anyMatch(Character::isISOControl)) {
-            throw new BadRequestException("Username must not contain control characters");
+            throw new BadRequestException(ErrorCode.USERNAME_CONTROL_CHARACTERS);
         }
         if (trimmed.length() > MAX_USERNAME_LENGTH) {
-            throw new BadRequestException("Username must be at most %d characters".formatted(MAX_USERNAME_LENGTH));
+            throw new BadRequestException(ErrorCode.USERNAME_TOO_LONG, MAX_USERNAME_LENGTH);
         }
         return trimmed;
     }
@@ -127,10 +128,10 @@ public class UserAdminService {
      */
     static void requirePassword(String password) {
         if (password == null || password.isBlank() || password.length() < MIN_PASSWORD_LENGTH) {
-            throw new BadRequestException("Password must be at least %d characters".formatted(MIN_PASSWORD_LENGTH));
+            throw new BadRequestException(ErrorCode.PASSWORD_TOO_SHORT, MIN_PASSWORD_LENGTH);
         }
         if (password.getBytes(StandardCharsets.UTF_8).length > MAX_PASSWORD_BYTES) {
-            throw new BadRequestException("Password must be at most %d bytes".formatted(MAX_PASSWORD_BYTES));
+            throw new BadRequestException(ErrorCode.PASSWORD_TOO_LONG, MAX_PASSWORD_BYTES);
         }
     }
 }

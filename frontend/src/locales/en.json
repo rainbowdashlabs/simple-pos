@@ -153,7 +153,41 @@
     "invalid_credentials": "Wrong username or password.",
     "account_disabled": "Your account is disabled. Ask an administrator to enable it.",
     "too_many_logins": "Too many failed logins. Try again in {minutes} minute. | Too many failed logins. Try again in {minutes} minutes.",
-    "too_many_requests": "Too many requests. Try again in a moment."
+    "too_many_requests": "Too many requests. Try again in a moment.",
+    "code": {
+      "not_found": "{entity} {id} was not found.",
+      "reference_unknown": "{entity} {id} does not exist.",
+      "id_missing": "The {entity} id is missing.",
+      "invalid_request": "Please check the input: {details}",
+      "data_conflict": "The change conflicts with data changed meanwhile. Reload and try again.",
+      "concurrent_change": "The data was changed at the same time. Please try again.",
+      "range_backwards": "The period ends before it starts.",
+      "range_too_long": "The period may span at most {years} years.",
+      "nothing_returned": "Nothing was entered to return.",
+      "ingredient_listed_twice": "Each ingredient may only be listed once.",
+      "no_bottle_deposit": "{name} has no bottle deposit.",
+      "no_crate_deposit": "{name} has no crate deposit.",
+      "nothing_returned_for": "Nothing is returned for {name}.",
+      "refund_too_large": "The refund is too large.",
+      "recipe_missing": "The recipe is missing.",
+      "recipe_entry_ambiguous": "Each recipe entry needs either an existing or a new ingredient.",
+      "no_purchase_to_cancel": "There is no purchase to cancel.",
+      "amount_too_large": "The price or deposit is too large.",
+      "batch_invalid": "A batch needs at least one unit and cannot have sold more than it holds.",
+      "current_password_wrong": "The current password is wrong.",
+      "username_missing": "The username is missing.",
+      "username_control_characters": "The username must not contain control characters.",
+      "username_too_long": "The username may be at most {max} characters long.",
+      "password_too_short": "The password must be at least {min} characters long.",
+      "password_too_long": "The password may be at most {max} bytes long.",
+      "username_taken": "The username {name} is already taken.",
+      "last_admin": "At least one enabled administrator must remain.",
+      "category_in_use": "{name} is still used by {products} product(s) and {ingredients} ingredient(s), inactive ones included. Move them to another category first.",
+      "category_just_used": "{name} was just given a product or ingredient. Move it to another category first.",
+      "ingredient_in_use": "{name} is used in recipes or storage. Deactivate it instead.",
+      "product_not_on_sale": "{name} is not on sale.",
+      "purchase_of_closed_account": "The purchase belongs to a closed account and cannot be cancelled."
+    }
   },
   "container": "Containers",
   "quarter": "Quarter",
@@ -250,5 +284,13 @@
   "shopping_copy_failed": "Copying is not possible here. Select the text below to copy it.",
   "guest_cash": "Guest (cash)",
   "checkout_collect": "To collect",
-  "sale": "Sale"
+  "sale": "Sale",
+  "entities": {
+    "account": "Account",
+    "category": "Category",
+    "ingredient": "Ingredient",
+    "product": "Product",
+    "user": "User",
+    "purchase": "Purchase"
+  }
 }

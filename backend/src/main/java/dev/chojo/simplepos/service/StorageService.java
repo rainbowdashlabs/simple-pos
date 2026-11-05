@@ -10,6 +10,7 @@ import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -58,7 +59,7 @@ public class StorageService {
                 : Money.of(delivery.price().multiply(BigDecimal.valueOf(delivery.amount())));
         if (Money.integerDigits(cost) > 10 || Money.integerDigits(Money.perUnit(cost, delivery.amount())) > 8
             || Money.integerDigits(delivery.pledge()) > 10) {
-            throw new BadRequestException("The price or pledge is too large");
+            throw new BadRequestException(ErrorCode.AMOUNT_TOO_LARGE);
         }
 
         if (cost.signum() > 0) {
@@ -87,7 +88,7 @@ public class StorageService {
     @Transactional
     public Storage addStorage(Storage storage) {
         if (storage.getAmount() < 1 || storage.getSold() < 0 || storage.getSold() > storage.getAmount()) {
-            throw new BadRequestException("A batch needs at least one unit and cannot have sold more than it holds");
+            throw new BadRequestException(ErrorCode.BATCH_INVALID);
         }
         Storage created = storageRepository.save(storage);
         if (created.getCost().signum() > 0) {

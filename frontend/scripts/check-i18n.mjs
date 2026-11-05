@@ -1,8 +1,10 @@
 /**
  * Fails when a translation key is used in the code but missing in a locale, or present in one locale only. Keys built
- * at runtime (`$t(variable)`) cannot be checked and are skipped.
+ * at runtime (`$t(variable)`) cannot be checked and are skipped; the ones the backend's error codes and entity names
+ * lead to are read from its sources and checked as well, whenever the backend is present (not in the frontend's Docker
+ * build stage, which sees only the frontend); a backend whose codes or entity names cannot be found fails the check.
  */
-import {readFileSync, readdirSync, statSync} from "node:fs"
+import {existsSync, readFileSync, readdirSync, statSync} from "node:fs"
 import {join} from "node:path"
 import {fileURLToPath} from "node:url"
 
@@ -14,11 +16,11 @@ function flatten(object, prefix = "") {
         typeof value === "object" ? flatten(value, `${prefix}${key}.`) : [`${prefix}${key}`])
 }
 
-function files(dir) {
+function files(dir, pattern = /\.(vue|ts)$/) {
     return readdirSync(dir).flatMap(name => {
         const path = join(dir, name)
-        if (statSync(path).isDirectory()) return files(path)
-        return /\.(vue|ts)$/.test(name) ? [path] : []
+        if (statSync(path).isDirectory()) return files(path, pattern)
+        return pattern.test(name) ? [path] : []
     })
 }
 
@@ -43,6 +45,23 @@ for (const file of files(root)) {
         }
     }
 }
+const backendRoot = fileURLToPath(new URL("../../backend/", import.meta.url))
+const backend = join(backendRoot, "src/main/java/dev/chojo/simplepos/")
+if (existsSync(backendRoot)) {
+    const errorCodes = readFileSync(join(backend, "exceptions", "ErrorCode.java"), "utf8")
+    const codes = [...errorCodes.matchAll(/^\s{4}([A-Z][A-Z_]+)\(/gm)].map(match => match[1].toLowerCase())
+    if (codes.length === 0) problems.push("No error codes found in ErrorCode.java")
+    const entityNames = files(backend, /\.java$/)
+        .flatMap(file => [...readFileSync(file, "utf8").matchAll(/(?:new NotFoundException\(|String entityName\(\) \{\s*return )"(\w+)"/g)])
+        .map(match => match[1].toLowerCase())
+    if (entityNames.length === 0) problems.push("No entity names found in the backend sources")
+    for (const key of [...codes.map(code => `errors.code.${code}`), ...entityNames.map(name => `entities.${name}`)]) {
+        for (const [locale, keys] of Object.entries(locales)) {
+            if (!keys.includes(key)) problems.push(`backend: "${key}" is missing in ${locale}`)
+        }
+    }
+}
+
 const [en, de] = [new Set(locales.en), new Set(locales.de)]
 for (const key of en) if (!de.has(key)) problems.push(`"${key}" is only in en`)
 for (const key of de) if (!en.has(key)) problems.push(`"${key}" is only in de`)

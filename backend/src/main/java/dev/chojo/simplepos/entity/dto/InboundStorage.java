@@ -25,7 +25,7 @@ public record InboundStorage(@NotNull Ingredient ingredient,
     /**
      * Exactly one of the price per unit and the total is given.
      */
-    @AssertTrue(message = "give either the price per unit or the total")
+    @AssertTrue(message = "{simplepos.validation.priced_once}")
     public boolean isPricedOnce() {
         return (price == null) != (total == null);
     }

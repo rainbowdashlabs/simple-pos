@@ -1,6 +1,7 @@
 package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -36,7 +37,7 @@ public interface LookupRepository<T> extends JpaRepository<T, Integer> {
      */
     default T requireReferenced(Integer id) {
         return findById(requireId(id))
-                .orElseThrow(() -> new BadRequestException("%s %d does not exist".formatted(entityName(), id)));
+                .orElseThrow(() -> new BadRequestException(ErrorCode.REFERENCE_UNKNOWN, entityName(), id));
     }
 
     /**
@@ -45,7 +46,7 @@ public interface LookupRepository<T> extends JpaRepository<T, Integer> {
      * @throws BadRequestException if the id is missing
      */
     default Integer requireId(Integer id) {
-        if (id == null) throw new BadRequestException(entityName() + " id is missing");
+        if (id == null) throw new BadRequestException(ErrorCode.ID_MISSING, entityName());
         return id;
     }
 }

@@ -32,11 +32,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -226,6 +229,39 @@ class InputCheckApiTest {
                 .andExpect(jsonPath("$.sales").isNumber())
                 .andExpect(jsonPath("$.revenue").isNumber())
                 .andExpect(jsonPath("$.day").doesNotExist());
+    }
+
+    @Test
+    void validationAnswersCarryTheirCodeInTheUsersLanguage() throws Exception {
+        String english = mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)
+                        .header("Accept-Language", "en")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("invalid_request"))
+                .andReturn().getResponse().getContentAsString();
+        String german = mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)
+                        .header("Accept-Language", "de")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+        assertNotEquals(messageOf(english), messageOf(german));
+    }
+
+    @Test
+    void ownValidationMessagesAreTranslatedToo() throws Exception {
+        mvc.perform(post("/api/account").header("Authorization", "Bearer " + token)
+                        .header("Accept-Language", "de")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"line\\nbreak\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].message").value("darf keine Steuerzeichen enthalten"));
+    }
+
+    private static Object messageOf(String body) {
+        return ((Map<?, ?>) ((List<?>) JsonParserFactory.getJsonParser().parseMap(body).get("errors")).get(0)).get("message");
     }
 
     @Test

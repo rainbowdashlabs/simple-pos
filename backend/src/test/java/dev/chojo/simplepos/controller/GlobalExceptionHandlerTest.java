@@ -11,6 +11,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.ServletWebRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
@@ -42,13 +43,14 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void shouldRenderConstraintViolationAsConflictWithRootCause() {
+    void shouldRenderConstraintViolationAsConflictWithoutTheDatabaseMessage() {
         var violation = new DataIntegrityViolationException("could not execute statement", new RuntimeException("duplicate key"));
 
         ResponseEntity<Object> response = handler.handleDataIntegrity(violation, request);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         ProblemDetail problem = assertInstanceOf(ProblemDetail.class, response.getBody());
-        assertEquals("duplicate key", problem.getDetail());
+        assertEquals("data_conflict", problem.getProperties().get("code"));
+        assertFalse(problem.getDetail().contains("duplicate key"));
     }
 }

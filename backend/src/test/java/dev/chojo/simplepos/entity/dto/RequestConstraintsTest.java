@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.entity.dto;
 
+import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Role;
@@ -8,6 +9,9 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -77,6 +81,16 @@ class RequestConstraintsTest {
         assertTrue(valid(new UpdateUserRequest(Role.STAFF, null)));
         assertFalse(valid(new UpdateUserRequest(null, null)));
         assertFalse(valid(new CreateUserRequest("someone", "long-enough", null)));
+    }
+
+    @Test
+    void pageLimitTextsNameTheLimitsInForce() {
+        for (Locale locale : List.of(Locale.ROOT, Locale.ENGLISH, Locale.GERMAN)) {
+            ResourceBundle messages = ResourceBundle.getBundle("ValidationMessages", locale);
+            assertTrue(messages.getString("simplepos.validation.page_size").contains(String.valueOf(PageSize.MAX)));
+            assertTrue(messages.getString("simplepos.validation.page_number")
+                    .contains(String.valueOf(Integer.MAX_VALUE / PageSize.MAX)));
+        }
     }
 
     private static boolean valid(Object request) {

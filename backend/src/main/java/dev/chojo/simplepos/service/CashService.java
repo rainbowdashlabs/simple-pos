@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
@@ -89,9 +90,9 @@ public class CashService {
      */
     @Transactional
     public BigDecimal returnEmpties(List<EmptiesReturn> returns, User returnedBy) {
-        if (returns.isEmpty()) throw new BadRequestException("Nothing is returned");
+        if (returns.isEmpty()) throw new BadRequestException(ErrorCode.NOTHING_RETURNED);
         if (new HashSet<>(returns.stream().map(EmptiesReturn::ingredientId).toList()).size() != returns.size()) {
-            throw new BadRequestException("Each ingredient may only be listed once");
+            throw new BadRequestException(ErrorCode.INGREDIENT_LISTED_TWICE);
         }
         BigDecimal total = Money.ZERO;
         for (EmptiesReturn empties : returns) {
@@ -108,15 +109,15 @@ public class CashService {
         BigDecimal bottleDeposit = Money.orZero(ingredient.getPledge());
         BigDecimal crateDeposit = Money.orZero(ingredient.getPledgeContainer());
         if (empties.bottles() > 0 && bottleDeposit.signum() == 0) {
-            throw new BadRequestException("%s has no bottle deposit".formatted(ingredient.getName()));
+            throw new BadRequestException(ErrorCode.NO_BOTTLE_DEPOSIT, ingredient.getName());
         }
         if (empties.crates() > 0 && crateDeposit.signum() == 0) {
-            throw new BadRequestException("%s has no crate deposit".formatted(ingredient.getName()));
+            throw new BadRequestException(ErrorCode.NO_CRATE_DEPOSIT, ingredient.getName());
         }
         BigDecimal refund = Money.of(bottleDeposit.multiply(BigDecimal.valueOf(empties.bottles()))
                 .add(crateDeposit.multiply(BigDecimal.valueOf(empties.crates()))));
-        if (refund.signum() <= 0) throw new BadRequestException("Nothing is returned for %s".formatted(ingredient.getName()));
-        if (Money.integerDigits(refund) > 10) throw new BadRequestException("The refund is too large");
+        if (refund.signum() <= 0) throw new BadRequestException(ErrorCode.NOTHING_RETURNED_FOR, ingredient.getName());
+        if (Money.integerDigits(refund) > 10) throw new BadRequestException(ErrorCode.REFUND_TOO_LARGE);
         return refund;
     }
 
