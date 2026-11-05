@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
+import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.entity.response.Listing;
@@ -14,6 +15,8 @@ import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.service.StockProjectionService;
 import dev.chojo.simplepos.service.StorageService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -87,6 +90,11 @@ public class StorageController {
     @ResponseStatus(HttpStatus.OK)
     public void updateInventory(@RequestBody List<InventoryCorrection> corrections) {
         storageService.processInventoryCorrection(corrections);
+    }
+
+    @GetMapping("/shopping-list")
+    public List<ShoppingListEntry> shoppingList(@RequestParam(defaultValue = "14") @Min(1) @Max(90) int days) {
+        return stockProjectionService.shoppingList(days);
     }
 
     @GetMapping("/stock/projection")

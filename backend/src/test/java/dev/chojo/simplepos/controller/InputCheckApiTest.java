@@ -170,6 +170,15 @@ class InputCheckApiTest {
     }
 
     @Test
+    void shoppingListDaysAreChecked() throws Exception {
+        for (String days : new String[]{"0", "91"}) {
+            mvc.perform(get("/api/storage/shopping-list").header("Authorization", "Bearer " + token).param("days", days))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors[0].field").value("days"));
+        }
+    }
+
+    @Test
     void returnedEmptiesAreChecked() throws Exception {
         for (String body : new String[]{"[]", "[null]", "[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"}) {
             mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)

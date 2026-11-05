@@ -77,3 +77,16 @@ export interface StockProjection {
 export function stockProjection(): Promise<StockProjection[]> {
     return getJson("api/storage/stock/projection")
 }
+
+export interface ShoppingListEntry {
+    ingredient: Ingredient
+    stock: number
+    dailyUsage: number
+    amount: number
+    containers: number
+    estimatedCost: number
+}
+
+export function shoppingList(days: number): Promise<ShoppingListEntry[]> {
+    return getJson("api/storage/shopping-list", new Map([["days", days]]))
+}

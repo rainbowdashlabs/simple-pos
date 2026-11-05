@@ -39,7 +39,9 @@
     "return_empties": "Return empties",
     "book_refund": "Book refund",
     "undo": "Undo",
-    "change_password": "Change password"
+    "change_password": "Change password",
+    "shopping_list": "Shopping list",
+    "copy_list": "Copy list"
   },
   "checkout_choose_account": "Choose an account",
   "checkout_no_accounts": "There are no accounts yet. Create one first.",
@@ -189,7 +191,8 @@
     "no_access": "No access",
     "theme": "Theme",
     "not_found": "Not found",
-    "empties": "Return empties"
+    "empties": "Return empties",
+    "shopping_list": "Shopping list"
   },
   "cart_added": "{name} added, cart {total}",
   "cart_removed": "1 × {name} removed, cart {total}",
@@ -234,5 +237,15 @@
   "export_to": "To",
   "export_sales": "Sales (CSV)",
   "export_cash": "Cash (CSV)",
-  "export_stock": "Stock batches (CSV)"
+  "export_stock": "Stock batches (CSV)",
+  "ingredient": "Ingredient",
+  "shopping_days_label": "Last for",
+  "shopping_days": "{days} days",
+  "shopping_containers": "{containers} containers ({amount} pcs.)",
+  "shopping_units": "{amount} pcs.",
+  "shopping_estimated_cost": "Estimated cost",
+  "shopping_nothing": "Nothing to buy for this period.",
+  "shopping_copied": "List copied",
+  "quantity": "Quantity",
+  "shopping_copy_failed": "Copying is not possible here. Select the text below to copy it."
 }
