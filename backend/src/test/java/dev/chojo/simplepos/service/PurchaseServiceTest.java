@@ -303,6 +303,39 @@ class PurchaseServiceTest {
     }
 
     @Test
+    void shouldUndoAWholeSale() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        Product second = productService.create(new Product(null, product.getCategory(), "PurchaseServiceSecond", 1.0, true,
+                new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 2)))));
+        entityManager.flush();
+        List<Integer> sale = purchaseService.purchase(account.getId(),
+                List.of(new CartPositionDto(product, 3), new CartPositionDto(second, 1)));
+        entityManager.flush();
+        entityManager.clear();
+
+        purchaseService.cancelAll(sale);
+
+        entityManager.flush();
+        entityManager.clear();
+        assertEquals(2, sale.size());
+        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertTrue(purchaseRepository.findAllById(sale).isEmpty());
+        assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
+    }
+
+    @Test
+    void shouldCancelNothingWhenOneOfTheSaleIsGone() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
+        entityManager.flush();
+        List<Integer> sale = purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 2)));
+        entityManager.flush();
+
+        assertThrows(NotFoundException.class, () -> purchaseService.cancelAll(List.of(sale.get(0), -1)));
+        entityManager.clear();
+        assertTrue(purchaseRepository.findById(sale.get(0)).isPresent());
+    }
+
+    @Test
     void shouldGiveTheStockBackToEveryBatchItCameFrom() {
         storageService.addStorage(new Storage(null, ingredient, Instant.now().minusSeconds(60), 0.5, 2, 0));
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 5, 0));

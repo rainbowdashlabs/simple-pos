@@ -37,7 +37,8 @@
     "count_till": "Count till",
     "save_count": "Save count",
     "return_empties": "Return empties",
-    "book_refund": "Book refund"
+    "book_refund": "Book refund",
+    "undo": "Undo"
   },
   "checkout_choose_account": "Choose an account",
   "checkout_no_accounts": "There are no accounts yet. Create one first.",
@@ -214,5 +215,8 @@
   "empties_outstanding_after": "Outstanding afterwards",
   "empties_more_than_outstanding": "This returns more deposit than is outstanding.",
   "empties_returned": "Refund booked",
-  "no_matches": "No matches"
+  "no_matches": "No matches",
+  "sale_booked": "Sale booked. Undo possible for {seconds} s.",
+  "sale_booked_undo": "Sale booked. It can be undone for {seconds} seconds.",
+  "sale_undone": "Sale undone"
 }

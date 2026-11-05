@@ -13,6 +13,7 @@ import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.DepositDto;
 import dev.chojo.simplepos.entity.dto.LazyProduct;
 import dev.chojo.simplepos.entity.dto.PurchaseHistoryDto;
+import dev.chojo.simplepos.entity.dto.PurchaseReceipt;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
@@ -20,6 +21,7 @@ import dev.chojo.simplepos.service.AccountService;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -98,9 +101,9 @@ public class AccountController {
     }
 
     @PostMapping("/{id}/purchase")
-    ResponseEntity<Void> purchase(@PathVariable int id, @RequestBody List<CartPositionDto> positions) {
-        purchaseService.purchase(id, positions);
-        return ResponseEntity.accepted().build();
+    @ResponseStatus(HttpStatus.CREATED)
+    PurchaseReceipt purchase(@PathVariable int id, @RequestBody List<CartPositionDto> positions) {
+        return new PurchaseReceipt(purchaseService.purchase(id, positions));
     }
 
     @GetMapping("/{id}/purchase")

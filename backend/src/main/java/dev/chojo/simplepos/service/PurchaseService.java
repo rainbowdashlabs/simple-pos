@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class PurchaseService {
      * <p>
      * The account is loaded only here, under its row lock, so an account closed meanwhile is seen as closed.
      *
+     * @return the ids of the purchases booked, one per position, in the order of the positions
      * @throws BadRequestException if the cart is empty or a position's amount is below 1
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a position names an unknown or deleted
      *                                                                     product, or the account does not exist or
@@ -66,7 +68,7 @@ public class PurchaseService {
      * @throws ConflictException if a product is not active
      */
     @Transactional
-    public synchronized void purchase(int accountId, List<CartPositionDto> positions) {
+    public synchronized List<Integer> purchase(int accountId, List<CartPositionDto> positions) {
         if (positions == null || positions.isEmpty()) throw new BadRequestException("The cart is empty");
         for (CartPositionDto position : positions) {
             if (position.amount() < 1) throw new BadRequestException("Every position needs an amount of at least 1");
@@ -82,6 +84,7 @@ public class PurchaseService {
                 .flatMap(product -> product.getRecipe().getEntries().stream())
                 .map(entry -> entry.getIngredient().getId())
                 .toList());
+        List<Integer> booked = new ArrayList<>();
         for (int index = 0; index < positions.size(); index++) {
             CartPositionDto position = positions.get(index);
             Product prod = products.get(index);
@@ -104,8 +107,9 @@ public class PurchaseService {
                 }
             }
             purchase.setParts(parts);
-            purchaseRepository.save(purchase);
+            booked.add(purchaseRepository.save(purchase).getId());
         }
+        return booked;
     }
 
     /**
@@ -116,12 +120,39 @@ public class PurchaseService {
      * @throws ConflictException if the purchase belongs to a closed account, whose balance was already settled
      */
     @Transactional
-    public synchronized void cancel(int id) {
-        Integer accountId = purchaseRepository.findAccountIdOf(id).orElseThrow(() -> new NotFoundException("Purchase", id));
-        if (accountRepository.requireLocked(accountId).isDeleted()) {
-            throw new ConflictException("The purchase belongs to a closed account and cannot be cancelled");
+    public void cancel(int id) {
+        cancelAll(List.of(id));
+    }
+
+    /**
+     * Cancels several purchases, such as all positions of one sale, in one transaction: either all of them are
+     * cancelled or none. The accounts are locked first, then all ingredients involved in ascending order, as a
+     * purchase does, so a cancellation cannot deadlock with a sale.
+     *
+     * @throws BadRequestException if no purchase is named
+     * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if a purchase does not exist
+     * @throws ConflictException if a purchase belongs to a closed account, whose balance was already settled
+     */
+    @Transactional
+    public synchronized void cancelAll(Collection<Integer> ids) {
+        List<Integer> distinct = ids.stream().distinct().sorted().toList();
+        if (distinct.isEmpty()) throw new BadRequestException("No purchase to cancel");
+        List<Integer> accountIds = new ArrayList<>();
+        for (int id : distinct) {
+            accountIds.add(purchaseRepository.findAccountIdOf(id).orElseThrow(() -> new NotFoundException("Purchase", id)));
         }
-        ingredientRepository.requireLockedInOrder(purchasePartRepository.findIngredientIdsOf(id));
+        for (int accountId : accountIds.stream().distinct().sorted().toList()) {
+            if (accountRepository.requireLocked(accountId).isDeleted()) {
+                throw new ConflictException("The purchase belongs to a closed account and cannot be cancelled");
+            }
+        }
+        ingredientRepository.requireLockedInOrder(distinct.stream()
+                .flatMap(id -> purchasePartRepository.findIngredientIdsOf(id).stream())
+                .toList());
+        distinct.forEach(this::cancelLocked);
+    }
+
+    private void cancelLocked(int id) {
         Purchase purchase = purchaseRepository.findById(id).orElseThrow(() -> new NotFoundException("Purchase", id));
         List<PurchasePart> parts = purchasePartRepository.findAllByPurchase(purchase);
         for (PurchasePart part : parts) {

@@ -63,6 +63,7 @@ function clearTokens() {
     store.loggedIn = false
     store.role = null
     store.roleOf = null
+    store.lastSale = null
     store.cart.clearCart()
 }
 

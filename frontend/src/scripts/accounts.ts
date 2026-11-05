@@ -59,7 +59,11 @@ export function deposits(id: number, limit: number): Promise<Balance[]> {
     return getJson(`api/account/${id}/balance`, new Map([["limit", limit]]))
 }
 
-export function purchase(id: number, entries: CartPosition[]): Promise<unknown> {
+export interface PurchaseReceipt {
+    purchaseIds: number[]
+}
+
+export function purchase(id: number, entries: CartPosition[]): Promise<PurchaseReceipt> {
     return postJson(`api/account/${id}/purchase`, entries)
 }
 

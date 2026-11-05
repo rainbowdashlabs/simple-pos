@@ -1,7 +1,7 @@
 <script lang="ts">
 import {keepingFocus} from "@/scripts/focus.ts";
 import {defineComponent} from 'vue'
-import {store} from "@/scripts/store.ts";
+import {store, UNDO_MILLIS} from "@/scripts/store.ts";
 import AccountPicker from "./checkout/AccountPicker.vue";
 import {account, Account, accounts, purchase} from "@/scripts/accounts.ts";
 import CheckoutEntry from "./checkout/CheckoutEntry.vue";
@@ -73,7 +73,8 @@ export default defineComponent({
       this.submitting = true
       const accountId = this.account.id
       keepingFocus(() => purchase(accountId, Array.from(this.cart.products.values()))
-          .then(() => {
+          .then(receipt => {
+            store.lastSale = {accountId: accountId, purchaseIds: receipt.purchaseIds, until: Date.now() + UNDO_MILLIS}
             this.cart.clearCart()
             this.$router.push({name: 'profile', params: {id: accountId}, query: {from: 'checkout'}})
           })

@@ -37,7 +37,8 @@
     "count_till": "Kasse zählen",
     "save_count": "Zählung speichern",
     "return_empties": "Leergut zurückgeben",
-    "book_refund": "Erstattung buchen"
+    "book_refund": "Erstattung buchen",
+    "undo": "Rückgängig"
   },
   "checkout_choose_account": "Konto auswählen",
   "checkout_no_accounts": "Es gibt noch keine Konten. Lege zuerst eines an.",
@@ -214,5 +215,8 @@
   "empties_outstanding_after": "Danach offen",
   "empties_more_than_outstanding": "Damit wird mehr Pfand zurückgegeben als offen ist.",
   "empties_returned": "Erstattung gebucht",
-  "no_matches": "Keine Treffer"
+  "no_matches": "Keine Treffer",
+  "sale_booked": "Verkauf gebucht. Rückgängig noch {seconds} s möglich.",
+  "sale_booked_undo": "Verkauf gebucht. Er kann {seconds} Sekunden lang rückgängig gemacht werden.",
+  "sale_undone": "Verkauf rückgängig gemacht"
 }

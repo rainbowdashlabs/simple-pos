@@ -4,19 +4,25 @@ import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Money;
+import dev.chojo.simplepos.entity.dto.PurchaseCancelRequest;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.PurchaseService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
@@ -45,6 +51,12 @@ public class PurchaseController {
     ResponseEntity<Void> delete(@PathVariable int id) {
         purchaseService.cancel(id);
         return ResponseEntity.accepted().build();
+    }
+
+    @PostMapping("/cancel")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void cancel(@Valid @RequestBody PurchaseCancelRequest request) {
+        purchaseService.cancelAll(request.ids());
     }
 
     @GetMapping("stats/total")
