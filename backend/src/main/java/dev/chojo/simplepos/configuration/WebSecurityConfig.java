@@ -68,13 +68,18 @@ public class WebSecurityConfig {
                 .build();
     }
 
+    /**
+     * Every request is authenticated by the {@code Bearer} token in its {@code Authorization} header, which a browser
+     * never adds on its own to a request another site triggers. CSRF protection therefore has nothing to guard and is
+     * switched off.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider, JwtAuthenticationFilter jwtAuthenticationFilter,
                                                    SecurityErrorResolver securityErrorResolver) throws Exception {
         return http
                 .cors(conf -> conf.configurationSource(corsConfigurationSource()))
                 .headers(headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(CONTENT_SECURITY_POLICY)))
-                .csrf(AbstractHttpConfigurer::disable) // TODO enable and figure out this stuff
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(conf -> conf
                         .requestMatchers("/api/auth/**", "/api/demo/**", "/api/version").permitAll()
                         .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())

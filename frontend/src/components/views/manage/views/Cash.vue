@@ -92,7 +92,6 @@ export default defineComponent({
       }
       return "withdraw"
     }
-    // TODO Add submit for cash transaction
   },
   mounted() {
     this.refreshCash()

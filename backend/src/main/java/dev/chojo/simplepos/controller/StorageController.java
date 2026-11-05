@@ -51,7 +51,6 @@ public class StorageController {
     @ResponseStatus(HttpStatus.OK)
     public List<Storage> getSummary(@RequestParam(defaultValue = "100") @PageSize int limit,
                                     @RequestParam(defaultValue = "0") @PageNumber int page) {
-        // TODO the response lacks the ingredient of each batch, so it cannot be attributed
         return storageRepository.findAllBy(PageRequest.of(page, limit, Sort.by("id")));
     }
 

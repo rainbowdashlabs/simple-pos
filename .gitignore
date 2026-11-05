@@ -2,3 +2,5 @@
 .direnv
 config
 .env
+
+/backend/requests/http-client.private.env.json
