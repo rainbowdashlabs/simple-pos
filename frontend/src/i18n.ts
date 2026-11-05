@@ -7,6 +7,10 @@ const numberformats = {
         currency: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
+        whole_currency: {
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol',
+            maximumFractionDigits: 0
+        },
         unit_price: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol',
             minimumFractionDigits: 2, maximumFractionDigits: 4
@@ -22,6 +26,10 @@ const numberformats = {
         currency: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol'
         },
+        whole_currency: {
+            style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol',
+            maximumFractionDigits: 0
+        },
         unit_price: {
             style: 'currency', currency: 'EUR', notation: 'standard', currencyDisplay: 'symbol',
             minimumFractionDigits: 2, maximumFractionDigits: 4
@@ -34,6 +42,11 @@ const numberformats = {
         }
     }
 } as const
+
+/**
+ * The languages the interface is translated into.
+ */
+export type Language = keyof typeof numberformats
 
 const datetimeFormats = {
     en: {

@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.chojo.simplepos.entity.dto.LazyProduct;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -64,6 +65,19 @@ public class Product implements Comparable<Product> {
 
     public void setRecipe(Recipe recipe) {
         this.recipe = recipe;
+    }
+
+    /**
+     * What one unit of the product costs at the ingredients' current prices; 0 without a recipe. Sent with the
+     * product so the interface shows the same margin everywhere; the profit in the statistics uses what the sold
+     * units actually cost instead.
+     */
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    public BigDecimal getUnitCost() {
+        if (recipe == null || recipe.getEntries() == null) return Money.ZERO;
+        return Money.of(recipe.getEntries().stream()
+                .map(entry -> entry.getIngredient().getPrice().multiply(BigDecimal.valueOf(entry.getAmount())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
     }
 
     public Integer getId() {

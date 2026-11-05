@@ -8,6 +8,7 @@ import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.Storage;
+import dev.chojo.simplepos.repository.projection.TotalsRow;
 import dev.chojo.simplepos.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -216,6 +217,23 @@ class PurchaseRepositoryTest {
 
         assertEquals(LocalDate.of(2026, 6, 11), berlin.get(0).getDay());
         assertEquals(LocalDate.of(2026, 6, 10), utc.get(0).getDay());
+    }
+
+    @Test
+    void theSummaryTotalsEverySaleSinceTheDateIncludingGuests() {
+        Instant after = Instant.parse("2001-05-01T00:00:00Z");
+        TotalsRow before = purchaseRepository.getSalesSummary(after);
+        Purchase sold = new Purchase(null, account, product, Instant.parse("2001-05-02T12:00:00Z"), 3, 2.5, Collections.emptyList());
+        sold.setCost(new BigDecimal("1.20"));
+        purchaseRepository.save(sold);
+        purchaseRepository.save(new Purchase(null, null, product, Instant.parse("2001-05-03T12:00:00Z"), 1, 2.5, Collections.emptyList()));
+        purchaseRepository.save(new Purchase(null, account, product, Instant.parse("2001-04-30T12:00:00Z"), 9, 2.5, Collections.emptyList()));
+
+        TotalsRow summary = purchaseRepository.getSalesSummary(after);
+
+        assertEquals(4, summary.getSales() - before.getSales());
+        assertMoney(10.0, summary.getRevenue().subtract(before.getRevenue()));
+        assertMoney(8.8, summary.getProfit().subtract(before.getProfit()));
     }
 
     @Test

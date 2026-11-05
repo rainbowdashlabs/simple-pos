@@ -5,7 +5,6 @@ import {currentBalance, currentCash, currentPledge, submitCash} from "@/scripts/
 import MoneyText from "@/components/styles/text/MoneyText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import Container from "@/components/styles/container/Container.vue";
-import InputField from "@/components/styles/input/InputField.vue";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
@@ -25,7 +24,7 @@ export default defineComponent({
     IconButton,
     ColorContainer,
     TillCount, TillCountHistory,
-    CashHistory, SelectMenu, ConfirmButton, SimpleInputField, InputField, Container, MoneyText, GridWrapper
+    CashHistory, SelectMenu, ConfirmButton, SimpleInputField, Container, MoneyText, GridWrapper
   },
   data() {
     return {

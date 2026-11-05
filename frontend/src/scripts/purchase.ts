@@ -68,11 +68,21 @@ export function statsBottom(after: Date, limit: number = 10): Promise<SalesStat[
     return getJson("api/purchase/stats/bottom", args)
 }
 
-export interface DailyStat {
-    day: string
+/**
+ * Sales, revenue and profit of a day, or of a whole period when `day` is null.
+ */
+export interface PeriodStat {
+    day: string | null
     sales: number
     revenue: number
     profit: number
+}
+
+/**
+ * Sales of one business day, as "yyyy-mm-dd".
+ */
+export interface DailyStat extends PeriodStat {
+    day: string
 }
 
 export interface CategoryStat {
@@ -80,6 +90,13 @@ export interface CategoryStat {
     categoryName: string
     sales: number
     revenue: number
+}
+
+/**
+ * Sales, revenue and profit of all products since `after`, in one figure each.
+ */
+export function salesSummary(after: Date): Promise<PeriodStat> {
+    return getJson("api/purchase/stats/summary", new Map([["after", after.toISOString()]]))
 }
 
 export function dailyStats(after: Date): Promise<DailyStat[]> {

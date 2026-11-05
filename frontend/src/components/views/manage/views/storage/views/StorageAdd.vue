@@ -2,7 +2,6 @@
 import {roundCurrency} from "@/scripts/util.ts";
 import {defineComponent} from 'vue'
 import FieldName from "@/components/views/manage/views/products/views/productcreate/FieldName.vue";
-import NamedInputField from "@/components/styles/input/NamedInputField.vue";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
 import GridRowWrapper from "@/components/styles/grid/GridRowWrapper.vue";
 import RawGridRowWrapper from "@/components/styles/grid/RawGridRowWrapper.vue";
@@ -27,7 +26,6 @@ export default defineComponent({
     GridRowWrapper,
     GridWrapper,
     ConfirmButton,
-    NamedInputField,
     FieldName
   },
   props: {

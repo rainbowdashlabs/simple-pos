@@ -1,5 +1,4 @@
 <script lang="ts">
-import Balance from "./profile/Balance.vue";
 import Name from "./profile/Name.vue";
 import {Account} from "@/scripts/accounts.ts";
 import MoneyText from "@/components/styles/text/MoneyText.vue";
@@ -7,7 +6,7 @@ import {PropType} from "vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 
 export default {
-  components: {ColorContainer, MoneyText, Balance, Name},
+  components: {ColorContainer, MoneyText, Name},
   props: {
     account: {
       type: Object as PropType<Account>,

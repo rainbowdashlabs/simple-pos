@@ -5,6 +5,7 @@ import {currentPledge, EmptiesReturn, returnEmpties} from "@/scripts/cash.ts";
 import {categoryLabel, CategoryGroup} from "@/scripts/categories.ts";
 import {announce} from "@/scripts/announcer.ts";
 import {SizeGroup} from "@/scripts/text.ts";
+import {roundCurrency} from "@/scripts/util.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -50,7 +51,7 @@ export default defineComponent({
       return cents / 100
     },
     outstandingAfter(): number {
-      return Math.round(((this.outstanding ?? 0) - this.refund) * 100) / 100
+      return roundCurrency((this.outstanding ?? 0) - this.refund)
     }
   },
   methods: {

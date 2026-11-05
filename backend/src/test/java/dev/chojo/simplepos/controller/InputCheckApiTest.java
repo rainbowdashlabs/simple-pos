@@ -211,6 +211,24 @@ class InputCheckApiTest {
     }
 
     @Test
+    void theSummaryAndCartBodiesWithTheUnitCostWork() throws Exception {
+        Category category = categoryRepository.save(new Category(null, "SummaryCat"));
+        Product product = productService.create(new Product(null, category, "SummaryProduct", 2.0, true,
+                new Recipe(null, null, Collections.emptyList())));
+
+        mvc.perform(post("/api/purchase/guest").header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[{\"product\": {\"id\": " + product.getId() + ", \"unitCost\": 1.23}, \"amount\": 2}]"))
+                .andExpect(status().isCreated());
+        mvc.perform(get("/api/purchase/stats/summary").param("after", "2020-01-01T00:00:00Z")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sales").isNumber())
+                .andExpect(jsonPath("$.revenue").isNumber())
+                .andExpect(jsonPath("$.day").doesNotExist());
+    }
+
+    @Test
     void returnedEmptiesAreChecked() throws Exception {
         for (String body : new String[]{"[]", "[null]", "[{\"ingredientId\": 1, \"bottles\": -1, \"crates\": 0}]"}) {
             mvc.perform(post("/api/cash/pledge/return").header("Authorization", "Bearer " + token)

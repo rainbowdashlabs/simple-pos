@@ -21,10 +21,13 @@ export class Cart {
         }
     }
 
+    /**
+     * The cart's total, added up in cents so it carries no floating-point remainder.
+     */
     totalPrice(): number {
-        let sum = 0;
-        this.products.forEach(item => sum += (item.product.price * item.amount));
-        return sum;
+        let cents = 0;
+        this.products.forEach(item => cents += Math.round(item.product.price * 100) * item.amount);
+        return cents / 100;
     }
 
     clearCart(): void {

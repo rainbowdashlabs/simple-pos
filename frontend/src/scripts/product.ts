@@ -1,3 +1,4 @@
+import {DailyStat, PeriodStat} from "./purchase.ts";
 import {Category, CategoryGroup, Listing} from "./categories.ts";
 import {Ingredient, ingredientRequest} from "./Ingredient.ts";
 import {deleteJson, getJson, patchJson, postJson, putJson} from "./http.ts";
@@ -37,7 +38,8 @@ export interface LazyProduct {
 }
 
 export interface Product extends LazyProduct {
-    recipe: Recipe
+    recipe: Recipe,
+    unitCost?: number
 }
 
 /**
@@ -50,14 +52,6 @@ export interface ProductGroup extends CategoryGroup<Product> {
 
 export interface ProductListings {
     categories: ProductGroup[]
-}
-
-export interface ProductSalesStat {
-    day: string | null,
-    product_id: number | undefined | null,
-    sales: number,
-    revenue: number,
-    profit: number
 }
 
 export function product(id: number): Promise<Product> {
@@ -113,11 +107,11 @@ export function toggleActive(id: number): Promise<Product> {
  * @param id product id
  * @param after only purchases after this date count
  */
-export function salesStat(id: number, after: Date): Promise<ProductSalesStat[]> {
+export function salesStat(id: number, after: Date): Promise<DailyStat[]> {
     return getJson(`api/product/${id}/sales/stat`, new Map([["after", after.toISOString()]]))
 }
 
-export function salesStatSummary(id: number, date: Date): Promise<ProductSalesStat> {
+export function salesStatSummary(id: number, date: Date): Promise<PeriodStat> {
     return getJson(`api/product/${id}/sales/stat/summary`, new Map([["after", date.toISOString()]]))
 }
 

@@ -6,7 +6,7 @@ import {LineChart} from 'echarts/charts'
 import {GridComponent, TooltipComponent, LegendComponent} from 'echarts/components'
 import {CanvasRenderer} from 'echarts/renderers'
 import VChart from 'vue-echarts'
-import {ProductSalesStat} from "@/scripts/product.ts";
+import {DailyStat} from "@/scripts/purchase.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
@@ -14,17 +14,25 @@ import {everyDay, localDateKey} from "@/scripts/util.ts";
 
 use([LineChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer])
 
+/**
+ * Revenue and profit per day over the last `days` days, with days without sales shown as zero. `wide` lays it out
+ * across the overview; otherwise it fits a card of a detail page.
+ */
 export default defineComponent({
-  name: "ProductRevenueChart",
+  name: "DailyRevenueChart",
   components: {ColorContainer, FormattedText, VChart},
   props: {
     stats: {
-      type: Array as PropType<ProductSalesStat[]>,
+      type: Array as PropType<DailyStat[]>,
       required: true
     },
     days: {
       type: Number,
       required: true
+    },
+    wide: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -37,7 +45,7 @@ export default defineComponent({
     chartOption() {
       const locale = this.$i18n.locale
       const filled = everyDay(this.stats, this.days, s => s.day,
-          day => ({day: localDateKey(day), product_id: null, sales: 0, revenue: 0, profit: 0}))
+          day => ({day: localDateKey(day), sales: 0, revenue: 0, profit: 0}))
       const days = filled.map(f => f.day.toLocaleDateString(locale, {month: 'short', day: 'numeric'}))
       const revenue = filled.map(f => f.row.revenue)
       const profit = filled.map(f => f.row.profit)
@@ -58,11 +66,11 @@ export default defineComponent({
           data: [this.$t('revenue'), this.$t('profit')],
           textStyle: {color: this.textColor}
         },
-        grid: {left: 10, right: 10, top: 35, bottom: 0, containLabel: true},
+        grid: {left: 10, right: this.wide ? 20 : 10, top: this.wide ? 40 : 35, bottom: 0, containLabel: true},
         xAxis: {
           type: 'category',
           data: days,
-          axisLabel: {color: this.textColor, rotate: 45, fontSize: 10}
+          axisLabel: this.wide ? {color: this.textColor} : {color: this.textColor, rotate: 45, fontSize: 10}
         },
         yAxis: {
           type: 'value',
@@ -96,11 +104,12 @@ export default defineComponent({
 </script>
 
 <template>
-  <ColorContainer bg="secondary" class="flex flex-col gap-3">
-    <FormattedText value="revenue_trend" type="locale" :size="SizeGroup.lg"/>
+  <ColorContainer bg="secondary" :class="wide ? 'col-span-full' : 'flex flex-col gap-3'">
+    <FormattedText value="revenue_trend" type="locale" :size="wide ? SizeGroup.xl : SizeGroup.lg"/>
     <FormattedText :value="$t('last_days', {days: days})" :size="SizeGroup.sm"/>
-    <v-chart v-if="stats.length > 0" :option="chartOption" autoresize style="height: 250px; width: 100%"/>
-    <div v-else class="h-[250px] flex items-center justify-center opacity-50">
+    <v-chart v-if="stats.length > 0" :option="chartOption" autoresize
+             :style="{height: wide ? '300px' : '250px', width: '100%'}"/>
+    <div v-else class="flex items-center justify-center opacity-50" :class="wide ? 'h-[300px]' : 'h-[250px]'">
       <FormattedText value="no_data" type="locale"/>
     </div>
   </ColorContainer>

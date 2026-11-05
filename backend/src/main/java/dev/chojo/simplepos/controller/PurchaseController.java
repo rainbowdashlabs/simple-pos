@@ -99,6 +99,11 @@ public class PurchaseController {
         return ResponseEntity.ok(withProducts(purchaseRepository.getBottomSales(after, PageRequest.of(page, limit))));
     }
 
+    @GetMapping("stats/summary")
+    ResponseEntity<DayStat> getSalesSummary(@RequestParam() Instant after) {
+        return ResponseEntity.ok(DayStat.of(purchaseRepository.getSalesSummary(after)));
+    }
+
     @GetMapping("stats/daily")
     ResponseEntity<List<DayStat>> getDailyStats(@RequestParam() Instant after) {
         return ResponseEntity.ok(purchaseRepository.getDailyStats(after, businessTimeZone.id()).stream().map(DayStat::of).toList());

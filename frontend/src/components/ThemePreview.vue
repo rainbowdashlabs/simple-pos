@@ -15,7 +15,6 @@ import TextButton from "@/components/styles/buttons/TextButton.vue";
 import DangerButton from "@/components/styles/buttons/DangerButton.vue";
 import ToggleButton from "@/components/styles/buttons/ToggleButton.vue";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
-import NamedInputField from "@/components/styles/input/NamedInputField.vue";
 import FormLabel from "@/components/styles/input/FormLabel.vue";
 import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
 import ConfirmModal from "@/components/styles/modal/ConfirmModal.vue";
@@ -36,7 +35,7 @@ export default defineComponent({
     ViewWrapper, ColorContainer, Container,
     FormattedText, CenterText, MoneyText, NumberText,
     FreeButton, IconButton, ConfirmButton, BackButton, TextButton, DangerButton, ToggleButton,
-    SimpleInputField, NamedInputField, FormLabel, SelectMenu,
+    SimpleInputField, FormLabel, SelectMenu,
     ConfirmModal, Icon
   },
   data() {
@@ -271,7 +270,7 @@ export default defineComponent({
         </div>
         <div class="flex flex-col gap-1">
           <FormLabel label="Named Input Field"/>
-          <NamedInputField name="Label" type="text" v-model="inputText"/>
+          <SimpleInputField label="Label" type="text" v-model="inputText"/>
         </div>
         <div class="flex flex-col gap-1">
           <FormLabel label="Select Menu"/>

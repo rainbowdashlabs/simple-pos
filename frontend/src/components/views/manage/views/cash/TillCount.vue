@@ -3,6 +3,7 @@ import {defineComponent} from 'vue'
 import {countTill, currentCash} from "@/scripts/cash.ts";
 import {differenceClass, EURO, totalCents} from "@/scripts/denominations.ts";
 import {SizeGroup} from "@/scripts/text.ts";
+import {roundCurrency} from "@/scripts/util.ts";
 import {announce} from "@/scripts/announcer.ts";
 import SimpleInputField from "@/components/styles/input/SimpleInputField.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
@@ -35,7 +36,7 @@ export default defineComponent({
       return totalCents(this.pieces) / 100
     },
     difference(): number {
-      return Math.round((this.counted - (this.expected ?? 0)) * 100) / 100
+      return roundCurrency(this.counted - (this.expected ?? 0))
     },
     allDenominations(): number[] {
       return [...this.denominations.coins, ...this.denominations.notes]

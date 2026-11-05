@@ -59,6 +59,19 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     TotalsRow getSalesStatSummary(int id, Instant after);
 
     /**
+     * Sales, revenue and profit of all products since {@code after}.
+     */
+    @Query(value = """
+            SELECT
+              coalesce(sum(p.amount), 0) as "sales",
+              coalesce(sum(p.price * p.amount), 0) as "revenue",
+              coalesce(sum(p.price * p.amount - p.cost), 0) as "profit"
+            FROM purchase p
+            WHERE p.purchased > ?1
+            """, nativeQuery = true)
+    TotalsRow getSalesSummary(Instant after);
+
+    /**
      * Sales per product since {@code after}. The sort of {@code pageable} names one of the columns sales, revenue or
      * profit; the rows are wrapped in a derived table so it applies to them.
      */

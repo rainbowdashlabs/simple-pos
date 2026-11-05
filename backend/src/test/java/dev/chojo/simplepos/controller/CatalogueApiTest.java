@@ -37,6 +37,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -187,6 +188,15 @@ class CatalogueApiTest {
                         .content("{\"name\": \"Lost\", \"categoryId\": 999999, \"price\": 0.7, \"containerSize\": 0, \"pledge\": 0, \"pledgeContainer\": 0, \"minStock\": 0}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("Category 999999 does not exist"));
+    }
+
+    @Test
+    void productsCarryTheirUnitCost() throws Exception {
+        Product product = product("Costed");
+
+        mvc.perform(get("/api/product/" + product.getId()).header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.unitCost").value(0.5));
     }
 
     @Test

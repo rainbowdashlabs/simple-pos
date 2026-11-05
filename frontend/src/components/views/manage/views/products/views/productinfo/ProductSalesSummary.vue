@@ -1,6 +1,7 @@
 <script lang="ts">
 import {defineComponent, PropType} from 'vue'
-import {ProductSalesStat, salesStatSummary, Timeframe} from "@/scripts/product.ts";
+import {salesStatSummary, Timeframe} from "@/scripts/product.ts";
+import {PeriodStat} from "@/scripts/purchase.ts";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import {SizeGroup} from "@/scripts/text.ts";
 import ColorContainer from "@/components/styles/container/ColorContainer.vue";
@@ -20,7 +21,7 @@ export default defineComponent({
   },
   data() {
     return {
-      summaries: [] as ProductSalesStat[]
+      summaries: [] as PeriodStat[]
     }
   },
   computed: {
@@ -30,7 +31,7 @@ export default defineComponent({
   },
   mounted() {
     this.summaries = this.timeframes.map(() => ({
-      day: null, sales: 0, profit: 0, product_id: 0, revenue: 0
+      day: null, sales: 0, profit: 0, revenue: 0
     }))
     this.timeframes.forEach((tf, i) => {
       salesStatSummary(this.productId, tf.getDate()).then(s => {

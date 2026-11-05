@@ -93,10 +93,11 @@ function constructUrl(url: string, params: Map<string, string | number> = new Ma
     return req.toString()
 }
 
+/**
+ * A form body of the given fields.
+ */
 export function urlEncode(data: Record<string, string | number | boolean>) {
-    return Object.keys(data)
-        .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
-        .join('&');
+    return new URLSearchParams(Object.entries(data).map(([key, value]) => [key, String(value)])).toString()
 }
 
 export function getHost() {

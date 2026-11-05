@@ -1,17 +1,18 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
-import {Product, ProductSalesStat, product, salesStat} from "@/scripts/product.ts";
+import {Product, product, salesStat} from "@/scripts/product.ts";
+import {DailyStat} from "@/scripts/purchase.ts";
 import {Timeframes} from "@/scripts/util.ts";
 import ViewWrapper from "@/components/styles/container/ViewWrapper.vue";
 import ProductHeader from "./productinfo/ProductHeader.vue";
 import ProductIngredients from "./productinfo/ProductIngredients.vue";
 import ProductSalesSummary from "./productinfo/ProductSalesSummary.vue";
 import ProductSalesChart from "./productinfo/ProductSalesChart.vue";
-import ProductRevenueChart from "./productinfo/ProductRevenueChart.vue";
+import DailyRevenueChart from "@/components/charts/DailyRevenueChart.vue";
 
 export default defineComponent({
   name: "ProductInfo",
-  components: {ProductRevenueChart, ProductSalesChart, ProductSalesSummary, ProductIngredients, ProductHeader, ViewWrapper},
+  components: {DailyRevenueChart, ProductSalesChart, ProductSalesSummary, ProductIngredients, ProductHeader, ViewWrapper},
   props: {
     id: {
       type: String,
@@ -21,7 +22,7 @@ export default defineComponent({
   data() {
     return {
       focusProduct: null as Product | null,
-      dailyStats: [] as ProductSalesStat[],
+      dailyStats: [] as DailyStat[],
       timeframes: [Timeframes.month, Timeframes.year]
     }
   },
@@ -30,8 +31,7 @@ export default defineComponent({
       return Timeframes.month.days
     },
     rawPrice(): number {
-      if (!this.focusProduct) return 0
-      return (this.focusProduct.recipe?.entries ?? []).reduce((p, c) => p + c.ingredient.price * c.amount, 0)
+      return this.focusProduct?.unitCost ?? 0
     }
   },
   methods: {
@@ -58,7 +58,7 @@ export default defineComponent({
       <ProductIngredients :entries="focusProduct.recipe?.entries ?? []"/>
       <ProductSalesSummary :product-id="focusProduct.id!" :timeframes="timeframes"/>
       <ProductSalesChart :stats="dailyStats" :days="chartDays"/>
-      <ProductRevenueChart :stats="dailyStats" :days="chartDays"/>
+      <DailyRevenueChart :stats="dailyStats" :days="chartDays"/>
     </div>
   </ViewWrapper>
 </template>
