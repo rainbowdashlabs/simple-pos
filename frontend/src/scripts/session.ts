@@ -9,7 +9,7 @@ interface Token {
     expiresIn: number
 }
 
-interface TokenResponse {
+export interface TokenResponse {
     token: Token
     refresh: Token
 }
@@ -308,6 +308,14 @@ function storeTokens(username: string, cred: TokenResponse) {
     scheduleRefresh()
 }
 
+
+/**
+ * Takes over the tokens of a new session the backend started for the logged-in user, such as after a password change.
+ */
+export function adoptTokens(cred: TokenResponse) {
+    const username = getUsername()
+    if (username) storeTokens(username, cred)
+}
 
 export function getUsername() {
     return Cookies.get(username_cookie)

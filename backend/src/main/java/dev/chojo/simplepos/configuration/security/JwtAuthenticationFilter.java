@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Authenticates requests that carry a {@code Bearer} login token. Requests without one pass through unchanged; a
@@ -68,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (SecurityContextHolder.getContext().getAuthentication() != null) return;
 
         UserDetails userDetails = userService.loadUserByUsername(username);
-        if (!jwtService.isTokenValid(jwt, userDetails, Map.of("type", "login"))) {
+        if (!jwtService.isTokenValid(jwt, userDetails, JwtService.LOGIN_CLAIM)) {
             throw new UnauthorizedException(INVALID_TOKEN);
         }
         if (!userDetails.isEnabled()) throw new DisabledException("Account is disabled");

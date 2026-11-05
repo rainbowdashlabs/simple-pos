@@ -31,6 +31,14 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     static final int MIN_KEY_BYTES = 32;
+    /**
+     * The claim that marks a login token, which authenticates requests.
+     */
+    public static final Map<String, Object> LOGIN_CLAIM = Map.of("type", "login");
+    /**
+     * The claim that marks a refresh token, which only buys a new token pair.
+     */
+    public static final Map<String, Object> REFRESH_CLAIM = Map.of("type", "refresh");
 
     @Value("${security.jwt.secret-key:}")
     private String secretKey;

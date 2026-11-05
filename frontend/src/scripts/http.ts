@@ -40,7 +40,7 @@ async function send(requrl: string, method: string, body: Object | null, retryUn
     let header = new Headers()
     header.append("Authorization", `Bearer ${token}`)
     header.append("Content-Type", "application/json")
-    if (import.meta.env.DEV) console.log(body ? `${method} ${requrl}: ${JSON.stringify(body)}` : `${method} ${requrl}`)
+    if (import.meta.env.DEV) console.log(`${method} ${requrl}`)
     let response: Response
     try {
         response = await fetch(requrl, {method: method, headers: header, body: body ? JSON.stringify(body) : undefined})

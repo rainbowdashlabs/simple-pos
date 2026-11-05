@@ -7,6 +7,7 @@ import ColorContainer from "@/components/styles/container/ColorContainer.vue";
 import FormattedText from "@/components/styles/text/FormattedText.vue";
 import ToggleButton from "@/components/styles/buttons/ToggleButton.vue";
 import {SizeGroup} from "@/scripts/text.ts";
+import ChangePassword from "./settings/ChangePassword.vue";
 
 const THEME_COLORS: Record<ColorTheme, string> = {
   blue: '#5193d5',
@@ -17,7 +18,7 @@ const THEME_COLORS: Record<ColorTheme, string> = {
 
 export default defineComponent({
   name: "Settings",
-  components: {ToggleButton, FormattedText, ColorContainer, ViewWrapper},
+  components: {ChangePassword, ToggleButton, FormattedText, ColorContainer, ViewWrapper},
   computed: {
     SizeGroup() {
       return SizeGroup
@@ -75,5 +76,7 @@ export default defineComponent({
         </ToggleButton>
       </div>
     </ColorContainer>
+
+    <ChangePassword/>
   </ViewWrapper>
 </template>

@@ -83,7 +83,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(conf -> conf
                         .requestMatchers("/api/auth/**", "/api/demo/**", "/api/version").permitAll()
                         .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
-                        .requestMatchers("/api/user/me", "/api/user/preferences").hasRole(Role.USER.name())
+                        .requestMatchers("/api/user/me", "/api/user/me/password", "/api/user/preferences").hasRole(Role.USER.name())
                         .requestMatchers("/api/**").hasRole(Role.STAFF.name())
                         .anyRequest().permitAll())
                 .exceptionHandling(handler -> handler

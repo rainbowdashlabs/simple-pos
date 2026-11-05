@@ -38,7 +38,8 @@
     "save_count": "Zählung speichern",
     "return_empties": "Leergut zurückgeben",
     "book_refund": "Erstattung buchen",
-    "undo": "Rückgängig"
+    "undo": "Rückgängig",
+    "change_password": "Passwort ändern"
   },
   "checkout_choose_account": "Konto auswählen",
   "checkout_no_accounts": "Es gibt noch keine Konten. Lege zuerst eines an.",
@@ -219,5 +220,13 @@
   "sale_booked": "Verkauf gebucht. Rückgängig noch {seconds} s möglich.",
   "sale_booked_undo": "Verkauf gebucht. Er kann {seconds} Sekunden lang rückgängig gemacht werden.",
   "sale_undone": "Verkauf rückgängig gemacht",
-  "sold_by": "von {user}"
+  "sold_by": "von {user}",
+  "change_password": "Passwort ändern",
+  "current_password": "Aktuelles Passwort",
+  "new_password": "Neues Passwort",
+  "repeat_password": "Neues Passwort wiederholen",
+  "password_too_short": "Mindestens {min} Zeichen",
+  "password_mismatch": "Die Passwörter stimmen nicht überein",
+  "password_changed": "Passwort geändert. Andere Geräte sind abgemeldet.",
+  "current_password_wrong": "Das aktuelle Passwort ist falsch."
 }

@@ -119,7 +119,12 @@ public class UserAdminService {
         return trimmed;
     }
 
-    private static void requirePassword(String password) {
+    /**
+     * Refuses a password shorter than {@value #MIN_PASSWORD_LENGTH} characters or longer than BCrypt can hash.
+     *
+     * @throws BadRequestException if the password is missing, too short or too long
+     */
+    static void requirePassword(String password) {
         if (password == null || password.isBlank() || password.length() < MIN_PASSWORD_LENGTH) {
             throw new BadRequestException("Password must be at least %d characters".formatted(MIN_PASSWORD_LENGTH));
         }
