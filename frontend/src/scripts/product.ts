@@ -40,7 +40,6 @@ export interface LazyProduct {
 
 export interface Product extends LazyProduct {
     recipe: Recipe,
-    deleted?: boolean,
     unitCost?: number
 }
 

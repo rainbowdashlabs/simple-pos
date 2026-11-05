@@ -18,7 +18,6 @@ export interface Account {
  */
 export interface Balance {
     id: number | null | undefined,
-    account: Account | null | undefined,
     amount: number;
     added: number | Date | string;
 }

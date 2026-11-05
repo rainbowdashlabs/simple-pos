@@ -119,7 +119,7 @@ public class AccountService {
         Page<Purchase> purchases = purchaseRepository.findByAccount_IdOrderByPurchasedDescIdDesc(id, page);
         Map<Integer, LazyProduct> products = purchases.stream()
                 .map(Purchase::getProduct)
-                .collect(Collectors.toMap(Product::getId, Product::asLazyProduct, (first, same) -> first));
+                .collect(Collectors.toMap(Product::getId, LazyProduct::of, (first, same) -> first));
         return new PurchaseHistoryDto(products, PageResponse.of(purchases, Purchase::toDto));
     }
 

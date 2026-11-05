@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +11,6 @@ public class RecipeEntry {
     @Id
     @GeneratedValue
     private Long id;
-    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Recipe recipe;
 

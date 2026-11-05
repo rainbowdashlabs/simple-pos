@@ -2,8 +2,8 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
-import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.dto.IngredientRequest;
+import dev.chojo.simplepos.entity.response.IngredientResponse;
 import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.service.IngredientService;
@@ -33,20 +33,20 @@ public class IngredientController {
     }
 
     @PostMapping
-    ResponseEntity<Ingredient> create(@Valid @RequestBody IngredientRequest ingredient) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ingredientService.create(ingredient));
+    ResponseEntity<IngredientResponse> create(@Valid @RequestBody IngredientRequest ingredient) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(IngredientResponse.of(ingredientService.create(ingredient)));
     }
 
     @GetMapping
-    PageResponse<Ingredient> all(@RequestParam(required = false) Integer categoryId,
-                                 @RequestParam(defaultValue = "100") @PageSize int limit,
-                                 @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(ingredientRepository.findPage(categoryId, PageRequest.of(page, limit)));
+    PageResponse<IngredientResponse> all(@RequestParam(required = false) Integer categoryId,
+                                         @RequestParam(defaultValue = "100") @PageSize int limit,
+                                         @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(ingredientRepository.findPage(categoryId, PageRequest.of(page, limit)), IngredientResponse::of);
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<Ingredient> update(@PathVariable int id, @Valid @RequestBody IngredientRequest ingredient) {
-        return ResponseEntity.ok(ingredientService.update(id, ingredient));
+    ResponseEntity<IngredientResponse> update(@PathVariable int id, @Valid @RequestBody IngredientRequest ingredient) {
+        return ResponseEntity.ok(IngredientResponse.of(ingredientService.update(id, ingredient)));
     }
 
     @DeleteMapping("/{id}")
@@ -56,12 +56,12 @@ public class IngredientController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Ingredient> get(@PathVariable int id) {
-        return ResponseEntity.ok(ingredientRepository.require(id));
+    ResponseEntity<IngredientResponse> get(@PathVariable int id) {
+        return ResponseEntity.ok(IngredientResponse.of(ingredientRepository.require(id)));
     }
 
     @PatchMapping("/{id}/active")
-    ResponseEntity<Ingredient> toggleActive(@PathVariable int id) {
-        return ResponseEntity.ok(ingredientService.toggleActive(id));
+    ResponseEntity<IngredientResponse> toggleActive(@PathVariable int id) {
+        return ResponseEntity.ok(IngredientResponse.of(ingredientService.toggleActive(id)));
     }
 }

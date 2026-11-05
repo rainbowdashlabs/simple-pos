@@ -8,6 +8,7 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
 import dev.chojo.simplepos.entity.response.PageResponse;
+import dev.chojo.simplepos.entity.response.ProductResponse;
 import dev.chojo.simplepos.exceptions.BadRequestException;
 import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
@@ -176,10 +177,10 @@ public class ProductService {
      * (products without one last), then name, each with its recipe.
      */
     @Transactional(readOnly = true)
-    public PageResponse<Product> page(boolean activeOnly, Integer categoryId, Pageable pageable) {
+    public PageResponse<ProductResponse> page(boolean activeOnly, Integer categoryId, Pageable pageable) {
         Page<Integer> ids = productRepository.findIdPage(activeOnly, categoryId, pageable);
         Map<Integer, Product> products = productRepository.findAllByIdIn(ids.getContent()).stream()
                 .collect(Collectors.toMap(Product::getId, Function.identity()));
-        return PageResponse.of(ids, products::get);
+        return PageResponse.of(ids, id -> ProductResponse.of(products.get(id)));
     }
 }

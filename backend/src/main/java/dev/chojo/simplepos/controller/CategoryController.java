@@ -2,8 +2,8 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
-import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.dto.CategoryRequest;
+import dev.chojo.simplepos.entity.response.CategoryResponse;
 import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.service.CategoryService;
@@ -34,24 +34,24 @@ public class CategoryController {
     }
 
     @PostMapping
-    ResponseEntity<Category> create(@Valid @RequestBody CategoryRequest category) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(category));
+    ResponseEntity<CategoryResponse> create(@Valid @RequestBody CategoryRequest category) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(CategoryResponse.of(categoryService.create(category)));
     }
 
     @GetMapping
-    PageResponse<Category> all(@RequestParam(defaultValue = "100") @PageSize int limit,
-                               @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(categoryRepository.findAll(PageRequest.of(page, limit, Sort.by("name", "id"))));
+    PageResponse<CategoryResponse> all(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                       @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(categoryRepository.findAll(PageRequest.of(page, limit, Sort.by("name", "id"))), CategoryResponse::of);
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Category> getById(@PathVariable Integer id) {
-        return ResponseEntity.ok(categoryRepository.require(id));
+    ResponseEntity<CategoryResponse> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(CategoryResponse.of(categoryRepository.require(id)));
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<Category> update(@PathVariable int id, @Valid @RequestBody CategoryRequest category) {
-        return ResponseEntity.ok(categoryService.update(id, category));
+    ResponseEntity<CategoryResponse> update(@PathVariable int id, @Valid @RequestBody CategoryRequest category) {
+        return ResponseEntity.ok(CategoryResponse.of(categoryService.update(id, category)));
     }
 
     @DeleteMapping("/{id}")

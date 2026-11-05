@@ -3,7 +3,6 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Ingredient;
-import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
@@ -11,6 +10,8 @@ import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.entity.response.PageResponse;
+import dev.chojo.simplepos.entity.response.StockResponse;
+import dev.chojo.simplepos.entity.response.StorageResponse;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
@@ -53,36 +54,36 @@ public class StorageController {
     }
 
     @GetMapping
-    public PageResponse<Storage> getSummary(@RequestParam(defaultValue = "100") @PageSize int limit,
-                                            @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(storageRepository.findAllBy(PageRequest.of(page, limit, Sort.by("id"))));
+    public PageResponse<StorageResponse> getSummary(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(storageRepository.findAllBy(PageRequest.of(page, limit, Sort.by("id"))), StorageResponse::of);
     }
 
     @GetMapping("/stock/{id}")
-    public StorageSummary getStock(@PathVariable int id) {
+    public StockResponse getStock(@PathVariable int id) {
         StorageSummary summary = storageRepository.summaryById(id);
         if (summary == null) throw new NotFoundException("Ingredient", id);
-        return summary;
+        return StockResponse.of(summary);
     }
 
     @GetMapping("/stock")
-    public PageResponse<StorageSummary> getStock(@RequestParam(defaultValue = "100") @PageSize int limit,
-                                                 @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(storageRepository.summaryPage(PageRequest.of(page, limit)));
+    public PageResponse<StockResponse> getStock(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                                @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(storageRepository.summaryPage(PageRequest.of(page, limit)), StockResponse::of);
     }
 
     @GetMapping("/{id}")
-    public PageResponse<Storage> byId(@PathVariable int id,
+    public PageResponse<StorageResponse> byId(@PathVariable int id,
                                               @RequestParam(value = "limit", defaultValue = "100") @PageSize int limit,
                                               @RequestParam(value = "page", defaultValue = "0") @PageNumber int page) {
         Ingredient ingredient = ingredientRepository.require(id);
         PageRequest request = PageRequest.of(page, limit).withSort(Sort.by("id").descending());
-        return PageResponse.of(storageRepository.findAllByIngredient(ingredient, request));
+        return PageResponse.of(storageRepository.findAllByIngredient(ingredient, request), StorageResponse::of);
     }
 
     @PostMapping
-    ResponseEntity<Storage> add(@Valid @RequestBody InboundStorage storage, @CurrentUser User current) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(storageService.deliver(storage, current));
+    ResponseEntity<StorageResponse> add(@Valid @RequestBody InboundStorage storage, @CurrentUser User current) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(StorageResponse.of(storageService.deliver(storage, current)));
     }
 
     @PutMapping
@@ -101,14 +102,14 @@ public class StorageController {
     }
 
     @GetMapping("/stock/low")
-    public PageResponse<StorageSummary> getStockLow(@RequestParam(defaultValue = "100") @PageSize int limit,
-                                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(storageRepository.lowStock(PageRequest.of(page, limit)));
+    public PageResponse<StockResponse> getStockLow(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                                   @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(storageRepository.lowStock(PageRequest.of(page, limit)), StockResponse::of);
     }
 
     @GetMapping("/stock/out")
-    public PageResponse<StorageSummary> getStockOut(@RequestParam(defaultValue = "100") @PageSize int limit,
-                                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(storageRepository.outOfStock(PageRequest.of(page, limit)));
+    public PageResponse<StockResponse> getStockOut(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                                   @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(storageRepository.outOfStock(PageRequest.of(page, limit)), StockResponse::of);
     }
 }

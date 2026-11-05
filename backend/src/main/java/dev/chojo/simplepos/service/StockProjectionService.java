@@ -7,6 +7,7 @@ import dev.chojo.simplepos.entity.dto.IngredientUsage;
 import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.entity.response.IngredientResponse;
 import dev.chojo.simplepos.repository.StorageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,7 +60,7 @@ public class StockProjectionService {
             if (summary == null) continue;
             double daily = usage.getValue().daily();
             Integer daysRemaining = daily > 0 ? (int) (summary.getStock() / daily) : null;
-            projections.add(new StockProjectionDto(summary.getIngredient(), summary.getStock(),
+            projections.add(new StockProjectionDto(IngredientResponse.of(summary.getIngredient()), summary.getStock(),
                     Math.round(daily * 100.0) / 100.0, daysRemaining));
         }
 
@@ -93,21 +94,21 @@ public class StockProjectionService {
             int size = ingredient.getContainerSize();
             int containers = size > 1 ? Math.ceilDiv(needed, size) : 0;
             int amount = size > 1 ? containers * size : needed;
-            entries.add(new ShoppingListEntry(ingredient, summary.getStock(), Math.round(used.daily() * 100.0) / 100.0,
+            entries.add(new ShoppingListEntry(IngredientResponse.of(ingredient), summary.getStock(), Math.round(used.daily() * 100.0) / 100.0,
                     amount, containers, Money.of(Money.orZero(ingredient.getPrice()).multiply(BigDecimal.valueOf(amount)))));
         }
         entries.sort(Comparator.comparing((ShoppingListEntry entry) -> categoryName(entry.ingredient()))
                 .thenComparingInt(entry -> categoryId(entry.ingredient()))
-                .thenComparing(entry -> entry.ingredient().getName()));
+                .thenComparing(entry -> entry.ingredient().name()));
         return entries;
     }
 
-    private static String categoryName(Ingredient ingredient) {
-        return ingredient.getCategory() == null ? "" : ingredient.getCategory().getName();
+    private static String categoryName(IngredientResponse ingredient) {
+        return ingredient.category() == null ? "" : ingredient.category().name();
     }
 
-    private static int categoryId(Ingredient ingredient) {
-        return ingredient.getCategory() == null ? Category.UNCATEGORISED_ID : ingredient.getCategory().getId();
+    private static int categoryId(IngredientResponse ingredient) {
+        return ingredient.category() == null ? Category.UNCATEGORISED_ID : ingredient.category().id();
     }
 
     /**
