@@ -44,8 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * a transaction holding an ingredient makes every other stock change of it wait until it commits. Also checks that
  * a refresh token can be used only once when two refreshes race.
  * <p>
- * Because these tests commit, the context is discarded afterwards, which drops the schema so no data leaks into
- * other tests.
+ * Because these tests commit, the context is discarded afterwards; the next context cleans and migrates the schema
+ * afresh, so no data leaks into other tests.
  */
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest

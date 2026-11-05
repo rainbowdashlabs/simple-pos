@@ -12,10 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -41,7 +43,7 @@ class BalanceRepositoryTest {
     void shouldSaveBalance() {
         Balance balance = balanceRepository.save(new Balance(null, account, Instant.now(), 100.0));
         assertNotNull(balance.getId());
-        assertEquals(100.0, balance.getAmount(), 0.001);
+        assertMoney(100.0, balance.getAmount());
     }
 
     @Test
@@ -53,9 +55,9 @@ class BalanceRepositoryTest {
 
         List<Balance> results = balanceRepository.findAllByAccount_IdOrderByAddedDesc(account.getId(), PageRequest.of(0, 10));
         assertEquals(3, results.size());
-        assertEquals(30.0, results.get(0).getAmount(), 0.001);
-        assertEquals(20.0, results.get(1).getAmount(), 0.001);
-        assertEquals(10.0, results.get(2).getAmount(), 0.001);
+        assertMoney(30.0, results.get(0).getAmount());
+        assertMoney(20.0, results.get(1).getAmount());
+        assertMoney(10.0, results.get(2).getAmount());
     }
 
     @Test
@@ -73,13 +75,13 @@ class BalanceRepositoryTest {
         balanceRepository.save(new Balance(null, account, Instant.now(), 50.0));
         balanceRepository.save(new Balance(null, account, Instant.now(), 30.0));
 
-        Double total = balanceRepository.totalBalance();
-        assertEquals(80.0, total, 0.001);
+        BigDecimal total = balanceRepository.totalBalance();
+        assertMoney(80.0, total);
     }
 
     @Test
     void shouldReturnNullTotalBalanceWhenEmpty() {
-        Double total = balanceRepository.totalBalance();
+        BigDecimal total = balanceRepository.totalBalance();
         assertNull(total);
     }
 
@@ -92,9 +94,9 @@ class BalanceRepositoryTest {
         balanceRepository.save(new Balance(null, debtor2, Instant.now(), -30.0));
         balanceRepository.save(new Balance(null, account, Instant.now(), 100.0));
 
-        Double debt = balanceRepository.totalDept();
+        BigDecimal debt = balanceRepository.totalDept();
         assertNotNull(debt);
-        assertEquals(-50.0, debt, 0.001);
+        assertMoney(-50.0, debt);
     }
 
     @Test
@@ -110,6 +112,6 @@ class BalanceRepositoryTest {
     void shouldHandleNegativeBalances() {
         balanceRepository.save(new Balance(null, account, Instant.now(), -15.0));
         Balance found = balanceRepository.findAllByAccount_IdOrderByAddedDesc(account.getId(), PageRequest.of(0, 1)).get(0);
-        assertEquals(-15.0, found.getAmount(), 0.001);
+        assertMoney(-15.0, found.getAmount());
     }
 }

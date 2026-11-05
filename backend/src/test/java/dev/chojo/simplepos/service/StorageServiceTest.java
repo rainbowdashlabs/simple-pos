@@ -28,12 +28,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
+import static dev.chojo.simplepos.MoneyAssertions.money;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -81,16 +84,16 @@ class StorageServiceTest {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 2.0, 10, 0));
 
         Ingredient updated = ingredientRepository.findById(ingredient.getId()).orElseThrow();
-        assertEquals(2.0, updated.getPrice(), 0.001);
+        assertMoney(2.0, updated.getPrice());
     }
 
     @Test
     void shouldNotUpdateIngredientPriceWhenPriceIsZero() {
-        double originalPrice = ingredient.getPrice();
+        BigDecimal originalPrice = ingredient.getPrice();
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0, 10, 0));
 
         Ingredient found = ingredientRepository.findById(ingredient.getId()).orElseThrow();
-        assertEquals(originalPrice, found.getPrice(), 0.001);
+        assertMoney(originalPrice, found.getPrice());
     }
 
     @Test
@@ -102,7 +105,7 @@ class StorageServiceTest {
         Collection<StorageTransaction> transactions = storageService.takeStorage(ingredient, 3);
 
         assertFalse(transactions.isEmpty());
-        int totalTaken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
+        int totalTaken = transactions.stream().mapToInt(StorageTransaction::amount).sum();
         assertEquals(3, totalTaken);
     }
 
@@ -116,7 +119,7 @@ class StorageServiceTest {
         Ingredient freshIngredient = ingredientRepository.findById(ingredient.getId()).orElseThrow();
         Collection<StorageTransaction> transactions = storageService.takeStorage(freshIngredient, 4);
 
-        int totalTaken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
+        int totalTaken = transactions.stream().mapToInt(StorageTransaction::amount).sum();
         assertEquals(4, totalTaken);
     }
 
@@ -127,7 +130,7 @@ class StorageServiceTest {
 
         Collection<StorageTransaction> transactions = storageService.takeStorage(ingredient, 5);
 
-        int totalTaken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
+        int totalTaken = transactions.stream().mapToInt(StorageTransaction::amount).sum();
         assertEquals(3, totalTaken);
     }
 
@@ -223,7 +226,7 @@ class StorageServiceTest {
 
         Ingredient sentWithAnotherName = new Ingredient(ingredient.getId(), null, "sent name", 0.0, 1, 0, 0, 0);
 
-        Storage stored = storageService.deliver(new InboundStorage(sentWithAnotherName, null, 2.0, 3.0, 12), receiver);
+        Storage stored = storageService.deliver(new InboundStorage(sentWithAnotherName, null, money(2.0), null, money(3.0), 12), receiver);
 
         assertEquals(12, stored.getAmount());
         assertNotNull(stored.getPurchased());
@@ -231,7 +234,7 @@ class StorageServiceTest {
         List<Cash> entries = cashRepository.findAll().stream()
                 .filter(cash -> cash.getNote() != null && cash.getNote().startsWith(ingredient.getName()))
                 .toList();
-        assertEquals(Map.of(CashType.PURCHASE, -24.0, CashType.PLEDGE, -3.0),
+        assertEquals(Map.of(CashType.PURCHASE, money(-24.0), CashType.PLEDGE, money(-3.0)),
                 entries.stream().collect(Collectors.toMap(Cash::getType, Cash::getAmount)));
     }
 
@@ -241,9 +244,9 @@ class StorageServiceTest {
         Ingredient unknown = new Ingredient(999999, null, "unknown", 0.0, 1, 0, 0, 0);
 
         assertThrows(NotFoundException.class,
-                () -> storageService.deliver(new InboundStorage(unknown, null, 1.0, 0.0, 1), receiver));
+                () -> storageService.deliver(new InboundStorage(unknown, null, money(1.0), null, money(0.0), 1), receiver));
         assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, 1.0, 0.0, null), receiver));
+                () -> storageService.deliver(new InboundStorage(ingredient, null, money(1.0), null, money(0.0), null), receiver));
     }
 
     @Test
@@ -252,13 +255,34 @@ class StorageServiceTest {
         long cashBefore = cashRepository.count();
 
         assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, 2.0, 0.0, -5), receiver));
+                () -> storageService.deliver(new InboundStorage(ingredient, null, money(2.0), null, money(0.0), -5), receiver));
         assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, -2.0, 0.0, 5), receiver));
+                () -> storageService.deliver(new InboundStorage(ingredient, null, money(-2.0), null, money(0.0), 5), receiver));
         assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, 2.0, -1.0, 5), receiver));
+                () -> storageService.deliver(new InboundStorage(ingredient, null, money(2.0), null, money(-1.0), 5), receiver));
         assertThrows(BadRequestException.class,
-                () -> storageService.deliver(new InboundStorage(ingredient, null, null, 0.0, 5), receiver));
+                () -> storageService.deliver(new InboundStorage(ingredient, null, null, null, money(0.0), 5), receiver));
         assertEquals(cashBefore, cashRepository.count());
+    }
+
+    @Test
+    void shouldBookADeliveryByItsTotalWithoutLosingCents() {
+        User receiver = userRepository.save(new User(null, "receiver4", "x", true, Role.STAFF));
+
+        Storage stored = storageService.deliver(new InboundStorage(ingredient, null, null, money(17.54), money(0.0), 20), receiver);
+
+        assertMoney(17.54, stored.getCost());
+        assertEquals(new BigDecimal("0.8770"), stored.getPrice());
+        assertEquals(new BigDecimal("0.8770"), ingredientRepository.findById(ingredient.getId()).orElseThrow().getPrice());
+        assertTrue(cashRepository.findAll().stream()
+                .anyMatch(cash -> cash.getType() == CashType.PURCHASE && money(-17.54).equals(cash.getAmount())));
+    }
+
+    @Test
+    void shouldRejectADeliveryWithBothPriceAndTotal() {
+        User receiver = userRepository.save(new User(null, "receiver5", "x", true, Role.STAFF));
+
+        assertThrows(BadRequestException.class,
+                () -> storageService.deliver(new InboundStorage(ingredient, null, money(1.0), money(20.0), money(0.0), 20), receiver));
     }
 }

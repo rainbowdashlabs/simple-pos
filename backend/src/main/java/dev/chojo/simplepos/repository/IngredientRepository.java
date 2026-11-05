@@ -4,11 +4,13 @@ import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Ingredient;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -46,16 +48,20 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Integer>
         ids.stream().map(this::requireId).distinct().sorted().forEach(this::requireLocked);
     }
 
+    /**
+     * Every ingredient with its category, in one query.
+     */
+    @Override
+    @EntityGraph(attributePaths = "category")
+    List<Ingredient> findAll();
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT i FROM Ingredient i WHERE i.id = ?1")
     Optional<Ingredient> findByIdForUpdate(int id);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Ingredient SET price = ?2 where id = ?1")
-    int updateByIdIs(int id, double price);
-
-    @Query("SELECT Ingredient ")
-    List<Ingredient> findBy(double price);
+    int updateByIdIs(int id, BigDecimal price);
 
     /**
      * Finds an ingredient that a request refers to by id. A missing one is the request's fault, so it is reported as

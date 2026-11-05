@@ -18,12 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * The client address behind a reverse proxy, on a real server: Tomcat takes it from {@code X-Forwarded-For} when the
  * request comes from an internal proxy, here the loopback address the test connects from.
  * <p>
- * Runs its own web server and so its own Spring context. That context updates the schema instead of creating and
- * dropping it, so it never takes away the tables the other contexts use.
+ * Runs its own web server and so its own Spring context.
  */
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        properties = "spring.jpa.hibernate.ddl-auto=update")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class ForwardedAddressTest {
     @LocalServerPort

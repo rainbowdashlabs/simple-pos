@@ -15,8 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -42,7 +44,7 @@ class CashRepositoryTest {
     void shouldSaveCashEntry() {
         Cash cash = cashRepository.save(new Cash(user, 50.0, CashType.DEPOSIT, "Initial deposit"));
         assertNotNull(cash.getId());
-        assertEquals(50.0, cash.getAmount(), 0.001);
+        assertMoney(50.0, cash.getAmount());
     }
 
     @Test
@@ -70,8 +72,8 @@ class CashRepositoryTest {
         cashRepository.save(new Cash(user, 100.0, CashType.DEPOSIT, ""));
         cashRepository.save(new Cash(user, -30.0, CashType.PURCHASE, ""));
 
-        Double total = cashRepository.totalAmount();
-        assertEquals(70.0, total, 0.001);
+        BigDecimal total = cashRepository.totalAmount();
+        assertMoney(70.0, total);
     }
 
     @Test
@@ -81,22 +83,22 @@ class CashRepositoryTest {
         cashRepository.save(new Cash(user, -10.0, CashType.PLEDGE, ""));
         cashRepository.save(new Cash(user, -5.0, CashType.PLEDGE, ""));
 
-        Double pledgeTotal = cashRepository.totalAmount(CashType.PLEDGE);
-        assertEquals(-15.0, pledgeTotal, 0.001);
+        BigDecimal pledgeTotal = cashRepository.totalAmount(CashType.PLEDGE);
+        assertMoney(-15.0, pledgeTotal);
 
-        Double depositTotal = cashRepository.totalAmount(CashType.DEPOSIT);
-        assertEquals(100.0, depositTotal, 0.001);
+        BigDecimal depositTotal = cashRepository.totalAmount(CashType.DEPOSIT);
+        assertMoney(100.0, depositTotal);
     }
 
     @Test
     void shouldReturnNullTotalWhenEmpty() {
-        Double total = cashRepository.totalAmount();
+        BigDecimal total = cashRepository.totalAmount();
         assertNull(total);
     }
 
     @Test
     void shouldReturnNullTotalByTypeWhenEmpty() {
-        Double total = cashRepository.totalAmount(CashType.OTHER);
+        BigDecimal total = cashRepository.totalAmount(CashType.OTHER);
         assertNull(total);
     }
 
@@ -104,7 +106,7 @@ class CashRepositoryTest {
     void shouldPersistAllFields() {
         Cash cash = cashRepository.save(new Cash(user, 42.0, CashType.OTHER, "A note"));
         Cash found = cashRepository.findById(cash.getId()).orElseThrow();
-        assertEquals(42.0, found.getAmount(), 0.001);
+        assertMoney(42.0, found.getAmount());
         assertEquals(CashType.OTHER, found.getType());
         assertEquals("A note", found.getNote());
         assertNotNull(found.getUser());

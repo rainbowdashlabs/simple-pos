@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
+import dev.chojo.simplepos.entity.PurchasePart;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
@@ -33,8 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -92,7 +95,7 @@ class PurchaseServiceTest {
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
         assertEquals(1, purchases.get(0).getAmount());
-        assertEquals(2.0, purchases.get(0).getPrice(), 0.001);
+        assertMoney(2.0, purchases.get(0).getPrice());
     }
 
     @Test
@@ -227,7 +230,14 @@ class PurchaseServiceTest {
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
         assertEquals(5, purchases.get(0).getAmount());
-        assertEquals(2, purchases.get(0).getParts().size());
+        List<PurchasePart> parts = purchases.get(0).getParts().stream()
+                .sorted(Comparator.comparing(PurchasePart::getId))
+                .toList();
+        assertEquals(2, parts.size());
+        assertEquals(2, parts.get(0).getAmount());
+        assertNotNull(parts.get(0).getStorage());
+        assertEquals(3, parts.get(1).getAmount());
+        assertNull(parts.get(1).getStorage());
     }
 
     @Test
@@ -239,7 +249,7 @@ class PurchaseServiceTest {
 
         Purchase purchase = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 1)).get(0);
-        assertEquals(product.getPrice(), purchase.getPrice(), 0.001);
+        assertMoney(product.getPrice(), purchase.getPrice());
     }
 
     @Test
@@ -289,7 +299,7 @@ class PurchaseServiceTest {
         assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
         assertTrue(purchaseRepository.findById(purchase.getId()).isEmpty());
         assertEquals(0, purchasePartRepository.count());
-        assertEquals(0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance(), 0.001);
+        assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
     }
 
     @Test

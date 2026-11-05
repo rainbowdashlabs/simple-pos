@@ -136,8 +136,7 @@ class StorageRepositoryTest {
     @Test
     void shouldTrackSold() {
         Storage storage = storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 10, 0));
-        storage.take();
-        storage.take();
+        storage.take(2);
         storageRepository.save(storage);
 
         Storage found = storageRepository.findById(storage.getId()).orElseThrow();

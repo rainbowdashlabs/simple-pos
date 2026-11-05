@@ -1,4 +1,5 @@
 <script lang="ts">
+import {parseLocalDate} from "@/scripts/util.ts";
 import {defineComponent, PropType} from 'vue'
 import GridRowWrapper from "@/components/styles/grid/GridRowWrapper.vue";
 import {ProductSalesStat} from "@/scripts/product.ts";
@@ -8,6 +9,7 @@ import {SizeGroup} from "@/scripts/text.ts";
 
 export default defineComponent({
   name: "SalesHistory",
+  methods: {parseLocalDate},
   computed: {
     SizeGroup() {
       return SizeGroup
@@ -42,7 +44,7 @@ export default defineComponent({
     <div class="flex flex-col overflow-y-scroll height">
       <div v-for="entry in history" class="flex border-accent border-2 rounded-md my-1 p-1 justify-between">
         <div class="flex justify-start">
-          {{ $d(new Date(entry.day!)) }}
+          {{ $d(parseLocalDate(entry.day!)) }}
         </div>
         <div class="flex justify-between gap-5">
           <div class="flex">

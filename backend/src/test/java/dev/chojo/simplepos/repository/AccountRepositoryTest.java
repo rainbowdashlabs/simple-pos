@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -42,7 +43,7 @@ class AccountRepositoryTest {
         Optional<AccountDto> found = accountRepository.findAccountById(account.getId());
         assertTrue(found.isPresent());
         assertEquals("Jane", found.get().getName());
-        assertEquals(0.0, found.get().getBalance(), 0.001);
+        assertMoney(0.0, found.get().getBalance());
     }
 
     @Test
@@ -53,7 +54,7 @@ class AccountRepositoryTest {
 
         Optional<AccountDto> found = accountRepository.findAccountById(account.getId());
         assertTrue(found.isPresent());
-        assertEquals(75.0, found.get().getBalance(), 0.001);
+        assertMoney(75.0, found.get().getBalance());
     }
 
     @Test

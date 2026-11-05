@@ -3,9 +3,11 @@ package dev.chojo.simplepos.repository;
 import dev.chojo.simplepos.entity.Purchase;
 import jakarta.persistence.Tuple;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +16,10 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     @Query("SELECT p.account.id FROM Purchase p WHERE p.id = ?1")
     Optional<Integer> findAccountIdOf(int purchaseId);
 
+    /**
+     * An account's purchases, newest first, with their products, in one query.
+     */
+    @EntityGraph(attributePaths = {"product", "product.category", "product.recipe"})
     List<Purchase> findAllByAccount_IdOrderByPurchasedDesc(int id, Pageable pageable);
 
     @Query(value = """
@@ -21,17 +27,15 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                b.day, b.sales, b.revenue, b.profit
             FROM (
                 SELECT
-                  date_trunc('day', p.purchased) as day, sum(p.amount) as sales, sum(p.revenue) as revenue, sum(p.revenue - p.raw_price) as profit
+                  cast(p.purchased AT TIME ZONE ?3 AS date) as day, sum(p.amount) as sales, sum(p.revenue) as revenue, sum(p.revenue - p.raw_price) as profit
                 FROM
                   (
                     SELECT p.purchased as purchased, p.amount as amount, p.price * p.amount as revenue, coalesce(raw.raw_price,0) as raw_price
                     FROM Purchase p
                     LEFT JOIN
                       (
-                        SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                        SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                         FROM purchase_part pp
-                        LEFT JOIN storage s
-                        ON pp.storage_id = s.id
                         GROUP BY pp.purchase_id
                       ) raw ON p.id = raw.id
                     WHERE p.product_id = ?1
@@ -41,7 +45,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 ORDER BY day DESC
             ) b
             """, nativeQuery = true)
-    List<Tuple> getSalesStatByProduct(int id, Instant after, Pageable pageable);
+    List<Tuple> getSalesStatByProduct(int id, Instant after, String zone, Pageable pageable);
 
     @Query(value = """
             SELECT
@@ -54,10 +58,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 FROM Purchase p
                 LEFT JOIN
                   (
-                    SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                    SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                     FROM purchase_part pp
-                    LEFT JOIN storage s
-                    ON pp.storage_id = s.id
                     GROUP BY pp.purchase_id
                   ) raw ON p.id = raw.id
                 WHERE p.product_id = ?1
@@ -82,10 +84,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 FROM Purchase p
                 LEFT JOIN
                   (
-                    SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                    SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                     FROM purchase_part pp
-                    LEFT JOIN storage s
-                    ON pp.storage_id = s.id
                     GROUP BY pp.purchase_id
                   ) raw ON p.id = raw.id
                 WHERE purchased > ?1
@@ -96,22 +96,21 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query(value = """
             SELECT
-                date_trunc('day', p.purchased) as day,
+                cast(p.purchased AT TIME ZONE ?2 AS date) as day,
                 cast(coalesce(sum(p.amount), 0) as integer) as sales,
                 coalesce(sum(p.price * p.amount), 0) as revenue,
                 coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
             FROM purchase p
             LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                 FROM purchase_part pp
-                LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
             ) raw ON p.id = raw.id
             WHERE p.purchased > ?1
             GROUP BY day
             ORDER BY day ASC
             """, nativeQuery = true)
-    List<Tuple> getDailyStats(Instant after);
+    List<Tuple> getDailyStats(Instant after, String zone);
 
     @Query(value = """
             SELECT
@@ -137,9 +136,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             FROM product pr
             LEFT JOIN purchase p ON p.product_id = pr.id AND p.purchased > ?1
             LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(s.price), 0) as raw_price
+                SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                 FROM purchase_part pp
-                LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
             ) raw ON p.id = raw.id
             WHERE pr.active = true AND pr.deleted = false
@@ -149,8 +147,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
     List<Tuple> getBottomSales(Instant after, Pageable pageable);
 
     @Query("SELECT sum(price * amount) FROM Purchase")
-    Double totalPurchases();
+    BigDecimal totalPurchases();
 
     @Query("SELECT sum(price * amount) FROM Purchase WHERE purchased > ?1")
-    Double totalPurchases(Instant after);
+    BigDecimal totalPurchases(Instant after);
 }

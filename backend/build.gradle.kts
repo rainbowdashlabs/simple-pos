@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.spring.boot.starter.data.rest)
     implementation(libs.spring.session.core)
     implementation(libs.postgresql)
+    implementation(libs.spring.boot.starter.flyway)
+    runtimeOnly(libs.flyway.postgresql)
     implementation(libs.spring.boot.starter.security)
     implementation(libs.bundles.spring.security)
     implementation(libs.springdoc.openapi)

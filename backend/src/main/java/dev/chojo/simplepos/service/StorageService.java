@@ -4,6 +4,7 @@ import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.InboundStorage;
@@ -16,13 +17,11 @@ import dev.chojo.simplepos.service.storage.StorageTransaction;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class StorageService {
@@ -41,32 +40,55 @@ public class StorageService {
      * Books a delivery: the new stock, and the money paid for it and for its pledge, in one transaction. A delivery
      * without a purchase date counts as purchased now, so it is used up in order with the others.
      *
-     * @throws BadRequestException if the ingredient is missing, the amount is not positive, or the price or pledge
-     *                             is missing or negative
+     * @throws BadRequestException if the ingredient is missing, the amount is not positive, not exactly one of the
+     *                             price per unit and the total is given, or the cost or pledge is missing or negative
      * @throws dev.chojo.simplepos.controller.exceptions.NotFoundException if the ingredient does not exist
      */
     @Transactional
     public Storage deliver(InboundStorage delivery, User receivedBy) {
         Ingredient ingredient = ingredientRepository.require(delivery.ingredientId());
         if (delivery.amount() == null || delivery.amount() < 1) throw new BadRequestException("The amount must be at least 1");
-        if (delivery.price() == null || delivery.price() < 0) throw new BadRequestException("The price must not be negative");
-        if (delivery.pledge() == null || delivery.pledge() < 0) throw new BadRequestException("The pledge must not be negative");
-
-        if (delivery.price() > 0) {
-            String note = "%s x %d".formatted(ingredient.getName(), delivery.amount());
-            cashRepository.save(new Cash(receivedBy, -delivery.price() * delivery.amount(), CashType.PURCHASE, note));
+        if ((delivery.price() == null) == (delivery.total() == null)) {
+            throw new BadRequestException("Give either the price per unit or the total, not both");
         }
-        if (delivery.pledge() > 0) {
-            cashRepository.save(new Cash(receivedBy, -delivery.pledge(), CashType.PLEDGE, ingredient.getName()));
+        BigDecimal cost = delivery.total() != null
+                ? Money.of(delivery.total())
+                : Money.of(delivery.price().multiply(BigDecimal.valueOf(delivery.amount())));
+        if (cost.signum() < 0) throw new BadRequestException("The price must not be negative");
+        if (delivery.pledge() == null || delivery.pledge().signum() < 0) throw new BadRequestException("The pledge must not be negative");
+        if (integerDigits(cost) > 10 || integerDigits(Money.perUnit(cost, delivery.amount())) > 8
+            || integerDigits(delivery.pledge()) > 10) {
+            throw new BadRequestException("The price or pledge is too large");
+        }
+
+        if (cost.signum() > 0) {
+            String note = "%s x %d".formatted(ingredient.getName(), delivery.amount());
+            cashRepository.save(new Cash(receivedBy, cost.negate(), CashType.PURCHASE, note));
+        }
+        if (delivery.pledge().signum() > 0) {
+            cashRepository.save(new Cash(receivedBy, delivery.pledge().negate(), CashType.PLEDGE, ingredient.getName()));
         }
         Instant purchased = delivery.purchased() == null ? Instant.now() : delivery.purchased();
-        return addStorage(new Storage(null, ingredient, purchased, delivery.price(), delivery.amount(), 0));
+        Storage created = storageRepository.save(Storage.withCost(ingredient, purchased, cost, delivery.amount()));
+        if (cost.signum() > 0) {
+            BigDecimal unitPrice = delivery.price() != null ? Money.unit(delivery.price()) : created.getPrice();
+            ingredientRepository.updateByIdIs(ingredient.getId(), unitPrice);
+        }
+        return created;
     }
 
+    /**
+     * Stores a batch and makes its unit cost the ingredient's default price.
+     *
+     * @throws BadRequestException if the batch holds no units or more sold units than it holds
+     */
     @Transactional
     public Storage addStorage(Storage storage) {
+        if (storage.getAmount() < 1 || storage.getSold() < 0 || storage.getSold() > storage.getAmount()) {
+            throw new BadRequestException("A batch needs at least one unit and cannot have sold more than it holds");
+        }
         Storage created = storageRepository.save(storage);
-        if (created.getPrice() > 0) {
+        if (created.getCost().signum() > 0) {
             ingredientRepository.updateByIdIs(storage.getIngredient().getId(), storage.getPrice());
         }
         return created;
@@ -85,13 +107,14 @@ public class StorageService {
         for (InventoryCorrection correction : corrections) {
             Ingredient ingredient = ingredientRepository.require(correction.ingredient());
             if (correction.amount() == null) throw new BadRequestException("Amount is missing");
+            if (correction.amount() < 0) throw new BadRequestException("The counted amount must not be negative");
             StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;
             if (delta > 0) {
                 takeStorage(ingredient, delta);
             } else {
-                addStorage(new Storage(null, summary.getIngredient(), Instant.now(), 0, Math.abs(delta), 0));
+                storageRepository.save(new Storage(null, ingredient, Instant.now(), ingredient.getPrice(), Math.abs(delta), 0));
             }
         }
     }
@@ -103,21 +126,26 @@ public class StorageService {
      * The ingredient row stays locked until the surrounding transaction commits, so concurrent purchases and
      * inventory corrections of the same ingredient cannot overwrite each other's stock changes.
      *
-     * @return one transaction per storage batch that units were taken from
+     * @return one transaction per storage batch that units were taken from, oldest first
      */
     @Transactional
-    public Collection<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
+    public List<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
         ingredientRepository.requireLocked(ingredient.getId());
-        Map<Integer, StorageTransaction> taken = new HashMap<>();
-        for (int i = 0; i < amount; i++) {
-            var optNext = storageRepository.findNextIngredient(ingredient.getId());
-            optNext.ifPresent(id -> {
-                Storage storage = storageRepository.findById(id)
-                        .orElseThrow(() -> new IllegalStateException("Storage %d vanished while taking stock".formatted(id)));
-                storage.take();
-                taken.computeIfAbsent(storage.getId(), s -> new StorageTransaction()).update(storageRepository.saveAndFlush(storage));
-            });
+        List<StorageTransaction> taken = new ArrayList<>();
+        int missing = amount;
+        while (missing > 0) {
+            Optional<Integer> next = storageRepository.findNextIngredient(ingredient.getId());
+            if (next.isEmpty()) break;
+            Storage storage = storageRepository.findById(next.get())
+                    .orElseThrow(() -> new IllegalStateException("Storage %d vanished while taking stock".formatted(next.get())));
+            Storage.StockTaken stock = storage.take(missing);
+            taken.add(new StorageTransaction(storageRepository.saveAndFlush(storage), stock.units(), stock.cost()));
+            missing -= stock.units();
         }
-        return taken.values();
+        return taken;
+    }
+
+    private static int integerDigits(BigDecimal amount) {
+        return Math.max(0, amount.precision() - amount.scale());
     }
 }

@@ -1,4 +1,6 @@
 package dev.chojo.simplepos.entity.response;
 
-public record CashResponse(double amount) {
+import java.math.BigDecimal;
+
+public record CashResponse(BigDecimal amount) {
 }

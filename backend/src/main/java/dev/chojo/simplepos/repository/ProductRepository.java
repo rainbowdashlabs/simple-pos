@@ -3,10 +3,12 @@ package dev.chojo.simplepos.repository;
 import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Product;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
@@ -31,9 +33,17 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                 .orElseThrow(() -> new NotFoundException("Product", id));
     }
 
+    @EntityGraph(attributePaths = {"category", "recipe", "recipe.entries", "recipe.entries.ingredient", "recipe.entries.ingredient.category"})
     List<Product> findAllByDeletedFalse();
 
+    @EntityGraph(attributePaths = {"category", "recipe", "recipe.entries", "recipe.entries.ingredient", "recipe.entries.ingredient.category"})
     List<Product> findAllByDeletedFalseAndActiveTrue();
+
+    /**
+     * The products with these ids, with their category and recipe, in one query.
+     */
+    @EntityGraph(attributePaths = {"category", "recipe", "recipe.entries", "recipe.entries.ingredient", "recipe.entries.ingredient.category"})
+    List<Product> findAllByIdIn(Collection<Integer> ids);
 
     private Integer requireId(Integer id) {
         if (id == null) throw new BadRequestException("Product id is missing");

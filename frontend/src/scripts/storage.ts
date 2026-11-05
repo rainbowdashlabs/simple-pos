@@ -19,6 +19,7 @@ export interface StorageEntry {
     id: number | null,
     purchased: number,
     price: number,
+    cost: number,
     amount: number,
     sold: number
 }
@@ -26,7 +27,8 @@ export interface StorageEntry {
 export interface InboundStorage {
     ingredient: Ingredient,
     purchased: Date,
-    price: number,
+    price: number | null,
+    total: number | null,
     pledge: number,
     amount: number
 }

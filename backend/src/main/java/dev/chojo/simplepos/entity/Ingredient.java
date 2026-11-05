@@ -9,6 +9,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
+
 @Entity
 public class Ingredient implements Comparable<Ingredient> {
     @Id
@@ -21,27 +23,32 @@ public class Ingredient implements Comparable<Ingredient> {
     @NotNull
     private String name;
     @NotNull
-    private Double price;
+    @Column(precision = 12, scale = Money.UNIT_SCALE, nullable = false)
+    private BigDecimal price;
     @Column(nullable = false)
     private int containerSize;
-    @Column(nullable = false)
-    private double pledge;
-    @Column(nullable = false)
-    private double pledgeContainer;
+    @Column(precision = 12, scale = Money.SCALE, nullable = false)
+    private BigDecimal pledge;
+    @Column(precision = 12, scale = Money.SCALE, nullable = false)
+    private BigDecimal pledgeContainer;
     @Column(nullable = false)
     private int minStock;
 
     @Column(columnDefinition = "boolean default true")
     private boolean active = true;
 
-    public Ingredient(Integer id, Category category, String name, Double price, int containerSize, double pledge, double pledgeContainer, int minStock) {
+    public Ingredient(Integer id, Category category, String name, double price, int containerSize, double pledge, double pledgeContainer, int minStock) {
+        this(id, category, name, BigDecimal.valueOf(price), containerSize, Money.of(pledge), Money.of(pledgeContainer), minStock);
+    }
+
+    public Ingredient(Integer id, Category category, String name, BigDecimal price, int containerSize, BigDecimal pledge, BigDecimal pledgeContainer, int minStock) {
         this.id = id;
         this.category = category;
         this.name = name;
-        this.price = price;
+        this.price = Money.unit(price);
         this.containerSize = containerSize;
-        this.pledge = pledge;
-        this.pledgeContainer = pledgeContainer;
+        this.pledge = Money.of(pledge);
+        this.pledgeContainer = Money.of(pledgeContainer);
         this.minStock = minStock;
     }
 
@@ -72,12 +79,12 @@ public class Ingredient implements Comparable<Ingredient> {
         this.name = name;
     }
 
-    public @NotNull Double getPrice() {
+    public @NotNull BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(@NotNull Double price) {
-        this.price = price;
+    public void setPrice(@NotNull BigDecimal price) {
+        this.price = Money.unit(price);
     }
 
     public int getContainerSize() {
@@ -88,20 +95,20 @@ public class Ingredient implements Comparable<Ingredient> {
         this.containerSize = containerSize;
     }
 
-    public double getPledge() {
+    public BigDecimal getPledge() {
         return pledge;
     }
 
-    public void setPledge(double deposit) {
-        this.pledge = deposit;
+    public void setPledge(BigDecimal deposit) {
+        this.pledge = Money.of(deposit);
     }
 
-    public double getPledgeContainer() {
+    public BigDecimal getPledgeContainer() {
         return pledgeContainer;
     }
 
-    public void setPledgeContainer(double depositContainer) {
-        this.pledgeContainer = depositContainer;
+    public void setPledgeContainer(BigDecimal depositContainer) {
+        this.pledgeContainer = Money.of(depositContainer);
     }
 
     public int getMinStock() {

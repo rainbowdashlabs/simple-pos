@@ -1,14 +1,15 @@
 package dev.chojo.simplepos.entity;
 
 import dev.chojo.simplepos.entity.dto.PurchaseDto;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -18,29 +19,33 @@ public class Purchase {
     @GeneratedValue
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Account account;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
     private Instant purchased;
 
     private int amount;
 
-    private double price;
+    @Column(precision = 12, scale = Money.SCALE, nullable = false)
+    private BigDecimal price;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "purchase_id")
+    @OneToMany(mappedBy = "purchase", fetch = FetchType.LAZY)
     private List<PurchasePart> parts;
 
     public Purchase(Integer id, Account account, Product product, Instant purchased, int amount, double price, List<PurchasePart> parts) {
+        this(id, account, product, purchased, amount, Money.of(price), parts);
+    }
+
+    public Purchase(Integer id, Account account, Product product, Instant purchased, int amount, BigDecimal price, List<PurchasePart> parts) {
         this.id = id;
         this.account = account;
         this.product = product;
         this.purchased = purchased;
         this.amount = amount;
-        this.price = price;
+        this.price = Money.of(price);
         this.parts = parts;
     }
 
@@ -87,12 +92,12 @@ public class Purchase {
         this.amount = amount;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setPrice(BigDecimal price) {
+        this.price = Money.of(price);
     }
 
     public List<PurchasePart> getParts() {

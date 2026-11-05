@@ -1,12 +1,14 @@
 spring:
+  flyway:
+    clean-disabled: false
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        enable_lazy_load_no_trans: true
+        generate_statistics: true
 
 security:
   jwt:

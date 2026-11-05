@@ -13,6 +13,7 @@ in addition to the bundled defaults. Besides the datasource, one setting is requ
 | `security.jwt.expiration-time` (`SECURITY_JWT_EXPIRATION_TIME`) | `3600000` (1 h)    | Lifetime of a login token in milliseconds.                                                                |
 | `security.jwt.refresh-expiration-time` (`SECURITY_JWT_REFRESH_EXPIRATION_TIME`) | `2592000000` (30 d) | Lifetime of a refresh token in milliseconds. Every refresh issues a new one, so a session stays alive as long as it is used within this time.                              |
 | `security.jwt.issuer` / `security.jwt.audience` (`SECURITY_JWT_ISSUER` / `SECURITY_JWT_AUDIENCE`) | `simple-pos` | Written into every token and checked on every request, so a token signed with the same key for another service is not accepted. |
+| `pos.time-zone` (`POS_TIME_ZONE`) | `Europe/Berlin` | Where a business day starts and ends in the daily statistics. |
 
 Changing the secret key logs out every user. Without a key the application does not start. The `local` Spring
 profile comes with a key that is only meant for development; compose reads the key from `.env` (see below).
@@ -26,6 +27,25 @@ Logins are rate limited per client address. Behind a reverse proxy such as traef
 unique-local ranges). Make sure only the proxy can reach the application, or set
 `server.tomcat.remoteip.internal-proxies` to the proxy's address; otherwise anything on those networks can claim any
 client address.
+
+### Database schema
+
+The schema is managed by Flyway (`backend/src/main/resources/db/migration`); Hibernate only checks that it matches.
+On its first start this version records an existing database as being at version 1 and then applies the later
+migrations, the first of which drops the unused `authority` table. Before that first start:
+
+- take a backup (`pg_dump`),
+- remove any `spring.jpa.hibernate.ddl-auto` from a mounted `application.yaml`, so it does not override the check.
+
+The migration to exact money is one way. It rounds amounts stored with fractions of a cent (cash entries such as
+−10.524 become −10.52, prices to cents, the default unit price of an ingredient to four decimals) and replaces the
+price per unit of a delivery by what was paid for it; the previous version cannot read the migrated database, so the
+only way back is restoring the backup. The same release merges the sale records of a purchase per stock batch
+and deletes sale records that belong to no purchase; the previous version cannot sell on the migrated database
+either.
+
+A database that was not kept up to date by the previous version (missing columns, an older role constraint) fails the
+check at startup or later; compare it with `V1__baseline.sql`, or dump the data and recreate it.
 
 ### Running with compose
 

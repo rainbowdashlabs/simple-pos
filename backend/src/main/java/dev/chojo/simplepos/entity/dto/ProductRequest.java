@@ -1,11 +1,13 @@
 package dev.chojo.simplepos.entity.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -14,6 +16,6 @@ import java.util.List;
  */
 public record ProductRequest(@NotBlank @Size(max = 100) String name,
                              @NotNull Integer categoryId,
-                             @NotNull @PositiveOrZero Double price,
+                             @NotNull @PositiveOrZero @Digits(integer = 10, fraction = 2) BigDecimal price,
                              @NotNull List<@NotNull @Valid RecipeEntryRequest> recipe) {
 }

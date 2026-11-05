@@ -188,5 +188,8 @@
   "cart_added": "{name} hinzugefügt, Warenkorb {total}",
   "cart_removed": "1 × {name} entfernt, Warenkorb {total}",
   "cart_cleared": "Warenkorb geleert",
-  "skip_to_cart": "Zum Warenkorb springen"
+  "skip_to_cart": "Zum Warenkorb springen",
+  "per_piece": "Pro Stück",
+  "total_paid": "Gesamtpreis",
+  "price_mode": "Preis angeben als"
 }

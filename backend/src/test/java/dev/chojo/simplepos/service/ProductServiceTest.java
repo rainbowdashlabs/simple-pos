@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
+import static dev.chojo.simplepos.MoneyAssertions.money;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Import(TestcontainersConfiguration.class)
@@ -91,7 +93,7 @@ class ProductServiceTest {
         Optional<Product> found = productRepository.findById(product.getId());
         assertTrue(found.isPresent());
         assertEquals("Soda", found.get().getName());
-        assertEquals(1.5, found.get().getPrice(), 0.001);
+        assertMoney(1.5, found.get().getPrice());
         assertTrue(found.get().isActive());
         assertEquals(category.getId(), found.get().getCategory().getId());
     }
@@ -105,7 +107,7 @@ class ProductServiceTest {
         Product updated = productService.update(product.getId(), request("NewName", 2.0, entry(1)));
 
         assertEquals("NewName", updated.getName());
-        assertEquals(2.0, updated.getPrice(), 0.001);
+        assertMoney(2.0, updated.getPrice());
     }
 
     @Test
@@ -299,8 +301,8 @@ class ProductServiceTest {
 
     @Test
     void createFromRequestWithNewIngredient() {
-        Product created = productService.create(new ProductRequest("Lemonade", category.getId(), 2.0,
-                List.of(new RecipeEntryRequest(null, new IngredientRequest("Lemon", category.getId(), 0.4, 6, 0.0, 0.0, 2), 1))));
+        Product created = productService.create(new ProductRequest("Lemonade", category.getId(), money(2.0),
+                List.of(new RecipeEntryRequest(null, new IngredientRequest("Lemon", category.getId(), money(0.4), 6, money(0.0), money(0.0), 2), 1))));
 
         assertTrue(created.isActive());
         assertEquals("Lemon", created.getRecipe().getEntries().get(0).getIngredient().getName());
@@ -309,21 +311,21 @@ class ProductServiceTest {
 
     @Test
     void recipeEntryNeedsExactlyOneIngredient() {
-        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Both", category.getId(), 1.0,
-                List.of(new RecipeEntryRequest(ingredient.getId(), new IngredientRequest("X", category.getId(), 0.1, 0, 0.0, 0.0, 0), 1)))));
-        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Neither", category.getId(), 1.0,
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Both", category.getId(), money(1.0),
+                List.of(new RecipeEntryRequest(ingredient.getId(), new IngredientRequest("X", category.getId(), money(0.1), 0, money(0.0), money(0.0), 0), 1)))));
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Neither", category.getId(), money(1.0),
                 List.of(new RecipeEntryRequest(null, null, 1)))));
     }
 
     @Test
     void unknownCategoryOrIngredientIsABadRequest() {
-        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("NoCat", 999_999, 1.0, List.of(entry(1)))));
-        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("NoIngr", category.getId(), 1.0,
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("NoCat", 999_999, money(1.0), List.of(entry(1)))));
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("NoIngr", category.getId(), money(1.0),
                 List.of(new RecipeEntryRequest(999_999, null, 1)))));
     }
 
     private ProductRequest request(String name, double price, RecipeEntryRequest... entries) {
-        return new ProductRequest(name, category.getId(), price, List.of(entries));
+        return new ProductRequest(name, category.getId(), money(price), List.of(entries));
     }
 
     private RecipeEntryRequest entry(int amount) {
