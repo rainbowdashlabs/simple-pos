@@ -29,10 +29,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                     FROM Purchase p
                     LEFT JOIN
                       (
-                        SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
+                        SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                         FROM purchase_part pp
-                        LEFT JOIN storage s
-                        ON pp.storage_id = s.id
                         GROUP BY pp.purchase_id
                       ) raw ON p.id = raw.id
                     WHERE p.product_id = ?1
@@ -55,10 +53,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 FROM Purchase p
                 LEFT JOIN
                   (
-                    SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
+                    SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                     FROM purchase_part pp
-                    LEFT JOIN storage s
-                    ON pp.storage_id = s.id
                     GROUP BY pp.purchase_id
                   ) raw ON p.id = raw.id
                 WHERE p.product_id = ?1
@@ -83,10 +79,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 FROM Purchase p
                 LEFT JOIN
                   (
-                    SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
+                    SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                     FROM purchase_part pp
-                    LEFT JOIN storage s
-                    ON pp.storage_id = s.id
                     GROUP BY pp.purchase_id
                   ) raw ON p.id = raw.id
                 WHERE purchased > ?1
@@ -103,9 +97,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
             FROM purchase p
             LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
+                SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                 FROM purchase_part pp
-                LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
             ) raw ON p.id = raw.id
             WHERE p.purchased > ?1
@@ -138,9 +131,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             FROM product pr
             LEFT JOIN purchase p ON p.product_id = pr.id AND p.purchased > ?1
             LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(s.cost / nullif(s.amount, 0)), 0) as raw_price
+                SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
                 FROM purchase_part pp
-                LEFT JOIN storage s ON pp.storage_id = s.id
                 GROUP BY pp.purchase_id
             ) raw ON p.id = raw.id
             WHERE pr.active = true AND pr.deleted = false

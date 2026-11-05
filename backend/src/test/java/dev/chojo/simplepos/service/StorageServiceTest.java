@@ -105,7 +105,7 @@ class StorageServiceTest {
         Collection<StorageTransaction> transactions = storageService.takeStorage(ingredient, 3);
 
         assertFalse(transactions.isEmpty());
-        int totalTaken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
+        int totalTaken = transactions.stream().mapToInt(StorageTransaction::amount).sum();
         assertEquals(3, totalTaken);
     }
 
@@ -119,7 +119,7 @@ class StorageServiceTest {
         Ingredient freshIngredient = ingredientRepository.findById(ingredient.getId()).orElseThrow();
         Collection<StorageTransaction> transactions = storageService.takeStorage(freshIngredient, 4);
 
-        int totalTaken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
+        int totalTaken = transactions.stream().mapToInt(StorageTransaction::amount).sum();
         assertEquals(4, totalTaken);
     }
 
@@ -130,7 +130,7 @@ class StorageServiceTest {
 
         Collection<StorageTransaction> transactions = storageService.takeStorage(ingredient, 5);
 
-        int totalTaken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
+        int totalTaken = transactions.stream().mapToInt(StorageTransaction::amount).sum();
         assertEquals(3, totalTaken);
     }
 

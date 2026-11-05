@@ -9,6 +9,7 @@ import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
+import dev.chojo.simplepos.entity.PurchasePart;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Storage;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static dev.chojo.simplepos.MoneyAssertions.assertMoney;
@@ -228,7 +230,14 @@ class PurchaseServiceTest {
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
         assertEquals(5, purchases.get(0).getAmount());
-        assertEquals(2, purchases.get(0).getParts().size());
+        List<PurchasePart> parts = purchases.get(0).getParts().stream()
+                .sorted(Comparator.comparing(PurchasePart::getId))
+                .toList();
+        assertEquals(2, parts.size());
+        assertEquals(2, parts.get(0).getAmount());
+        assertNotNull(parts.get(0).getStorage());
+        assertEquals(3, parts.get(1).getAmount());
+        assertNull(parts.get(1).getStorage());
     }
 
     @Test

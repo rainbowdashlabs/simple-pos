@@ -10,7 +10,7 @@ import java.util.List;
 public interface PurchasePartRepository extends JpaRepository<PurchasePart, Integer> {
     List<PurchasePart> findAllByPurchase(Purchase purchase);
 
-    @Query("SELECT DISTINCT p.storage.ingredient.id FROM PurchasePart p WHERE p.purchase.id = ?1")
+    @Query("SELECT DISTINCT p.ingredient.id FROM PurchasePart p WHERE p.purchase.id = ?1")
     List<Integer> findIngredientIdsOf(int purchaseId);
 
 }

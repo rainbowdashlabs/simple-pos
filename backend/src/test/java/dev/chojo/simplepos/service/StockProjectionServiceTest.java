@@ -112,10 +112,8 @@ class StockProjectionServiceTest {
 
     private void take(int units, Instant when) {
         Purchase purchase = purchaseRepository.save(new Purchase(null, account, product, when, units, 2.0, Collections.emptyList()));
-        for (int i = 0; i < units; i++) {
-            purchasePartRepository.save(new PurchasePart(null, purchase, batch));
-            batch.take();
-        }
+        Storage.StockTaken taken = batch.take(units);
+        purchasePartRepository.save(new PurchasePart(purchase, batch, ingredient, taken.units(), taken.cost()));
         storageRepository.save(batch);
         entityManager.flush();
     }

@@ -31,20 +31,23 @@ public interface StorageRepository extends JpaRepository<Storage, Integer> {
 
     List<Storage> findAllByIngredient(Ingredient ingredient, Pageable pageable);
 
-    @Query(value = "SELECT id FROM storage WHERE amount > sold AND ingredient_id = ?1 ORDER BY purchased LIMIT 1", nativeQuery = true)
+    /**
+     * The oldest batch of the ingredient that still holds units: by delivery time, then by id.
+     */
+    @Query(value = "SELECT id FROM storage WHERE amount > sold AND ingredient_id = ?1 ORDER BY purchased, id LIMIT 1", nativeQuery = true)
     Optional<Integer> findNextIngredient(int ingredient);
 
     /**
-     * Per ingredient used for a sale between {@code after} and {@code until}, how many units were taken from storage
-     * in that time, and when a unit of it was first taken for a sale at all.
+     * Per ingredient used for a sale between {@code after} and {@code until}, how many units sales used in that time,
+     * from storage or sold without stock, and when a unit of it was first used for a sale at all.
      */
     @Query("""
-            SELECT pp.storage.ingredient.id AS ingredient_id,
-                   count(pp) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) AS taken,
+            SELECT pp.ingredient.id AS ingredient_id,
+                   sum(pp.amount) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) AS taken,
                    min(pp.purchase.purchased) AS first_taken
             FROM PurchasePart pp
-            GROUP BY pp.storage.ingredient.id
-            HAVING count(pp) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) > 0
+            GROUP BY pp.ingredient.id
+            HAVING sum(pp.amount) FILTER (WHERE pp.purchase.purchased > ?1 AND pp.purchase.purchased <= ?2) > 0
             """)
     List<Tuple> usageByIngredient(Instant after, Instant until);
 }

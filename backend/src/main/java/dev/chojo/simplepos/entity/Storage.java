@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 
 @Entity
@@ -111,7 +112,27 @@ public class Storage {
         this.sold = sold;
     }
 
-    public void take(){
-        sold += 1;
+    /**
+     * Takes up to {@code wanted} units that are still in the batch.
+     *
+     * @return what the taken units cost: the share of the batch cost up to the units sold now, minus the share up to
+     * the units sold before, so the costs of all units of a sold-out batch add up to exactly its cost
+     */
+    public StockTaken take(int wanted) {
+        int units = Math.min(wanted, amount - sold);
+        BigDecimal taken = costUpTo(sold + units).subtract(costUpTo(sold));
+        sold += units;
+        return new StockTaken(units, taken);
+    }
+
+    private BigDecimal costUpTo(int units) {
+        if (amount <= 0) return Money.ZERO;
+        return cost.multiply(BigDecimal.valueOf(units)).divide(BigDecimal.valueOf(amount), Money.SCALE, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * How many units {@link #take(int)} took and what they cost.
+     */
+    public record StockTaken(int units, BigDecimal cost) {
     }
 }

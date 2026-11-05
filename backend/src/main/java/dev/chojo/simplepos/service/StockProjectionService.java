@@ -17,9 +17,10 @@ import java.util.Map;
 /**
  * Estimates how long the stock of each ingredient lasts.
  * <p>
- * Daily usage is what was actually taken from storage for sales, averaged over the last {@value #WINDOW_DAYS} days,
- * or over the days since the ingredient was first taken if that is shorter. So an ingredient that is new, or whose
- * recipes changed, is judged by what it really sold, not by today's recipes or by days it did not exist yet.
+ * Daily usage is what sales actually used, from storage or sold without stock, averaged over the last
+ * {@value #WINDOW_DAYS} days, or over the days since the ingredient was first used if that is shorter. So an
+ * ingredient that is new, or whose recipes changed, is judged by what it really sold, not by today's recipes or by
+ * days it did not exist yet.
  */
 @Service
 public class StockProjectionService {

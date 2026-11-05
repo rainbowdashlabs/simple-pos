@@ -20,11 +20,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class StorageService {
@@ -108,7 +105,7 @@ public class StorageService {
             if (delta > 0) {
                 takeStorage(ingredient, delta);
             } else {
-                addStorage(new Storage(null, summary.getIngredient(), Instant.now(), 0, Math.abs(delta), 0));
+                storageRepository.save(new Storage(null, ingredient, Instant.now(), ingredient.getPrice(), Math.abs(delta), 0));
             }
         }
     }
@@ -120,22 +117,23 @@ public class StorageService {
      * The ingredient row stays locked until the surrounding transaction commits, so concurrent purchases and
      * inventory corrections of the same ingredient cannot overwrite each other's stock changes.
      *
-     * @return one transaction per storage batch that units were taken from
+     * @return one transaction per storage batch that units were taken from, oldest first
      */
     @Transactional
-    public Collection<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
+    public List<StorageTransaction> takeStorage(Ingredient ingredient, int amount) {
         ingredientRepository.requireLocked(ingredient.getId());
-        Map<Integer, StorageTransaction> taken = new HashMap<>();
-        for (int i = 0; i < amount; i++) {
-            var optNext = storageRepository.findNextIngredient(ingredient.getId());
-            optNext.ifPresent(id -> {
-                Storage storage = storageRepository.findById(id)
-                        .orElseThrow(() -> new IllegalStateException("Storage %d vanished while taking stock".formatted(id)));
-                storage.take();
-                taken.computeIfAbsent(storage.getId(), s -> new StorageTransaction()).update(storageRepository.saveAndFlush(storage));
-            });
+        List<StorageTransaction> taken = new ArrayList<>();
+        int missing = amount;
+        while (missing > 0) {
+            Optional<Integer> next = storageRepository.findNextIngredient(ingredient.getId());
+            if (next.isEmpty()) break;
+            Storage storage = storageRepository.findById(next.get())
+                    .orElseThrow(() -> new IllegalStateException("Storage %d vanished while taking stock".formatted(next.get())));
+            Storage.StockTaken stock = storage.take(missing);
+            taken.add(new StorageTransaction(storageRepository.saveAndFlush(storage), stock.units(), stock.cost()));
+            missing -= stock.units();
         }
-        return taken.values();
+        return taken;
     }
 
     private static int integerDigits(BigDecimal amount) {

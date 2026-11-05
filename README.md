@@ -39,7 +39,9 @@ migrations, the first of which drops the unused `authority` table. Before that f
 The migration to exact money is one way. It rounds amounts stored with fractions of a cent (cash entries such as
 −10.524 become −10.52, prices to cents, the default unit price of an ingredient to four decimals) and replaces the
 price per unit of a delivery by what was paid for it; the previous version cannot read the migrated database, so the
-only way back is restoring the backup.
+only way back is restoring the backup. The same release merges the sale records of a purchase per stock batch
+and deletes sale records that belong to no purchase; the previous version cannot sell on the migrated database
+either.
 
 A database that was not kept up to date by the previous version (missing columns, an older role constraint) fails the
 check at startup or later; compare it with `V1__baseline.sql`, or dump the data and recreate it.

@@ -4,6 +4,7 @@ import dev.chojo.simplepos.controller.exceptions.BadRequestException;
 import dev.chojo.simplepos.controller.exceptions.ConflictException;
 import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.entity.Account;
+import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Purchase;
 import dev.chojo.simplepos.entity.PurchasePart;
@@ -20,9 +21,9 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,7 +53,8 @@ public class PurchaseService {
      * Books a purchase for every cart position and takes the ingredients of each product's recipe from storage.
      * <p>
      * Runs in one transaction: if any position names an unknown product, nothing is booked. A product whose
-     * ingredients are out of stock is still sold; the shortfall is logged as a warning.
+     * ingredients are out of stock is still sold; the shortfall is logged as a warning and recorded as units sold
+     * without stock, costed at the ingredient's current price.
      *
      * <p>
      * The account is loaded only here, under its row lock, so an account closed meanwhile is seen as closed.
@@ -87,13 +89,18 @@ public class PurchaseService {
             purchase = purchaseRepository.save(purchase);
             ArrayList<PurchasePart> parts = new ArrayList<>();
             for (RecipeEntry recipe : prod.getRecipe().getEntries()) {
+                Ingredient ingredient = recipe.getIngredient();
                 int requested = recipe.getAmount() * position.amount();
-                Collection<StorageTransaction> transactions = storageService.takeStorage(recipe.getIngredient(), requested);
-                logShortfall(purchase, recipe, requested, transactions);
+                List<StorageTransaction> transactions = storageService.takeStorage(ingredient, requested);
                 for (StorageTransaction transaction : transactions) {
-                    for (int i = 0; i < transaction.getAmount(); i++) {
-                        parts.add(purchasePartRepository.save(new PurchasePart(null, purchase, transaction.getStorage())));
-                    }
+                    parts.add(purchasePartRepository.save(new PurchasePart(purchase, transaction.storage(), ingredient,
+                            transaction.amount(), transaction.cost())));
+                }
+                int missing = requested - transactions.stream().mapToInt(StorageTransaction::amount).sum();
+                if (missing > 0) {
+                    logShortfall(purchase, recipe, requested, requested - missing);
+                    BigDecimal cost = ingredient.getPrice().multiply(BigDecimal.valueOf(missing));
+                    parts.add(purchasePartRepository.save(new PurchasePart(purchase, null, ingredient, missing, cost)));
                 }
             }
             purchase.setParts(parts);
@@ -119,17 +126,13 @@ public class PurchaseService {
         List<PurchasePart> parts = purchasePartRepository.findAllByPurchase(purchase);
         for (PurchasePart part : parts) {
             Storage storage = part.getStorage();
-            storage.setSold(Math.max(0, storage.getSold() - 1));
+            if (storage != null) storage.setSold(Math.max(0, storage.getSold() - part.getAmount()));
         }
-        purchase.setParts(new ArrayList<>());
         purchasePartRepository.deleteAll(parts);
         purchaseRepository.delete(purchase);
     }
 
-    private static void logShortfall(Purchase purchase, RecipeEntry recipe, int requested,
-                                     Collection<StorageTransaction> transactions) {
-        int taken = transactions.stream().mapToInt(StorageTransaction::getAmount).sum();
-        if (taken >= requested) return;
+    private static void logShortfall(Purchase purchase, RecipeEntry recipe, int requested, int taken) {
         Product product = purchase.getProduct();
         log.warn("Purchase {} by account {} sold product {} ({}) with insufficient stock of ingredient {} ({}): took {} of {}",
                 purchase.getId(), purchase.getAccount().getId(), product.getId(), product.getName(),

@@ -100,8 +100,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         entityManager.createNativeQuery("DO $$ DECLARE r RECORD; BEGIN " +
                 "FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'flyway_schema_history') LOOP " +
                 "EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' CASCADE'; END LOOP; " +
-                "FOR r IN (SELECT sequencename FROM pg_sequences WHERE schemaname = 'public') LOOP " +
-                "EXECUTE 'ALTER SEQUENCE ' || quote_ident(r.sequencename) || ' RESTART WITH 1'; END LOOP; " +
                 "END $$").executeUpdate();
         entityManager.flush();
 

@@ -6,7 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -33,8 +32,7 @@ public class Purchase {
     @Column(precision = 12, scale = Money.SCALE, nullable = false)
     private BigDecimal price;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "purchase_id")
+    @OneToMany(mappedBy = "purchase", fetch = FetchType.LAZY)
     private List<PurchasePart> parts;
 
     public Purchase(Integer id, Account account, Product product, Instant purchased, int amount, double price, List<PurchasePart> parts) {
