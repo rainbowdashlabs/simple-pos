@@ -8,10 +8,10 @@ import dev.chojo.simplepos.repository.BalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
-import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
 import dev.chojo.simplepos.service.ProductService;
+import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -49,7 +53,7 @@ class DemoDataSeederTest {
     @Autowired
     BalanceRepository balanceRepository;
     @Autowired
-    PurchaseRepository purchaseRepository;
+    PurchaseService purchaseService;
     @Autowired
     CashRepository cashRepository;
 
@@ -75,6 +79,12 @@ class DemoDataSeederTest {
         assertEquals(1, userRepository.count());
         assertTrue(userRepository.findByUsername("demo").isPresent());
         assertTrue(categoryRepository.count() > 0);
+        assertTrue(entityManager.createQuery("SELECT count(pp) FROM PurchasePart pp", Long.class).getSingleResult() > 0);
+        assertTrue(entityManager.createQuery("SELECT sum(p.cost) FROM Purchase p", BigDecimal.class).getSingleResult().signum() > 0);
+        assertTrue(entityManager.createQuery("SELECT min(p.purchased) FROM Purchase p", Instant.class).getSingleResult()
+                .isBefore(Instant.now().minus(1, ChronoUnit.DAYS)));
+        assertEquals(0, entityManager.createQuery(
+                "SELECT count(p) FROM Purchase p WHERE p.soldBy IS NULL OR p.soldBy.username <> 'demo'", Long.class).getSingleResult());
     }
 
     @Test
@@ -90,6 +100,6 @@ class DemoDataSeederTest {
     private DemoDataSeeder seeder(boolean resetDatabase) {
         return new DemoDataSeeder(entityManager, userRepository, passwordEncoder, categoryRepository,
                 ingredientRepository, productService, storageRepository, accountRepository, balanceRepository,
-                purchaseRepository, cashRepository, resetDatabase);
+                purchaseService, cashRepository, resetDatabase);
     }
 }

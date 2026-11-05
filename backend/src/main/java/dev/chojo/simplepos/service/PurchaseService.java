@@ -85,8 +85,22 @@ public class PurchaseService {
      */
     @Transactional
     public List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy) {
+        return purchase(accountId, positions, soldBy, Instant.now());
+    }
+
+    /**
+     * Books a sale like {@link #purchase(int, List, User)}, but as made at {@code purchased}. For demo data, which
+     * fills a history of past sales; the API always books at the current time.
+     *
+     * @return the ids of the purchases booked, one per position, in the order of the positions
+     * @throws NotFoundException if a position names an unknown or deleted product, or the account does not exist or
+     *                           is closed
+     * @throws ConflictException if a product is not active
+     */
+    @Transactional
+    public List<Integer> purchase(int accountId, List<CartPositionDto> positions, User soldBy, Instant purchased) {
         Account account = accountRepository.requireNotDeletedLocked(accountId);
-        return book(account, positions, soldBy).stream().map(Purchase::getId).toList();
+        return book(account, positions, soldBy, purchased).stream().map(Purchase::getId).toList();
     }
 
     /**
@@ -101,13 +115,13 @@ public class PurchaseService {
      */
     @Transactional
     public List<Integer> purchaseAsGuest(List<CartPositionDto> positions, User soldBy) {
-        List<Purchase> purchases = book(null, positions, soldBy);
+        List<Purchase> purchases = book(null, positions, soldBy, Instant.now());
         BigDecimal total = purchases.stream().map(PurchaseService::totalOf).reduce(Money.ZERO, BigDecimal::add);
         cashRepository.save(new Cash(soldBy, total, CashType.SALE, note("Guest sale", purchases)));
         return purchases.stream().map(Purchase::getId).toList();
     }
 
-    private List<Purchase> book(Account account, List<CartPositionDto> positions, User soldBy) {
+    private List<Purchase> book(Account account, List<CartPositionDto> positions, User soldBy, Instant purchased) {
         List<Product> products = positions.stream()
                 .map(position -> productRepository.requireNotDeleted(position.productId()))
                 .toList();
@@ -122,7 +136,7 @@ public class PurchaseService {
         for (int index = 0; index < positions.size(); index++) {
             CartPositionDto position = positions.get(index);
             Product prod = products.get(index);
-            Purchase purchase = new Purchase(null, account, prod, Instant.now(), position.amount(), prod.getPrice(), Collections.emptyList());
+            Purchase purchase = new Purchase(null, account, prod, purchased, position.amount(), prod.getPrice(), Collections.emptyList());
             purchase.setSoldBy(soldBy);
             purchase = purchaseRepository.save(purchase);
             ArrayList<PurchasePart> parts = new ArrayList<>();
