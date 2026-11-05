@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -46,13 +45,11 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Product> get(@PathVariable int id) {
         return ResponseEntity.ok(productRepository.require(id));
     }
 
     @GetMapping("/{id}/sales/stat")
-    @ResponseStatus(HttpStatus.OK)
     ResponseEntity<List<DayStat>> getSalesStat(@PathVariable int id,
                                                            @RequestParam(required = false) Instant after,
                                                            @RequestParam(defaultValue = "100") @PageSize int limit,
@@ -70,26 +67,24 @@ public class ProductController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Listing<Product>> get() {
         return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalse(), Product::getCategory));
     }
 
     @GetMapping("/active")
-    @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Listing<Product>> getActive() {
         return ResponseEntity.ok(Listing.map(productRepository.findAllByDeletedFalseAndActiveTrue(), Product::getCategory));
     }
 
     @PostMapping
     ResponseEntity<Product> create(@Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.accepted().body(productService.create(product));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(product));
     }
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id) {
         productService.delete(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/active")
@@ -99,6 +94,6 @@ public class ProductController {
 
     @PutMapping("/{id}")
     ResponseEntity<Product> update(@PathVariable int id, @Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.accepted().body(productService.update(id, product));
+        return ResponseEntity.ok(productService.update(id, product));
     }
 }

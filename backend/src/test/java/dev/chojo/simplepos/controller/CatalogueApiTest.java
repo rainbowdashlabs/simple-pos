@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
@@ -35,6 +36,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -107,7 +109,7 @@ class CatalogueApiTest {
         mvc.perform(post("/api/product").header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productJson("Overwrite", "\"id\": " + existing.getId() + ",")))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isCreated());
         entityManager.clear();
         assertEquals("Existing", productRepository.findById(existing.getId()).orElseThrow().getName());
     }
@@ -121,7 +123,7 @@ class CatalogueApiTest {
         mvc.perform(put("/api/product/" + target.getId()).header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(productJson("Renamed", "\"id\": " + bystander.getId() + ",")))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(target.getId()));
         entityManager.flush();
         entityManager.clear();
@@ -146,7 +148,7 @@ class CatalogueApiTest {
         mvc.perform(patch("/api/category/" + category.getId()).header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"id\": " + other.getId() + ", \"name\": \"Renamed\"}"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(category.getId()))
                 .andExpect(jsonPath("$.name").value("Renamed"));
         entityManager.flush();
@@ -164,7 +166,7 @@ class CatalogueApiTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"Changed\", \"categoryId\": " + category.getId()
                                 + ", \"price\": 0.7, \"active\": true, \"containerSize\": 6, \"pledge\": 0, \"pledgeContainer\": 0, \"minStock\": 1}"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Changed"))
                 .andExpect(jsonPath("$.active").value(false));
     }
@@ -187,6 +189,38 @@ class CatalogueApiTest {
                 .andExpect(jsonPath("$.detail").value("Category 999999 does not exist"));
     }
 
+    @Test
+    void createAnswersCreatedAndDeleteAnswersNoContent() throws Exception {
+        int categoryId = idOf(send(post("/api/category"), "{\"name\": \"LifecycleCat\"}", 201));
+        int ingredientId = idOf(send(post("/api/ingredient"), "{\"name\": \"LifecycleIngr\", \"categoryId\": " + categoryId
+                + ", \"price\": 0.5, \"containerSize\": 0, \"pledge\": 0, \"pledgeContainer\": 0, \"minStock\": 0}", 201));
+        int productId = idOf(send(post("/api/product"), "{\"name\": \"LifecycleProduct\", \"categoryId\": " + category.getId()
+                + ", \"price\": 2.0, \"recipe\": [{\"ingredientId\": " + ingredient.getId() + ", \"amount\": 1}]}", 201));
+        int accountId = idOf(send(post("/api/account"), "{\"name\": \"LifecycleAccount\"}", 201));
+        send(post("/api/account/" + accountId + "/balance"), "{\"amount\": 5}", 201);
+        send(post("/api/storage"), "{\"ingredient\": {\"id\": " + ingredient.getId()
+                + "}, \"price\": 1, \"pledge\": 0, \"amount\": 2}", 201);
+        String receipt = send(post("/api/account/" + accountId + "/purchase"),
+                "[{\"product\": {\"id\": " + productId + "}, \"amount\": 1}]", 201);
+        int purchaseId = ((Number) ((List<?>) JsonParserFactory.getJsonParser().parseMap(receipt).get("purchaseIds")).get(0)).intValue();
+
+        send(delete("/api/purchase/" + purchaseId), null, 204);
+        send(delete("/api/product/" + productId), null, 204);
+        send(delete("/api/ingredient/" + ingredientId), null, 204);
+        send(delete("/api/category/" + categoryId), null, 204);
+        send(delete("/api/account/" + accountId), null, 204);
+    }
+
+    private String send(MockHttpServletRequestBuilder request, String body, int expectedStatus) throws Exception {
+        request.header("Authorization", "Bearer " + token);
+        if (body != null) request.contentType(MediaType.APPLICATION_JSON).content(body);
+        return mvc.perform(request).andExpect(status().is(expectedStatus)).andReturn().getResponse().getContentAsString();
+    }
+
+    private static int idOf(String json) {
+        return ((Number) JsonParserFactory.getJsonParser().parseMap(json).get("id")).intValue();
+    }
+
     private Product product(String name) {
         return productService.create(new Product(null, category, name, 2.0, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, ingredient, 1)))));
@@ -199,7 +233,7 @@ class CatalogueApiTest {
 
     private String login() throws Exception {
         String body = mvc.perform(post("/api/auth/login").param("username", "catalogueadmin").param("password", "secret"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
         return (String) ((Map<?, ?>) tokens.get("token")).get("token");

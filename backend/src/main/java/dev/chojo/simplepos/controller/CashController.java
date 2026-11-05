@@ -49,7 +49,6 @@ public class CashController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<Cash> all(@RequestParam(defaultValue = "100") @PageSize int limit,
                           @RequestParam(defaultValue = "0") @PageNumber int page) {
         return cashRepository.findByOrderByCreatedDesc(Pageable.ofSize(limit).withPage(page));

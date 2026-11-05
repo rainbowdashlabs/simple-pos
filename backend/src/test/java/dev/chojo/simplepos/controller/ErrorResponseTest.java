@@ -108,7 +108,7 @@ class ErrorResponseTest {
                 .andExpect(jsonPath("$.retryAfter").isNumber());
         mvc.perform(post("/api/auth/login").param("username", "erroruser").param("password", "secret")
                         .with(fromAddress("10.9.0.2")))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -228,7 +228,7 @@ class ErrorResponseTest {
         String newRefresh = tokenOf(JsonParserFactory.getJsonParser().parseMap(body).get("refresh"));
 
         mvc.perform(post("/api/auth/refresh").param("token", other.get("refresh"))).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/auth/refresh").param("token", newRefresh)).andExpect(status().isAccepted());
+        mvc.perform(post("/api/auth/refresh").param("token", newRefresh)).andExpect(status().isOk());
         login("pwchanger", "new-secret");
     }
 
@@ -260,7 +260,7 @@ class ErrorResponseTest {
         String refresh = login().get("refresh");
 
         mvc.perform(post("/api/auth/refresh").param("token", refresh))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
         mvc.perform(post("/api/auth/refresh").param("token", refresh))
                 .andExpect(status().isUnauthorized());
     }
@@ -295,7 +295,7 @@ class ErrorResponseTest {
 
     private Map<String, String> login(String username, String password) throws Exception {
         String body = mvc.perform(post("/api/auth/login").param("username", username).param("password", password))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
         return Map.of("token", tokenOf(tokens.get("token")), "refresh", tokenOf(tokens.get("refresh")));

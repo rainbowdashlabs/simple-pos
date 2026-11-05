@@ -103,7 +103,7 @@ class RoleAccessTest {
 
     private String login(String username) throws Exception {
         String body = mvc.perform(post("/api/auth/login").param("username", username).param("password", "secret"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
         return (String) ((Map<?, ?>) tokens.get("token")).get("token");

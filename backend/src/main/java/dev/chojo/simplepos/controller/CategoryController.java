@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,9 +31,8 @@ public class CategoryController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Category> create(@Valid @RequestBody CategoryRequest category) {
-        return ResponseEntity.accepted().body(categoryService.create(category));
+        return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(category));
     }
 
     @GetMapping
@@ -48,15 +46,13 @@ public class CategoryController {
     }
 
     @PatchMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Category> update(@PathVariable int id, @Valid @RequestBody CategoryRequest category) {
-        return ResponseEntity.accepted().body(categoryService.update(id, category));
+        return ResponseEntity.ok(categoryService.update(id, category));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Void> delete(@PathVariable int id) {
         categoryService.delete(id);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.noContent().build();
     }
 }

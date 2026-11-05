@@ -30,7 +30,7 @@ export function createCategory(name: string): Promise<Category> {
     return postJson("api/category", {name: name})
 }
 
-export function deleteCategory(id: number): Promise<Category> {
+export function deleteCategory(id: number): Promise<unknown> {
     return deleteJson("api/category/" + id)
 }
 

@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -54,14 +53,12 @@ public class StorageController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<Storage> getSummary(@RequestParam(defaultValue = "100") @PageSize int limit,
                                     @RequestParam(defaultValue = "0") @PageNumber int page) {
         return storageRepository.findAllBy(PageRequest.of(page, limit, Sort.by("id")));
     }
 
     @GetMapping("/stock/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public StorageSummary getStock(@PathVariable int id) {
         StorageSummary summary = storageRepository.summaryById(id);
         if (summary == null) throw new NotFoundException("Ingredient", id);
@@ -69,13 +66,11 @@ public class StorageController {
     }
 
     @GetMapping("/stock")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Listing<StorageSummary>> getStock() {
         return ResponseEntity.ok(Listing.map(storageRepository.summary(), e -> e.getIngredient().getCategory()));
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Storage>> byId(@PathVariable int id,
                                               @RequestParam(value = "limit", defaultValue = "100") @PageSize int limit,
                                               @RequestParam(value = "page", defaultValue = "0") @PageNumber int page) {
@@ -85,13 +80,11 @@ public class StorageController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<Storage> add(@Valid @RequestBody InboundStorage storage, @CurrentUser User current) {
-        return ResponseEntity.accepted().body(storageService.deliver(storage, current));
+        return ResponseEntity.status(HttpStatus.CREATED).body(storageService.deliver(storage, current));
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public void updateInventory(@RequestBody @Size(max = 1000) List<@Valid @NotNull InventoryCorrection> corrections) {
         storageService.processInventoryCorrection(corrections);
     }
@@ -102,13 +95,11 @@ public class StorageController {
     }
 
     @GetMapping("/stock/projection")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<StockProjectionDto>> getStockProjection() {
         return ResponseEntity.ok(stockProjectionService.soonestEmpty());
     }
 
     @GetMapping("/stock/low")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<StorageSummary>> getStockLow(@RequestParam(value = "limit", defaultValue = "100") @PageSize int limit,
                                                             @RequestParam(value = "page", defaultValue = "0") @PageNumber int page) {
         List<StorageSummary> list = storageRepository.lowStock(PageRequest.of(page, limit));
@@ -116,7 +107,6 @@ public class StorageController {
     }
 
     @GetMapping("/stock/out")
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<StorageSummary>> getStockOut(@RequestParam(value = "limit", defaultValue = "100") @PageSize int limit,
                                                             @RequestParam(value = "page", defaultValue = "0") @PageNumber int page) {
         List<StorageSummary> list = storageRepository.outOfStock(PageRequest.of(page, limit));

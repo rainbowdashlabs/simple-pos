@@ -61,7 +61,7 @@ public class PurchaseController {
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id, @CurrentUser User current) {
         purchaseService.cancel(id, current);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/cancel")

@@ -100,7 +100,7 @@ export function activeProducts(): Promise<Listing<Product>> {
     return getJson("api/product/active")
 }
 
-export function deleteProduct(id: number) {
+export function deleteProduct(id: number): Promise<unknown> {
     return deleteJson("api/product/" + id)
 }
 

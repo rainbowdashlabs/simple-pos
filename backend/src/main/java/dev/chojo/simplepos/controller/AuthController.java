@@ -42,7 +42,6 @@ public class AuthController {
      * that can be stored are rejected as wrong before anything is counted or hashed.
      */
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<TokenResponse> login(@RequestParam String username, @RequestParam String password,
                                         HttpServletRequest request) {
         if (username.length() > UserAdminService.MAX_USERNAME_LENGTH
@@ -61,7 +60,7 @@ public class AuthController {
 
         TokenResponse tokenResponse = authenticationService.issueTokens(authenticatedUser);
 
-        return ResponseEntity.accepted().body(tokenResponse);
+        return ResponseEntity.ok(tokenResponse);
     }
 
     /**
@@ -76,7 +75,6 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @ResponseStatus(HttpStatus.ACCEPTED)
     ResponseEntity<TokenResponse> refresh(@RequestParam String token, HttpServletRequest request) {
         rateLimiter.checkRequest("refresh", request.getRemoteAddr());
         String username = jwtService.extractUsername(token);
@@ -94,6 +92,6 @@ public class AuthController {
         log.info("Valid token. Creating new login and refresh token");
 
         TokenResponse tokenResponse = authenticationService.issueTokens(user);
-        return ResponseEntity.accepted().body(tokenResponse);
+        return ResponseEntity.ok(tokenResponse);
     }
 }

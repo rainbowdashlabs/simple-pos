@@ -54,7 +54,7 @@ public class AccountController {
 
     @PostMapping
     ResponseEntity<Account> create(@Valid @RequestBody AccountRequest account) {
-        return ResponseEntity.accepted().body(accountService.create(account.name()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.create(account.name()));
     }
 
     @GetMapping("/{id}")
@@ -71,7 +71,7 @@ public class AccountController {
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable int id, @CurrentUser User currentUser) {
         accountService.close(id, currentUser);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -81,7 +81,7 @@ public class AccountController {
 
     @PostMapping("/{id}/balance")
     ResponseEntity<Balance> deposit(@PathVariable int id, @Valid @RequestBody DepositDto deposit) {
-        return ResponseEntity.accepted().body(accountService.deposit(id, deposit.amount()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.deposit(id, deposit.amount()));
     }
 
     @GetMapping("/{id}/balance")
@@ -89,7 +89,7 @@ public class AccountController {
                                           @RequestParam(defaultValue = "100") @PageSize int limit,
                                           @RequestParam(defaultValue = "0") @PageNumber int page) {
         var balance = balanceRepository.findAllByAccount_IdOrderByAddedDesc(id, PageRequest.of(page, limit));
-        return ResponseEntity.accepted().body(balance);
+        return ResponseEntity.ok(balance);
     }
 
     @PostMapping("/{id}/purchase")
