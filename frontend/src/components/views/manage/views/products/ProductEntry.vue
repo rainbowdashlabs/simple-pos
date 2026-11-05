@@ -14,10 +14,9 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['deleted'],
+  emits: ['deleted', 'changed'],
   data() {
     return {
-      active: this.product.active,
       showDeleteModal: false
     }
   },
@@ -34,16 +33,16 @@ export default defineComponent({
     },
     toggleActive(event: Event) {
       event.stopPropagation()
-      toggleActive(this.product.id!).then(p => {
-        this.active = p.active
-        this.product.active = p.active
-      })
+      toggleActive(this.product.id!).then(product => this.$emit('changed', product))
     },
     openInfo() {
       this.$router.push({name: 'manage-products-info', params: {id: this.product.id}})
     }
   },
   computed: {
+    active(): boolean {
+      return this.product.active
+    },
     currentColor(): string {
       return this.active ? "bg-secondary dark:bg-secondary-d" : "bg-slate-200 dark:bg-slate-900 text-slate-500"
     },

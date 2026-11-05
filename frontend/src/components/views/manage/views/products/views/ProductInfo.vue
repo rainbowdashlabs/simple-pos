@@ -35,6 +35,9 @@ export default defineComponent({
     }
   },
   methods: {
+    productChanged(product: Product) {
+      if (this.focusProduct) this.focusProduct = {...this.focusProduct, active: product.active}
+    },
     editProduct() {
       this.$router.push({name: 'manage-products-edit', params: {id: this.id}})
     }
@@ -49,7 +52,7 @@ export default defineComponent({
 
 <template>
   <ViewWrapper v-if="focusProduct">
-    <ProductHeader :product="focusProduct" :raw-price="rawPrice" @edit="editProduct"/>
+    <ProductHeader :product="focusProduct" :raw-price="rawPrice" @edit="editProduct" @changed="productChanged"/>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <ProductIngredients :entries="focusProduct.recipe?.entries ?? []"/>

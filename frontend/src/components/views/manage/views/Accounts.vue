@@ -14,6 +14,10 @@ export default defineComponent({
     }
   },
   methods: {
+    accountChanged(account: Account) {
+      const index = this.accounts.findIndex(entry => entry.id === account.id)
+      if (index >= 0) this.accounts[index] = account
+    },
     createAccount() {
       this.$router.push({name: 'manage-accounts-create'})
     },
@@ -31,7 +35,7 @@ export default defineComponent({
   <ViewWrapper>
     <ConfirmButton icon="fa-user-plus" :label="$t('button.new_account')" @click="createAccount"/>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <AccountEntry v-for="item in accounts" :key="item.id" :user="item" @deleted="loadAccounts"/>
+      <AccountEntry v-for="item in accounts" :key="item.id" :user="item" @deleted="loadAccounts" @changed="accountChanged"/>
     </div>
   </ViewWrapper>
 </template>

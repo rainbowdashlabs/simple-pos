@@ -21,6 +21,10 @@ export default defineComponent({
     }
   },
   methods: {
+    categoryChanged(category: Category) {
+      const index = this.categoryList.findIndex(entry => entry.id === category.id)
+      if (index >= 0) this.categoryList[index] = category
+    },
     submit() {
       createCategory(this.name).then(() => {
         this.name = ""
@@ -67,7 +71,7 @@ export default defineComponent({
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <CategoryEntry v-for="item in categoryList" :key="item.id" :category="item"
                      :products="productsFor(item.id)" :ingredients="ingredientsFor(item.id)"
-                     @deleted="loadData"/>
+                     @deleted="loadData" @changed="categoryChanged"/>
     </div>
   </ViewWrapper>
 </template>

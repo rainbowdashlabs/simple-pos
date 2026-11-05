@@ -19,7 +19,7 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['deleted'],
+  emits: ['deleted', 'changed'],
   data() {
     return {
       edit: false,
@@ -46,9 +46,7 @@ export default defineComponent({
     },
     saveRename() {
       this.edit = false
-      renameAccount(this.user.id, this.newName).then(() => {
-        this.user.name = this.newName
-      })
+      renameAccount(this.user.id, this.newName).then(() => this.$emit('changed', {...this.user, name: this.newName}))
     },
     cancelEdit() {
       this.edit = false
@@ -60,7 +58,6 @@ export default defineComponent({
 
 <template>
   <ColorContainer bg="secondary" class="flex flex-col gap-3">
-    <!-- Header: name + actions -->
     <div v-if="edit" class="flex gap-2">
       <SimpleInputField class="flex-1" :label="$t('name')" type="text" v-model="newName"/>
       <ConfirmButton :hint="$t('button.save')" @click="saveRename"/>
@@ -74,7 +71,6 @@ export default defineComponent({
       </div>
     </div>
 
-    <!-- Balance + created date -->
     <div class="flex items-center justify-between">
       <span :class="balanceColor" class="font-semibold">
         {{ $n(user.balance, 'currency') }}

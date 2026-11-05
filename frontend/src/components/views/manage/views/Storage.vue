@@ -1,4 +1,5 @@
 <script lang="ts">
+import {Ingredient} from "@/scripts/Ingredient.ts";
 import {defineComponent} from 'vue'
 import StorageGroup from "./storage/StorageGroup.vue";
 import {stockSummary, StorageSummary} from "@/scripts/storage.ts";
@@ -28,6 +29,12 @@ export default defineComponent({
     }
   },
   methods: {
+    ingredientChanged(ingredient: Ingredient) {
+      for (const group of this.inventorySummary.categories) {
+        const listing = group.entries.find(entry => entry.ingredient.id === ingredient.id)
+        if (listing) listing.ingredient = ingredient
+      }
+    },
     inventory() {
       this.$router.push({name: 'manage-storage-inventory'})
     },
@@ -52,7 +59,7 @@ export default defineComponent({
                   :bg="lowStockOnly ? 'warn' : 'secondary'"
                   @click="lowStockOnly = !lowStockOnly"/>
     </div>
-    <StorageGroup v-for="item in filteredCategories" :key="item.category.id" :group="item"/>
+    <StorageGroup v-for="item in filteredCategories" :key="item.category.id" :group="item" @changed="ingredientChanged"/>
   </ViewWrapper>
 </template>
 
