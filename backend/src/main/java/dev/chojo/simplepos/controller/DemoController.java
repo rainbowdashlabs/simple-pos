@@ -1,8 +1,9 @@
 package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.configuration.security.RateLimiter;
+import dev.chojo.simplepos.configuration.security.RefreshCookie;
 import dev.chojo.simplepos.entity.User;
-import dev.chojo.simplepos.entity.security.TokenResponse;
+import dev.chojo.simplepos.entity.security.SessionResponse;
 import dev.chojo.simplepos.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,10 +22,12 @@ public class DemoController {
 
     private final AuthenticationService authenticationService;
     private final RateLimiter rateLimiter;
+    private final RefreshCookie refreshCookie;
 
-    public DemoController(AuthenticationService authenticationService, RateLimiter rateLimiter) {
+    public DemoController(AuthenticationService authenticationService, RateLimiter rateLimiter, RefreshCookie refreshCookie) {
         this.authenticationService = authenticationService;
         this.rateLimiter = rateLimiter;
+        this.refreshCookie = refreshCookie;
     }
 
     @GetMapping
@@ -33,10 +36,9 @@ public class DemoController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> demoLogin(HttpServletRequest request) {
+    public ResponseEntity<SessionResponse> demoLogin(HttpServletRequest request) {
         rateLimiter.checkRequest("demo-login", request.getRemoteAddr());
         User user = authenticationService.findByUsername("demo");
-        TokenResponse tokenResponse = authenticationService.issueTokens(user);
-        return ResponseEntity.ok(tokenResponse);
+        return refreshCookie.respond(authenticationService.issueTokens(user), user.getUsername());
     }
 }

@@ -15,7 +15,7 @@ export function hasRole(role: Role | null | undefined, required: Role): boolean 
 
 /**
  * Loads the role of the logged-in user into the store. The loaded role is reused as long as the same user is logged
- * in; after a login as someone else, in this tab or another one (the session cookies are shared), it is loaded again.
+ * in; after a login as someone else, in this tab or another one, it is loaded again.
  *
  * @return the role, or null if it could not be loaded
  */

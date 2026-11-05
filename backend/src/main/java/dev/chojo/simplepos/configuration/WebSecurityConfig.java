@@ -2,6 +2,7 @@ package dev.chojo.simplepos.configuration;
 
 import dev.chojo.simplepos.configuration.security.LoginTokenAuthentication;
 import dev.chojo.simplepos.configuration.security.LoginTokens;
+import dev.chojo.simplepos.configuration.security.RefreshCookie;
 import dev.chojo.simplepos.configuration.security.SecurityErrorResolver;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.service.UserService;
@@ -73,8 +74,9 @@ public class WebSecurityConfig {
     /**
      * Every request is authenticated by the {@code Bearer} login token in its {@code Authorization} header, which a
      * browser never adds on its own to a request another site triggers. CSRF protection therefore has nothing to
-     * guard and is switched off. Rejected tokens, and failures while checking one, are answered by the
-     * {@link SecurityErrorResolver} like every other security error.
+     * guard and is switched off. The one cookie, the refresh token's, is guarded by {@link RefreshCookie} instead.
+     * Rejected tokens, and failures while checking one, are answered by the {@link SecurityErrorResolver} like every
+     * other security error.
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationProvider authenticationProvider,

@@ -77,8 +77,15 @@ public class AuthenticationService {
      * @throws DisabledException     if the user is disabled
      */
     @Transactional
-    public TokenResponse refresh(String token) {
-        return issueTokens(redeemRefreshToken(token));
+    public Session refresh(String token) {
+        User user = redeemRefreshToken(token);
+        return new Session(user, issueTokens(user));
+    }
+
+    /**
+     * A session started for a user, with its tokens.
+     */
+    public record Session(User user, TokenResponse tokens) {
     }
 
     /**

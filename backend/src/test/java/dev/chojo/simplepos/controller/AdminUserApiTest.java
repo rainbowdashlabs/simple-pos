@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.configuration.security.RefreshCookie;
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.User;
@@ -8,6 +9,7 @@ import dev.chojo.simplepos.repository.UserRepository;
 import dev.chojo.simplepos.service.AuthenticationService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.Filter;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -134,7 +137,7 @@ class AdminUserApiTest {
         asAdmin(patch("/api/admin/users/" + staff.getId()), "{\"enabled\": false}")
                 .andExpect(status().isOk());
 
-        mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isUnauthorized());
+        mvc.perform(refresh(refresh)).andExpect(status().isUnauthorized());
         assertTrue(tokenRepository.findByUserAndToken(staff, AuthenticationService.fingerprint(refresh)).isEmpty());
     }
 
@@ -170,7 +173,7 @@ class AdminUserApiTest {
         asAdmin(put("/api/admin/users/" + user.getId() + "/password"), "{\"password\": \"newpassword1\"}")
                 .andExpect(status().isNoContent());
 
-        mvc.perform(post("/api/auth/refresh").param("token", refresh)).andExpect(status().isUnauthorized());
+        mvc.perform(refresh(refresh)).andExpect(status().isUnauthorized());
         mvc.perform(post("/api/auth/login").param("username", "resetme").param("password", "password123"))
                 .andExpect(status().isUnauthorized());
         login("resetme", "newpassword1");
@@ -207,11 +210,21 @@ class AdminUserApiTest {
     }
 
     private Map<String, String> login(String username, String password) throws Exception {
-        String body = mvc.perform(post("/api/auth/login").param("username", username).param("password", password))
+        MockHttpServletResponse response = mvc.perform(post("/api/auth/login").param("username", username).param("password", password))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(body);
-        return Map.of("token", tokenOf(tokens.get("token")), "refresh", tokenOf(tokens.get("refresh")));
+                .andReturn().getResponse();
+        Map<String, Object> tokens = JsonParserFactory.getJsonParser().parseMap(response.getContentAsString());
+        return Map.of("token", tokenOf(tokens.get("token")), "refresh", response.getCookie(RefreshCookie.NAME).getValue());
+    }
+
+    private static MockHttpServletRequestBuilder refresh(String token) {
+        return post("/api/auth/refresh").cookie(new Cookie(RefreshCookie.NAME, token))
+                .header(RefreshCookie.CSRF_HEADER, RefreshCookie.CSRF_VALUE);
+    }
+
+    private static MockHttpServletRequestBuilder logout(String token) {
+        return post("/api/auth/logout").cookie(new Cookie(RefreshCookie.NAME, token))
+                .header(RefreshCookie.CSRF_HEADER, RefreshCookie.CSRF_VALUE);
     }
 
     private static String tokenOf(Object token) {
