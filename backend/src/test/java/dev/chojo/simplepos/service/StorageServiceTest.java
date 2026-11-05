@@ -149,7 +149,7 @@ class StorageServiceTest {
                 List.of(new InventoryCorrection(ingredient.getId(), 7)));
 
         entityManager.flush();
-        StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
+        StorageSummary summary = storageRepository.summaryById(ingredient.getId());
         assertEquals(7, summary.getStock());
     }
 
@@ -162,7 +162,7 @@ class StorageServiceTest {
                 List.of(new InventoryCorrection(ingredient.getId(), 8)));
 
         entityManager.flush();
-        StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
+        StorageSummary summary = storageRepository.summaryById(ingredient.getId());
         assertEquals(8, summary.getStock());
     }
 
@@ -195,7 +195,7 @@ class StorageServiceTest {
                 new InventoryCorrection(999999, 1))));
 
         entityManager.clear();
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -214,8 +214,8 @@ class StorageServiceTest {
         ));
 
         entityManager.flush();
-        assertEquals(7, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
-        assertEquals(5, new StorageSummary(storageRepository.summaryById(other.getId())).getStock());
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
+        assertEquals(5, storageRepository.summaryById(other.getId()).getStock());
     }
 
     @Test
@@ -245,7 +245,7 @@ class StorageServiceTest {
         storageService.processInventoryCorrection(List.of(
                 new InventoryCorrection(ingredient.getId(), 5), new InventoryCorrection(ingredient.getId(), 8)));
 
-        assertEquals(8, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(8, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test

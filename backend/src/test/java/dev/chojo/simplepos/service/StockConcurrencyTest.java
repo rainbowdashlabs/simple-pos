@@ -11,7 +11,6 @@ import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
-import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -95,7 +94,7 @@ class StockConcurrencyTest {
             for (Future<?> purchase : purchases) purchase.get(30, TimeUnit.SECONDS);
         }
 
-        assertEquals(0, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(0, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -120,8 +119,8 @@ class StockConcurrencyTest {
             for (Future<?> sale : sales) sale.get(30, TimeUnit.SECONDS);
         }
 
-        assertEquals(0, new StorageSummary(storageRepository.summaryById(first.getId())).getStock());
-        assertEquals(0, new StorageSummary(storageRepository.summaryById(second.getId())).getStock());
+        assertEquals(0, storageRepository.summaryById(first.getId()).getStock());
+        assertEquals(0, storageRepository.summaryById(second.getId()).getStock());
     }
 
     @Test
@@ -151,7 +150,7 @@ class StockConcurrencyTest {
             taker.get(10, TimeUnit.SECONDS);
         }
 
-        assertEquals(9, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(9, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test

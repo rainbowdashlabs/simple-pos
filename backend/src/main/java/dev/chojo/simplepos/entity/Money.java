@@ -62,13 +62,4 @@ public final class Money {
     public static BigDecimal orZero(BigDecimal amount) {
         return amount == null ? ZERO : of(amount);
     }
-
-    /**
-     * A sum or other number read from a native query, as money; null, which a sum over no rows gives, counts as zero.
-     */
-    public static BigDecimal fromQuery(Number amount) {
-        if (amount == null) return ZERO;
-        if (amount instanceof BigDecimal decimal) return of(decimal);
-        return of(new BigDecimal(amount.toString()));
-    }
 }

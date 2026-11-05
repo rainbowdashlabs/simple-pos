@@ -5,7 +5,6 @@ import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
-import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,17 +63,14 @@ class StorageRepositoryTest {
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 20, 5));
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.2, 10, 2));
 
-        Tuple summary = storageRepository.summaryById(ingredient.getId());
-        StorageSummary storageSummary = new StorageSummary(summary);
+        StorageSummary storageSummary = storageRepository.summaryById(ingredient.getId());
         assertEquals(ingredient.getId(), storageSummary.getIngredient().getId());
-        assertEquals(23, storageSummary.getStock()); // (20-5) + (10-2) = 23
+        assertEquals(23, storageSummary.getStock());
     }
 
     @Test
     void shouldReturnZeroStockWhenEmpty() {
-        Tuple summary = storageRepository.summaryById(ingredient.getId());
-        StorageSummary storageSummary = new StorageSummary(summary);
-        assertEquals(0, storageSummary.getStock());
+        assertEquals(0, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -86,7 +82,7 @@ class StorageRepositoryTest {
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 10, 3));
         storageRepository.save(new Storage(null, other, Instant.now(), 2.0, 6, 1));
 
-        List<Tuple> summaries = storageRepository.summary();
+        List<StorageSummary> summaries = storageRepository.summary();
         assertTrue(summaries.size() >= 2);
     }
 
@@ -148,9 +144,8 @@ class StorageRepositoryTest {
         // ingredient has minStock=5, add storage with stock=3
         storageRepository.save(new Storage(null, ingredient, Instant.now(), 1.0, 3, 0));
 
-        List<Tuple> lowStock = storageRepository.lowStock(PageRequest.of(0, 10));
+        List<StorageSummary> lowStock = storageRepository.lowStock(PageRequest.of(0, 10));
         boolean found = lowStock.stream()
-                .map(StorageSummary::new)
                 .anyMatch(s -> s.getIngredient().getId().equals(ingredient.getId()));
         assertTrue(found);
     }
@@ -165,7 +160,7 @@ class StorageRepositoryTest {
         storageRepository.flush();
 
         List<String> names = storageRepository.lowStock(PageRequest.of(0, 100)).stream()
-                .map(tuple -> ((Ingredient) tuple.get("ingredient")).getName())
+                .map(summary -> summary.getIngredient().getName())
                 .filter(name -> name.equals("Zeta") || name.equals("Alpha"))
                 .toList();
 

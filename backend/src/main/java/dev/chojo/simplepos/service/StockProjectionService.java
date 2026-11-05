@@ -3,11 +3,11 @@ package dev.chojo.simplepos.service;
 import dev.chojo.simplepos.entity.Category;
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Money;
+import dev.chojo.simplepos.entity.dto.IngredientUsage;
 import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.repository.StorageRepository;
-import jakarta.persistence.Tuple;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,8 +49,7 @@ public class StockProjectionService {
 
     List<StockProjectionDto> soonestEmpty(Instant now) {
         Map<Integer, StorageSummary> stock = new HashMap<>();
-        for (Tuple tuple : storageRepository.summary()) {
-            StorageSummary summary = new StorageSummary(tuple);
+        for (StorageSummary summary : storageRepository.summary()) {
             stock.put(summary.getIngredient().getId(), summary);
         }
 
@@ -82,8 +81,7 @@ public class StockProjectionService {
     List<ShoppingListEntry> shoppingList(int days, Instant now) {
         Map<Integer, Usage> usage = usage(now);
         List<ShoppingListEntry> entries = new ArrayList<>();
-        for (Tuple tuple : storageRepository.summary()) {
-            StorageSummary summary = new StorageSummary(tuple);
+        for (StorageSummary summary : storageRepository.summary()) {
             Ingredient ingredient = summary.getIngredient();
             Usage used = usage.getOrDefault(ingredient.getId(), Usage.NONE);
             long stock = summary.getStock();
@@ -117,10 +115,8 @@ public class StockProjectionService {
      */
     private Map<Integer, Usage> usage(Instant now) {
         Map<Integer, Usage> usage = new HashMap<>();
-        for (Tuple row : storageRepository.usageByIngredient(now.minus(Duration.ofDays(WINDOW_DAYS)), now)) {
-            long taken = ((Number) row.get("taken")).longValue();
-            Instant firstTaken = row.get("first_taken", Instant.class);
-            usage.put(((Number) row.get("ingredient_id")).intValue(), new Usage(taken, windowDays(firstTaken, now)));
+        for (IngredientUsage row : storageRepository.usageByIngredient(now.minus(Duration.ofDays(WINDOW_DAYS)), now)) {
+            usage.put(row.ingredientId(), new Usage(row.taken(), windowDays(row.firstTaken(), now)));
         }
         return usage;
     }

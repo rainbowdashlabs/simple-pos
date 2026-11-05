@@ -39,7 +39,7 @@ export default defineComponent({
       const data = this.stats
           .map(s => ({
             name: s.categoryId === UNCATEGORISED_ID ? this.$t('uncategorised') : s.categoryName,
-            value: Math.round(s.revenue * 100) / 100
+            value: s.revenue
           }))
           .sort((a, b) => b.value - a.value)
 

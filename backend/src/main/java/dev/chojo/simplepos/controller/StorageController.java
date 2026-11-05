@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.controller.exceptions.NotFoundException;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Ingredient;
@@ -63,13 +64,15 @@ public class StorageController {
     @GetMapping("/stock/{id}")
     @ResponseStatus(HttpStatus.OK)
     public StorageSummary getStock(@PathVariable int id) {
-        return new StorageSummary(storageRepository.summaryById(id));
+        StorageSummary summary = storageRepository.summaryById(id);
+        if (summary == null) throw new NotFoundException("Ingredient", id);
+        return summary;
     }
 
     @GetMapping("/stock")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Listing<StorageSummary>> getStock() {
-        return ResponseEntity.ok(Listing.map(storageRepository.summary().stream().map(StorageSummary::new).toList(), e -> e.getIngredient().getCategory()));
+        return ResponseEntity.ok(Listing.map(storageRepository.summary(), e -> e.getIngredient().getCategory()));
     }
 
     @GetMapping("/{id}")
@@ -110,7 +113,7 @@ public class StorageController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<StorageSummary>> getStockLow(@RequestParam(value = "limit", defaultValue = "100") @PageSize int limit,
                                                             @RequestParam(value = "page", defaultValue = "0") @PageNumber int page) {
-        List<StorageSummary> list = storageRepository.lowStock(PageRequest.of(page, limit)).stream().map(StorageSummary::new).toList();
+        List<StorageSummary> list = storageRepository.lowStock(PageRequest.of(page, limit));
         return ResponseEntity.ok(list);
     }
 
@@ -118,7 +121,7 @@ public class StorageController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<StorageSummary>> getStockOut(@RequestParam(value = "limit", defaultValue = "100") @PageSize int limit,
                                                             @RequestParam(value = "page", defaultValue = "0") @PageNumber int page) {
-        List<StorageSummary> list = storageRepository.outOfStock(PageRequest.of(page, limit)).stream().map(StorageSummary::new).toList();
+        List<StorageSummary> list = storageRepository.outOfStock(PageRequest.of(page, limit));
         return ResponseEntity.ok(list);
     }
 }

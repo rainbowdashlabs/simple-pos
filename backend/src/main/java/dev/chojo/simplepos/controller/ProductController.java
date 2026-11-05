@@ -4,8 +4,8 @@ import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Product;
+import dev.chojo.simplepos.entity.dto.DayStat;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
-import dev.chojo.simplepos.entity.dto.ProductSalesStatDto;
 import dev.chojo.simplepos.entity.response.Listing;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
@@ -53,21 +53,20 @@ public class ProductController {
 
     @GetMapping("/{id}/sales/stat")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<List<ProductSalesStatDto>> getSalesStat(@PathVariable int id,
+    ResponseEntity<List<DayStat>> getSalesStat(@PathVariable int id,
                                                            @RequestParam(required = false) Instant after,
                                                            @RequestParam(defaultValue = "100") @PageSize int limit,
                                                            @RequestParam(defaultValue = "0") @PageNumber int page) {
         Instant since = Objects.requireNonNullElse(after, Instant.EPOCH);
-        List<ProductSalesStatDto> list = purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(), PageRequest.of(page, limit)).stream()
-                .map(ProductSalesStatDto::new)
+        List<DayStat> list = purchaseRepository.getSalesStatByProduct(id, since, businessTimeZone.id(), PageRequest.of(page, limit)).stream()
+                .map(DayStat::of)
                 .toList();
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/{id}/sales/stat/summary")
-    ResponseEntity<ProductSalesStatDto> getSalesStatSummary(@PathVariable int id, @RequestParam Instant after) {
-        ProductSalesStatDto dto = ProductSalesStatDto.summary(purchaseRepository.getSalesStatSummary(id, after));
-        return ResponseEntity.ok(dto);
+    ResponseEntity<DayStat> getSalesStatSummary(@PathVariable int id, @RequestParam Instant after) {
+        return ResponseEntity.ok(DayStat.of(purchaseRepository.getSalesStatSummary(id, after)));
     }
 
     @GetMapping

@@ -4,14 +4,18 @@ import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Money;
+import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
+import dev.chojo.simplepos.entity.dto.CategoryStat;
+import dev.chojo.simplepos.entity.dto.DayStat;
 import dev.chojo.simplepos.entity.dto.PurchaseCancelRequest;
 import dev.chojo.simplepos.entity.dto.PurchaseReceipt;
 import dev.chojo.simplepos.entity.dto.SalesStatDto;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
+import dev.chojo.simplepos.repository.projection.ProductSalesRow;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -34,9 +38,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/purchase")
@@ -87,40 +92,32 @@ public class PurchaseController {
                                                    @RequestParam(defaultValue = "sales") SalesSorting sorting,
                                                    @RequestParam(defaultValue = "100") @PageSize int limit,
                                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
-        var sales = SalesStatDto.build(purchaseRepository.getTopSales(after, PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting.name()))), productRepository);
-        return ResponseEntity.ok(sales);
+        return ResponseEntity.ok(withProducts(purchaseRepository.getTopSales(after,
+                PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, sorting.name())))));
     }
 
     @GetMapping("stats/bottom")
     ResponseEntity<List<SalesStatDto>> getBottomSales(@RequestParam() Instant after,
                                                       @RequestParam(defaultValue = "10") @PageSize int limit,
                                                       @RequestParam(defaultValue = "0") @PageNumber int page) {
-        var sales = SalesStatDto.build(purchaseRepository.getBottomSales(after, PageRequest.of(page, limit)), productRepository);
-        return ResponseEntity.ok(sales);
+        return ResponseEntity.ok(withProducts(purchaseRepository.getBottomSales(after, PageRequest.of(page, limit))));
     }
 
     @GetMapping("stats/daily")
-    ResponseEntity<List<Map<String, Object>>> getDailyStats(@RequestParam() Instant after) {
-        return ResponseEntity.ok(purchaseRepository.getDailyStats(after, businessTimeZone.id()).stream().map(t -> {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("day", BusinessTimeZone.dateOf(t.get("day")));
-            m.put("sales", t.get("sales"));
-            m.put("revenue", t.get("revenue"));
-            m.put("profit", t.get("profit"));
-            return m;
-        }).toList());
+    ResponseEntity<List<DayStat>> getDailyStats(@RequestParam() Instant after) {
+        return ResponseEntity.ok(purchaseRepository.getDailyStats(after, businessTimeZone.id()).stream().map(DayStat::of).toList());
     }
 
     @GetMapping("stats/categories")
-    ResponseEntity<List<Map<String, Object>>> getSalesByCategory(@RequestParam() Instant after) {
-        return ResponseEntity.ok(purchaseRepository.getSalesByCategory(after).stream().map(t -> {
-            Map<String, Object> m = new LinkedHashMap<>();
-            m.put("categoryId", t.get("category_id"));
-            m.put("categoryName", t.get("category_name"));
-            m.put("sales", t.get("sales"));
-            m.put("revenue", t.get("revenue"));
-            return m;
-        }).toList());
+    ResponseEntity<List<CategoryStat>> getSalesByCategory(@RequestParam() Instant after) {
+        return ResponseEntity.ok(purchaseRepository.getSalesByCategory(after).stream().map(CategoryStat::of).toList());
+    }
+
+    private List<SalesStatDto> withProducts(List<ProductSalesRow> rows) {
+        Map<Integer, Product> products = productRepository.findAllByIdIn(rows.stream().map(ProductSalesRow::getProductId).toList())
+                .stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+        return SalesStatDto.of(rows, products);
     }
 
     /**

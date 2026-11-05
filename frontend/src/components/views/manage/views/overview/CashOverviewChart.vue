@@ -33,9 +33,9 @@ export default defineComponent({
       const locale = this.$i18n.locale
       const fmt = euro(locale)
       const data = [
-        {name: this.$t('cash'), value: Math.round(this.cash * 100) / 100, itemStyle: {color: '#5193d5'}},
-        {name: this.$t('pledge'), value: Math.round(Math.abs(this.pledge) * 100) / 100, itemStyle: {color: '#f59e0b'}},
-        {name: this.$t('balance'), value: Math.round(this.balance * 100) / 100, itemStyle: {color: '#85c88a'}}
+        {name: this.$t('cash'), value: this.cash, itemStyle: {color: '#5193d5'}},
+        {name: this.$t('pledge'), value: Math.abs(this.pledge), itemStyle: {color: '#f59e0b'}},
+        {name: this.$t('balance'), value: this.balance, itemStyle: {color: '#85c88a'}}
       ].filter(d => d.value > 0)
 
       return {

@@ -16,7 +16,6 @@ import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
-import dev.chojo.simplepos.entity.dto.StorageSummary;
 import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
@@ -145,12 +144,9 @@ class PurchaseServiceTest {
         Account freshAccount = accountRepository.findById(account.getId()).orElseThrow();
         purchaseService.purchase(freshAccount.getId(), List.of(new CartPositionDto(freshProduct, 3)), null);
 
-        // Recipe requires 1 ingredient per product, 3 products = 3 taken
         entityManager.flush();
         entityManager.clear();
-        var summary = new dev.chojo.simplepos.entity.dto.StorageSummary(
-                storageRepository.summaryById(ingredient.getId()));
-        assertEquals(7, summary.getStock());
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -237,7 +233,7 @@ class PurchaseServiceTest {
 
         entityManager.clear();
         assertTrue(purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(account.getId(), PageRequest.of(0, 10)).isEmpty());
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -249,7 +245,7 @@ class PurchaseServiceTest {
 
         entityManager.flush();
         entityManager.clear();
-        assertEquals(0, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(0, storageRepository.summaryById(ingredient.getId()).getStock());
         List<Purchase> purchases = purchaseRepository.findAllByAccount_IdOrderByPurchasedDesc(
                 account.getId(), PageRequest.of(0, 10));
         assertEquals(1, purchases.size());
@@ -307,7 +303,7 @@ class PurchaseServiceTest {
 
         entityManager.flush();
         entityManager.clear();
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
         assertTrue(purchaseRepository.findById(purchase.getId()).isEmpty());
         assertEquals(0, purchasePartRepository.count());
         assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
@@ -329,7 +325,7 @@ class PurchaseServiceTest {
         entityManager.flush();
         entityManager.clear();
         assertEquals(2, sale.size());
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
         assertTrue(purchaseRepository.findAllById(sale).isEmpty());
         assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
     }
@@ -348,14 +344,14 @@ class PurchaseServiceTest {
         assertMoney(tillBefore.add(new BigDecimal("6.00")), cashService.tillTotal());
         assertMoney(accountsBefore, Money.orZero(accountBalanceRepository.totalBalance()));
         assertMoney(salesBefore.add(new BigDecimal("6.00")), Money.orZero(purchaseRepository.totalPurchases()));
-        assertEquals(7, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
 
         purchaseService.cancelAll(sale, null);
         entityManager.flush();
         entityManager.clear();
 
         assertMoney(tillBefore, cashService.tillTotal());
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
         assertTrue(purchaseRepository.findAllById(sale).isEmpty());
     }
 
@@ -374,7 +370,7 @@ class PurchaseServiceTest {
 
         assertMoney(tillBefore, cashService.tillTotal());
         assertMoney(0.0, accountRepository.findAccountById(account.getId()).orElseThrow().getBalance());
-        assertEquals(10, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(10, storageRepository.summaryById(ingredient.getId()).getStock());
     }
 
     @Test
@@ -403,7 +399,7 @@ class PurchaseServiceTest {
 
         entityManager.flush();
         entityManager.clear();
-        assertEquals(7, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+        assertEquals(7, storageRepository.summaryById(ingredient.getId()).getStock());
         assertTrue(storageRepository.findAll().stream()
                 .filter(storage -> storage.getIngredient().getId().equals(ingredient.getId()))
                 .allMatch(storage -> storage.getSold() == 0));

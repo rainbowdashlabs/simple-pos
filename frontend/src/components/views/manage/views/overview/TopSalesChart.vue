@@ -39,8 +39,8 @@ export default defineComponent({
       const names = this.stat.map(s => s.product.name)
       const values = this.stat.map(s => {
         if (this.type === 'sales') return s.sales
-        if (this.type === 'revenue') return Math.round(s.revenue * 100) / 100
-        return Math.round(s.profit * 100) / 100
+        if (this.type === 'revenue') return s.revenue
+        return s.profit
       })
 
       const isCurrency = this.valueType === 'currency'

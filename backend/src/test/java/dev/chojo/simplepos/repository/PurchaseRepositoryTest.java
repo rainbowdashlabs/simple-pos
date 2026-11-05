@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.repository;
 
-import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.TestcontainersConfiguration;
 import dev.chojo.simplepos.entity.Account;
 import dev.chojo.simplepos.entity.Category;
@@ -166,7 +165,7 @@ class PurchaseRepositoryTest {
 
         List<Integer> ids = purchaseRepository.getBottomSales(Instant.now().minus(1, ChronoUnit.DAYS), PageRequest.of(0, 100))
                 .stream()
-                .map(t -> ((Number) t.get("product_id")).intValue())
+                .map(t -> t.getProductId())
                 .toList();
 
         assertTrue(ids.contains(unsold.getId()));
@@ -184,7 +183,7 @@ class PurchaseRepositoryTest {
         var days = purchaseRepository.getSalesStatByProduct(product.getId(), now.minus(30, ChronoUnit.DAYS), "Europe/Berlin", PageRequest.of(0, 100));
 
         assertEquals(1, days.size());
-        assertEquals(1, ((Number) days.get(0).get("sales")).intValue());
+        assertEquals(1, days.get(0).getSales().intValue());
     }
 
     @Test
@@ -200,11 +199,11 @@ class PurchaseRepositoryTest {
 
         var rows = purchaseRepository.getSalesByCategory(now.minus(1, ChronoUnit.HOURS));
 
-        var grouped = rows.stream().filter(t -> ((Number) t.get("category_id")).intValue() == category.getId()).toList();
+        var grouped = rows.stream().filter(t -> t.getCategoryId().equals(category.getId())).toList();
         assertEquals(1, grouped.size());
-        assertEquals(5, ((Number) grouped.get(0).get("sales")).intValue());
-        assertTrue(rows.stream().anyMatch(t -> ((Number) t.get("category_id")).intValue() == Category.UNCATEGORISED_ID
-                && ((Number) t.get("sales")).intValue() == 1));
+        assertEquals(5, grouped.get(0).getSales().intValue());
+        assertTrue(rows.stream().anyMatch(t -> t.getCategoryId() == Category.UNCATEGORISED_ID
+                && t.getSales() == 1));
     }
 
     @Test
@@ -215,8 +214,8 @@ class PurchaseRepositoryTest {
         var berlin = purchaseRepository.getDailyStats(Instant.parse("2026-06-09T00:00:00Z"), "Europe/Berlin");
         var utc = purchaseRepository.getDailyStats(Instant.parse("2026-06-09T00:00:00Z"), "UTC");
 
-        assertEquals(LocalDate.of(2026, 6, 11), BusinessTimeZone.dateOf(berlin.get(0).get("day")));
-        assertEquals(LocalDate.of(2026, 6, 10), BusinessTimeZone.dateOf(utc.get(0).get("day")));
+        assertEquals(LocalDate.of(2026, 6, 11), berlin.get(0).getDay());
+        assertEquals(LocalDate.of(2026, 6, 10), utc.get(0).getDay());
     }
 
     @Test

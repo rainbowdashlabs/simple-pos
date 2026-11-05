@@ -36,8 +36,8 @@ export default defineComponent({
       const filled = everyDay(this.stats, this.timeframe.days, s => s.day,
           day => ({day: localDateKey(day), sales: 0, revenue: 0, profit: 0}))
       const days = filled.map(f => f.day.toLocaleDateString(locale, {month: 'short', day: 'numeric'}))
-      const revenue = filled.map(f => Math.round(f.row.revenue * 100) / 100)
-      const profit = filled.map(f => Math.round(f.row.profit * 100) / 100)
+      const revenue = filled.map(f => f.row.revenue)
+      const profit = filled.map(f => f.row.profit)
       const fmt = euro(locale)
 
       return {

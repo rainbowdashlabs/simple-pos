@@ -22,8 +22,8 @@ import dev.chojo.simplepos.repository.PurchasePartRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.repository.projection.TotalsRow;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Tuple;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -90,9 +90,9 @@ class ProfitTest {
         purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, 12)), null);
         entityManager.flush();
 
-        Tuple summary = purchaseRepository.getSalesStatSummary(product.getId(), Instant.now().minus(1, ChronoUnit.HOURS));
-        assertMoney(24.0, Money.fromQuery((Number) summary.get("revenue")));
-        assertMoney(13.48, Money.fromQuery((Number) summary.get("profit")));
+        TotalsRow summary = purchaseRepository.getSalesStatSummary(product.getId(), Instant.now().minus(1, ChronoUnit.HOURS));
+        assertMoney(24.0, Money.orZero(summary.getRevenue()));
+        assertMoney(13.48, Money.orZero(summary.getProfit()));
     }
 
     @Test

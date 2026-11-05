@@ -108,7 +108,7 @@ public class StorageService {
         ingredientRepository.requireLockedInOrder(corrections.stream().map(InventoryCorrection::ingredient).toList());
         for (InventoryCorrection correction : corrections) {
             Ingredient ingredient = ingredientRepository.require(correction.ingredient());
-            StorageSummary summary = new StorageSummary(storageRepository.summaryById(ingredient.getId()));
+            StorageSummary summary = storageRepository.summaryById(ingredient.getId());
             int delta = summary.getStock() - correction.amount();
             if (delta == 0) continue;
             if (delta > 0) {
