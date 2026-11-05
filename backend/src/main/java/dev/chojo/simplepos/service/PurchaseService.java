@@ -144,6 +144,7 @@ public class PurchaseService {
                 }
             }
             purchase.setParts(parts);
+            purchase.setCost(parts.stream().map(PurchasePart::getCost).reduce(Money.ZERO, BigDecimal::add));
             booked.add(purchaseRepository.save(purchase));
         }
         return booked;

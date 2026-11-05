@@ -238,6 +238,17 @@ class StorageServiceTest {
     }
 
     @Test
+    void shouldCountTheSameIngredientTwiceInOneRequestAsTheLastCount() {
+        storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 3, 0));
+        entityManager.flush();
+
+        storageService.processInventoryCorrection(List.of(
+                new InventoryCorrection(ingredient.getId(), 5), new InventoryCorrection(ingredient.getId(), 8)));
+
+        assertEquals(8, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
+    }
+
+    @Test
     void shouldRejectADeliveryOfAnUnknownIngredient() {
         User receiver = userRepository.save(new User(null, "receiver3", "x", true, Role.STAFF));
         Ingredient unknown = new Ingredient(999999, null, "unknown", 0.0, 1, 0, 0, 0);

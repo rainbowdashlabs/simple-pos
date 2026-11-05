@@ -62,35 +62,20 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     }
 
     @Query("""
-            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0))
+            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, b.balance)
             FROM Account a
-            LEFT JOIN (
-              SELECT account.id AS id, sum(amount) AS balance
-              FROM Balance
-              WHERE account.id = ?1
-              GROUP BY account) b
-            ON a.id = b.id
-            LEFT JOIN (
-              SELECT account.id AS id, sum(amount * price) AS purchase
-              FROM Purchase
-              WHERE account.id = ?1
-              GROUP BY account.id
-            ) p
-            ON a.id = p.id
+            JOIN AccountBalance b ON b.accountId = a.id
             WHERE a.id = ?1""")
     Optional<AccountDto> findAccountById(int id);
 
     @Query("""
-            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, coalesce(b.balance, 0) - coalesce(p.purchase,0), p.last)
+            SELECT NEW dev.chojo.simplepos.entity.dto.AccountDto(a.id, a.name, a.created, b.balance, p.last)
             FROM Account a
+            JOIN AccountBalance b ON b.accountId = a.id
             LEFT JOIN (
-              SELECT account.id AS id, sum(amount) AS balance
-              FROM Balance
-              GROUP BY account) b
-            ON a.id = b.id
-            LEFT JOIN (
-              SELECT account.id AS id, sum(amount * price) AS purchase, max(purchased) AS last
+              SELECT account.id AS id, max(purchased) AS last
               FROM Purchase
+              WHERE account IS NOT NULL
               GROUP BY account.id
             ) p
             ON a.id = p.id

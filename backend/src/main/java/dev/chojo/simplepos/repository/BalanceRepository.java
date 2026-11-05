@@ -12,7 +12,4 @@ public interface BalanceRepository extends JpaRepository<Balance, Integer> {
     List<Balance> findAllByAccount_IdOrderByAddedDesc(int id, Pageable pageable);
     @Query("SELECT sum(amount) FROM Balance")
     BigDecimal totalBalance();
-
-    @Query("SELECT sum(s.amount) FROM (SELECT sum(amount) as amount FROM Balance GROUP BY account) s WHERE s.amount < 0")
-    BigDecimal totalDept();
 }

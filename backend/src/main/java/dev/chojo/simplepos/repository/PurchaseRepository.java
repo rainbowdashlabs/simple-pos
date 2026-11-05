@@ -32,48 +32,26 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query(value = """
             SELECT
-               b.day, b.sales, b.revenue, b.profit
-            FROM (
-                SELECT
-                  cast(p.purchased AT TIME ZONE ?3 AS date) as day, sum(p.amount) as sales, sum(p.revenue) as revenue, sum(p.revenue - p.raw_price) as profit
-                FROM
-                  (
-                    SELECT p.purchased as purchased, p.amount as amount, p.price * p.amount as revenue, coalesce(raw.raw_price,0) as raw_price
-                    FROM Purchase p
-                    LEFT JOIN
-                      (
-                        SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
-                        FROM purchase_part pp
-                        GROUP BY pp.purchase_id
-                      ) raw ON p.id = raw.id
-                    WHERE p.product_id = ?1
-                      AND p.purchased > ?2
-                  ) p
-                GROUP BY day
-                ORDER BY day DESC
-            ) b
+              cast(p.purchased AT TIME ZONE ?3 AS date) as day,
+              sum(p.amount) as sales,
+              sum(p.price * p.amount) as revenue,
+              sum(p.price * p.amount - p.cost) as profit
+            FROM purchase p
+            WHERE p.product_id = ?1
+              AND p.purchased > ?2
+            GROUP BY day
+            ORDER BY day DESC
             """, nativeQuery = true)
     List<Tuple> getSalesStatByProduct(int id, Instant after, String zone, Pageable pageable);
 
     @Query(value = """
             SELECT
-              coalesce(sum(p.amount),0 ) as sales,
-              coalesce(sum(p.revenue),0) as revenue,
-              coalesce(sum(p.revenue - p.raw_price), 0) as profit
-            FROM
-              (
-                SELECT p.amount as amount, p.price * p.amount as revenue, coalesce(raw.raw_price, 0) as raw_price
-                FROM Purchase p
-                LEFT JOIN
-                  (
-                    SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
-                    FROM purchase_part pp
-                    GROUP BY pp.purchase_id
-                  ) raw ON p.id = raw.id
-                WHERE p.product_id = ?1
-                    AND purchased > ?2
-              ) p
-              ORDER BY sales DESC
+              coalesce(sum(p.amount), 0) as sales,
+              coalesce(sum(p.price * p.amount), 0) as revenue,
+              coalesce(sum(p.price * p.amount - p.cost), 0) as profit
+            FROM purchase p
+            WHERE p.product_id = ?1
+              AND p.purchased > ?2
             """, nativeQuery = true)
     Tuple getSalesStatSummary(int id, Instant after);
 
@@ -84,20 +62,10 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
             SELECT
               p.product_id as product_id,
               coalesce(sum(p.amount), 0) as sales,
-              coalesce(sum(p.revenue), 0) as revenue,
-              coalesce(sum(p.revenue - p.raw_price), 0) as profit
-            FROM
-              (
-                SELECT p.product_id, p.amount as amount, p.price * p.amount as revenue, coalesce(raw.raw_price, 0) as raw_price
-                FROM Purchase p
-                LEFT JOIN
-                  (
-                    SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
-                    FROM purchase_part pp
-                    GROUP BY pp.purchase_id
-                  ) raw ON p.id = raw.id
-                WHERE purchased > ?1
-              ) p
+              coalesce(sum(p.price * p.amount), 0) as revenue,
+              coalesce(sum(p.price * p.amount - p.cost), 0) as profit
+            FROM purchase p
+            WHERE p.purchased > ?1
             GROUP BY p.product_id
             """, nativeQuery = true)
     List<Tuple> getTopSales(Instant after, Pageable pageable);
@@ -107,13 +75,8 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
                 cast(p.purchased AT TIME ZONE ?2 AS date) as day,
                 cast(coalesce(sum(p.amount), 0) as integer) as sales,
                 coalesce(sum(p.price * p.amount), 0) as revenue,
-                coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
+                coalesce(sum(p.price * p.amount - p.cost), 0) as profit
             FROM purchase p
-            LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
-                FROM purchase_part pp
-                GROUP BY pp.purchase_id
-            ) raw ON p.id = raw.id
             WHERE p.purchased > ?1
             GROUP BY day
             ORDER BY day ASC
@@ -140,14 +103,9 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
               pr.id as product_id,
               coalesce(sum(p.amount), 0) as sales,
               coalesce(sum(p.price * p.amount), 0) as revenue,
-              coalesce(sum(p.price * p.amount - coalesce(raw.raw_price, 0)), 0) as profit
+              coalesce(sum(p.price * p.amount - p.cost), 0) as profit
             FROM product pr
             LEFT JOIN purchase p ON p.product_id = pr.id AND p.purchased > ?1
-            LEFT JOIN (
-                SELECT pp.purchase_id as id, coalesce(sum(pp.cost), 0) as raw_price
-                FROM purchase_part pp
-                GROUP BY pp.purchase_id
-            ) raw ON p.id = raw.id
             WHERE pr.active = true AND pr.deleted = false
             GROUP BY pr.id
             ORDER BY sales ASC, pr.name ASC
@@ -156,12 +114,6 @@ public interface PurchaseRepository extends JpaRepository<Purchase, Integer> {
 
     @Query("SELECT sum(price * amount) FROM Purchase")
     BigDecimal totalPurchases();
-
-    /**
-     * What all accounts together bought; guest sales are paid in cash and are left out.
-     */
-    @Query("SELECT sum(price * amount) FROM Purchase WHERE account IS NOT NULL")
-    BigDecimal totalAccountPurchases();
 
     @Query("SELECT sum(price * amount) FROM Purchase WHERE purchased > ?1")
     BigDecimal totalPurchases(Instant after);

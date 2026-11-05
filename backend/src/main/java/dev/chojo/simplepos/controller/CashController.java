@@ -10,12 +10,10 @@ import dev.chojo.simplepos.entity.dto.CashDto;
 import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountDto;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
-import dev.chojo.simplepos.entity.dto.InventoryCorrection;
 import dev.chojo.simplepos.entity.response.CashResponse;
-import dev.chojo.simplepos.repository.BalanceRepository;
+import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.CashRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
-import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.repository.TillCountRepository;
 import dev.chojo.simplepos.service.CashService;
 import jakarta.validation.Valid;
@@ -39,19 +37,18 @@ import java.util.List;
 @RequestMapping("/api/cash")
 public class CashController {
     private final CashRepository cashRepository;
-    private final PurchaseRepository purchaseRepository;
-    private final BalanceRepository balanceRepository;
     private final IngredientRepository ingredientRepository;
     private final TillCountRepository tillCountRepository;
+    private final AccountBalanceRepository accountBalanceRepository;
     private final CashService cashService;
 
-    public CashController(CashRepository cashRepository, PurchaseRepository purchaseRepository, BalanceRepository balanceRepository,
-                          IngredientRepository ingredientRepository, TillCountRepository tillCountRepository, CashService cashService) {
+    public CashController(CashRepository cashRepository, IngredientRepository ingredientRepository,
+                          TillCountRepository tillCountRepository, CashService cashService,
+                          AccountBalanceRepository accountBalanceRepository) {
+        this.accountBalanceRepository = accountBalanceRepository;
         this.tillCountRepository = tillCountRepository;
         this.cashService = cashService;
         this.cashRepository = cashRepository;
-        this.purchaseRepository = purchaseRepository;
-        this.balanceRepository = balanceRepository;
         this.ingredientRepository = ingredientRepository;
     }
 
@@ -98,7 +95,7 @@ public class CashController {
 
     @GetMapping("/total/balance")
     public CashResponse balanceAmount() {
-        return new CashResponse(Money.orZero(balanceRepository.totalBalance()).subtract(Money.orZero(purchaseRepository.totalAccountPurchases())));
+        return new CashResponse(Money.orZero(accountBalanceRepository.totalBalance()));
     }
 
     @GetMapping("/total/pledge")

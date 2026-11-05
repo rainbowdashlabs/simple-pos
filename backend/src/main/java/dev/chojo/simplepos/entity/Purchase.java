@@ -32,6 +32,9 @@ public class Purchase {
     @Column(precision = 12, scale = Money.SCALE, nullable = false)
     private BigDecimal price;
 
+    @Column(precision = 12, scale = Money.SCALE, nullable = false)
+    private BigDecimal cost = Money.ZERO;
+
     @OneToMany(mappedBy = "purchase", fetch = FetchType.LAZY)
     private List<PurchasePart> parts;
 
@@ -109,6 +112,18 @@ public class Purchase {
 
     public void setParts(List<PurchasePart> parts) {
         this.parts = parts;
+    }
+
+    /**
+     * What the units this purchase used cost, the sum of its parts. Written when the purchase is booked; the parts
+     * never change afterwards.
+     */
+    public BigDecimal getCost() {
+        return cost;
+    }
+
+    public void setCost(BigDecimal cost) {
+        this.cost = Money.of(cost);
     }
 
     public User getSoldBy() {

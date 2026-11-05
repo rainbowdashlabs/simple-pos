@@ -42,6 +42,7 @@ class MigrationTest {
         jdbc.update("INSERT INTO balance (id, amount, account_id) VALUES (1, 0.8000000000000398, 1)");
         jdbc.update("INSERT INTO product (id, active, name, price, category_id) VALUES (1, true, 'Lemonade', 2.0, 1)");
         jdbc.update("INSERT INTO purchase (id, amount, price, purchased, account_id, product_id) VALUES (1, 5, 2.0, now(), 1, 1)");
+        jdbc.update("INSERT INTO purchase (id, amount, price, purchased, account_id, product_id) VALUES (8, 1, 2.0, now(), 1, 1)");
         jdbc.update("INSERT INTO purchase (id, amount, price, purchased, account_id, product_id) VALUES (2, 7, 2.0, now(), 1, 1)");
         for (int id = 1; id <= 5; id++) {
             jdbc.update("INSERT INTO purchase_part (id, purchase_id, storage_id) VALUES (?, 1, 1)", id);
@@ -117,6 +118,16 @@ class MigrationTest {
         assertEquals(new BigDecimal("0.34"), part(5, 3, "cost", BigDecimal.class));
         assertEquals(new BigDecimal("0.33"), part(6, 3, "cost", BigDecimal.class));
         assertEquals(new BigDecimal("1.00"), jdbc.queryForObject("SELECT sum(cost) FROM purchase_part WHERE storage_id = 3", BigDecimal.class));
+    }
+
+    @Test
+    void eachPurchaseCarriesTheCostOfItsParts() {
+        assertEquals(new BigDecimal("6.28"), jdbc.queryForObject("SELECT cost FROM purchase WHERE id = 2", BigDecimal.class));
+        assertEquals(new BigDecimal("0.00"), jdbc.queryForObject("SELECT cost FROM purchase WHERE id = 8", BigDecimal.class));
+        assertEquals(0, jdbc.queryForObject("""
+                SELECT count(*) FROM purchase p
+                WHERE p.cost <> coalesce((SELECT sum(pp.cost) FROM purchase_part pp WHERE pp.purchase_id = p.id), 0)""",
+                Integer.class));
     }
 
     private static <T> T part(int purchase, int storage, String column, Class<T> type) {

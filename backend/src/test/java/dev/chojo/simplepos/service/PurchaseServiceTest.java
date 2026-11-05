@@ -17,6 +17,7 @@ import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.repository.AccountBalanceRepository;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
@@ -76,6 +77,8 @@ class PurchaseServiceTest {
     UserRepository userRepository;
     @Autowired
     CashService cashService;
+    @Autowired
+    AccountBalanceRepository accountBalanceRepository;
 
     private Account account;
     private Product product;
@@ -336,14 +339,14 @@ class PurchaseServiceTest {
         storageService.addStorage(new Storage(null, ingredient, Instant.now(), 0.5, 10, 0));
         entityManager.flush();
         BigDecimal tillBefore = cashService.tillTotal();
-        BigDecimal accountsBefore = Money.orZero(purchaseRepository.totalAccountPurchases());
+        BigDecimal accountsBefore = Money.orZero(accountBalanceRepository.totalBalance());
         BigDecimal salesBefore = Money.orZero(purchaseRepository.totalPurchases());
 
         List<Integer> sale = purchaseService.purchaseAsGuest(List.of(new CartPositionDto(product, 3)), null);
         entityManager.flush();
 
         assertMoney(tillBefore.add(new BigDecimal("6.00")), cashService.tillTotal());
-        assertMoney(accountsBefore, Money.orZero(purchaseRepository.totalAccountPurchases()));
+        assertMoney(accountsBefore, Money.orZero(accountBalanceRepository.totalBalance()));
         assertMoney(salesBefore.add(new BigDecimal("6.00")), Money.orZero(purchaseRepository.totalPurchases()));
         assertEquals(7, new StorageSummary(storageRepository.summaryById(ingredient.getId())).getStock());
 

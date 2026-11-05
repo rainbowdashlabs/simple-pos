@@ -86,20 +86,6 @@ class BalanceRepositoryTest {
     }
 
     @Test
-    void shouldCalculateTotalDebt() {
-        Account debtor1 = accountRepository.save(new Account(null, "Debtor1", Instant.now()));
-        Account debtor2 = accountRepository.save(new Account(null, "Debtor2", Instant.now()));
-
-        balanceRepository.save(new Balance(null, debtor1, Instant.now(), -20.0));
-        balanceRepository.save(new Balance(null, debtor2, Instant.now(), -30.0));
-        balanceRepository.save(new Balance(null, account, Instant.now(), 100.0));
-
-        BigDecimal debt = balanceRepository.totalDept();
-        assertNotNull(debt);
-        assertMoney(-50.0, debt);
-    }
-
-    @Test
     void shouldNotReturnResultsForDifferentAccount() {
         Account other = accountRepository.save(new Account(null, "Other", Instant.now()));
         balanceRepository.save(new Balance(null, other, Instant.now(), 100.0));
