@@ -19,6 +19,8 @@ spring-security-config = { group = "org.springframework.security", name = "sprin
 
 # Database
 postgresql = { group = "org.postgresql", name = "postgresql" }
+spring-boot-starter-flyway = { group = "org.springframework.boot", name = "spring-boot-starter-flyway" }
+flyway-postgresql = { group = "org.flywaydb", name = "flyway-database-postgresql" }
 
 # OpenAPI
 springdoc-openapi = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }

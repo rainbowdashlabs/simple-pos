@@ -27,6 +27,18 @@ unique-local ranges). Make sure only the proxy can reach the application, or set
 `server.tomcat.remoteip.internal-proxies` to the proxy's address; otherwise anything on those networks can claim any
 client address.
 
+### Database schema
+
+The schema is managed by Flyway (`backend/src/main/resources/db/migration`); Hibernate only checks that it matches.
+On its first start this version records an existing database as being at version 1 and then applies the later
+migrations, the first of which drops the unused `authority` table. Before that first start:
+
+- take a backup (`pg_dump`),
+- remove any `spring.jpa.hibernate.ddl-auto` from a mounted `application.yaml`, so it does not override the check.
+
+A database that was not kept up to date by the previous version (missing columns, an older role constraint) fails the
+check at startup or later; compare it with `V1__baseline.sql`, or dump the data and recreate it.
+
 ### Running with compose
 
 `compose.yml` (and `backend/compose.yaml` for a database only) reads its secrets from a `.env` file next to it,

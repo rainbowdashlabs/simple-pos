@@ -1,7 +1,9 @@
 spring:
+  flyway:
+    clean-disabled: false
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:

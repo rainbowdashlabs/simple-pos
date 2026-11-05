@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 /**
  * Two admins demote each other at the same time, each in its own committed transaction: exactly one must win.
  * <p>
- * Because this test commits, the context is discarded afterwards, which drops the schema so no data leaks into
- * other tests.
+ * Because this test commits, the context is discarded afterwards; the next context cleans and migrates the schema
+ * afresh, so no data leaks into other tests.
  */
 @Import(TestcontainersConfiguration.class)
 @SpringBootTest
