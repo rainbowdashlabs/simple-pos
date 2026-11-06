@@ -3,7 +3,6 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
 import dev.chojo.simplepos.entity.Account;
-import dev.chojo.simplepos.entity.Balance;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.AccountDto;
 import dev.chojo.simplepos.entity.dto.AccountRequest;
@@ -11,6 +10,8 @@ import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.entity.dto.DepositDto;
 import dev.chojo.simplepos.entity.dto.PurchaseHistoryDto;
 import dev.chojo.simplepos.entity.dto.PurchaseReceipt;
+import dev.chojo.simplepos.entity.response.AccountResponse;
+import dev.chojo.simplepos.entity.response.BalanceResponse;
 import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.AccountRepository;
@@ -56,8 +57,8 @@ public class AccountController {
     }
 
     @PostMapping
-    ResponseEntity<Account> create(@Valid @RequestBody AccountRequest account) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.create(account.name()));
+    ResponseEntity<AccountResponse> create(@Valid @RequestBody AccountRequest account) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(AccountResponse.of(accountService.create(account.name())));
     }
 
     @GetMapping("/{id}")
@@ -67,8 +68,8 @@ public class AccountController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<Account> rename(@PathVariable int id, @Valid @RequestBody AccountRequest account) {
-        return ResponseEntity.ok(accountService.rename(id, account.name()));
+    ResponseEntity<AccountResponse> rename(@PathVariable int id, @Valid @RequestBody AccountRequest account) {
+        return ResponseEntity.ok(AccountResponse.of(accountService.rename(id, account.name())));
     }
 
     @DeleteMapping("/{id}")
@@ -90,15 +91,15 @@ public class AccountController {
     }
 
     @PostMapping("/{id}/balance")
-    ResponseEntity<Balance> deposit(@PathVariable int id, @Valid @RequestBody DepositDto deposit) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(accountService.deposit(id, deposit.amount()));
+    ResponseEntity<BalanceResponse> deposit(@PathVariable int id, @Valid @RequestBody DepositDto deposit) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(BalanceResponse.of(accountService.deposit(id, deposit.amount())));
     }
 
     @GetMapping("/{id}/balance")
-    PageResponse<Balance> deposit(@PathVariable int id,
-                                  @RequestParam(defaultValue = "100") @PageSize int limit,
-                                  @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(id, PageRequest.of(page, limit)));
+    PageResponse<BalanceResponse> deposit(@PathVariable int id,
+                                          @RequestParam(defaultValue = "100") @PageSize int limit,
+                                          @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(balanceRepository.findAllByAccount_IdOrderByAddedDescIdDesc(id, PageRequest.of(page, limit)), BalanceResponse::of);
     }
 
     @PostMapping("/{id}/purchase")

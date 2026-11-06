@@ -90,7 +90,7 @@ class StockConcurrencyTest {
             List<Future<?>> purchases = new ArrayList<>();
             for (int i = 0; i < BUYERS; i++) {
                 purchases.add(executor.submit(() ->
-                        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product, UNITS_PER_BUYER)), null)));
+                        purchaseService.purchase(account.getId(), List.of(new CartPositionDto(product.getId(), UNITS_PER_BUYER)), null)));
             }
             for (Future<?> purchase : purchases) purchase.get(30, TimeUnit.SECONDS);
         }
@@ -115,7 +115,7 @@ class StockConcurrencyTest {
             for (int i = 0; i < BUYERS; i++) {
                 Product product = i % 2 == 0 ? forward : backward;
                 sales.add(executor.submit(() ->
-                        purchaseService.purchaseAsGuest(List.of(new CartPositionDto(product, UNITS_PER_BUYER)), null)));
+                        purchaseService.purchaseAsGuest(List.of(new CartPositionDto(product.getId(), UNITS_PER_BUYER)), null)));
             }
             for (Future<?> sale : sales) sale.get(30, TimeUnit.SECONDS);
         }

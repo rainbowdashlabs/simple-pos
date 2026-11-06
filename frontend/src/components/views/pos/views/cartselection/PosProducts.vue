@@ -33,7 +33,7 @@ export default defineComponent({
           .map(entry => ({group: {category: entry.category, entries: entry.list.items}, list: entry.list}))
     },
     topSellerGroup(): ProductGroup | null {
-      const entries = this.topSellers.filter(p => p.active && !p.deleted).slice(0, TOP_SELLERS)
+      const entries = this.topSellers.filter(p => p.active).slice(0, TOP_SELLERS)
       if (entries.length === 0) return null
       return {
         category: {id: -1, name: this.$t('top_sellers')},

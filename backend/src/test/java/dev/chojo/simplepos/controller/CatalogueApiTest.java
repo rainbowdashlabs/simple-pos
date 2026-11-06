@@ -194,12 +194,27 @@ class CatalogueApiTest {
     }
 
     @Test
-    void productsCarryTheirUnitCost() throws Exception {
+    void productsCarryTheirUnitCostButNoInternalIds() throws Exception {
         Product product = product("Costed");
 
         mvc.perform(get("/api/product/" + product.getId()).header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.unitCost").value(0.5));
+                .andExpect(jsonPath("$.unitCost").value(0.5))
+                .andExpect(jsonPath("$.recipe.entries[0].ingredient.name").isString())
+                .andExpect(jsonPath("$.deleted").doesNotExist())
+                .andExpect(jsonPath("$.recipe.id").doesNotExist())
+                .andExpect(jsonPath("$.recipe.entries[0].id").doesNotExist());
+    }
+
+    @Test
+    void depositsDoNotRepeatTheirAccount() throws Exception {
+        int accountId = idOf(send(post("/api/account"), "{\"name\": \"DepositAccount\"}", 201));
+        send(post("/api/account/" + accountId + "/balance"), "{\"amount\": 5}", 201);
+
+        mvc.perform(get("/api/account/" + accountId + "/balance").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].amount").value(5.0))
+                .andExpect(jsonPath("$.items[0].account").doesNotExist());
     }
 
     @Test
@@ -211,10 +226,10 @@ class CatalogueApiTest {
                 + ", \"price\": 2.0, \"recipe\": [{\"ingredientId\": " + ingredient.getId() + ", \"amount\": 1}]}", 201));
         int accountId = idOf(send(post("/api/account"), "{\"name\": \"LifecycleAccount\"}", 201));
         send(post("/api/account/" + accountId + "/balance"), "{\"amount\": 5}", 201);
-        send(post("/api/storage"), "{\"ingredient\": {\"id\": " + ingredient.getId()
-                + "}, \"price\": 1, \"pledge\": 0, \"amount\": 2}", 201);
+        send(post("/api/storage"), "{\"ingredientId\": " + ingredient.getId()
+                + ", \"price\": 1, \"pledge\": 0, \"amount\": 2}", 201);
         String receipt = send(post("/api/account/" + accountId + "/purchase"),
-                "[{\"product\": {\"id\": " + productId + "}, \"amount\": 1}]", 201);
+                "[{\"productId\": " + productId + ", \"amount\": 1}]", 201);
         int purchaseId = ((Number) ((List<?>) JsonParserFactory.getJsonParser().parseMap(receipt).get("purchaseIds")).get(0)).intValue();
 
         send(delete("/api/purchase/" + purchaseId), null, 204);

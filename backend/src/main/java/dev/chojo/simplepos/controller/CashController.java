@@ -2,12 +2,12 @@ package dev.chojo.simplepos.controller;
 
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
-import dev.chojo.simplepos.entity.Cash;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.CashDto;
 import dev.chojo.simplepos.entity.dto.EmptiesReturn;
 import dev.chojo.simplepos.entity.dto.TillCountDto;
 import dev.chojo.simplepos.entity.dto.TillCountRequest;
+import dev.chojo.simplepos.entity.response.CashEntryResponse;
 import dev.chojo.simplepos.entity.response.CashResponse;
 import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.repository.CashRepository;
@@ -50,9 +50,9 @@ public class CashController {
     }
 
     @GetMapping
-    public PageResponse<Cash> all(@RequestParam(defaultValue = "100") @PageSize int limit,
-                                  @RequestParam(defaultValue = "0") @PageNumber int page) {
-        return PageResponse.of(cashRepository.findByOrderByCreatedDescIdDesc(PageRequest.of(page, limit)));
+    public PageResponse<CashEntryResponse> all(@RequestParam(defaultValue = "100") @PageSize int limit,
+                                               @RequestParam(defaultValue = "0") @PageNumber int page) {
+        return PageResponse.of(cashRepository.findByOrderByCreatedDescIdDesc(PageRequest.of(page, limit)), CashEntryResponse::of);
     }
 
     @GetMapping("/total")

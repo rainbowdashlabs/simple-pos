@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,7 +14,6 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity(name = "users")
-@JsonIncludeProperties({"id", "username", "role"})
 public class User implements UserDetails {
     @Id
     @GeneratedValue

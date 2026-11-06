@@ -130,7 +130,7 @@ class PaginationApiTest {
         for (Product product : List.of(first, second)) {
             mvc.perform(authorized(post("/api/account/" + buyer.getId() + "/purchase"))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("[{\"product\": {\"id\": " + product.getId() + "}, \"amount\": 1}]"))
+                            .content("[{\"productId\": " + product.getId() + ", \"amount\": 1}]"))
                     .andExpect(status().isCreated());
         }
 

@@ -6,6 +6,7 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.dto.LazyProduct;
 import dev.chojo.simplepos.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ class ProductRepositoryTest {
         Recipe recipe = new Recipe(null, null, Collections.emptyList());
         Product product = productService.create(new Product(null, category, "LazyTest", 2.5, true, recipe));
 
-        var lazy = product.asLazyProduct();
+        var lazy = LazyProduct.of(product);
         assertEquals(product.getId(), lazy.id());
         assertEquals("LazyTest", lazy.name());
         assertMoney(2.5, lazy.price());

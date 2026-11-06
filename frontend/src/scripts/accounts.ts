@@ -18,7 +18,6 @@ export interface Account {
  */
 export interface Balance {
     id: number | null | undefined,
-    account: Account | null | undefined,
     amount: number;
     added: number | Date | string;
 }
@@ -80,11 +79,15 @@ export const GUEST_ACCOUNT_ID = 0
  * Sells the cart to a guest who pays cash; the money goes into the till.
  */
 export function purchaseAsGuest(entries: CartPosition[]): Promise<PurchaseReceipt> {
-    return postJson("api/purchase/guest", entries)
+    return postJson("api/purchase/guest", positionRequests(entries))
 }
 
 export function purchase(id: number, entries: CartPosition[]): Promise<PurchaseReceipt> {
-    return postJson(`api/account/${id}/purchase`, entries)
+    return postJson(`api/account/${id}/purchase`, positionRequests(entries))
+}
+
+function positionRequests(entries: CartPosition[]) {
+    return entries.map(entry => ({productId: entry.product.id, amount: entry.amount}))
 }
 
 export function renameAccount(id: number, name: string): Promise<Account> {

@@ -1,8 +1,6 @@
 package dev.chojo.simplepos.entity.dto;
 
 import dev.chojo.simplepos.controller.validation.PageSize;
-import dev.chojo.simplepos.entity.Ingredient;
-import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Role;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -21,31 +19,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class RequestConstraintsTest {
     private static final Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
-    private static final Ingredient INGREDIENT = new Ingredient(1, null, "Cola", 1.0, 24, 0, 0, 0);
     private static final BigDecimal ONE = BigDecimal.ONE;
 
     @Test
     void deliveriesNeedOnePriceAPositiveAmountAndNoNegativeMoney() {
-        assertTrue(valid(new InboundStorage(INGREDIENT, null, ONE, null, BigDecimal.ZERO, 5)));
-        assertTrue(valid(new InboundStorage(INGREDIENT, null, null, ONE, BigDecimal.ZERO, 5)));
-        assertTrue(valid(new InboundStorage(INGREDIENT, null, new BigDecimal("3.3333333333333335"), null,
+        assertTrue(valid(new InboundStorage(1, null, ONE, null, BigDecimal.ZERO, 5)));
+        assertTrue(valid(new InboundStorage(1, null, null, ONE, BigDecimal.ZERO, 5)));
+        assertTrue(valid(new InboundStorage(1, null, new BigDecimal("3.3333333333333335"), null,
                 new BigDecimal("0.44999999999999996"), 3)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, ONE, ONE, BigDecimal.ZERO, 5)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, null, null, BigDecimal.ZERO, 5)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, ONE, null, BigDecimal.ZERO, -5)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, ONE, null, BigDecimal.ZERO, null)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, ONE.negate(), null, BigDecimal.ZERO, 5)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, ONE, null, ONE.negate(), 5)));
-        assertFalse(valid(new InboundStorage(INGREDIENT, null, ONE, null, null, 5)));
+        assertFalse(valid(new InboundStorage(1, null, ONE, ONE, BigDecimal.ZERO, 5)));
+        assertFalse(valid(new InboundStorage(1, null, null, null, BigDecimal.ZERO, 5)));
+        assertFalse(valid(new InboundStorage(1, null, ONE, null, BigDecimal.ZERO, -5)));
+        assertFalse(valid(new InboundStorage(1, null, ONE, null, BigDecimal.ZERO, null)));
+        assertFalse(valid(new InboundStorage(1, null, ONE.negate(), null, BigDecimal.ZERO, 5)));
+        assertFalse(valid(new InboundStorage(1, null, ONE, null, ONE.negate(), 5)));
+        assertFalse(valid(new InboundStorage(1, null, ONE, null, null, 5)));
         assertFalse(valid(new InboundStorage(null, null, ONE, null, BigDecimal.ZERO, 5)));
     }
 
     @Test
     void cartPositionsNeedAProductAndAtLeastOne() {
-        Product product = new Product();
-        assertTrue(valid(new CartPositionDto(product, 1)));
-        assertFalse(valid(new CartPositionDto(product, 0)));
-        assertFalse(valid(new CartPositionDto(product, -10)));
+        assertTrue(valid(new CartPositionDto(1, 1)));
+        assertFalse(valid(new CartPositionDto(1, 0)));
+        assertFalse(valid(new CartPositionDto(1, -10)));
         assertFalse(valid(new CartPositionDto(null, 1)));
     }
 

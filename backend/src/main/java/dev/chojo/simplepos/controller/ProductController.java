@@ -3,10 +3,10 @@ package dev.chojo.simplepos.controller;
 import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.controller.validation.PageNumber;
 import dev.chojo.simplepos.controller.validation.PageSize;
-import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.dto.DayStat;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.response.PageResponse;
+import dev.chojo.simplepos.entity.response.ProductResponse;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.PurchaseRepository;
 import dev.chojo.simplepos.service.ProductService;
@@ -44,8 +44,8 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Product> get(@PathVariable int id) {
-        return ResponseEntity.ok(productRepository.require(id));
+    ResponseEntity<ProductResponse> get(@PathVariable int id) {
+        return ResponseEntity.ok(ProductResponse.of(productRepository.require(id)));
     }
 
     @GetMapping("/{id}/sales/stat")
@@ -64,22 +64,22 @@ public class ProductController {
     }
 
     @GetMapping
-    PageResponse<Product> get(@RequestParam(required = false) Integer categoryId,
-                              @RequestParam(defaultValue = "100") @PageSize int limit,
-                              @RequestParam(defaultValue = "0") @PageNumber int page) {
+    PageResponse<ProductResponse> get(@RequestParam(required = false) Integer categoryId,
+                                      @RequestParam(defaultValue = "100") @PageSize int limit,
+                                      @RequestParam(defaultValue = "0") @PageNumber int page) {
         return productService.page(false, categoryId, PageRequest.of(page, limit));
     }
 
     @GetMapping("/active")
-    PageResponse<Product> getActive(@RequestParam(required = false) Integer categoryId,
-                                    @RequestParam(defaultValue = "100") @PageSize int limit,
-                                    @RequestParam(defaultValue = "0") @PageNumber int page) {
+    PageResponse<ProductResponse> getActive(@RequestParam(required = false) Integer categoryId,
+                                            @RequestParam(defaultValue = "100") @PageSize int limit,
+                                            @RequestParam(defaultValue = "0") @PageNumber int page) {
         return productService.page(true, categoryId, PageRequest.of(page, limit));
     }
 
     @PostMapping
-    ResponseEntity<Product> create(@Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.create(product));
+    ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest product) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ProductResponse.of(productService.create(product)));
     }
 
     @DeleteMapping("/{id}")
@@ -89,12 +89,12 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/active")
-    ResponseEntity<Product> toggleActive(@PathVariable int id) {
-        return ResponseEntity.ok(productService.toggleActive(id));
+    ResponseEntity<ProductResponse> toggleActive(@PathVariable int id) {
+        return ResponseEntity.ok(ProductResponse.of(productService.toggleActive(id)));
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<Product> update(@PathVariable int id, @Valid @RequestBody ProductRequest product) {
-        return ResponseEntity.ok(productService.update(id, product));
+    ResponseEntity<ProductResponse> update(@PathVariable int id, @Valid @RequestBody ProductRequest product) {
+        return ResponseEntity.ok(ProductResponse.of(productService.update(id, product)));
     }
 }

@@ -80,7 +80,7 @@ export default defineComponent({
     },
     submit() {
       addStorage({
-        ingredient: this.ingredient,
+        ingredientId: this.ingredient.id,
         purchased: new Date(),
         price: this.priceMode === "piece" ? this.price : null,
         total: this.priceMode === "total" ? this.price : null,

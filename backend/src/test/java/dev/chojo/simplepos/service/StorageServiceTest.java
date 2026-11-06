@@ -223,9 +223,7 @@ class StorageServiceTest {
         User receiver = userRepository.save(new User(null, "receiver", "x", true, Role.STAFF));
         long cashBefore = cashRepository.count();
 
-        Ingredient sentWithAnotherName = new Ingredient(ingredient.getId(), null, "sent name", 0.0, 1, 0, 0, 0);
-
-        Storage stored = storageService.deliver(new InboundStorage(sentWithAnotherName, null, money(2.0), null, money(3.0), 12), receiver);
+        Storage stored = storageService.deliver(new InboundStorage(ingredient.getId(), null, money(2.0), null, money(3.0), 12), receiver);
 
         assertEquals(12, stored.getAmount());
         assertNotNull(stored.getPurchased());
@@ -251,17 +249,16 @@ class StorageServiceTest {
     @Test
     void shouldRejectADeliveryOfAnUnknownIngredient() {
         User receiver = userRepository.save(new User(null, "receiver3", "x", true, Role.STAFF));
-        Ingredient unknown = new Ingredient(999999, null, "unknown", 0.0, 1, 0, 0, 0);
 
         assertThrows(NotFoundException.class,
-                () -> storageService.deliver(new InboundStorage(unknown, null, money(1.0), null, money(0.0), 1), receiver));
+                () -> storageService.deliver(new InboundStorage(999999, null, money(1.0), null, money(0.0), 1), receiver));
     }
 
     @Test
     void shouldBookADeliveryByItsTotalWithoutLosingCents() {
         User receiver = userRepository.save(new User(null, "receiver4", "x", true, Role.STAFF));
 
-        Storage stored = storageService.deliver(new InboundStorage(ingredient, null, null, money(17.54), money(0.0), 20), receiver);
+        Storage stored = storageService.deliver(new InboundStorage(ingredient.getId(), null, null, money(17.54), money(0.0), 20), receiver);
 
         assertMoney(17.54, stored.getCost());
         assertEquals(new BigDecimal("0.8770"), stored.getPrice());

@@ -5,6 +5,7 @@ import dev.chojo.simplepos.configuration.security.RefreshCookie;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.ChangePasswordRequest;
 import dev.chojo.simplepos.entity.dto.UserPreferencesDto;
+import dev.chojo.simplepos.entity.response.UserResponse;
 import dev.chojo.simplepos.entity.security.SessionResponse;
 import dev.chojo.simplepos.service.AuthenticationService;
 import dev.chojo.simplepos.service.PreferencesService;
@@ -55,8 +56,8 @@ public class UserController {
     }
 
     @GetMapping("me")
-    public User me(@CurrentUser User user) {
-        return user;
+    public UserResponse me(@CurrentUser User user) {
+        return UserResponse.of(user);
     }
 
     @GetMapping("/preferences")

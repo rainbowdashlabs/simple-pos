@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +15,6 @@ public class Cash {
     @GeneratedValue
     private int id;
     @ManyToOne
-    @JsonIncludeProperties({"id", "username"})
     private User user;
 
     private Instant created = Instant.now();

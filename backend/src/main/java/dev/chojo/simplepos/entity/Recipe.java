@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +19,6 @@ public class Recipe {
 
     @OneToOne
     @JoinColumn(name = "product_id")
-    @JsonIgnore
     private Product product;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,7 +18,6 @@ public class Storage {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
     private Ingredient ingredient;
 
     private Instant purchased;

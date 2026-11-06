@@ -103,7 +103,7 @@ class StockProjectionServiceTest {
         take(5, now.plus(Duration.ofDays(2)));
 
         assertTrue(projectionService.soonestEmpty(now).stream()
-                .noneMatch(p -> p.ingredient().getId().equals(ingredient.getId())));
+                .noneMatch(p -> p.ingredient().id().equals(ingredient.getId())));
     }
 
     @Test
@@ -133,9 +133,9 @@ class StockProjectionServiceTest {
 
         List<ShoppingListEntry> list = projectionService.shoppingList(14, now);
 
-        assertEquals(3, list.stream().filter(e -> e.ingredient().getId().equals(unusedLow.getId())).findFirst().orElseThrow().amount());
-        assertTrue(list.stream().noneMatch(e -> e.ingredient().getId().equals(unusedEnough.getId())));
-        assertTrue(list.stream().noneMatch(e -> e.ingredient().getId().equals(ingredient.getId())));
+        assertEquals(3, list.stream().filter(e -> e.ingredient().id().equals(unusedLow.getId())).findFirst().orElseThrow().amount());
+        assertTrue(list.stream().noneMatch(e -> e.ingredient().id().equals(unusedEnough.getId())));
+        assertTrue(list.stream().noneMatch(e -> e.ingredient().id().equals(ingredient.getId())));
     }
 
     @Test
@@ -145,7 +145,7 @@ class StockProjectionServiceTest {
         entityManager.flush();
 
         assertTrue(projectionService.shoppingList(30, now).stream()
-                .noneMatch(e -> e.ingredient().getId().equals(ingredient.getId())));
+                .noneMatch(e -> e.ingredient().id().equals(ingredient.getId())));
     }
 
     @Test
@@ -165,14 +165,14 @@ class StockProjectionServiceTest {
 
     private ShoppingListEntry shoppingEntryOf(Ingredient ingredient, int days) {
         return projectionService.shoppingList(days, now).stream()
-                .filter(e -> e.ingredient().getId().equals(ingredient.getId()))
+                .filter(e -> e.ingredient().id().equals(ingredient.getId()))
                 .findFirst()
                 .orElseThrow();
     }
 
     private StockProjectionDto projectionOf(Ingredient ingredient) {
         return projectionService.soonestEmpty(now).stream()
-                .filter(p -> p.ingredient().getId().equals(ingredient.getId()))
+                .filter(p -> p.ingredient().id().equals(ingredient.getId()))
                 .findFirst()
                 .orElseThrow();
     }

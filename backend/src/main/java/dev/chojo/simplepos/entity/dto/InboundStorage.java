@@ -1,6 +1,5 @@
 package dev.chojo.simplepos.entity.dto;
 
-import dev.chojo.simplepos.entity.Ingredient;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.Max;
@@ -16,7 +15,7 @@ import java.time.Instant;
  * ({@code total}), never both. Amounts may carry more decimals than money has, as a form computing them in floating
  * point sends; they are rounded when booked.
  */
-public record InboundStorage(@NotNull Ingredient ingredient,
+public record InboundStorage(@NotNull Integer ingredientId,
                              Instant purchased,
                              @PositiveOrZero @DecimalMax("99999999") BigDecimal price,
                              @PositiveOrZero @DecimalMax("9999999999") BigDecimal total,
@@ -28,12 +27,5 @@ public record InboundStorage(@NotNull Ingredient ingredient,
     @AssertTrue(message = "{simplepos.validation.priced_once}")
     public boolean isPricedOnce() {
         return (price == null) != (total == null);
-    }
-
-    /**
-     * The id of the delivered ingredient, or null if the request names none.
-     */
-    public Integer ingredientId() {
-        return ingredient == null ? null : ingredient.getId();
     }
 }
