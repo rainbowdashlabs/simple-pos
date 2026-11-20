@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18
+    image: postgres:18@sha256:eb63372c1e05c755f55fa30cbd07aecc443676fc6c0fa90b9002d01537841e1a
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in .env}
       SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
