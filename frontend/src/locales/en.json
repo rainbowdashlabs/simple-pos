@@ -305,5 +305,9 @@
   "shown_of": "{shown} of {total} shown",
   "loaded_more": "{count} more loaded",
   "search_more_matches": "More matches. Keep typing to narrow them down.",
-  "all_shown": "All {total} shown."
+  "all_shown": "All {total} shown.",
+  "demo": {
+    "as_admin": "Demo: switch to admin",
+    "as_staff": "Demo: switch to cashier"
+  }
 }

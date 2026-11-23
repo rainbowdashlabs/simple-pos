@@ -76,8 +76,9 @@ class DemoDataSeederTest {
 
         seeder(false).run();
 
-        assertEquals(1, userRepository.count());
-        assertTrue(userRepository.findByUsername("demo").isPresent());
+        assertEquals(2, userRepository.count());
+        assertEquals(Role.STAFF, userRepository.findByUsername("demo").orElseThrow().getRole());
+        assertEquals(Role.ADMIN, userRepository.findByUsername("demo-admin").orElseThrow().getRole());
         assertTrue(categoryRepository.count() > 0);
         assertTrue(entityManager.createQuery("SELECT count(pp) FROM PurchasePart pp", Long.class).getSingleResult() > 0);
         assertTrue(entityManager.createQuery("SELECT sum(p.cost) FROM Purchase p", BigDecimal.class).getSingleResult().signum() > 0);
@@ -85,6 +86,19 @@ class DemoDataSeederTest {
                 .isBefore(Instant.now().minus(1, ChronoUnit.DAYS)));
         assertEquals(0, entityManager.createQuery(
                 "SELECT count(p) FROM Purchase p WHERE p.soldBy IS NULL OR p.soldBy.username <> 'demo'", Long.class).getSingleResult());
+    }
+
+    @Test
+    void shouldKeepWipingADatabaseThatHoldsBothDemoUsers() {
+        userRepository.deleteAll();
+        userRepository.save(new User(null, "demo", "x", true, Role.STAFF));
+        userRepository.save(new User(null, "demo-admin", "x", true, Role.ADMIN));
+        entityManager.flush();
+        entityManager.clear();
+
+        seeder(false).run();
+
+        assertEquals(2, userRepository.count());
     }
 
     @Test

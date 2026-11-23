@@ -36,12 +36,21 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @ConditionalOnProperty(name = "demo.enabled", havingValue = "true")
 public class DemoDataSeeder implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
-    private static final String DEMO_USER = "demo";
+    /**
+     * The demo user the one-click demo login signs in as. It works the till like staff.
+     */
+    public static final String DEMO_USER = "demo";
+    /**
+     * The demo user for trying what administrators can do, such as managing users and VAT rates.
+     */
+    public static final String DEMO_ADMIN = "demo-admin";
+    private static final Set<String> DEMO_USERS = Set.of(DEMO_USER, DEMO_ADMIN);
 
     private final EntityManager entityManager;
     private final UserRepository userRepository;
@@ -78,13 +87,13 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private boolean holdsRealUsers() {
-        return userRepository.findAll().stream().anyMatch(user -> !DEMO_USER.equals(user.getUsername()));
+        return userRepository.findAll().stream().anyMatch(user -> !DEMO_USERS.contains(user.getUsername()));
     }
 
     /**
      * Wipes the database and fills it with demo data.
      * <p>
-     * Refuses to wipe a database that holds users other than the demo user, unless {@code demo.reset-database} is
+     * Refuses to wipe a database that holds users other than the demo users, unless {@code demo.reset-database} is
      * set: demo mode switched on by accident against a real database would otherwise delete everything in it on
      * startup.
      *
@@ -95,7 +104,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (!resetDatabase && holdsRealUsers()) {
             throw new IllegalStateException("demo.enabled is set, but the database holds users other than the demo "
-                    + "user. Refusing to wipe it. Set demo.reset-database: true if this database really is a demo.");
+                    + "users. Refusing to wipe it. Set demo.reset-database: true if this database really is a demo.");
         }
         log.info("Wiping database for demo mode...");
         entityManager.createNativeQuery("DO $$ DECLARE r RECORD; BEGIN " +
@@ -109,6 +118,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         User demoUser = userRepository.save(
                 new User(null, DEMO_USER, passwordEncoder.encode("demo"), true, Role.STAFF));
         seller = demoUser;
+        userRepository.save(new User(null, DEMO_ADMIN, passwordEncoder.encode("demo"), true, Role.ADMIN));
 
         Category drinks = categoryRepository.save(new Category(null, "Drinks"));
         Category softDrinks = categoryRepository.save(new Category(null, "Soft Drinks"));

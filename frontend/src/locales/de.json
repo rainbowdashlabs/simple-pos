@@ -305,5 +305,9 @@
   "shown_of": "{shown} von {total} angezeigt",
   "loaded_more": "{count} weitere geladen",
   "search_more_matches": "Weitere Treffer. Weiter tippen, um sie einzugrenzen.",
-  "all_shown": "Alle {total} angezeigt."
+  "all_shown": "Alle {total} angezeigt.",
+  "demo": {
+    "as_admin": "Demo: als Admin",
+    "as_staff": "Demo: als Kasse"
+  }
 }
