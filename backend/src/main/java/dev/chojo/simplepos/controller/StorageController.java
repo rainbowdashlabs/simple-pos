@@ -10,6 +10,7 @@ import dev.chojo.simplepos.entity.dto.InvoiceRequest;
 import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.entity.response.InvoiceAliasResponse;
 import dev.chojo.simplepos.entity.response.InvoiceResponse;
 import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.entity.response.StockResponse;
@@ -17,6 +18,7 @@ import dev.chojo.simplepos.entity.response.StorageResponse;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
+import dev.chojo.simplepos.service.InvoiceAliasService;
 import dev.chojo.simplepos.service.InvoiceService;
 import dev.chojo.simplepos.service.StockProjectionService;
 import dev.chojo.simplepos.service.StorageService;
@@ -48,15 +50,17 @@ public class StorageController {
     private final StorageService storageService;
     private final StockProjectionService stockProjectionService;
     private final InvoiceService invoiceService;
+    private final InvoiceAliasService invoiceAliasService;
 
     public StorageController(StorageRepository storageRepository, IngredientRepository ingredientRepository,
                              StorageService storageService, StockProjectionService stockProjectionService,
-                             InvoiceService invoiceService) {
+                             InvoiceService invoiceService, InvoiceAliasService invoiceAliasService) {
         this.storageRepository = storageRepository;
         this.ingredientRepository = ingredientRepository;
         this.storageService = storageService;
         this.stockProjectionService = stockProjectionService;
         this.invoiceService = invoiceService;
+        this.invoiceAliasService = invoiceAliasService;
     }
 
     @GetMapping
@@ -90,6 +94,11 @@ public class StorageController {
     @PostMapping
     ResponseEntity<StorageResponse> add(@Valid @RequestBody InboundStorage storage, @CurrentUser User current) {
         return ResponseEntity.status(HttpStatus.CREATED).body(StorageResponse.of(storageService.deliver(storage, current)));
+    }
+
+    @GetMapping("/invoice/aliases")
+    List<InvoiceAliasResponse> invoiceAliases(@RequestParam @Size(max = 200) String q) {
+        return invoiceAliasService.search(q).stream().map(InvoiceAliasResponse::of).toList();
     }
 
     @PostMapping("/invoice")

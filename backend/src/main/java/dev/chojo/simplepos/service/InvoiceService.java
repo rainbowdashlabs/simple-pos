@@ -2,15 +2,16 @@ package dev.chojo.simplepos.service;
 
 import dev.chojo.simplepos.configuration.BusinessTimeZone;
 import dev.chojo.simplepos.entity.Cash;
+import dev.chojo.simplepos.entity.CountUnit;
 import dev.chojo.simplepos.entity.CashType;
 import dev.chojo.simplepos.entity.Ingredient;
+import dev.chojo.simplepos.entity.InvoiceAlias;
 import dev.chojo.simplepos.entity.Money;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.VatRate;
 import dev.chojo.simplepos.entity.dto.InvoicePosition;
 import dev.chojo.simplepos.entity.dto.InvoicePosition.Kind;
-import dev.chojo.simplepos.entity.dto.InvoicePosition.Unit;
 import dev.chojo.simplepos.entity.dto.InvoiceRequest;
 import dev.chojo.simplepos.entity.response.InvoiceResponse;
 import dev.chojo.simplepos.entity.response.StorageResponse;
@@ -44,6 +45,7 @@ import java.util.Objects;
  * The ingredients of the items are locked for the booking, in id order like every other multi-ingredient change,
  * because their price and VAT rate are written back and a concurrent edit must not be overwritten. The cash entries
  * carry the supplier and the purchase day in their note, since their own time is when the invoice was booked.
+ * Every item and pledge line that carries its printed text or GTIN is remembered for the next invoice.
  */
 @Service
 public class InvoiceService {
@@ -54,15 +56,17 @@ public class InvoiceService {
     private final CashRepository cashRepository;
     private final VatRateRepository vatRateRepository;
     private final BusinessTimeZone timeZone;
+    private final InvoiceAliasService aliasService;
 
     public InvoiceService(IngredientRepository ingredientRepository, StorageRepository storageRepository,
                           CashRepository cashRepository, VatRateRepository vatRateRepository,
-                          BusinessTimeZone timeZone) {
+                          BusinessTimeZone timeZone, InvoiceAliasService aliasService) {
         this.ingredientRepository = ingredientRepository;
         this.storageRepository = storageRepository;
         this.cashRepository = cashRepository;
         this.vatRateRepository = vatRateRepository;
         this.timeZone = timeZone;
+        this.aliasService = aliasService;
     }
 
     /**
@@ -129,11 +133,26 @@ public class InvoiceService {
         String note = note(invoice.supplier(), purchased);
         if (goods.signum() != 0) cashRepository.save(new Cash(bookedBy, goods.negate(), CashType.PURCHASE, note));
         if (pledge.signum() != 0) cashRepository.save(new Cash(bookedBy, pledge.negate(), CashType.PLEDGE, note));
+        rememberNames(positions, items, invoice.pricesNet());
         return new InvoiceResponse(batches, Money.of(goods), Money.of(pledge), Money.of(goods.add(pledge)));
     }
 
     private static BigDecimal lineTotal(InvoicePosition position) {
         return position.price().multiply(BigDecimal.valueOf(position.quantity()));
+    }
+
+    private void rememberNames(List<InvoicePosition> positions, Map<Integer, Line> items, boolean net) {
+        Instant now = Instant.now();
+        for (int index = 0; index < positions.size(); index++) {
+            InvoicePosition position = positions.get(index);
+            if (position.kind() == Kind.ITEM) {
+                aliasService.remember(position.text(), position.gtin(), InvoiceAlias.Kind.ITEM,
+                        items.get(index).ingredient, position.unit(), position.price(), net, now);
+            } else if (position.kind() == Kind.PLEDGE) {
+                aliasService.remember(position.text(), position.gtin(), InvoiceAlias.Kind.PLEDGE, null, null,
+                        position.price(), net, now);
+            }
+        }
     }
 
     private String note(String supplier, Instant purchased) {
@@ -180,6 +199,8 @@ public class InvoiceService {
                 forbid(position.unit(), "unit", number);
                 forbid(position.price(), "price", number);
                 forbid(position.vatRateId(), "vatRateId", number);
+                forbid(position.text(), "text", number);
+                forbid(position.gtin(), "gtin", number);
                 if (position.updatesIngredientRate()) throw unexpected(number, "updateIngredientRate");
             }
         }
@@ -233,7 +254,7 @@ public class InvoiceService {
         private Line item(InvoicePosition position, int number) {
             Ingredient ingredient = ingredientRepository.requireReferenced(position.ingredientId());
             int units = position.quantity();
-            if (position.unit() == Unit.CONTAINER) {
+            if (position.unit() == CountUnit.CONTAINER) {
                 if (ingredient.getContainerSize() <= 0) {
                     throw new BadRequestException(ErrorCode.CONTAINER_SIZE_MISSING, ingredient.getName());
                 }

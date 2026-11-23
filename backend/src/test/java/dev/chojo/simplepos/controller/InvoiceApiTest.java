@@ -99,12 +99,12 @@ class InvoiceApiTest {
         book("""
                 {"supplier": "Netto", "pricesNet": false, "positions": [
                   %s,
-                  {"kind": "PLEDGE", "label": "Traeger voll", "quantity": 2, "price": 3.10},
+                  {"kind": "PLEDGE", "text": "Traeger voll", "quantity": 2, "price": 3.10},
                   {"kind": "DISCOUNT", "amount": 2.40, "discountOf": 0},
                   %s,
-                  {"kind": "PLEDGE", "label": "Traeger voll", "quantity": 2, "price": 3.10},
+                  {"kind": "PLEDGE", "text": "Traeger voll", "quantity": 2, "price": 3.10},
                   %s,
-                  {"kind": "PLEDGE", "label": "Traeger voll", "quantity": 1, "price": 3.10},
+                  {"kind": "PLEDGE", "text": "Traeger voll", "quantity": 1, "price": 3.10},
                   {"kind": "DISCOUNT", "amount": 1.20, "discountOf": 5}
                 ]}""".formatted(item(pils, 2, "CONTAINER", "10.99"), item(spezi, 2, "CONTAINER", "9.99"),
                 item(alcoholFree, 1, "CONTAINER", "10.99")))
@@ -136,9 +136,9 @@ class InvoiceApiTest {
         book("""
                 {"supplier": "Getränkegroßhandel", "pricesNet": true, "positions": [
                   %s,
-                  {"kind": "PLEDGE", "label": "LG 3,10 EUR 20 FL.0,08 + KISTE", "quantity": 1, "price": 3.10},
+                  {"kind": "PLEDGE", "text": "LG 3,10 EUR 20 FL.0,08 + KISTE", "quantity": 1, "price": 3.10},
                   %s,
-                  {"kind": "PLEDGE", "label": "LG 3,10 EUR 20 FL.0,08 + KISTE", "quantity": 1, "price": 3.10}
+                  {"kind": "PLEDGE", "text": "LG 3,10 EUR 20 FL.0,08 + KISTE", "quantity": 1, "price": 3.10}
                 ]}""".formatted(item(ale, 20, "PIECE", "0.95"), item(wheat, 20, "PIECE", "0.95")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.batches[0].cost").value(22.61))

@@ -1,10 +1,12 @@
 package dev.chojo.simplepos.entity.dto;
 
+import dev.chojo.simplepos.entity.CountUnit;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -18,13 +20,15 @@ import java.math.BigDecimal;
  *     <li>a {@link Kind#DISCOUNT} has an amount and the index of the item in {@code positions} it reduces, counted
  *     from 0; error messages count positions from 1, as an invoice does.</li>
  * </ul>
- * A VAT rate given on the line overrides the ingredient's rate, or for pledge the default rate.
+ * A VAT rate given on the line overrides the ingredient's rate, or for pledge the default rate. Items and pledge may
+ * carry the text and GTIN printed on the invoice; they are remembered, so the line can be filled in next time.
  */
 public record InvoicePosition(@NotNull Kind kind,
                               Integer ingredientId,
-                              @Size(max = 200) String label,
+                              @Size(max = 200) String text,
+                              @Pattern(regexp = "\\d{8,14}") String gtin,
                               @Min(1) @Max(1_000_000) Integer quantity,
-                              Unit unit,
+                              CountUnit unit,
                               @DecimalMin("-99999999") @DecimalMax("99999999") BigDecimal price,
                               @DecimalMin("0") @DecimalMax("9999999999") BigDecimal amount,
                               @Min(0) Integer discountOf,
@@ -39,9 +43,5 @@ public record InvoicePosition(@NotNull Kind kind,
 
     public enum Kind {
         ITEM, PLEDGE, DISCOUNT
-    }
-
-    public enum Unit {
-        CONTAINER, PIECE
     }
 }
