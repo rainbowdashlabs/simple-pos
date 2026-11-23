@@ -395,12 +395,16 @@
       "no_amount": "Gib den Rabattbetrag ein.",
       "no_target": "Wähle den Artikel, zu dem der Rabatt gehört.",
       "bad_date": "Gib ein Kaufdatum ein, das nicht in der Zukunft liegt.",
-      "rate_conflict": "Diese Zutat bekommt auf dieser Rechnung schon einen anderen Satz zum Übernehmen."
+      "rate_conflict": "Diese Zutat bekommt auf dieser Rechnung schon einen anderen Satz zum Übernehmen.",
+      "bad_gtin": "Eine GTIN hat 8 bis 14 Ziffern."
     },
     "add_item_pledge": "Pfand gleich mit erfassen: {quantity} × {price}",
     "load_failed": "Zutaten oder Steuersätze konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
     "pledge_paid": "Pfand bezahlt",
-    "pledge_direction": "Pfand bezahlt oder Leergut zurück"
+    "pledge_direction": "Pfand bezahlt oder Leergut zurück",
+    "search_hint": "Zutat, Rechnungstext oder GTIN",
+    "gtin": "GTIN",
+    "remembered": "Von früheren Rechnungen"
   }
 }

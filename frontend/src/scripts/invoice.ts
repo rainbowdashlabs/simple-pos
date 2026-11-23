@@ -1,4 +1,4 @@
-import {postJson} from "./http.ts";
+import {getJson, postJson} from "./http.ts";
 import {Ingredient} from "./Ingredient.ts";
 import {VatRate} from "./vat.ts";
 import {StorageEntry} from "./storage.ts";
@@ -62,6 +62,45 @@ export interface InvoiceDraft {
     printedTotal: number | null
     positions: PositionDraft[]
     nextKey: number
+}
+
+/**
+ * How a supplier named something on an earlier invoice, with what it stood for then. The last price is as printed,
+ * without VAT when {@code lastPriceNet}; it is negative for empties given back.
+ */
+export interface InvoiceAlias {
+    id: number
+    text: string | null
+    gtin: string | null
+    kind: "ITEM" | "PLEDGE"
+    ingredient: Ingredient | null
+    unit: CountUnit | null
+    lastPrice: number | null
+    lastPriceNet: boolean
+    lastUsed: string
+}
+
+const GTIN = /^\d{8,14}$/
+
+/**
+ * A printed text as remembered names are compared: trimmed, inner runs of spaces as one, in upper case.
+ */
+export function normalizeAliasText(text: string): string {
+    return text.trim().replace(/\s+/g, " ").toUpperCase()
+}
+
+/**
+ * Whether a text is a GTIN as invoices print it: 8 to 14 digits.
+ */
+export function isGtin(text: string): boolean {
+    return GTIN.test(text.trim())
+}
+
+/**
+ * The remembered names whose GTIN is the query or whose text starts with it, best first.
+ */
+export function searchAliases(query: string): Promise<InvoiceAlias[]> {
+    return getJson("api/storage/invoice/aliases", new Map([["q", query]]))
 }
 
 export interface InvoiceResult {
@@ -279,6 +318,7 @@ export function problemsOf(draft: InvoiceDraft, totals: InvoiceTotals): { key: s
             if (position.unit === "CONTAINER" && position.ingredient && position.ingredient.containerSize <= 0) {
                 problems.push({key: "invoice.problem.no_container", position: number})
             }
+            if (position.gtin.trim() && !isGtin(position.gtin)) problems.push({key: "invoice.problem.bad_gtin", position: number})
             if ((totals.itemCosts.get(position.key) ?? 0) < 0) problems.push({key: "invoice.problem.discount_too_large", position: number})
             if (draft.pricesNet && position.updateIngredientRate && position.ingredient && position.vatRate) {
                 const kept = keptRates.get(position.ingredient.id)

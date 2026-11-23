@@ -11,12 +11,18 @@ import {
   PledgeDraft,
   PositionDraft,
   computeTotals,
+  InvoiceAlias,
+  isGtin,
+  normalizeAliasText,
   pledgeOf,
-  rateOf
+  rateOf,
+  searchAliases
 } from "@/scripts/invoice.ts";
 
 const QUICK_QUANTITIES = [1, 2, 3, 5, 10]
 const MAX_MATCHES = 8
+const ALIAS_DELAY_MS = 250
+const ALIAS_MIN_LENGTH = 2
 
 /**
  * Edits one invoice line on its own copy, as a sheet over the whole screen on phones and a dialog on wider ones. An
@@ -27,6 +33,12 @@ const MAX_MATCHES = 8
  * switch, so its amount is always typed as a positive number. A new item whose ingredient carries pledge offers to add that pledge as
  * the next line, ticked by default, since the item already says how much it is. Focus starts on the first field the line needs, stays inside the sheet
  * while it is open, and returns to where it was when the sheet closes.
+ * <p>
+ * The search also finds what earlier invoices printed, by text or GTIN; picking such a match fills in the ingredient,
+ * the unit, the printed text and GTIN, and the last price when it was net or gross like this invoice. A pledge line
+ * offers the pledge texts printed before in the same way. Text and GTIN a match filled in are taken back when another
+ * ingredient or match is picked, so a corrected line never remembers one article's name for another; what the user
+ * typed stays.
  * <p>
  * Emits `save` with the edited line, whether the next item should be opened right away and the pledge line to add
  * after it (or null), `remove`, and `close`.
@@ -67,10 +79,36 @@ export default defineComponent({
       search: "",
       askRateWriteBack: false,
       addPledge: true,
+      aliases: [] as InvoiceAlias[],
+      aliasRequest: 0,
+      aliasTimer: 0,
+      pickedPledgeText: null as string | null,
+      aliasFilled: null as { text: string | null, gtin: string | null } | null,
       returnFocus: document.activeElement as HTMLElement | null
     }
   },
+  watch: {
+    search(query: string) {
+      this.lookUpAliases(query)
+    },
+    "draft.text"(text: string) {
+      if (!this.pledge) return
+      if (text === this.pickedPledgeText) return
+      this.pickedPledgeText = null
+      this.lookUpAliases(text)
+    }
+  },
   computed: {
+    itemAliases(): { alias: InvoiceAlias, ingredient: Ingredient }[] {
+      return this.aliases.flatMap(alias => {
+        const ingredient = alias.kind === "ITEM" ? this.ingredients.find(candidate => candidate.id === alias.ingredient?.id) : undefined
+        return ingredient ? [{alias, ingredient}] : []
+      })
+    },
+    pledgeAliases(): InvoiceAlias[] {
+      const text = normalizeAliasText(this.pledge?.text ?? "")
+      return this.aliases.filter(alias => alias.kind === "PLEDGE" && alias.text !== text)
+    },
     quickQuantities(): number[] {
       return QUICK_QUANTITIES
     },
@@ -131,7 +169,7 @@ export default defineComponent({
       if (this.item) {
         const item = this.item
         return item.ingredient !== null && item.quantity >= 1 && item.price !== null && item.price >= 0
-            && (item.unit === "PIECE" || this.hasContainers)
+            && (item.unit === "PIECE" || this.hasContainers) && (!item.gtin.trim() || isGtin(item.gtin))
       }
       if (this.pledge) return this.pledge.quantity >= 1 && this.pledge.price !== null && this.pledge.price >= 0
       return this.discount!.amount !== null && this.discount!.amount >= 0 && this.discount!.target !== null
@@ -145,8 +183,74 @@ export default defineComponent({
           : [...this.invoice.positions, this.draft]
       return computeTotals({...this.invoice, pricesNet, positions}, this.defaultRate).lines.get(this.draft.key) ?? 0
     },
+    lookUpAliases(query: string) {
+      window.clearTimeout(this.aliasTimer)
+      const request = ++this.aliasRequest
+      this.aliases = []
+      if (query.trim().length < ALIAS_MIN_LENGTH) return
+      this.aliasTimer = window.setTimeout(() => {
+        searchAliases(query.trim())
+            .then(aliases => {
+              if (request === this.aliasRequest) this.aliases = aliases
+            })
+            .catch(() => {
+              if (request === this.aliasRequest) this.aliases = []
+            })
+      }, ALIAS_DELAY_MS)
+    },
+    lastPriceFits(alias: InvoiceAlias): boolean {
+      return alias.lastPrice !== null && alias.lastPriceNet === this.invoice.pricesNet
+    },
+    pickAlias(alias: InvoiceAlias, ingredient: Ingredient) {
+      const item = this.item!
+      const query = this.search
+      this.forgetAliasFill()
+      const typedGtin = isGtin(item.gtin) ? item.gtin.trim() : null
+      this.pickIngredient(ingredient)
+      if (this.unitApplies(alias, ingredient)) item.unit = alias.unit!
+      if (alias.text) item.text = alias.text
+      item.gtin = isGtin(query) ? query.trim() : alias.gtin ?? typedGtin ?? ""
+      if (item.unit === alias.unit && this.lastPriceFits(alias)) item.price = Number(alias.lastPrice)
+      this.aliasFilled = {text: alias.text, gtin: item.gtin === alias.gtin ? alias.gtin : null}
+    },
+    pickPlainIngredient(ingredient: Ingredient) {
+      this.forgetAliasFill()
+      this.pickIngredient(ingredient)
+    },
+    forgetAliasFill() {
+      const item = this.item
+      const filled = this.aliasFilled
+      this.aliasFilled = null
+      if (!item || !filled) return
+      if (filled.text && item.text === filled.text) item.text = ""
+      if (filled.gtin && item.gtin === filled.gtin) item.gtin = ""
+    },
+    unitApplies(alias: InvoiceAlias, ingredient: Ingredient): boolean {
+      return alias.unit === "PIECE" || (alias.unit === "CONTAINER" && ingredient.containerSize > 0)
+    },
+    pickPledgeAlias(alias: InvoiceAlias) {
+      const pledge = this.pledge!
+      this.pickedPledgeText = alias.text ?? pledge.text
+      pledge.text = this.pickedPledgeText
+      if (this.lastPriceFits(alias)) {
+        const price = Number(alias.lastPrice)
+        pledge.returned = price < 0
+        pledge.price = Math.abs(price)
+      }
+      this.aliases = []
+    },
+    aliasDetail(alias: InvoiceAlias, ingredient: Ingredient): string {
+      if (!this.unitApplies(alias, ingredient)) return this.$t('pieces')
+      const unit = alias.unit === "CONTAINER" ? this.$t('container') : this.$t('pieces')
+      const price = this.lastPriceFits(alias) ? ` · ${this.$n(Math.abs(Number(alias.lastPrice)), 'unit_price')}` : ""
+      return `${unit}${price}`
+    },
+    isGtin(text: string): boolean {
+      return isGtin(text)
+    },
     pickIngredient(ingredient: Ingredient) {
       const item = this.item!
+      if (isGtin(this.search) && !item.gtin) item.gtin = this.search.trim()
       item.ingredient = ingredient
       item.unit = ingredient.containerSize > 0 ? "CONTAINER" : "PIECE"
       item.vatRate = null
@@ -234,6 +338,8 @@ export default defineComponent({
     this.$nextTick(() => this.focusFirst())
   },
   beforeUnmount() {
+    window.clearTimeout(this.aliasTimer)
+    this.aliasRequest++
     if (this.returnFocus?.isConnected) this.returnFocus.focus()
   }
 })
@@ -262,12 +368,22 @@ export default defineComponent({
               </div>
               <template v-else>
                 <input ref="search" v-model="search" type="search" autocomplete="off" :aria-label="$t('invoice.search_ingredient')"
-                       :placeholder="$t('invoice.search_ingredient')"
+                       :placeholder="$t('invoice.search_hint')"
                        class="rounded-md border-2 border-accent dark:border-accent-d bg-primary dark:bg-primary-d px-3 py-2 text-lg"/>
-                <ul class="flex flex-col gap-1">
+                <p v-if="itemAliases.length" id="remembered-items" class="text-sm opacity-80">{{ $t('invoice.remembered') }}</p>
+                <ul v-if="itemAliases.length" class="flex flex-col gap-1" aria-labelledby="remembered-items">
+                  <li v-for="match in itemAliases" :key="'alias-' + match.alias.id">
+                    <button type="button" class="w-full text-left rounded-md bg-accent/40 dark:bg-accent-d/40 p-3"
+                            @click="pickAlias(match.alias, match.ingredient)">
+                      <span class="block font-semibold">{{ match.alias.text ?? match.alias.gtin }}</span>
+                      <span class="block text-sm opacity-80">→ {{ match.ingredient.name }} · {{ aliasDetail(match.alias, match.ingredient) }}</span>
+                    </button>
+                  </li>
+                </ul>
+                <ul v-if="matches.length" class="flex flex-col gap-1" :aria-label="$t('invoice.ingredient')">
                   <li v-for="ingredient in matches" :key="ingredient.id!">
                     <button type="button" class="w-full text-left rounded-md bg-primary dark:bg-primary-d p-3"
-                            @click="pickIngredient(ingredient)">
+                            @click="pickPlainIngredient(ingredient)">
                       {{ ingredient.name }}
                       <span v-if="ingredient.containerSize > 0" class="text-sm opacity-70">
                         · {{ ingredient.containerSize }} {{ $t('pieces') }}
@@ -275,15 +391,23 @@ export default defineComponent({
                     </button>
                   </li>
                 </ul>
-                <p v-if="search.trim() && matches.length === 0" class="text-sm opacity-80">{{ $t('invoice.no_match') }}</p>
+                <p v-if="search.trim() && matches.length === 0 && itemAliases.length === 0" class="text-sm opacity-80">{{ $t('invoice.no_match') }}</p>
               </template>
             </div>
 
-            <label class="flex flex-col gap-1">
-              <span>{{ $t('invoice.text_on_invoice') }} <span class="text-sm opacity-70">({{ $t('invoice.optional') }})</span></span>
-              <input v-model="item.text" type="text" maxlength="200" autocomplete="off"
-                     class="rounded-md border-2 border-accent dark:border-accent-d bg-primary dark:bg-primary-d px-3 py-2"/>
-            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label class="flex flex-col gap-1 sm:col-span-2">
+                <span>{{ $t('invoice.text_on_invoice') }} <span class="text-sm opacity-70">({{ $t('invoice.optional') }})</span></span>
+                <input v-model="item.text" type="text" maxlength="200" autocomplete="off"
+                       class="rounded-md border-2 border-accent dark:border-accent-d bg-primary dark:bg-primary-d px-3 py-2"/>
+              </label>
+              <label class="flex flex-col gap-1">
+                <span>{{ $t('invoice.gtin') }} <span class="text-sm opacity-70">({{ $t('invoice.optional') }})</span></span>
+                <input v-model="item.gtin" type="text" inputmode="numeric" maxlength="14" autocomplete="off"
+                       :aria-invalid="item.gtin.trim() !== '' && !isGtin(item.gtin)"
+                       class="rounded-md border-2 border-accent dark:border-accent-d bg-primary dark:bg-primary-d px-3 py-2"/>
+              </label>
+            </div>
 
             <fieldset v-if="item.ingredient" class="flex gap-2">
               <legend class="sr-only">{{ $t('invoice.counts') }}</legend>
@@ -318,6 +442,17 @@ export default defineComponent({
                      :placeholder="pledge.returned ? $t('invoice.kind.returned') : $t('pledge')"
                      class="rounded-md border-2 border-accent dark:border-accent-d bg-primary dark:bg-primary-d px-3 py-2"/>
             </label>
+            <ul v-if="pledgeAliases.length" class="flex flex-col gap-1" :aria-label="$t('invoice.remembered')">
+              <li v-for="alias in pledgeAliases" :key="alias.id">
+                <button type="button" class="w-full text-left rounded-md bg-accent/40 dark:bg-accent-d/40 p-3"
+                        @click="pickPledgeAlias(alias)">
+                  <span class="block font-semibold">{{ alias.text }}</span>
+                  <span v-if="lastPriceFits(alias)" class="block text-sm opacity-80">
+                    {{ Number(alias.lastPrice) < 0 ? $t('invoice.kind.returned') + ' · ' : '' }}{{ $n(Math.abs(Number(alias.lastPrice)), 'unit_price') }}
+                  </span>
+                </button>
+              </li>
+            </ul>
             <button v-if="pledgeSuggestion && !pledge.returned" type="button" class="rounded-md bg-accent dark:bg-accent-d p-3 text-left"
                     @click="applyPledgeSuggestion">
               {{ $t('invoice.pledge_suggestion', {quantity: pledgeSuggestion.quantity, price: $n(pledgeSuggestion.price, 'currency')}) }}

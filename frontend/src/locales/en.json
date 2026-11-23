@@ -395,12 +395,16 @@
       "no_amount": "Enter the discount amount.",
       "no_target": "Choose the item the discount belongs to.",
       "bad_date": "Enter a purchase day that is not in the future.",
-      "rate_conflict": "This ingredient is given another rate to keep on this invoice already."
+      "rate_conflict": "This ingredient is given another rate to keep on this invoice already.",
+      "bad_gtin": "A GTIN has 8 to 14 digits."
     },
     "add_item_pledge": "Also add pledge: {quantity} × {price}",
     "load_failed": "Ingredients or VAT rates could not be loaded.",
     "retry": "Retry",
     "pledge_paid": "Pledge paid",
-    "pledge_direction": "Pledge paid or empties returned"
+    "pledge_direction": "Pledge paid or empties returned",
+    "search_hint": "Ingredient, invoice text or GTIN",
+    "gtin": "GTIN",
+    "remembered": "From earlier invoices"
   }
 }
