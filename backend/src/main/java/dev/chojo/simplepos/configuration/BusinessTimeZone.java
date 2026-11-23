@@ -31,4 +31,11 @@ public class BusinessTimeZone {
     public String id() {
         return zone.getId();
     }
+
+    /**
+     * The zone, for dates the business shows, such as the day an invoice was purchased.
+     */
+    public ZoneId zone() {
+        return zone;
+    }
 }

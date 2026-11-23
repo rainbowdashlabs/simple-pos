@@ -19,13 +19,16 @@ public class IngredientService {
     private final RecipeEntryRepository recipeEntryRepository;
     private final StorageRepository storageRepository;
     private final CategoryRepository categoryRepository;
+    private final VatRateService vatRateService;
 
     public IngredientService(IngredientRepository repository, RecipeEntryRepository recipeEntryRepository,
-                             StorageRepository storageRepository, CategoryRepository categoryRepository) {
+                             StorageRepository storageRepository, CategoryRepository categoryRepository,
+                             VatRateService vatRateService) {
         this.repository = repository;
         this.recipeEntryRepository = recipeEntryRepository;
         this.storageRepository = storageRepository;
         this.categoryRepository = categoryRepository;
+        this.vatRateService = vatRateService;
     }
 
     /**
@@ -47,23 +50,26 @@ public class IngredientService {
     /**
      * Creates an active ingredient.
      *
-     * @throws BadRequestException if the category does not exist
+     * @throws BadRequestException if the category or the VAT rate does not exist, or the VAT rate is inactive
      */
     @Transactional
     public Ingredient create(IngredientRequest request) {
-        return repository.save(request.toIngredient(categoryRepository.requireReferenced(request.categoryId())));
+        return repository.save(request.toIngredient(categoryRepository.requireReferenced(request.categoryId()),
+                vatRateService.forIngredient(request.vatRateId(), null)));
     }
 
     /**
      * Changes an ingredient's values. Whether it is active is not changed here.
      *
      * @throws NotFoundException if the ingredient does not exist
-     * @throws BadRequestException if the category does not exist
+     * @throws BadRequestException if the category or the VAT rate does not exist, or the VAT rate is inactive and not
+     *                             the ingredient's current one
      */
     @Transactional
     public Ingredient update(int id, IngredientRequest request) {
         Ingredient ingredient = repository.require(id);
-        request.applyTo(ingredient, categoryRepository.requireReferenced(request.categoryId()));
+        request.applyTo(ingredient, categoryRepository.requireReferenced(request.categoryId()),
+                vatRateService.forIngredient(request.vatRateId(), ingredient.getVatRate()));
         return repository.save(ingredient);
     }
 

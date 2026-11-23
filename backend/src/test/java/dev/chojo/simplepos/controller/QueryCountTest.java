@@ -12,6 +12,7 @@ import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.repository.VatRateRepository;
 import dev.chojo.simplepos.service.ProductService;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.persistence.EntityManager;
@@ -81,6 +82,8 @@ class QueryCountTest {
     @Autowired
     CashRepository cashRepository;
     @Autowired
+    VatRateRepository vatRateRepository;
+    @Autowired
     ProductRepository productRepository;
 
     private static final long MAX_STATEMENTS = 5;
@@ -95,7 +98,7 @@ class QueryCountTest {
         statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
         new DemoDataSeeder(entityManager, userRepository, passwordEncoder, categoryRepository, ingredientRepository,
                 productService, storageRepository, accountRepository, balanceRepository, purchaseService,
-                cashRepository, true).run();
+                cashRepository, vatRateRepository, true).run();
         userRepository.save(new User(null, "countadmin", passwordEncoder.encode("secret"), true, Role.ADMIN));
         entityManager.flush();
         entityManager.clear();

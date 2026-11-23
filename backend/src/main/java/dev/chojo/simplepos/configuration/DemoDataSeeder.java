@@ -12,6 +12,7 @@ import dev.chojo.simplepos.entity.RecipeEntry;
 import dev.chojo.simplepos.entity.Role;
 import dev.chojo.simplepos.entity.Storage;
 import dev.chojo.simplepos.entity.User;
+import dev.chojo.simplepos.entity.VatRate;
 import dev.chojo.simplepos.entity.dto.CartPositionDto;
 import dev.chojo.simplepos.repository.AccountRepository;
 import dev.chojo.simplepos.repository.BalanceRepository;
@@ -20,6 +21,7 @@ import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.repository.VatRateRepository;
 import dev.chojo.simplepos.service.ProductService;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.persistence.EntityManager;
@@ -54,6 +56,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final BalanceRepository balanceRepository;
     private final PurchaseService purchaseService;
     private final CashRepository cashRepository;
+    private final VatRateRepository vatRateRepository;
     private final boolean resetDatabase;
     private User seller;
 
@@ -62,6 +65,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                           ProductService productService, StorageRepository storageRepository,
                           AccountRepository accountRepository, BalanceRepository balanceRepository,
                           PurchaseService purchaseService, CashRepository cashRepository,
+                          VatRateRepository vatRateRepository,
                           @Value("${demo.reset-database:false}") boolean resetDatabase) {
         this.entityManager = entityManager;
         this.userRepository = userRepository;
@@ -74,6 +78,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.balanceRepository = balanceRepository;
         this.purchaseService = purchaseService;
         this.cashRepository = cashRepository;
+        this.vatRateRepository = vatRateRepository;
         this.resetDatabase = resetDatabase;
     }
 
@@ -109,6 +114,9 @@ public class DemoDataSeeder implements CommandLineRunner {
         User demoUser = userRepository.save(
                 new User(null, DEMO_USER, passwordEncoder.encode("demo"), true, Role.STAFF));
         seller = demoUser;
+
+        vatRateRepository.save(new VatRate(null, "Standard", 19, true));
+        VatRate reduced = vatRateRepository.save(new VatRate(null, "Reduced", 7, false));
 
         Category drinks = categoryRepository.save(new Category(null, "Drinks"));
         Category softDrinks = categoryRepository.save(new Category(null, "Soft Drinks"));
@@ -159,6 +167,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                 new Ingredient(null, hotDrinks, "Coffee", 0.30, 0, 0, 0, 50));
         Ingredient hotChocolate = ingredientRepository.save(
                 new Ingredient(null, hotDrinks, "Hot Chocolate", 0.40, 0, 0, 0, 30));
+        for (Ingredient snack : List.of(chips, peanuts, pretzel, nachos)) snack.setVatRate(reduced);
 
         Product pCola = productService.create(new Product(null, softDrinks, "Cola", 1.50, true,
                 new Recipe(null, null, List.of(new RecipeEntry(null, cola, 1)))));

@@ -20,7 +20,7 @@ export default defineComponent({
     return {
       price: 0,
       initial: {
-        id: null, name: "", price: 0, containerSize: 0, pledge: 0, pledgeContainer: 0, minStock: 0, active: true
+        id: null, name: "", price: 0, containerSize: 0, pledge: 0, pledgeContainer: 0, minStock: 0, active: true, vatRate: null
       } as IngredientDraft
     }
   },

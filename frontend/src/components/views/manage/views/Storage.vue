@@ -39,6 +39,9 @@ export default defineComponent({
     inventory() {
       this.$router.push({name: 'manage-storage-inventory'})
     },
+    invoice() {
+      this.$router.push({name: 'manage-storage-invoice'})
+    },
     empties() {
       this.$router.push({name: 'manage-storage-empties'})
     },
@@ -66,12 +69,13 @@ export default defineComponent({
 
 <template>
   <ViewWrapper>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5">
+      <ConfirmButton icon="fa-file-invoice" :label="$t('button.enter_invoice')" @click="invoice"/>
       <ConfirmButton icon="fa-square-plus" :label="$t('button.new_ingredient')" @click="createIngredient"/>
       <ConfirmButton icon="fa-check-double" :label="$t('button.count_stock')" @click="inventory"/>
       <ConfirmButton icon="fa-bottle-water" :label="$t('button.return_empties')" @click="empties"/>
       <ConfirmButton icon="fa-list-check" :label="$t('button.shopping_list')" @click="shopping"/>
-      <IconButton class="col-span-2 sm:col-span-1" :icon="'fa-triangle-exclamation'" :label="$t('button.low_stock_only')"
+      <IconButton :icon="'fa-triangle-exclamation'" :label="$t('button.low_stock_only')"
                   :bg="lowStockOnly ? 'warn' : 'secondary'"
                   @click="toggleLowStock"/>
     </div>
