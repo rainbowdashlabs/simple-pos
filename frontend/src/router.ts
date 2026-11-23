@@ -31,6 +31,7 @@ const StorageEmpties = () => import('@/components/views/manage/views/storage/vie
 const StorageShoppingList = () => import('@/components/views/manage/views/storage/views/StorageShoppingList.vue')
 const Cash = () => import('@/components/views/manage/views/Cash.vue')
 const Users = () => import('@/components/views/manage/views/Users.vue')
+const VatRates = () => import('@/components/views/manage/views/VatRates.vue')
 const Settings = () => import('@/components/views/Settings.vue')
 const NoAccess = () => import('@/components/views/NoAccess.vue')
 
@@ -110,6 +111,7 @@ const router = createRouter({
                 {path: 'storage/shopping-list', name: 'manage-storage-shopping', component: StorageShoppingList, meta: {titleKey: 'title.shopping_list'}},
                 {path: 'cash', name: 'manage-cash', component: Cash, meta: {titleKey: 'title.cash'}},
                 {path: 'users', name: 'manage-users', component: Users, meta: {titleKey: 'title.users', role: 'ADMIN'}},
+                {path: 'vat-rates', name: 'manage-vat-rates', component: VatRates, meta: {titleKey: 'title.vat_rates', role: 'ADMIN'}},
             ]
         },
         {

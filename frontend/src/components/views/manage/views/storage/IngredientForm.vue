@@ -10,12 +10,17 @@ import SelectMenu from "@/components/styles/input/select/SelectMenu.vue";
 import TextButton from "@/components/styles/buttons/TextButton.vue";
 import {Ingredient, IngredientDraft} from "@/scripts/Ingredient.ts";
 import ConfirmButton from "@/components/styles/buttons/ConfirmButton.vue";
+import {activeVatRates, VatRate} from "@/scripts/vat.ts";
+import {notifyError} from "@/scripts/notifications.ts";
 
 /**
  * The fields of an ingredient, shared by creating and editing one. Works on its own copy of `initial` and emits
  * `submit` with the edited ingredient; the page decides what to do with it. A page that needs more fields, such as
  * the selling price when an ingredient is sold as a product of its own, puts them in the `extra` slot and holds the
  * submit back with `blocked` until they are filled in.
+ * <p>
+ * The VAT rate is picked from the active rates; picking the default rate stores none, so the ingredient follows the
+ * default when an administrator changes it. A rate deactivated since it was picked stays on offer for this ingredient.
  */
 export default defineComponent({
   name: "IngredientForm",
@@ -39,12 +44,21 @@ export default defineComponent({
     return {
       ingredient: {...this.initial} as IngredientDraft,
       category: this.initial.category as Category | undefined,
-      categoryList: [] as Category[]
+      categoryList: [] as Category[],
+      vatRates: [] as VatRate[]
     }
   },
   computed: {
     SizeGroup() {
       return SizeGroup
+    },
+    vatChoices(): VatRate[] {
+      const current = this.initial.vatRate
+      if (current && !this.vatRates.some(rate => rate.id === current.id)) return [...this.vatRates, current]
+      return this.vatRates
+    },
+    selectedVatRateId(): number | undefined {
+      return this.ingredient.vatRate?.id ?? this.vatRates.find(rate => rate.isDefault)?.id
     },
     disabled(): boolean {
       return this.blocked || !this.ingredient.name || !this.category || !this.ingredient.price
@@ -55,11 +69,20 @@ export default defineComponent({
       if (this.disabled) return
       this.$emit('submit', {...this.ingredient, category: this.category} as Ingredient)
     },
+    selectVatRate(rate: VatRate) {
+      this.ingredient.vatRate = rate.isDefault ? null : rate
+    },
+    vatLabel(rate: VatRate): string {
+      const label = `${rate.name} (${this.$n(rate.rate / 100, 'vat_percent')})`
+      if (rate.isDefault) return `${label} · ${this.$t('vat.default')}`
+      return rate.active ? label : `${label} · ${this.$t('vat.inactive')}`
+    },
     updateCategory(vk: string) {
       this.category = this.categoryList.find(e => e.id == Number(vk)) ?? this.category
     }
   },
   mounted() {
+    activeVatRates().then(rates => this.vatRates = rates).catch(notifyError)
     allPages(page => categories(page)).then(e => {
       this.categoryList = e
       if (!this.category && e.length > 0) this.category = e[0]
@@ -139,6 +162,20 @@ export default defineComponent({
                     :value="ingredient.containerSize * item[0] || item[1]"
                     type="number"/>
       </div>
+    </ColorContainer>
+
+    <ColorContainer bg="secondary">
+      <fieldset class="flex flex-col gap-3">
+        <legend class="pb-5">
+          <FormattedText :size="SizeGroup.xl2" value="vat.rate_of_ingredient" type="locale"/>
+        </legend>
+        <label v-for="rate in vatChoices" :key="rate.id"
+               class="flex items-center gap-3 rounded-md border-2 border-accent dark:border-accent-d p-3 cursor-pointer has-[:checked]:bg-accent dark:has-[:checked]:bg-accent-d">
+          <input type="radio" name="vat-rate" :value="rate.id" :checked="rate.id === selectedVatRateId"
+                 @change="selectVatRate(rate)">
+          <span>{{ vatLabel(rate) }}</span>
+        </label>
+      </fieldset>
     </ColorContainer>
 
     <div class="col-span-full">

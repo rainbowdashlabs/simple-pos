@@ -231,7 +231,8 @@
     "theme": "Theme",
     "not_found": "Not found",
     "empties": "Return empties",
-    "shopping_list": "Shopping list"
+    "shopping_list": "Shopping list",
+    "vat_rates": "VAT rates"
   },
   "cart_added": "{name} added, cart {total}",
   "cart_removed": "1 × {name} removed, cart {total}",
@@ -309,5 +310,22 @@
   "shown_of": "{shown} of {total} shown",
   "loaded_more": "{count} more loaded",
   "search_more_matches": "More matches. Keep typing to narrow them down.",
-  "all_shown": "All {total} shown."
+  "all_shown": "All {total} shown.",
+  "vat": {
+    "title": "VAT rates",
+    "create": "New VAT rate",
+    "create_button": "Create",
+    "name": "Name",
+    "rate": "Rate in %",
+    "rate_hint": "From 0 to below 100, at most two decimals. Changing a rate affects only future bookings.",
+    "save": "Save",
+    "default": "Default",
+    "inactive": "inactive",
+    "make_default": "Make default",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "default_hint": "The default rate applies wherever no other rate is chosen and cannot be deactivated.",
+    "created": "VAT rate {name} created",
+    "rate_of_ingredient": "VAT rate"
+  }
 }

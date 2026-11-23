@@ -4,7 +4,7 @@ import {
     faCartArrowDown, faCashRegister, faChartPie, faCheck, faCheckDouble, faChevronDown,
     faChevronUp, faCircleExclamation, faCoins, faDownload, faEquals, faEraser,
     faEye, faEyeSlash, faGear, faHome, faLayerGroup, faListCheck,
-    faMoneyBill, faMoneyBillWave, faMoneyBills, faMoon, faPen, faRightToBracket,
+    faMoneyBill, faMoneyBillWave, faMoneyBills, faMoon, faPen, faPercent, faRightToBracket,
     faSackDollar, faSquareMinus, faSquarePlus, faStar, faSun, faTrashCan,
     faTriangleExclamation, faUpload, faUser, faUserGear, faUserPlus, faUsers,
     faWarehouse, faXmark
@@ -20,7 +20,7 @@ export function registerIcons() {
         faCartArrowDown, faCashRegister, faChartPie, faCheck, faCheckDouble, faChevronDown,
         faChevronUp, faCircleExclamation, faCoins, faDownload, faEquals, faEraser,
         faEye, faEyeSlash, faGear, faHome, faLayerGroup, faListCheck,
-        faMoneyBill, faMoneyBillWave, faMoneyBills, faMoon, faPen, faRightToBracket,
+        faMoneyBill, faMoneyBillWave, faMoneyBills, faMoon, faPen, faPercent, faRightToBracket,
         faSackDollar, faSquareMinus, faSquarePlus, faStar, faSun, faTrashCan,
         faTriangleExclamation, faUpload, faUser, faUserGear, faUserPlus, faUsers,
         faWarehouse, faXmark

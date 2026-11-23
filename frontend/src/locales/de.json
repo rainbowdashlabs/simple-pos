@@ -231,7 +231,8 @@
     "theme": "Design",
     "not_found": "Nicht gefunden",
     "empties": "Leergut zurückgeben",
-    "shopping_list": "Einkaufsliste"
+    "shopping_list": "Einkaufsliste",
+    "vat_rates": "Steuersätze"
   },
   "cart_added": "{name} hinzugefügt, Warenkorb {total}",
   "cart_removed": "1 × {name} entfernt, Warenkorb {total}",
@@ -309,5 +310,22 @@
   "shown_of": "{shown} von {total} angezeigt",
   "loaded_more": "{count} weitere geladen",
   "search_more_matches": "Weitere Treffer. Weiter tippen, um sie einzugrenzen.",
-  "all_shown": "Alle {total} angezeigt."
+  "all_shown": "Alle {total} angezeigt.",
+  "vat": {
+    "title": "Steuersätze",
+    "create": "Neuer Steuersatz",
+    "create_button": "Anlegen",
+    "name": "Name",
+    "rate": "Satz in %",
+    "rate_hint": "Von 0 bis unter 100, höchstens zwei Nachkommastellen. Eine Änderung gilt nur für künftige Buchungen.",
+    "save": "Speichern",
+    "default": "Standard",
+    "inactive": "inaktiv",
+    "make_default": "Zum Standard machen",
+    "activate": "Aktivieren",
+    "deactivate": "Deaktivieren",
+    "default_hint": "Der Standardsatz gilt überall, wo kein anderer gewählt ist, und kann nicht deaktiviert werden.",
+    "created": "Steuersatz {name} angelegt",
+    "rate_of_ingredient": "Mehrwertsteuer"
+  }
 }

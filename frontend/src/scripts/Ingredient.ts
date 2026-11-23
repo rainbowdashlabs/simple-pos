@@ -1,6 +1,7 @@
 import {Page} from "./page.ts";
 import {Category} from "./categories.ts";
 import {deleteJson, getJson, patchJson, postJson} from "./http.ts";
+import {VatRate} from "./vat.ts";
 
 export interface Ingredient {
     id: number | null | undefined,
@@ -11,7 +12,11 @@ export interface Ingredient {
     pledge: number,
     pledgeContainer: number,
     minStock: number,
-    active: boolean
+    active: boolean,
+    /**
+     * The ingredient's VAT rate, or null when it uses the default rate.
+     */
+    vatRate: VatRate | null
 }
 
 
@@ -27,7 +32,8 @@ export interface IngredientRequest {
     containerSize: number,
     pledge: number,
     pledgeContainer: number,
-    minStock: number
+    minStock: number,
+    vatRateId: number | null
 }
 
 /**
@@ -41,7 +47,8 @@ export function ingredientRequest(ingredient: Ingredient): IngredientRequest {
         containerSize: ingredient.containerSize,
         pledge: ingredient.pledge,
         pledgeContainer: ingredient.pledgeContainer,
-        minStock: ingredient.minStock
+        minStock: ingredient.minStock,
+        vatRateId: ingredient.vatRate?.id ?? null
     }
 }
 
