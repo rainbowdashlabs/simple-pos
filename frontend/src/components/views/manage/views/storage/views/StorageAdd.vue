@@ -222,6 +222,9 @@ export default defineComponent({
                           :model-value="pieceCount"
                           @update:modelValue="setPieceCount"
                           :label="$t('pieces')"/>
+        <p v-if="containerCount > 0" class="text-sm opacity-80">
+          {{ $t('pieces_from_containers', {containers: containerCount, size: ingredient.containerSize, pieces: containerCount * ingredient.containerSize}) }}
+        </p>
       </template>
 
       <template v-if="state == 'price'">

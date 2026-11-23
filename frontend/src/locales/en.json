@@ -240,6 +240,7 @@
   "per_container": "Per container",
   "pledged_pieces": "Pieces with pledge",
   "pledged_containers": "Containers with pledge",
+  "pieces_from_containers": "{containers} containers × {size} pieces = {pieces} pieces. Add loose pieces or correct the number if the delivery differs.",
   "step_of": "Step {step} of {total}",
   "till_count": "Count till",
   "till_counts": "Till counts",

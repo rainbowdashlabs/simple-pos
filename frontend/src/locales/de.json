@@ -240,6 +240,7 @@
   "per_container": "Pro Packung",
   "pledged_pieces": "Einheiten mit Pfand",
   "pledged_containers": "Packungen mit Pfand",
+  "pieces_from_containers": "{containers} Packungen × {size} Einheiten = {pieces} Einheiten. Lose Einheiten dazurechnen oder die Zahl korrigieren, wenn die Lieferung abweicht.",
   "step_of": "Schritt {step} von {total}",
   "till_count": "Kasse zählen",
   "till_counts": "Kassenzählungen",
