@@ -79,7 +79,8 @@ class CommittedRequestsApiTest {
     @Test
     void everyEndpointAnswersWithoutATestTransaction() throws Exception {
         int category = idOf(send(post("/api/category"), "{\"name\": \"CommittedCat\"}", 201));
-        int ingredient = idOf(send(post("/api/ingredient"), ingredientJson("CommittedIngredient", category), 201));
+        int vatRate = idOf(send(post("/api/admin/vat-rates"), "{\"name\": \"CommittedRate\", \"rate\": 7}", 201));
+        int ingredient = idOf(send(post("/api/ingredient"), ingredientJson("CommittedIngredient", category, vatRate), 201));
         int product = idOf(send(post("/api/product"), "{\"name\": \"CommittedProduct\", \"categoryId\": " + category
                 + ", \"price\": 2.0, \"recipe\": [{\"ingredientId\": " + ingredient + ", \"amount\": 1}]}", 201));
         send(post("/api/storage"), "{\"ingredientId\": " + ingredient + ", \"price\": 0.5, \"pledge\": 0, \"amount\": 12}", 201);
@@ -92,6 +93,13 @@ class CommittedRequestsApiTest {
         send(post("/api/cash"), "{\"amount\": 5, \"type\": \"other\", \"note\": \"committed\"}", 201);
         send(post("/api/cash/pledge/return"), "[{\"ingredientId\": " + ingredient + ", \"bottles\": 1, \"crates\": 0}]", 201);
         send(post("/api/cash/count"), "{\"denominations\": {\"200\": 3}}", 201);
+        send(post("/api/storage/invoice"), "{\"supplier\": \"Committed\", \"pricesNet\": true, \"positions\": ["
+                + "{\"kind\": \"ITEM\", \"ingredientId\": " + ingredient + ", \"text\": \"COMMITTED ITEM\", \"quantity\": 1,"
+                + " \"unit\": \"CONTAINER\", \"price\": 3.00, \"updateIngredientRate\": true, \"vatRateId\": " + vatRate + "},"
+                + "{\"kind\": \"PLEDGE\", \"text\": \"COMMITTED PLEDGE\", \"quantity\": 1, \"price\": 3.00},"
+                + "{\"kind\": \"DISCOUNT\", \"amount\": 0.50, \"discountOf\": 0}]}", 201);
+        send(patch("/api/admin/vat-rates/" + vatRate), "{\"name\": \"CommittedRateRenamed\", \"rate\": 7}", 200);
+        send(put("/api/admin/vat-rates/" + vatRate + "/default"), null, 200);
 
         send(patch("/api/category/" + category), "{\"name\": \"CommittedCategory\"}", 200);
         send(patch("/api/ingredient/" + ingredient + "/active"), null, 200);
@@ -103,8 +111,8 @@ class CommittedRequestsApiTest {
         send(patch("/api/account/" + account), "{\"name\": \"CommittedRenamed\"}", 200);
         send(put("/api/storage"), "[{\"ingredient\": " + ingredient + ", \"amount\": 9}]", 200);
         int spareCategory = idOf(send(post("/api/category"), "{\"name\": \"SpareCat\"}", 201));
-        int spareIngredient = idOf(send(post("/api/ingredient"), ingredientJson("SpareIngredient", spareCategory), 201));
-        send(patch("/api/ingredient/" + spareIngredient), ingredientJson("SpareRenamed", spareCategory), 200);
+        int spareIngredient = idOf(send(post("/api/ingredient"), ingredientJson("SpareIngredient", spareCategory, null), 201));
+        send(patch("/api/ingredient/" + spareIngredient), ingredientJson("SpareRenamed", spareCategory, vatRate), 200);
         send(delete("/api/ingredient/" + spareIngredient), null, 204);
         send(delete("/api/category/" + spareCategory), null, 204);
         send(put("/api/user/preferences"), "{\"locale\": \"en\", \"colorTheme\": \"blue\", \"darkMode\": \"dark\"}", 200);
@@ -131,6 +139,7 @@ class CommittedRequestsApiTest {
                 "/api/purchase/stats/daily?after=" + AFTER, "/api/purchase/stats/categories?after=" + AFTER,
                 "/api/export/sales.csv?from=" + from + "&to=" + to, "/api/export/cash.csv?from=" + from + "&to=" + to,
                 "/api/export/stock.csv?from=" + from + "&to=" + to,
+                "/api/vat-rates", "/api/admin/vat-rates", "/api/storage/invoice/aliases?q=committed",
                 "/api/user/me", "/api/user/preferences", "/api/admin/users", "/api/version")) {
             send(get(path), null, 200);
         }
@@ -152,9 +161,9 @@ class CommittedRequestsApiTest {
                 .andExpect(status().isNoContent());
     }
 
-    private static String ingredientJson(String name, int category) {
+    private static String ingredientJson(String name, int category, Integer vatRate) {
         return "{\"name\": \"" + name + "\", \"categoryId\": " + category + ", \"price\": 0.5, \"containerSize\": 6,"
-                + " \"pledge\": 0.25, \"pledgeContainer\": 1.5, \"minStock\": 50}";
+                + " \"pledge\": 0.25, \"pledgeContainer\": 1.5, \"minStock\": 50, \"vatRateId\": " + vatRate + "}";
     }
 
     private String send(MockHttpServletRequestBuilder request, String body, int expectedStatus) throws Exception {
