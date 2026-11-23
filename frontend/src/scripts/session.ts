@@ -363,11 +363,17 @@ export async function isDemoMode(): Promise<boolean> {
 }
 
 /**
- * Logs in as the demo user, under the refresh lock like {@link login}.
+ * The demo user that signs in as administrator.
  */
-export function demoLogin(): Promise<boolean> {
+export const DEMO_ADMIN = "demo-admin"
+
+/**
+ * Logs in as the demo user, or as the demo administrator with {@code asAdmin}, under the refresh lock like
+ * {@link login}.
+ */
+export function demoLogin(asAdmin: boolean = false): Promise<boolean> {
     return withRefreshLock(async () => {
-        const response = await fetch(getHost() + "/api/demo/login", {
+        const response = await fetch(getHost() + (asAdmin ? "/api/demo/login/admin" : "/api/demo/login"), {
             method: "POST",
             headers: {"Accept": "application/json"}
         })

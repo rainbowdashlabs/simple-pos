@@ -406,5 +406,9 @@
     "search_hint": "Zutat, Rechnungstext oder GTIN",
     "gtin": "GTIN",
     "remembered": "Von früheren Rechnungen"
+  },
+  "demo": {
+    "as_admin": "Demo: als Admin",
+    "as_staff": "Demo: als Kasse"
   }
 }

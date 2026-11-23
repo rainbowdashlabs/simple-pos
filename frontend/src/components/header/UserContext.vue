@@ -1,17 +1,39 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import UserContextEntry from "./usercontext/UserContextEntry.vue";
-import {logout} from "@/scripts/session.ts";
+import {DEMO_ADMIN, demoLogin, getUsername, isDemoMode, logout} from "@/scripts/session.ts";
+import {forgetRole} from "@/scripts/roles.ts";
 
+/**
+ * The account menu. In demo mode it also switches between the demo cashier and the demo administrator, so the admin
+ * screens can be tried without a real account.
+ */
 export default defineComponent({
   name: "UserContext",
+  data() {
+    return {
+      demo: false
+    }
+  },
+  computed: {
+    demoAsAdmin(): boolean {
+      return getUsername() === DEMO_ADMIN
+    }
+  },
   methods: {
     logout,
+    async switchDemoUser() {
+      forgetRole()
+      if (await demoLogin(!this.demoAsAdmin)) window.location.assign("/")
+    },
     openSettings() {
       this.$router.push({name: 'settings'})
     }
   },
-  components: {UserContextEntry}
+  components: {UserContextEntry},
+  mounted() {
+    isDemoMode().then(demo => this.demo = demo)
+  }
 })
 </script>
 
@@ -22,6 +44,7 @@ export default defineComponent({
         aria-labelledby="menu-button">
       <div class="py-1" role="none">
         <UserContextEntry :text="$t('settings')" @click="openSettings"/>
+        <UserContextEntry v-if="demo" :text="demoAsAdmin ? $t('demo.as_staff') : $t('demo.as_admin')" @click="switchDemoUser"/>
         <UserContextEntry :text="$t('logout')" @click="logout"/>
       </div>
     </div>

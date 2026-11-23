@@ -406,5 +406,9 @@
     "search_hint": "Ingredient, invoice text or GTIN",
     "gtin": "GTIN",
     "remembered": "From earlier invoices"
+  },
+  "demo": {
+    "as_admin": "Demo: switch to admin",
+    "as_staff": "Demo: switch to cashier"
   }
 }

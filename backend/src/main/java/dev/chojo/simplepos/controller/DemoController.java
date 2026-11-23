@@ -1,5 +1,6 @@
 package dev.chojo.simplepos.controller;
 
+import dev.chojo.simplepos.configuration.DemoDataSeeder;
 import dev.chojo.simplepos.configuration.security.RateLimiter;
 import dev.chojo.simplepos.configuration.security.RefreshCookie;
 import dev.chojo.simplepos.entity.User;
@@ -35,10 +36,25 @@ public class DemoController {
         return ResponseEntity.ok(Map.of("demo", true));
     }
 
+    /**
+     * Signs in as the demo user, who works the till like staff.
+     */
     @PostMapping("/login")
     public ResponseEntity<SessionResponse> demoLogin(HttpServletRequest request) {
+        return logIn(DemoDataSeeder.DEMO_USER, request);
+    }
+
+    /**
+     * Signs in as the demo administrator, to try what only administrators can do.
+     */
+    @PostMapping("/login/admin")
+    public ResponseEntity<SessionResponse> demoAdminLogin(HttpServletRequest request) {
+        return logIn(DemoDataSeeder.DEMO_ADMIN, request);
+    }
+
+    private ResponseEntity<SessionResponse> logIn(String username, HttpServletRequest request) {
         rateLimiter.checkRequest("demo-login", request.getRemoteAddr());
-        User user = authenticationService.findByUsername("demo");
+        User user = authenticationService.findByUsername(username);
         return refreshCookie.respond(authenticationService.issueTokens(user), user.getUsername());
     }
 }
