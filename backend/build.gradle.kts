@@ -15,6 +15,7 @@ java {
 }
 
 repositories {
+    maven("https://eldonexus.de/repository/maven-proxies/")
     mavenCentral()
 }
 

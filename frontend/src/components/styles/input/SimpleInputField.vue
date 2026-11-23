@@ -142,7 +142,7 @@ function parseNumber(text: string): number | null {
 
 <template>
   <input
-      :class="`bg-${bg} dark:bg-${bg}-d rounded-md border-2 border-${border} dark:border-${border}-d justify-stretch w-full ${size} text-dark dark:text-bright placeholder-dark/40 dark:placeholder-bright/40`"
+      :class="`bg-${bg} dark:bg-${bg}-d rounded-md border-2 border-${border} dark:border-${border}-d justify-stretch w-full ${size} text-dark dark:text-bright`"
       :type="inputType"
       :inputmode="inputMode"
       :value="displayValue"

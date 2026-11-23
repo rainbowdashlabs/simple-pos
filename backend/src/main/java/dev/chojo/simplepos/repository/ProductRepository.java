@@ -33,7 +33,8 @@ public interface ProductRepository extends LookupRepository<Product> {
     /**
      * The products with these ids, with their category and recipe, in one query.
      */
-    @EntityGraph(attributePaths = {"category", "recipe", "recipe.entries", "recipe.entries.ingredient", "recipe.entries.ingredient.category"})
+    @EntityGraph(attributePaths = {"category", "recipe", "recipe.entries", "recipe.entries.ingredient", "recipe.entries.ingredient.category",
+            "recipe.entries.ingredient.vatRate"})
     List<Product> findAllByIdIn(Collection<Integer> ids);
 
     /**

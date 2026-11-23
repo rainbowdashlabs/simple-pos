@@ -16,6 +16,7 @@ export default defineComponent({
         containerSize: 0,
         pledge: 0,
         pledgeContainer: 0,
+        vatRate: null,
         minStock: 0,
         active: true
       } as IngredientDraft

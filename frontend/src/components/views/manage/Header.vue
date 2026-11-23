@@ -29,6 +29,7 @@ export default defineComponent({
       <Entry to="/manage/storage" :label="$t('storage')" icon="fa-warehouse"/>
       <Entry to="/manage/cash" :label="$t('cash')" icon="fa-sack-dollar"/>
       <Entry v-if="isAdmin" to="/manage/users" :label="$t('users.title')" icon="fa-user-gear"/>
+      <Entry v-if="isAdmin" to="/manage/vat-rates" :label="$t('vat.title')" icon="fa-percent"/>
     </div>
     <!-- Mobile: icons only -->
     <div class="flex sm:hidden justify-around p-3">
@@ -39,6 +40,7 @@ export default defineComponent({
       <router-link to="/manage/storage" class="text-xl p-2"><Icon icon="fa-warehouse"/></router-link>
       <router-link to="/manage/cash" class="text-xl p-2"><Icon icon="fa-sack-dollar"/></router-link>
       <router-link v-if="isAdmin" to="/manage/users" class="text-xl p-2" :aria-label="$t('users.title')"><Icon icon="fa-user-gear"/></router-link>
+      <router-link v-if="isAdmin" to="/manage/vat-rates" class="text-xl p-2" :aria-label="$t('vat.title')"><Icon icon="fa-percent"/></router-link>
     </div>
   </div>
 </template>

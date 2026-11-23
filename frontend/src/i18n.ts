@@ -18,6 +18,9 @@ const numberformats = {
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2
         },
+        vat_percent: {
+            style: 'percent', useGrouping: false, maximumFractionDigits: 2
+        },
         percent: {
             style: 'percent', useGrouping: false
         }
@@ -36,6 +39,9 @@ const numberformats = {
         },
         decimal: {
             style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2
+        },
+        vat_percent: {
+            style: 'percent', useGrouping: false, maximumFractionDigits: 2
         },
         percent: {
             style: 'percent', useGrouping: false

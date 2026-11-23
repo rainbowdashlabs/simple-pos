@@ -28,9 +28,11 @@ const StorageAdd = () => import('@/components/views/manage/views/storage/views/S
 const StorageEdit = () => import('@/components/views/manage/views/storage/views/StorageEdit.vue')
 const StorageInventory = () => import('@/components/views/manage/views/storage/views/StorageInventory.vue')
 const StorageEmpties = () => import('@/components/views/manage/views/storage/views/StorageEmpties.vue')
+const StorageInvoice = () => import('@/components/views/manage/views/storage/views/StorageInvoice.vue')
 const StorageShoppingList = () => import('@/components/views/manage/views/storage/views/StorageShoppingList.vue')
 const Cash = () => import('@/components/views/manage/views/Cash.vue')
 const Users = () => import('@/components/views/manage/views/Users.vue')
+const VatRates = () => import('@/components/views/manage/views/VatRates.vue')
 const Settings = () => import('@/components/views/Settings.vue')
 const NoAccess = () => import('@/components/views/NoAccess.vue')
 
@@ -102,6 +104,7 @@ const router = createRouter({
                 {path: 'products/:id/edit', name: 'manage-products-edit', component: ProductEdit, props: true, meta: {titleKey: 'title.edit_product'}},
                 {path: 'categories', name: 'manage-categories', component: Categories, meta: {titleKey: 'title.categories'}},
                 {path: 'storage', name: 'manage-storage', component: Storage, meta: {titleKey: 'title.storage'}},
+                {path: 'storage/invoice', name: 'manage-storage-invoice', component: StorageInvoice, meta: {titleKey: 'title.invoice'}},
                 {path: 'storage/create', name: 'manage-storage-create', component: StorageCreate, meta: {titleKey: 'title.new_ingredient'}},
                 {path: 'storage/:id/add', name: 'manage-storage-add', component: StorageAdd, props: true, meta: {titleKey: 'title.add_stock'}},
                 {path: 'storage/:id/edit', name: 'manage-storage-edit', component: StorageEdit, props: true, meta: {titleKey: 'title.edit_ingredient'}},
@@ -110,6 +113,7 @@ const router = createRouter({
                 {path: 'storage/shopping-list', name: 'manage-storage-shopping', component: StorageShoppingList, meta: {titleKey: 'title.shopping_list'}},
                 {path: 'cash', name: 'manage-cash', component: Cash, meta: {titleKey: 'title.cash'}},
                 {path: 'users', name: 'manage-users', component: Users, meta: {titleKey: 'title.users', role: 'ADMIN'}},
+                {path: 'vat-rates', name: 'manage-vat-rates', component: VatRates, meta: {titleKey: 'title.vat_rates', role: 'ADMIN'}},
             ]
         },
         {

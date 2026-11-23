@@ -57,8 +57,7 @@ public class StorageService {
         BigDecimal cost = delivery.total() != null
                 ? Money.of(delivery.total())
                 : Money.of(delivery.price().multiply(BigDecimal.valueOf(delivery.amount())));
-        if (Money.integerDigits(cost) > 10 || Money.integerDigits(Money.perUnit(cost, delivery.amount())) > 8
-            || Money.integerDigits(delivery.pledge()) > 10) {
+        if (!Money.fitsBatch(cost, delivery.amount()) || Money.integerDigits(delivery.pledge()) > 10) {
             throw new BadRequestException(ErrorCode.AMOUNT_TOO_LARGE);
         }
 

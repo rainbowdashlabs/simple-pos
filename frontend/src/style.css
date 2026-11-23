@@ -6,6 +6,12 @@
 
 @variant dark (&:where(.dark, .dark *));
 
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  opacity: 1;
+}
+
 @theme {
   --color-warn-d: #600202;
   --color-warn: #ff9d9d;
