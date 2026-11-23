@@ -191,7 +191,16 @@
       "purchase_of_closed_account": "The purchase belongs to a closed account and cannot be cancelled.",
       "vat_rate_name_taken": "VAT rate {name} already exists.",
       "vat_rate_inactive": "VAT rate {name} is not active.",
-      "default_vat_rate_active": "{name} is the default VAT rate and cannot be deactivated. Make another rate the default first."
+      "default_vat_rate_active": "{name} is the default VAT rate and cannot be deactivated. Make another rate the default first.",
+      "invoice_without_item": "An invoice needs at least one item.",
+      "invoice_position_incomplete": "Position {position} is missing {field}.",
+      "invoice_position_unexpected": "Position {position} must not have {field}.",
+      "container_size_missing": "{name} has no container size, so it can only be counted in pieces.",
+      "discount_target_invalid": "The discount at position {position} must point at an item of this invoice.",
+      "discount_too_large": "The discounts on position {position} are larger than its cost.",
+      "default_vat_rate_missing": "No default VAT rate is set.",
+      "invoice_price_negative": "The price of position {position} must not be negative.",
+      "vat_rate_conflict": "{name} is given different VAT rates to keep on this invoice."
     }
   },
   "container": "Containers",

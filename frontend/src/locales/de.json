@@ -192,7 +192,16 @@
       "purchase_of_closed_account": "Der Kauf gehört zu einem geschlossenen Konto und kann nicht storniert werden.",
       "vat_rate_name_taken": "Den Steuersatz {name} gibt es schon.",
       "vat_rate_inactive": "Der Steuersatz {name} ist nicht aktiv.",
-      "default_vat_rate_active": "{name} ist der Standard-Steuersatz und kann nicht deaktiviert werden. Mache zuerst einen anderen Satz zum Standard."
+      "default_vat_rate_active": "{name} ist der Standard-Steuersatz und kann nicht deaktiviert werden. Mache zuerst einen anderen Satz zum Standard.",
+      "invoice_without_item": "Eine Rechnung braucht mindestens einen Artikel.",
+      "invoice_position_incomplete": "Bei Position {position} fehlt {field}.",
+      "invoice_position_unexpected": "Position {position} darf {field} nicht haben.",
+      "container_size_missing": "{name} hat keine Packungsgröße und kann nur in Einheiten gezählt werden.",
+      "discount_target_invalid": "Der Rabatt in Position {position} muss sich auf einen Artikel dieser Rechnung beziehen.",
+      "discount_too_large": "Die Rabatte auf Position {position} sind größer als ihr Preis.",
+      "default_vat_rate_missing": "Es ist kein Standard-Steuersatz festgelegt.",
+      "invoice_price_negative": "Der Preis von Position {position} darf nicht negativ sein.",
+      "vat_rate_conflict": "{name} bekommt auf dieser Rechnung verschiedene Steuersätze zum Übernehmen."
     }
   },
   "quarter": "Quartal",

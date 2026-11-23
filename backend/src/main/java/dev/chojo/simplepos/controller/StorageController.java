@@ -6,15 +6,18 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.User;
 import dev.chojo.simplepos.entity.dto.InboundStorage;
 import dev.chojo.simplepos.entity.dto.InventoryCorrection;
+import dev.chojo.simplepos.entity.dto.InvoiceRequest;
 import dev.chojo.simplepos.entity.dto.ShoppingListEntry;
 import dev.chojo.simplepos.entity.dto.StockProjectionDto;
 import dev.chojo.simplepos.entity.dto.StorageSummary;
+import dev.chojo.simplepos.entity.response.InvoiceResponse;
 import dev.chojo.simplepos.entity.response.PageResponse;
 import dev.chojo.simplepos.entity.response.StockResponse;
 import dev.chojo.simplepos.entity.response.StorageResponse;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
+import dev.chojo.simplepos.service.InvoiceService;
 import dev.chojo.simplepos.service.StockProjectionService;
 import dev.chojo.simplepos.service.StorageService;
 import jakarta.validation.Valid;
@@ -44,13 +47,16 @@ public class StorageController {
     private final IngredientRepository ingredientRepository;
     private final StorageService storageService;
     private final StockProjectionService stockProjectionService;
+    private final InvoiceService invoiceService;
 
     public StorageController(StorageRepository storageRepository, IngredientRepository ingredientRepository,
-                             StorageService storageService, StockProjectionService stockProjectionService) {
+                             StorageService storageService, StockProjectionService stockProjectionService,
+                             InvoiceService invoiceService) {
         this.storageRepository = storageRepository;
         this.ingredientRepository = ingredientRepository;
         this.storageService = storageService;
         this.stockProjectionService = stockProjectionService;
+        this.invoiceService = invoiceService;
     }
 
     @GetMapping
@@ -84,6 +90,11 @@ public class StorageController {
     @PostMapping
     ResponseEntity<StorageResponse> add(@Valid @RequestBody InboundStorage storage, @CurrentUser User current) {
         return ResponseEntity.status(HttpStatus.CREATED).body(StorageResponse.of(storageService.deliver(storage, current)));
+    }
+
+    @PostMapping("/invoice")
+    ResponseEntity<InvoiceResponse> bookInvoice(@Valid @RequestBody InvoiceRequest invoice, @CurrentUser User current) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(invoiceService.book(invoice, current));
     }
 
     @PutMapping

@@ -50,6 +50,14 @@ public final class Money {
     }
 
     /**
+     * Whether a batch of {@code units} costing {@code cost} in total fits the money columns: the cost and the unit
+     * price it gives.
+     */
+    public static boolean fitsBatch(BigDecimal cost, int units) {
+        return integerDigits(cost) <= 10 && integerDigits(perUnit(cost, units)) <= 8;
+    }
+
+    /**
      * The number of digits before the decimal point, used to refuse amounts a money column cannot hold.
      */
     public static int integerDigits(BigDecimal amount) {

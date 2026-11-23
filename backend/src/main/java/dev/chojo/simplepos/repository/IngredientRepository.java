@@ -2,6 +2,7 @@ package dev.chojo.simplepos.repository;
 
 import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.exceptions.BadRequestException;
+import dev.chojo.simplepos.exceptions.ErrorCode;
 import dev.chojo.simplepos.exceptions.NotFoundException;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,17 @@ public interface IngredientRepository extends LookupRepository<Ingredient> {
      */
     default void requireLockedInOrder(Collection<Integer> ids) {
         ids.stream().map(this::requireId).distinct().sorted().forEach(this::requireLocked);
+    }
+
+    /**
+     * Locks the rows of all ingredients a request refers to, in ascending id order like
+     * {@link #requireLockedInOrder}. An unknown one is the request's fault, so it is a bad request.
+     *
+     * @throws BadRequestException if one of the ids is missing or one of the ingredients does not exist
+     */
+    default void requireReferencedLockedInOrder(Collection<Integer> ids) {
+        ids.stream().map(this::requireId).distinct().sorted().forEach(id -> findByIdForUpdate(id)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.REFERENCE_UNKNOWN, entityName(), id)));
     }
 
     /**

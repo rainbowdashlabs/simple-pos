@@ -48,7 +48,16 @@ public enum ErrorCode {
     PURCHASE_OF_CLOSED_ACCOUNT("The purchase belongs to a closed account and cannot be cancelled"),
     VAT_RATE_NAME_TAKEN("VAT rate %s already exists", "name"),
     VAT_RATE_INACTIVE("VAT rate %s is not active", "name"),
-    DEFAULT_VAT_RATE_ACTIVE("%s is the default VAT rate and cannot be deactivated. Make another rate the default first.", "name");
+    DEFAULT_VAT_RATE_ACTIVE("%s is the default VAT rate and cannot be deactivated. Make another rate the default first.", "name"),
+    INVOICE_WITHOUT_ITEM("An invoice needs at least one item"),
+    INVOICE_POSITION_INCOMPLETE("Position %s is missing %s", "position", "field"),
+    INVOICE_POSITION_UNEXPECTED("Position %s must not have %s", "position", "field"),
+    CONTAINER_SIZE_MISSING("%s has no container size, so it can only be counted in pieces", "name"),
+    DISCOUNT_TARGET_INVALID("The discount at position %s must point at an item of this invoice", "position"),
+    DISCOUNT_TOO_LARGE("The discounts on position %s are larger than its cost", "position"),
+    DEFAULT_VAT_RATE_MISSING("No default VAT rate is set"),
+    INVOICE_PRICE_NEGATIVE("The price of position %s must not be negative", "position"),
+    VAT_RATE_CONFLICT("%s is given different VAT rates to keep on this invoice", "name");
 
     private final String template;
     private final String[] params;
