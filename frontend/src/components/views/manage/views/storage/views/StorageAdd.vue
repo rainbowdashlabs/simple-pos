@@ -330,6 +330,7 @@ export default defineComponent({
           <div v-if="ingredient.pledgeContainer > 0">
             {{ pledgedContainers }} × {{ $n(ingredient.pledgeContainer, 'currency') }} = {{ $n(containerPledge, 'currency') }}
           </div>
+          <div class="font-bold">{{ $t('total') }} {{ $t('pledge') }}: {{ $n(totalPledge, 'currency') }}</div>
         </div>
         <TextButton :value="$t('button.edit')" @click="edit('pledge')"/>
       </ColorContainer>
