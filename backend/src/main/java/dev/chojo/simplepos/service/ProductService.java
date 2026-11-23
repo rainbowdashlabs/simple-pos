@@ -36,13 +36,16 @@ public class ProductService {
     private final IngredientRepository ingredientRepository;
     private final RecipeRepository recipeRepository;
     private final RecipeEntryRepository recipeEntryRepository;
+    private final VatRateService vatRateService;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, IngredientRepository ingredientRepository, RecipeRepository recipeRepository, RecipeEntryRepository recipeEntryRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, IngredientRepository ingredientRepository, RecipeRepository recipeRepository, RecipeEntryRepository recipeEntryRepository,
+                          VatRateService vatRateService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.ingredientRepository = ingredientRepository;
         this.recipeRepository = recipeRepository;
         this.recipeEntryRepository = recipeEntryRepository;
+        this.vatRateService = vatRateService;
     }
 
     /**
@@ -144,7 +147,8 @@ public class ProductService {
         }
         Ingredient ingredient = request.ingredientId() != null
                 ? ingredientRepository.requireReferenced(request.ingredientId())
-                : request.ingredient().toIngredient(categoryRepository.requireReferenced(request.ingredient().categoryId()));
+                : request.ingredient().toIngredient(categoryRepository.requireReferenced(request.ingredient().categoryId()),
+                        vatRateService.forIngredient(request.ingredient().vatRateId(), null));
         return new RecipeEntry(null, ingredient, request.amount());
     }
 

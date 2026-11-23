@@ -45,7 +45,10 @@ public enum ErrorCode {
     CATEGORY_JUST_USED("%s was just given a product or ingredient. Move it to another category first.", "name"),
     INGREDIENT_IN_USE("%s is used in recipes or storage. Deactivate it instead.", "name"),
     PRODUCT_NOT_ON_SALE("%s is not on sale", "name"),
-    PURCHASE_OF_CLOSED_ACCOUNT("The purchase belongs to a closed account and cannot be cancelled");
+    PURCHASE_OF_CLOSED_ACCOUNT("The purchase belongs to a closed account and cannot be cancelled"),
+    VAT_RATE_NAME_TAKEN("VAT rate %s already exists", "name"),
+    VAT_RATE_INACTIVE("VAT rate %s is not active", "name"),
+    DEFAULT_VAT_RATE_ACTIVE("%s is the default VAT rate and cannot be deactivated. Make another rate the default first.", "name");
 
     private final String template;
     private final String[] params;

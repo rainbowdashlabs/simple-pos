@@ -6,6 +6,7 @@ import dev.chojo.simplepos.entity.Ingredient;
 import dev.chojo.simplepos.entity.Product;
 import dev.chojo.simplepos.entity.Recipe;
 import dev.chojo.simplepos.entity.RecipeEntry;
+import dev.chojo.simplepos.entity.VatRate;
 import dev.chojo.simplepos.entity.dto.IngredientRequest;
 import dev.chojo.simplepos.entity.dto.ProductRequest;
 import dev.chojo.simplepos.entity.dto.RecipeEntryRequest;
@@ -14,6 +15,7 @@ import dev.chojo.simplepos.exceptions.NotFoundException;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.ProductRepository;
 import dev.chojo.simplepos.repository.RecipeRepository;
+import dev.chojo.simplepos.repository.VatRateRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @Transactional
 class ProductServiceTest {
+    @Autowired
+    VatRateRepository vatRateRepository;
     @Autowired
     ProductService productService;
     @Autowired
@@ -303,7 +307,7 @@ class ProductServiceTest {
     @Test
     void createFromRequestWithNewIngredient() {
         Product created = productService.create(new ProductRequest("Lemonade", category.getId(), money(2.0),
-                List.of(new RecipeEntryRequest(null, new IngredientRequest("Lemon", category.getId(), money(0.4), 6, money(0.0), money(0.0), 2), 1))));
+                List.of(new RecipeEntryRequest(null, new IngredientRequest("Lemon", category.getId(), money(0.4), 6, money(0.0), money(0.0), 2, null), 1))));
 
         assertTrue(created.isActive());
         assertEquals("Lemon", created.getRecipe().getEntries().get(0).getIngredient().getName());
@@ -311,9 +315,22 @@ class ProductServiceTest {
     }
 
     @Test
+    void newRecipeIngredientTakesAnActiveVatRateOnly() {
+        VatRate reduced = vatRateRepository.save(new VatRate(null, "RecipeReduced", 7, false));
+        Product created = productService.create(new ProductRequest("Candy bag", category.getId(), money(2.0),
+                List.of(new RecipeEntryRequest(null, new IngredientRequest("Candy", category.getId(), money(0.4), 0, money(0.0), money(0.0), 0, reduced.getId()), 1))));
+        assertEquals(reduced.getId(), created.getRecipe().getEntries().get(0).getIngredient().getVatRate().getId());
+
+        reduced.setActive(false);
+        vatRateRepository.saveAndFlush(reduced);
+        assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Stale", category.getId(), money(2.0),
+                List.of(new RecipeEntryRequest(null, new IngredientRequest("Stale candy", category.getId(), money(0.4), 0, money(0.0), money(0.0), 0, reduced.getId()), 1)))));
+    }
+
+    @Test
     void recipeEntryNeedsExactlyOneIngredient() {
         assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Both", category.getId(), money(1.0),
-                List.of(new RecipeEntryRequest(ingredient.getId(), new IngredientRequest("X", category.getId(), money(0.1), 0, money(0.0), money(0.0), 0), 1)))));
+                List.of(new RecipeEntryRequest(ingredient.getId(), new IngredientRequest("X", category.getId(), money(0.1), 0, money(0.0), money(0.0), 0, null), 1)))));
         assertThrows(BadRequestException.class, () -> productService.create(new ProductRequest("Neither", category.getId(), money(1.0),
                 List.of(new RecipeEntryRequest(null, null, 1)))));
     }

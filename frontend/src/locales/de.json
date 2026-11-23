@@ -189,7 +189,10 @@
       "category_just_used": "{name} wurde gerade einem Produkt oder einer Zutat zugeordnet. Erst in eine andere Kategorie verschieben.",
       "ingredient_in_use": "{name} wird in Rezepten oder im Lager verwendet. Stattdessen deaktivieren.",
       "product_not_on_sale": "{name} ist nicht im Verkauf.",
-      "purchase_of_closed_account": "Der Kauf gehört zu einem geschlossenen Konto und kann nicht storniert werden."
+      "purchase_of_closed_account": "Der Kauf gehört zu einem geschlossenen Konto und kann nicht storniert werden.",
+      "vat_rate_name_taken": "Den Steuersatz {name} gibt es schon.",
+      "vat_rate_inactive": "Der Steuersatz {name} ist nicht aktiv.",
+      "default_vat_rate_active": "{name} ist der Standard-Steuersatz und kann nicht deaktiviert werden. Mache zuerst einen anderen Satz zum Standard."
     }
   },
   "quarter": "Quartal",
@@ -300,7 +303,8 @@
     "ingredient": "Zutat",
     "product": "Produkt",
     "user": "Benutzer",
-    "purchase": "Kauf"
+    "purchase": "Kauf",
+    "vatrate": "Steuersatz"
   },
   "shown_of": "{shown} von {total} angezeigt",
   "loaded_more": "{count} weitere geladen",

@@ -10,6 +10,7 @@ import dev.chojo.simplepos.repository.CategoryRepository;
 import dev.chojo.simplepos.repository.IngredientRepository;
 import dev.chojo.simplepos.repository.StorageRepository;
 import dev.chojo.simplepos.repository.UserRepository;
+import dev.chojo.simplepos.repository.VatRateRepository;
 import dev.chojo.simplepos.service.ProductService;
 import dev.chojo.simplepos.service.PurchaseService;
 import jakarta.persistence.EntityManager;
@@ -56,6 +57,8 @@ class DemoDataSeederTest {
     PurchaseService purchaseService;
     @Autowired
     CashRepository cashRepository;
+    @Autowired
+    VatRateRepository vatRateRepository;
 
     @Test
     void shouldRefuseToWipeADatabaseWithRealUsers() {
@@ -100,6 +103,6 @@ class DemoDataSeederTest {
     private DemoDataSeeder seeder(boolean resetDatabase) {
         return new DemoDataSeeder(entityManager, userRepository, passwordEncoder, categoryRepository,
                 ingredientRepository, productService, storageRepository, accountRepository, balanceRepository,
-                purchaseService, cashRepository, resetDatabase);
+                purchaseService, cashRepository, vatRateRepository, resetDatabase);
     }
 }

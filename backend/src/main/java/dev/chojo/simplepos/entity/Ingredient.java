@@ -17,6 +17,8 @@ public class Ingredient implements Comparable<Ingredient> {
 
     @ManyToOne
     private Category category;
+    @ManyToOne
+    private VatRate vatRate;
 
     @NotNull
     private String name;
@@ -94,6 +96,17 @@ public class Ingredient implements Comparable<Ingredient> {
 
     public void setContainerSize(int containerSize) {
         this.containerSize = containerSize;
+    }
+
+    /**
+     * The VAT rate of the ingredient, or null when it uses the default rate.
+     */
+    public VatRate getVatRate() {
+        return vatRate;
+    }
+
+    public void setVatRate(VatRate vatRate) {
+        this.vatRate = vatRate;
     }
 
     public BigDecimal getPledge() {

@@ -188,7 +188,10 @@
       "category_just_used": "{name} was just given a product or ingredient. Move it to another category first.",
       "ingredient_in_use": "{name} is used in recipes or storage. Deactivate it instead.",
       "product_not_on_sale": "{name} is not on sale.",
-      "purchase_of_closed_account": "The purchase belongs to a closed account and cannot be cancelled."
+      "purchase_of_closed_account": "The purchase belongs to a closed account and cannot be cancelled.",
+      "vat_rate_name_taken": "VAT rate {name} already exists.",
+      "vat_rate_inactive": "VAT rate {name} is not active.",
+      "default_vat_rate_active": "{name} is the default VAT rate and cannot be deactivated. Make another rate the default first."
     }
   },
   "container": "Containers",
@@ -300,7 +303,8 @@
     "ingredient": "Ingredient",
     "product": "Product",
     "user": "User",
-    "purchase": "Purchase"
+    "purchase": "Purchase",
+    "vatrate": "VAT rate"
   },
   "shown_of": "{shown} of {total} shown",
   "loaded_more": "{count} more loaded",
