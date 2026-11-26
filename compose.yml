@@ -21,7 +21,7 @@ services:
     profiles:
       - prod
   postgres:
-    image: postgres:18
+    image: postgres:19@sha256:4ea94de574c17f0372722806c949757050fbb1cd7648410fe45d6bba275cc00e
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in .env}
       SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
