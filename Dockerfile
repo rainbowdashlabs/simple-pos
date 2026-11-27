@@ -26,7 +26,7 @@ COPY backend/src/ src/
 RUN ./gradlew bootJar -x test --no-daemon
 
 # --- Runtime ---
-FROM eclipse-temurin:25.0.5_8-jre-alpine
+FROM eclipse-temurin:25.0.5.1_2-jre-alpine@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89
 
 RUN addgroup -S app && adduser -S -G app -u 10001 app
 
