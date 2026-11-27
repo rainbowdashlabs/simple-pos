@@ -12,7 +12,7 @@ services:
     volumes:
       - ./application.yaml:/app/application.yaml
   spring:
-    image: ghcr.io/rainbowdashlabs/simple-pos:latest
+    image: ghcr.io/rainbowdashlabs/simple-pos:latest@sha256:efc287345776f19eb32f796ea9818a6cafae4a0296edd17439838cb2a749b148
     environment:
       SECURITY_JWT_SECRET_KEY: ${SECURITY_JWT_SECRET_KEY:?set it in .env}
       SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
@@ -21,7 +21,7 @@ services:
     profiles:
       - prod
   postgres:
-    image: postgres:18
+    image: postgres:18@sha256:64c8b0d31e4ab6ea665e8426ea406a94bf52de3c05b3a4a8bf713704eefa9328
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in .env}
       SIMPLE_POS_DB_PASSWORD: ${SIMPLE_POS_DB_PASSWORD:?set it in .env}
